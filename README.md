@@ -1,4 +1,4 @@
-jsgen
+JSgen
 =====
 
-JSGen is web software you can use to create a beautiful website or blog.
+JSgen is web software you can use to create a beautiful website or blog.
