@@ -83,7 +83,7 @@ db.bind('users', {
     getLatestId: function(callback) {
         this.findOne({}, {
             sort: {
-                id: -1
+                _id: -1
             },
             hint: {
                 _id: 1
@@ -709,14 +709,20 @@ db.bind('users', {
 
         if(!newUser._id) {
             this.getLatestId(function(err, doc) {
-                if(err) return callback(err, null);
+                if(err) {
+                    db.close();
+                    return callback(err, null);
+                }
                 preAllocate._id = doc._id + 1;
                 delete newUser._id;
                 that.insert(
                 preAllocate, {
                     w: 1
                 }, function(err, doc) {
-                    if(err) callback(err, doc);
+                    if(err) {
+                        db.close();
+                        return callback(err, doc);
+                    }
                     that.update({
                         _id: preAllocate._id
                     }, newUser, {
@@ -734,7 +740,10 @@ db.bind('users', {
             preAllocate, {
                 w: 1
             }, function(err, doc) {
-                if(err) callback(err, doc);
+                if(err) {
+                        db.close();
+                        return callback(err, doc);
+                    }
                 that.update({
                     _id: preAllocate._id
                 }, newUser, {
