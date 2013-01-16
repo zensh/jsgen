@@ -12,17 +12,17 @@ setUserInfo(userObjArray, callback); 批量设置用户信息;
 setLoginAttempt(userObj); 记录用户尝试登录的次数（未成功登录）;
 setLogin(userObj); 记录用户成功登录的时间和IP;
 setSocial(userObj, callback); 设置用户的社交媒体认证数据
-setScore(userObj, callback); 增加或减少用户积分;
-setFans(userObj, callback); 增加或减少用户粉丝;
+setScore(userObj); 增加或减少用户积分;
+setFans(userObj); 增加或减少用户粉丝;
 setFollow(userObj, callback); 增加或减少用户关注对象;
 setTags(userObj, callback); 增加或减少用户标签;
-setTopics(userObj, callback); 增加或减少用户主题;
+setArticles(userObj, callback); 增加或减少用户主题;
 setCollections(userObj, callback); 增加或减少用户合集;
 setComments(userObj, callback); 增加或减少用户评论;
 setCollect(userObj, callback); 增加或减少用户收藏;
-setMessages(userObj, callback); 增加或重置用户未读信息;
-setReceive(userObj, callback); 增加或减少用户接收的消息;
-setSend(userObj, callback); 增加或减少用户发送的消息;
+setMessages(userObj); 增加或重置用户未读信息;
+setReceive(userObj); 增加或减少用户接收的消息;
+setSend(userObj); 增加或减少用户发送的消息;
 setNewUser(userObj, callback); 注册新用户;
 */
 var mongo = require('./mongoDao.js'),
@@ -34,7 +34,7 @@ var mongo = require('./mongoDao.js'),
     preAllocate = require('./json.js').UserPre,
     db = mongo.db;
 
-db.bind('users', {
+var that = db.bind('users', {
 
     convertID: function(id) {
         switch(typeof id) {
@@ -55,14 +55,14 @@ db.bind('users', {
     },
 
     getUsersNum: function(callback) {
-        this.count({}, function(err, count) {
+        that.count({}, function(err, count) {
             db.close();
             return callback(err, count);
         });
     },
 
     getUsersIndex: function(callback) {
-        this.find({}, {
+        that.find({}, {
             sort: {
                 _id: -1
             },
@@ -81,7 +81,7 @@ db.bind('users', {
     },
 
     getLatestId: function(callback) {
-        this.findOne({}, {
+        that.findOne({}, {
             sort: {
                 _id: -1
             },
@@ -98,7 +98,7 @@ db.bind('users', {
     },
 
     getAuth: function(_id, callback) {
-        this.findOne({
+        that.findOne({
             _id: _id
         }, {
             fields: {
@@ -117,7 +117,7 @@ db.bind('users', {
     },
 
     getSocial: function(_id, callback) {
-        this.findOne({
+        that.findOne({
             _id: _id
         }, {
             fields: {
@@ -132,7 +132,8 @@ db.bind('users', {
     },
 
     getUsers: function(_idArray, callback) {
-        this.find({
+        if(!Array.isArray(_idArray)) _idArray = [_idArray];
+        that.find({
             _id: {
                 $in: _idArray
             }
@@ -147,7 +148,7 @@ db.bind('users', {
                 lastLoginDate: 1,
                 fans: 1,
                 follow: 1,
-                topics: 1,
+                articles: 1,
                 collections: 1,
                 comments: 1
             }
@@ -158,7 +159,7 @@ db.bind('users', {
     },
 
     getUserInfo: function(_id, callback) {
-        this.findOne({
+        that.findOne({
             _id: _id
         }, {
             fields: {
@@ -178,7 +179,6 @@ db.bind('users', {
     setUserInfo: function(userObjArray, callback) {
         var result = 0,
             resulterr = null,
-            that = this,
             defaultObj = {
                 name: null,
                 email: null,
@@ -192,7 +192,7 @@ db.bind('users', {
                 desc: null
             };
 
-        if(!(userObjArray instanceof Array)) userObjArray = [userObjArray];
+        if(!Array.isArray(userObjArray)) userObjArray = [userObjArray];
 
         function setUserInfoExec() {
             var newObj = {},
@@ -241,7 +241,7 @@ db.bind('users', {
             loginAttempts: 1
         };
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj);
         db.close();
@@ -264,7 +264,7 @@ db.bind('users', {
         setObj.$push = {
             login: newObj.login
         };
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj);
         db.close();
@@ -310,7 +310,7 @@ db.bind('users', {
         if(newObj.social.baidu) setObj.$set['social.baidu'] = newObj.social.baidu;
         else delete setObj.$set['social.baidu'];
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -320,27 +320,24 @@ db.bind('users', {
         });
     },
 
-    setScore: function(userObj, callback) {
+    setScore: function(userObj) {
         var setObj = {},
             newObj = {
                 score: 0
             };
 
         newObj = intersect(newObj, userObj);
-        setObj.$inc = newObj;
+        setObj.$inc = {
+            score: newObj.score,
+        };
 
-        this.update({
+        that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            db.close();
-            return callback(err, doc);
-        });
-
+        }, setObj);
+        db.close();
     },
 
-    setFans: function(userObj, callback) {
+    setFans: function(userObj) {
         var setObj = {},
             newObj = {
                 fansList: 0
@@ -364,15 +361,10 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            db.close();
-            return callback(err, doc);
-        });
-
+        }, setObj);
+        db.close();
     },
 
     setFollow: function(userObj, callback) {
@@ -399,7 +391,7 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -407,7 +399,6 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
     setTags: function(userObj, callback) {
@@ -428,7 +419,7 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -436,34 +427,33 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
-    setTopics: function(userObj, callback) {
+    setArticles: function(userObj, callback) {
         var setObj = {},
             newObj = {
-                topicsList: 0
+                articlesList: 0
             };
 
         newObj = intersect(newObj, userObj);
-        if(newObj.topicsList < 0) {
-            newObj.topicsList = Math.abs(newObj.topicsList);
+        if(newObj.articlesList < 0) {
+            newObj.articlesList = Math.abs(newObj.articlesList);
             setObj.$inc = {
                 fans: -1
             };
             setObj.$pull = {
-                topicsList: newObj.topicsList
+                articlesList: newObj.articlesList
             };
         } else {
             setObj.$inc = {
                 fans: 1
             };
             setObj.$push = {
-                topicsList: newObj.topicsList
+                articlesList: newObj.articlesList
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -471,7 +461,6 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
     setCollections: function(userObj, callback) {
@@ -498,7 +487,7 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -506,7 +495,6 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
     setComments: function(userObj, callback) {
@@ -533,7 +521,7 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -541,7 +529,6 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
     setCollect: function(userObj, callback) {
@@ -568,7 +555,7 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
         }, setObj, {
             w: 1
@@ -576,70 +563,64 @@ db.bind('users', {
             db.close();
             return callback(err, doc);
         });
-
     },
 
-    setMessages: function(userObj, callback) {
+    setMessages: function(userObj) {
         var setObj = {
             $set: {
-                'messages.topics': 0,
-                'messages.collections': 0,
-                'messages.comments': 0,
-                'messages.fans': 0,
+                'messages.article': 0,
+                'messages.collection': 0,
+                'messages.comment': 0,
+                'messages.fan': 0,
                 'messages.receive': 0
             },
             $push: {
-                'messages.topics': 0,
-                'messages.collections': 0,
-                'messages.comments': 0,
-                'messages.fans': 0,
+                'messages.article': 0,
+                'messages.collection': 0,
+                'messages.comment': 0,
+                'messages.fan': 0,
                 'messages.receive': 0
             }
         },
             newObj = {
                 messages: {
-                    topics: 0,
-                    collections: 0,
-                    comments: 0,
-                    fans: 0,
+                    article: 0,
+                    collection: 0,
+                    comment: 0,
+                    fan: 0,
                     receive: 0
                 }
             };
 
         newObj = intersect(newObj, userObj);
-        if(newObj.messages.topics === 0) setObj.$set['messages.topics'] = [];
-        else delete setObj.$set['messages.topics'];
-        if(newObj.messages.topics > 0) setObj.$push['messages.topics'] = newObj.messages.topics;
-        else delete setObj.$push['messages.topics'];
-        if(newObj.messages.collections === 0) setObj.$set['messages.collections'] = [];
-        else delete setObj.$set['messages.collections'];
-        if(newObj.messages.collections > 0) setObj.$push['messages.collections'] = newObj.messages.collections;
-        else delete setObj.$push['messages.collections'];
-        if(newObj.messages.comments === 0) setObj.$set['messages.comments'] = [];
-        else delete setObj.$set['messages.comments'];
-        if(newObj.messages.comments > 0) setObj.$push['messages.comments'] = newObj.messages.comments;
-        else delete setObj.$push['messages.comments'];
-        if(newObj.messages.fans === 0) setObj.$set['messages.fans'] = [];
-        else delete setObj.$set['messages.fans'];
-        if(newObj.messages.fans > 0) setObj.$push['messages.fans'] = newObj.messages.fans;
-        else delete setObj.$push['messages.fans'];
+        if(newObj.messages.article === 0) setObj.$set['messages.article'] = [];
+        else delete setObj.$set['messages.article'];
+        if(newObj.messages.article > 0) setObj.$push['messages.article'] = newObj.messages.article;
+        else delete setObj.$push['messages.article'];
+        if(newObj.messages.collection === 0) setObj.$set['messages.collection'] = [];
+        else delete setObj.$set['messages.collection'];
+        if(newObj.messages.collection > 0) setObj.$push['messages.collection'] = newObj.messages.collection;
+        else delete setObj.$push['messages.collection'];
+        if(newObj.messages.comment === 0) setObj.$set['messages.comment'] = [];
+        else delete setObj.$set['messages.comment'];
+        if(newObj.messages.comment > 0) setObj.$push['messages.comment'] = newObj.messages.comment;
+        else delete setObj.$push['messages.comment'];
+        if(newObj.messages.fan === 0) setObj.$set['messages.fan'] = [];
+        else delete setObj.$set['messages.fan'];
+        if(newObj.messages.fan > 0) setObj.$push['messages.fan'] = newObj.messages.fan;
+        else delete setObj.$push['messages.fan'];
         if(newObj.messages.receive === 0) setObj.$set['messages.receive'] = [];
         else delete setObj.$set['messages.receive'];
         if(newObj.messages.receive > 0) setObj.$push['messages.receive'] = newObj.messages.receive;
         else delete setObj.$push['messages.receive'];
 
-        this.update({
+        that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            db.close();
-            return callback(err, doc);
-        });
-
+        }, setObj);
+        db.close();
     },
 
-    setReceive: function(userObj, callback) {
+    setReceive: function(userObj) {
         var setObj = {},
             newObj = {
                 receiveList: 0
@@ -657,18 +638,13 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            db.close();
-            return callback(err, doc);
-        });
-
+        }, setObj);
+        db.close();
     },
 
-    setSend: function(userObj, callback) {
+    setSend: function(userObj) {
         var setObj = {},
             newObj = {
                 sendList: 0
@@ -686,20 +662,14 @@ db.bind('users', {
             };
         }
 
-        this.update({
+        that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            db.close();
-            return callback(err, doc);
-        });
-
+        }, setObj);
+        db.close();
     },
 
     setNewUser: function(userObj, callback) {
-        var that = this,
-            user = {},
+        var user = {},
             newUser = {};
 
         user = merge(user, defautUser);
@@ -708,7 +678,7 @@ db.bind('users', {
         newUser = merge(user, newUser);
 
         if(!newUser._id) {
-            this.getLatestId(function(err, doc) {
+            that.getLatestId(function(err, doc) {
                 if(err) {
                     db.close();
                     return callback(err, null);
@@ -736,14 +706,14 @@ db.bind('users', {
         } else {
             preAllocate._id = newUser._id;
             delete newUser._id;
-            this.insert(
+            that.insert(
             preAllocate, {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                        db.close();
-                        return callback(err, doc);
-                    }
+                    db.close();
+                    return callback(err, doc);
+                }
                 that.update({
                     _id: preAllocate._id
                 }, newUser, {
@@ -757,4 +727,29 @@ db.bind('users', {
     }
 });
 
-module.exports = db.users;
+module.exports = {
+    convertID: that.convertID,
+    getUsersNum: that.getUsersNum,
+    getUsersIndex: that.getUsersIndex,
+    getLatestId: that.getLatestId,
+    getAuth: that.getAuth,
+    getSocial: that.getSocial,
+    getUsers: that.getUsers,
+    getUserInfo: that.getUserInfo,
+    setUserInfo: that.setUserInfo,
+    setLoginAttempt: that.setLoginAttempt,
+    setLogin: that.setLogin,
+    setSocial: that.setSocial,
+    setScore: that.setScore,
+    setFans: that.setFans,
+    setFollow: that.setFollow,
+    setTags: that.setTags,
+    setArticles: that.setArticles,
+    setCollections: that.setCollections,
+    setComments: that.setComments,
+    setCollect: that.setCollect,
+    setMessages: that.setMessages,
+    setReceive: that.setReceive,
+    setSend: that.setSend,
+    setNewUser: that.setNewUser
+};
