@@ -1,0 +1,22 @@
+{
+  "author": {
+    "name": "zensh",
+    "email": "admin@zensh.com",
+    "url": "http://weibo.com/zensh"
+  },
+  "name": "jsGen",
+  "version": "0.0.1",
+  "url": "http://jsgen.org",
+  "homepage": "http://jsgen.com",
+  "main": "app.js",
+  "engines": {
+    "node": ">=0.6.6"
+  },
+  "dependencies": {
+    "rrestjs": "0.9.x",
+    "mongoskin": "0.5.X",
+    "validator": "0.4.x",
+    "marked": "0.2.x",
+    "nodemailer": "0.3.x"
+  }
+}
