@@ -5,7 +5,7 @@ module.exports = {
 /*
 * 注意，所有的路径配置的前面请加‘/’而后面不要加'/'！
 */
-	server:'jsGen.com',     
+	server:'jsGen.com',
 	poweredBy: 'jsGen',
 	listenPort:3000,//监听端口，如果配合clusterplus监听多个端口，这里也可以使用[3000, 3001, 3002, 3003]数组形式，rrestjs会智能分析
 	//baseDir: path.join(__dirname, '/..'), //绝对目录地址，下面的目录配置都是根据这个目录的相对地址，这里是根据config文件进行配置地址
@@ -14,7 +14,7 @@ module.exports = {
 	favicon:'/favicon.ico',  //favicon存放地址
 	charset: 'utf-8',
 	autoStatic:'/static',  //自动响应静态文件的uri，比如 http://rrestjs.com/static/rrest.jpg 将会自动响应给客户端，为了加速这里只能设置一级目录
-	staticFolder:'/static',  //自动响应静态文件的根目录，比如  http://rrestjs.com/static/rrest.jpg 将返回 baseDir+'/static/rrest.jpg' 
+	staticFolder:'/static',  //自动响应静态文件的根目录，比如  http://rrestjs.com/static/rrest.jpg 将返回 baseDir+'/static/rrest.jpg'
 	staticParse:true,//是否开启静态文件压缩整合功能
     staticParseName:'parse',//压缩整合功能的名称，例如用户可以'/static/?parse=/index.body.css|/index.user.css|/user.face.css'压缩整合成一个css响应给客户端
 	staticParseCacheTime:1000*60*60,//压缩整合缓存时间，1小时
@@ -55,7 +55,7 @@ module.exports = {
 	ZlibArray:['text/plain', 'application/javascript', 'text/css', 'application/xml', 'text/html'], //只压缩数组中的content-type响应
 //logger log4js 配置
 	isLog:false, //是否开启日志，过多的记录日志会影响性能，但是能记录系统运行情况
-	logLevel:'debug',//['trace','debug','info','warn','error', 'fatal'] 日志等级
+	logLevel:'error',//['trace','debug','info','warn','error', 'fatal'] 日志等级
 	logPath:'/mylogs', // "/mylogs" 日志存放目录
 	logMaxSize:1024*1024*10, //单个日志文件大小
 	logFileNum:10, //当单个日志文件大小达标时，自动切分，这里设置最多切分多少个日志文件

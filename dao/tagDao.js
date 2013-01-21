@@ -1,21 +1,25 @@
 /*
-    convertID(id); 
-    getTagsNum(callback); 
-    getLatestId(callback); 
-    getTagsList(_idArray, callback); 
-    getTag(_id, callback); 
-    setTopics(tagObj);  
-    setUsers(tagObj);  
-    setNewTag(tagObj, callback); 
-    delTag(_idArray, callback);     
+    convertID(id);
+    getTagsNum(callback);
+    getLatestId(callback);
+    getTagsList(_idArray, callback);
+    getTag(_id, callback);
+    setArticles(tagObj);
+    setUsers(tagObj);
+    setNewTag(tagObj, callback);
+    delTag(_idArray, callback);
  */
-var mongo = require('./mongoDao.js'),
+var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
-    defautTag = require('./json.js').Tag,
-    db = mongo.db;
+    defautTag = require('./json.js').Tag;
+
+var callbackFn = function(err, doc) {
+    if (err) console.log(err);
+    return doc;
+};
 
 var that = db.bind('tags', {
 
@@ -27,7 +31,7 @@ var that = db.bind('tags', {
             return id;
         case 'number':
             id = converter(id, 62, IDString);
-            while(id.length < 5) {
+            while(id.length < 3) {
                 id = '0' + id;
             }
             id = 'T' + id;
@@ -38,6 +42,7 @@ var that = db.bind('tags', {
     },
 
     getTagsNum: function(callback) {
+        callback = callback || callbackFn;
         that.count({}, function(err, count) {
             db.close();
             return callback(err, count);
@@ -45,6 +50,7 @@ var that = db.bind('tags', {
     },
 
     getLatestId: function(callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -62,6 +68,7 @@ var that = db.bind('tags', {
     },
 
     getTagsList: function(_idArray, callback) {
+        callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -70,7 +77,7 @@ var that = db.bind('tags', {
         }, {
             fields: {
                 tag: 1,
-                topics: 1,
+                articles: 1,
                 users: 1
             }
         }).toArray(function(err, doc) {
@@ -80,6 +87,7 @@ var that = db.bind('tags', {
     },
 
     getTag: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -88,8 +96,8 @@ var that = db.bind('tags', {
             },
             fields: {
                 tag: 1,
-                topics: 1,
-                topicsList: 1,
+                articles: 1,
+                articlesList: 1,
                 users: 1,
                 usersList: 1
             }
@@ -99,27 +107,27 @@ var that = db.bind('tags', {
         });
     },
 
-    setTopics: function(tagObj) {
+    setArticles: function(tagObj) {
         var setObj = {},
             newObj = {
-                topicsList: 0
+                articlesList: 0
             };
 
         newObj = intersect(newObj, tagObj);
-        if(newObj.topicsList < 0) {
-            newObj.topicsList = Math.abs(newObj.topicsList);
+        if(newObj.articlesList < 0) {
+            newObj.articlesList = Math.abs(newObj.articlesList);
             setObj.$inc = {
-                topics: -1
+                articles: -1
             };
             setObj.$pull = {
-                topicsList: newObj.topicsList
+                articlesList: newObj.articlesList
             };
         } else {
             setObj.$inc = {
-                topics: 1
+                articles: 1
             };
             setObj.$push = {
-                topicsList: newObj.topicsList
+                articlesList: newObj.articlesList
             };
         }
 
@@ -162,6 +170,7 @@ var that = db.bind('tags', {
     setNewTag: function(tagObj, callback) {
         var tag = {},
             newTag = {};
+        callback = callback || callbackFn;
 
         tag = merge(tag, defautTag);
         newTag = merge(newTag, defautTag);
@@ -192,9 +201,10 @@ var that = db.bind('tags', {
                 return callback(err, doc);
             });
         }
-    }
+    },
 
     delTag: function(_id, callback) {
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {
@@ -212,7 +222,7 @@ module.exports = {
     getLatestId: that.getLatestId,
     getTagsList: that.getTagsList,
     getTag: that.getTag,
-    setTopics: that.setTopics,
+    setArticles: that.setArticles,
     setUsers: that.setUsers,
     setNewTag: that.setNewTag,
     delTag: that.delTag

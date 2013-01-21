@@ -1,24 +1,28 @@
 /*
-    convertID(id); 
-    getCollectionsNum(callback); 
-    getCollectionsIndex(date, limit, callback); 
-    getLatestId(callback); 
-    getCollectionsList(_idArray, callback); 
-    getCollection(_id, callback); 
-    getCollectionInfo(_id, callback); 
-    setCollectionInfo(CollectionObjArray, callback); 
-    setUpdate(collectionObj); 
-    setCollectors(collectionObj); 
-    setNewCollection(collectionObj, callback); 
-    delCollection(_idArray, callback);     
+    convertID(id);
+    getCollectionsNum(callback);
+    getCollectionsIndex(date, limit, callback);
+    getLatestId(callback);
+    getCollectionsList(_idArray, callback);
+    getCollection(_id, callback);
+    getCollectionInfo(_id, callback);
+    setCollectionInfo(CollectionObjArray, callback);
+    setUpdate(collectionObj);
+    setComments(collectionObj);
+    setNewCollection(collectionObj, callback);
+    delCollection(_idArray, callback);
  */
-var mongo = require('./mongoDao.js'),
+var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
-    defautCollection = require('./json.js').Collection,
-    db = mongo.db;
+    defautCollection = require('./json.js').Collection;
+
+var callbackFn = function(err, doc) {
+    if (err) console.log(err);
+    return doc;
+};
 
 var that = db.bind('collections', {
 
@@ -30,7 +34,7 @@ var that = db.bind('collections', {
             return id;
         case 'number':
             id = converter(id, 62, IDString);
-            while(id.length < 2) {
+            while(id.length < 3) {
                 id = '0' + id;
             }
             id = 'O' + id;
@@ -41,6 +45,7 @@ var that = db.bind('collections', {
     },
 
     getCollectionsNum: function(callback) {
+        callback = callback || callbackFn;
         that.count({}, function(err, count) {
             db.close();
             return callback(err, count);
@@ -48,6 +53,7 @@ var that = db.bind('collections', {
     },
 
     getLatestId: function(callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -66,6 +72,7 @@ var that = db.bind('collections', {
 
     getCollectionsIndex: function(date, limit, callback) {
         var query = {};
+        callback = callback || callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -90,6 +97,7 @@ var that = db.bind('collections', {
     },
 
     getCollectionsList: function(_idArray, callback) {
+        callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -112,6 +120,7 @@ var that = db.bind('collections', {
     },
 
     getCollection: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -135,6 +144,7 @@ var that = db.bind('collections', {
     },
 
     getCollectionInfo: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -166,8 +176,8 @@ var that = db.bind('collections', {
                     title: null,
                     summary: null,
                     subsection: [{
-                        title: null
-                        summary: null
+                        title: null,
+                        summary: null,
                         topics: [{
                             _id: 0,
                             author: 0,
@@ -176,6 +186,7 @@ var that = db.bind('collections', {
                     ],
                     articles: 0
             };
+        callback = callback || callbackFn;
 
         if(!Array.isArray(CollectionObjArray)) CollectionObjArray = [CollectionObjArray];
 
@@ -236,27 +247,27 @@ var that = db.bind('collections', {
         db.close();
     },
 
-    setCollectors: function(collectionObj) {
+    setComments: function(collectionObj) {
         var setObj = {},
             newObj = {
-                collectorsList: 0
+                commentsList: 0
             };
 
         newObj = intersect(newObj, collectionObj);
-        if(newObj.collectorsList < 0) {
-            newObj.collectorsList = Math.abs(newObj.collectorsList);
+        if(newObj.commentsList < 0) {
+            newObj.commentsList = Math.abs(newObj.commentsList);
             setObj.$inc = {
                 collectors: -1
             };
             setObj.$pull = {
-                collectorsList: newObj.collectorsList
+                commentsList: newObj.commentsList
             };
         } else {
             setObj.$inc = {
                 collectors: 1
             };
             setObj.$push = {
-                collectorsList: newObj.collectorsList
+                commentsList: newObj.commentsList
             };
         }
 
@@ -269,6 +280,7 @@ var that = db.bind('collections', {
     setNewCollection: function(collectionObj, callback) {
         var collection = {},
             newCollection = {};
+        callback = callback || callbackFn;
 
         collection = merge(collection, defautCollection);
         newCollection = merge(newCollection, defautCollection);
@@ -302,6 +314,7 @@ var that = db.bind('collections', {
     },
 
     delCollection: function(_id, callback) {
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {
@@ -323,7 +336,7 @@ module.exports = {
     getCollectionInfo: that.getCollectionInfo,
     setCollectionInfo: that.setCollectionInfo,
     setUpdate: that.setUpdate,
-    setCollectors: that.setCollectors,
-    setNewCollection: that.setComments,
+    setComments: that.setComments,
+    setNewCollection: that.setNewCollection,
     delCollection: that.delCollection
 };

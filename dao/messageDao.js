@@ -1,20 +1,24 @@
 /*
-    convertID(id); 
-    getMessagesNum(callback); 
-    getLatestId(callback); 
-    getMessagesList(_idArray, callback); 
-    getMessage(_id, callback); 
-    setMessage(messageObj);  
-    setNewMessage(messageObj, callback); 
-    delMessage(_idArray, callback);     
+    convertID(id);
+    getMessagesNum(callback);
+    getLatestId(callback);
+    getMessagesList(_idArray, callback);
+    getMessage(_id, callback);
+    setMessage(messageObj);
+    setNewMessage(messageObj, callback);
+    delMessage(_idArray, callback);
  */
-var mongo = require('./mongoDao.js'),
+var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
-    defautMessage = require('./json.js').Message,
-    db = mongo.db;
+    defautMessage = require('./json.js').Message;
+
+var callbackFn = function(err, doc) {
+    if (err) console.log(err);
+    return doc;
+};
 
 var that = db.bind('messages', {
 
@@ -26,7 +30,7 @@ var that = db.bind('messages', {
             return id;
         case 'number':
             id = converter(id, 62, IDString);
-            while(id.length < 5) {
+            while(id.length < 3) {
                 id = '0' + id;
             }
             id = 'M' + id;
@@ -37,6 +41,7 @@ var that = db.bind('messages', {
     },
 
     getMessagesNum: function(callback) {
+        callback = callback || callbackFn;
         that.count({}, function(err, count) {
             db.close();
             return callback(err, count);
@@ -44,6 +49,7 @@ var that = db.bind('messages', {
     },
 
     getLatestId: function(callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -61,6 +67,7 @@ var that = db.bind('messages', {
     },
 
     getMessagesList: function(_idArray, callback) {
+        callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -80,6 +87,7 @@ var that = db.bind('messages', {
     },
 
     getMessage: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -112,11 +120,8 @@ var that = db.bind('messages', {
         newObj = intersect(newObj, messageObj);
 
         that.update({
-            {
-                _id: messageObj._id
-            }, {
+                _id: messageObj._id,
                 'receiver._id': newObj.receiver._id
-            }
         }, {
             $set: {
                 'receiver.$.read': true
@@ -128,6 +133,7 @@ var that = db.bind('messages', {
     setNewMessage: function(messageObj, callback) {
         var message = {},
             newMessage = {};
+        callback = callback || callbackFn;
 
         message = merge(message, defautMessage);
         newMessage = merge(newMessage, defautMessage);
@@ -158,9 +164,10 @@ var that = db.bind('messages', {
                 return callback(err, doc);
             });
         }
-    }
+    },
 
     delMessage: function(_id, callback) {
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

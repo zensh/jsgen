@@ -1,22 +1,26 @@
 /*
-    convertID(id); 
-    getCommentsNum(callback); 
-    getCommentsIndex(date, limit, callback); 
-    getLatestId(callback); 
-    getCommentsList(_idArray, callback); 
-    getComment(_id, callback); 
-    setFavors(commentObj); 
-    setOpposes(commentObj);  
-    setNewComment(commentObj, callback); 
-    delComment(_idArray, callback);     
+    convertID(id);
+    getCommentsNum(callback);
+    getCommentsIndex(date, limit, callback);
+    getLatestId(callback);
+    getCommentsList(_idArray, callback);
+    getComment(_id, callback);
+    setFavors(commentObj);
+    setOpposes(commentObj);
+    setNewComment(commentObj, callback);
+    delComment(_idArray, callback);
  */
-var mongo = require('./mongoDao.js'),
+var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
-    defautComment = require('./json.js').Comment,
-    db = mongo.db;
+    defautComment = require('./json.js').Comment;
+
+var callbackFn = function(err, doc) {
+    if (err) console.log(err);
+    return doc;
+};
 
 var that = db.bind('comments', {
 
@@ -39,6 +43,7 @@ var that = db.bind('comments', {
     },
 
     getCommentsNum: function(callback) {
+        callback = callback || callbackFn;
         that.count({}, function(err, count) {
             db.close();
             return callback(err, count);
@@ -46,6 +51,7 @@ var that = db.bind('comments', {
     },
 
     getLatestId: function(callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -64,6 +70,7 @@ var that = db.bind('comments', {
 
     getCommentsIndex: function(date, limit, callback) {
         var query = {};
+        callback = callback || callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -89,6 +96,7 @@ var that = db.bind('comments', {
     },
 
     getCommentsList: function(_idArray, callback) {
+        callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -98,7 +106,7 @@ var that = db.bind('comments', {
             fields: {
                 author: 1,
                 date: 1,
-                topic: 1,
+                article: 1,
                 refer: 1,
                 content: 1,
                 favors: 1,
@@ -111,6 +119,7 @@ var that = db.bind('comments', {
     },
 
     getComment: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -120,7 +129,7 @@ var that = db.bind('comments', {
             fields: {
                 author: 1,
                 date: 1,
-                topic: 1,
+                article: 1,
                 refer: 1,
                 content: 1,
                 favors: 1,
@@ -197,6 +206,7 @@ var that = db.bind('comments', {
     setNewComment: function(commentObj, callback) {
         var comment = {},
             newComment = {};
+        callback = callback || callbackFn;
 
         comment = merge(comment, defautComment);
         newComment = merge(newComment, defautComment);
@@ -227,9 +237,10 @@ var that = db.bind('comments', {
                 return callback(err, doc);
             });
         }
-    }
+    },
 
     delComment: function(_id, callback) {
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

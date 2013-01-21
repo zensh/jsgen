@@ -25,14 +25,18 @@ setReceive(userObj); 增加或减少用户接收的消息;
 setSend(userObj); 增加或减少用户发送的消息;
 setNewUser(userObj, callback); 注册新用户;
 */
-var mongo = require('./mongoDao.js'),
+var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     UIDString = require('./json.js').UIDString,
     defautUser = require('./json.js').User,
-    preAllocate = require('./json.js').UserPre,
-    db = mongo.db;
+    preAllocate = require('./json.js').UserPre;
+
+var callbackFn = function(err, doc) {
+    if(err) console.log(err);
+    return doc;
+};
 
 var that = db.bind('users', {
 
@@ -55,13 +59,15 @@ var that = db.bind('users', {
     },
 
     getUsersNum: function(callback) {
+        callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            db.close();
+            //db.close();
             return callback(err, count);
         });
     },
 
     getUsersIndex: function(callback) {
+        callback = callback || callbackFn;
         that.find({}, {
             sort: {
                 _id: -1
@@ -74,13 +80,14 @@ var that = db.bind('users', {
                 name: 1,
                 email: 1
             }
-        }).toArray(function(err, doc) {
-            db.close();
+        }).each(function(err, doc) {
+            //db.close();
             return callback(err, doc);
         });
     },
 
     getLatestId: function(callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -92,12 +99,13 @@ var that = db.bind('users', {
                 _id: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
 
     getAuth: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -108,15 +116,18 @@ var that = db.bind('users', {
                 resetpwdKey: 1,
                 resetDate: 1,
                 loginAttempts: 1,
-                locked: 1
+                locked: 1,
+                role: 1,
+                avatar: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
 
     getSocial: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -126,12 +137,13 @@ var that = db.bind('users', {
                 social: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
 
     getUsers: function(_idArray, callback) {
+        callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -149,16 +161,19 @@ var that = db.bind('users', {
                 fans: 1,
                 follow: 1,
                 articles: 1,
+                articlesList: 1,
                 collections: 1,
+                collectionsList: 1,
                 comments: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
 
     getUserInfo: function(_id, callback) {
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -171,7 +186,7 @@ var that = db.bind('users', {
                 login: 0
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -189,8 +204,10 @@ var that = db.bind('users', {
                 sex: null,
                 role: null,
                 avatar: null,
-                desc: null
+                desc: null,
+                readtimestamp: 0
             };
+        callback = callback || callbackFn;
 
         if(!Array.isArray(userObjArray)) userObjArray = [userObjArray];
 
@@ -201,7 +218,7 @@ var that = db.bind('users', {
 
             userObj = userObjArray.pop();
             if(!userObj) {
-                db.close();
+                //db.close();
                 return callback(resulterr, result);
             }
 
@@ -215,7 +232,7 @@ var that = db.bind('users', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    db.close();
+                    //db.close();
                     resulterr = err;
                     return callback(resulterr, result);
                 } else {
@@ -244,7 +261,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setLogin: function(userObj) {
@@ -267,7 +284,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setSocial: function(userObj, callback) {
@@ -299,6 +316,7 @@ var that = db.bind('users', {
                     }
                 }
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.social.weibo) setObj.$set['social.weibo'] = newObj.social.weibo;
@@ -315,7 +333,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -334,7 +352,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setFans: function(userObj) {
@@ -364,7 +382,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setFollow: function(userObj, callback) {
@@ -372,6 +390,7 @@ var that = db.bind('users', {
             newObj = {
                 followList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.followList < 0) {
@@ -396,7 +415,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -406,6 +425,7 @@ var that = db.bind('users', {
             newObj = {
                 tagsList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.tagsList < 0) {
@@ -424,7 +444,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -434,6 +454,7 @@ var that = db.bind('users', {
             newObj = {
                 articlesList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.articlesList < 0) {
@@ -458,7 +479,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -468,6 +489,7 @@ var that = db.bind('users', {
             newObj = {
                 collectionsList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.collectionsList < 0) {
@@ -492,7 +514,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -502,6 +524,7 @@ var that = db.bind('users', {
             newObj = {
                 commentsList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.commentsList < 0) {
@@ -526,7 +549,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -536,6 +559,7 @@ var that = db.bind('users', {
             newObj = {
                 collectList: 0
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.collectList < 0) {
@@ -560,7 +584,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -591,6 +615,7 @@ var that = db.bind('users', {
                     receive: 0
                 }
             };
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.messages.article === 0) setObj.$set['messages.article'] = [];
@@ -617,7 +642,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setReceive: function(userObj) {
@@ -641,7 +666,7 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setSend: function(userObj) {
@@ -665,12 +690,13 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setNewUser: function(userObj, callback) {
         var user = {},
             newUser = {};
+        callback = callback || callbackFn;
 
         user = merge(user, defautUser);
         newUser = merge(newUser, defautUser);
@@ -680,7 +706,7 @@ var that = db.bind('users', {
         if(!newUser._id) {
             that.getLatestId(function(err, doc) {
                 if(err) {
-                    db.close();
+                    //db.close();
                     return callback(err, null);
                 }
                 preAllocate._id = doc._id + 1;
@@ -690,15 +716,19 @@ var that = db.bind('users', {
                     w: 1
                 }, function(err, doc) {
                     if(err) {
-                        db.close();
+                        //db.close();
                         return callback(err, doc);
                     }
-                    that.update({
+                    that.findAndModify({
                         _id: preAllocate._id
+                    }, {
+                        sort: {
+                            _id: -1
+                        }
                     }, newUser, {
                         w: 1
                     }, function(err, doc) {
-                        db.close();
+                        //db.close();
                         return callback(err, doc);
                     });
                 });
@@ -711,15 +741,19 @@ var that = db.bind('users', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    db.close();
+                    //db.close();
                     return callback(err, doc);
                 }
-                that.update({
+                that.findAndModify({
                     _id: preAllocate._id
+                }, {
+                    sort: {
+                        _id: -1
+                    }
                 }, newUser, {
                     w: 1
                 }, function(err, doc) {
-                    db.close();
+                    //db.close();
                     return callback(err, doc);
                 });
             });
