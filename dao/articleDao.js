@@ -22,7 +22,8 @@ var db = require('./mongoDao.js').db,
     intersect = require('../lib/tools.js').intersect,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
-    defautArticle = require('./json.js').Article;
+    defautArticle = require('./json.js').Article,
+    globalConfig = require('./json.js').GlobalConfig;
 
 var callbackFn = function(err, doc) {
     if (err) console.log(err);
@@ -119,11 +120,12 @@ var that = db.bind('articles', {
                 commend: 1,
                 title: 1,
                 summary: 1,
+                cover: 1,
                 updateTime: 1,
                 hots: 1,
                 visitors: 1,
                 collection: 1,
-                tags: 1
+                tagsList: 1
             }
         }).toArray(function(err, doc) {
             //db.close();
@@ -146,14 +148,16 @@ var that = db.bind('articles', {
                 commend: 1,
                 title: 1,
                 summary: 1,
+                cover: 1,
                 content: 1,
                 updateTime: 1,
                 hots: 1,
                 visitors: 1,
                 collection: 1,
-                tags: 1,
+                tagsList: 1,
                 favors: 1,
                 collectors: 1,
+                comment: 1,
                 comments: 1,
                 commentsList: 1
             }
@@ -178,6 +182,7 @@ var that = db.bind('articles', {
                 commend: 1,
                 title: 1,
                 summary: 1,
+                cover: 1,
                 content: 1,
                 draft: 1,
                 updateTime: 1,
@@ -185,11 +190,12 @@ var that = db.bind('articles', {
                 visitors: 1,
                 update: 1,
                 collection: 1,
-                tags: 1,
+                tagsList: 1,
                 favors: 1,
                 favorsList: 1,
                 collectors: 1,
                 collectorsList: 1,
+                comment: 1,
                 comments: 1,
                 commentsList: 1
             }
@@ -205,28 +211,30 @@ var that = db.bind('articles', {
             defaultObj = {
                 display: 0,
                 commend: 0,
-                title: null,
-                summary: null,
-                content: null,
+                title: '',
+                summary: '',
+                cover: '',
+                content: '',
+                comment: true,
                 collection: 0,
-                tags: []
+                tagsList: []
             };
+
+        for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) defaultObj.tagsList[i] = 0;
         callback = callback || callbackFn;
 
         if(!Array.isArray(ArticleObjArray)) ArticleObjArray = [ArticleObjArray];
 
         function setArticleInfoExec() {
-            var newObj = {},
-                setObj = {},
-                articleObj = {};
+            var setObj = {},
+                newObj = merge(defaultObj),
+                articleObj = ArticleObjArray.pop();
 
-            articleObj = ArticleObjArray.pop();
             if(!articleObj) {
                 //db.close();
                 return callback(resulterr, result);
             }
 
-            newObj = merge(newObj, defaultObj);
             newObj = intersect(newObj, articleObj);
             setObj.$set = newObj;
 
@@ -252,7 +260,7 @@ var that = db.bind('articles', {
     setDraft: function(articleObj) {
         var setObj = {},
             newObj = {
-                draft: null
+                draft: ''
             };
 
         newObj = intersect(newObj, articleObj);
@@ -412,31 +420,21 @@ var that = db.bind('articles', {
     },
 
     setNewArticle: function(articleObj, callback) {
-        var article = {},
-            newArticle = {};
+        var article = merge(defautArticle),
+            newArticle = merge(defautArticle);
         callback = callback || callbackFn;
 
-        article = merge(article, defautArticle);
-        newArticle = merge(newArticle, defautArticle);
+        for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
         newArticle = merge(article, newArticle);
 
-        if(!newArticle._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    //db.close();
-                    return callback(err, null);
-                }
-                newArticle._id = doc._id + 1;
-                that.insert(
-                newArticle, {
-                    w: 1
-                }, function(err, doc) {
-                    //db.close();
-                    return callback(err, doc);
-                });
-            });
-        } else {
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                //db.close();
+                return callback(err, null);
+            }
+            if (!doc) newArticle._id = 1;
+            else newArticle._id = doc._id + 1;
             that.insert(
             newArticle, {
                 w: 1
@@ -444,7 +442,7 @@ var that = db.bind('articles', {
                 //db.close();
                 return callback(err, doc);
             });
-        }
+        });
     },
 
     delArticle: function(_id, callback) {

@@ -15,7 +15,6 @@ setSocial(userObj, callback); 设置用户的社交媒体认证数据
 setScore(userObj); 增加或减少用户积分;
 setFans(userObj); 增加或减少用户粉丝;
 setFollow(userObj, callback); 增加或减少用户关注对象;
-setTags(userObj, callback); 增加或减少用户标签;
 setArticles(userObj, callback); 增加或减少用户主题;
 setCollections(userObj, callback); 增加或减少用户合集;
 setComments(userObj, callback); 增加或减少用户评论;
@@ -31,7 +30,8 @@ var db = require('./mongoDao.js').db,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     UIDString = require('./json.js').UIDString,
     defautUser = require('./json.js').User,
-    preAllocate = require('./json.js').UserPre;
+    preAllocate = require('./json.js').UserPre,
+    globalConfig = require('./json.js').GlobalConfig;
 
 var callbackFn = function(err, doc) {
     if(err) console.log(err);
@@ -195,34 +195,35 @@ var that = db.bind('users', {
         var result = 0,
             resulterr = null,
             defaultObj = {
-                name: null,
-                email: null,
-                passwd: null,
-                resetpwdKey: null,
-                resetDate: null,
+                name: '',
+                email: '',
+                passwd: '',
+                resetpwdKey: '',
+                resetDate: 0,
                 locked: false,
-                sex: null,
-                role: null,
-                avatar: null,
-                desc: null,
-                readtimestamp: 0
+                sex: '',
+                role: '',
+                avatar: '',
+                desc: '',
+                readtimestamp: 0,
+                tagsList: []
             };
+
+        for (var i = globalConfig.UserTagsMax - 1; i >= 0; i--) defaultObj.tagsList[i] = 0;
         callback = callback || callbackFn;
 
         if(!Array.isArray(userObjArray)) userObjArray = [userObjArray];
 
         function setUserInfoExec() {
-            var newObj = {},
-                setObj = {},
-                userObj = {};
+            var setObj = {},
+                newObj = merge(defaultObj),
+                userObj = userObjArray.pop();;
 
-            userObj = userObjArray.pop();
             if(!userObj) {
                 //db.close();
                 return callback(resulterr, result);
             }
 
-            newObj = merge(newObj, defaultObj);
             newObj = intersect(newObj, userObj);
             setObj.$set = newObj;
 
@@ -270,7 +271,7 @@ var that = db.bind('users', {
                 lastLoginDate: 0,
                 login: {
                     date: 0,
-                    ip: null
+                    ip: ''
                 }
             };
 
@@ -299,20 +300,20 @@ var that = db.bind('users', {
             newObj = {
                 social: {
                     weibo: {
-                        id: null,
-                        name: null
+                        id: '',
+                        name: ''
                     },
                     qq: {
-                        id: null,
-                        name: null
+                        id: '',
+                        name: ''
                     },
                     google: {
-                        id: null,
-                        name: null
+                        id: '',
+                        name: ''
                     },
                     baidu: {
-                        id: null,
-                        name: null
+                        id: '',
+                        name: ''
                     }
                 }
             };
@@ -407,35 +408,6 @@ var that = db.bind('users', {
             };
             setObj.$push = {
                 followList: newObj.followList
-            };
-        }
-
-        that.update({
-            _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, function(err, doc) {
-            //db.close();
-            return callback(err, doc);
-        });
-    },
-
-    setTags: function(userObj, callback) {
-        var setObj = {},
-            newObj = {
-                tagsList: 0
-            };
-        callback = callback || callbackFn;
-
-        newObj = intersect(newObj, userObj);
-        if(newObj.tagsList < 0) {
-            newObj.tagsList = Math.abs(newObj.tagsList);
-            setObj.$pull = {
-                tagsList: newObj.tagsList
-            };
-        } else {
-            setObj.$push = {
-                tagsList: newObj.tagsList
             };
         }
 
@@ -694,47 +666,20 @@ var that = db.bind('users', {
     },
 
     setNewUser: function(userObj, callback) {
-        var user = {},
-            newUser = {};
+        var user = merge(defautUser),
+            newUser = merge(defautUser);
         callback = callback || callbackFn;
 
-        user = merge(user, defautUser);
-        newUser = merge(newUser, defautUser);
         newUser = intersect(newUser, userObj);
         newUser = merge(user, newUser);
 
-        if(!newUser._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    //db.close();
-                    return callback(err, null);
-                }
-                preAllocate._id = doc._id + 1;
-                delete newUser._id;
-                that.insert(
-                preAllocate, {
-                    w: 1
-                }, function(err, doc) {
-                    if(err) {
-                        //db.close();
-                        return callback(err, doc);
-                    }
-                    that.findAndModify({
-                        _id: preAllocate._id
-                    }, {
-                        sort: {
-                            _id: -1
-                        }
-                    }, newUser, {
-                        w: 1
-                    }, function(err, doc) {
-                        //db.close();
-                        return callback(err, doc);
-                    });
-                });
-            });
-        } else {
-            preAllocate._id = newUser._id;
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                //db.close();
+                return callback(err, null);
+            }
+            if (!doc) preAllocate._id = newUser._id || 1;
+            else preAllocate._id = doc._id + 1;
             delete newUser._id;
             that.insert(
             preAllocate, {
@@ -751,13 +696,14 @@ var that = db.bind('users', {
                         _id: -1
                     }
                 }, newUser, {
-                    w: 1
+                    w: 1,
+                    new: true
                 }, function(err, doc) {
                     //db.close();
                     return callback(err, doc);
                 });
             });
-        }
+        });
     }
 });
 
@@ -777,7 +723,6 @@ module.exports = {
     setScore: that.setScore,
     setFans: that.setFans,
     setFollow: that.setFollow,
-    setTags: that.setTags,
     setArticles: that.setArticles,
     setCollections: that.setCollections,
     setComments: that.setComments,

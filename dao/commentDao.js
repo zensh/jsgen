@@ -45,7 +45,7 @@ var that = db.bind('comments', {
     getCommentsNum: function(callback) {
         callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            db.close();
+            // db.close();
             return callback(err, count);
         });
     },
@@ -63,7 +63,7 @@ var that = db.bind('comments', {
                 _id: 1
             }
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -90,7 +90,7 @@ var that = db.bind('comments', {
                 opposes: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -113,7 +113,7 @@ var that = db.bind('comments', {
                 opposes: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -138,7 +138,7 @@ var that = db.bind('comments', {
                 opposesList: 1
             }
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -170,7 +170,7 @@ var that = db.bind('comments', {
         that.update({
             _id: commentObj._id
         }, setObj);
-        db.close();
+        // db.close();
     },
 
     setOpposes: function(commentObj) {
@@ -200,43 +200,32 @@ var that = db.bind('comments', {
         that.update({
             _id: commentObj._id
         }, setObj);
-        db.close();
+        // db.close();
     },
 
     setNewComment: function(commentObj, callback) {
-        var comment = {},
-            newComment = {};
-        callback = callback || callbackFn;
+        var comment = merge(defautComment),
+            newComment = merge(defautComment);
 
-        comment = merge(comment, defautComment);
-        newComment = merge(newComment, defautComment);
+        callback = callback || callbackFn;
         newComment = intersect(newComment, commentObj);
         newComment = merge(comment, newComment);
 
-        if(!newComment._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    db.close();
-                    return callback(err, null);
-                }
-                newComment._id = doc._id + 1;
-                that.insert(
-                newComment, {
-                    w: 1
-                }, function(err, doc) {
-                    db.close();
-                    return callback(err, doc);
-                });
-            });
-        } else {
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                // db.close();
+                return callback(err, null);
+            }
+            if (!doc) newComment._id = 1;
+            else newComment._id = doc._id + 1;
             that.insert(
             newComment, {
                 w: 1
             }, function(err, doc) {
-                db.close();
+                // db.close();
                 return callback(err, doc);
             });
-        }
+        });
     },
 
     delComment: function(_id, callback) {
@@ -246,7 +235,7 @@ var that = db.bind('comments', {
         }, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },

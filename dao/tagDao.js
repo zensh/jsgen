@@ -44,7 +44,7 @@ var that = db.bind('tags', {
     getTagsNum: function(callback) {
         callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            db.close();
+            // db.close();
             return callback(err, count);
         });
     },
@@ -62,7 +62,7 @@ var that = db.bind('tags', {
                 _id: 1
             }
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -81,7 +81,7 @@ var that = db.bind('tags', {
                 users: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -102,7 +102,7 @@ var that = db.bind('tags', {
                 usersList: 1
             }
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },
@@ -134,7 +134,7 @@ var that = db.bind('tags', {
         that.update({
             _id: tagObj._id
         }, setObj);
-        db.close();
+        // db.close();
     },
 
     setUsers: function(tagObj) {
@@ -164,43 +164,32 @@ var that = db.bind('tags', {
         that.update({
             _id: tagObj._id
         }, setObj);
-        db.close();
+        // db.close();
     },
 
     setNewTag: function(tagObj, callback) {
-        var tag = {},
-            newTag = {};
+        var tag = merge(defautTag),
+            newTag = merge(defautTag);
         callback = callback || callbackFn;
 
-        tag = merge(tag, defautTag);
-        newTag = merge(newTag, defautTag);
         newTag = intersect(newTag, tagObj);
         newTag = merge(tag, newTag);
 
-        if(!newTag._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    db.close();
-                    return callback(err, null);
-                }
-                newTag._id = doc._id + 1;
-                that.insert(
-                newTag, {
-                    w: 1
-                }, function(err, doc) {
-                    db.close();
-                    return callback(err, doc);
-                });
-            });
-        } else {
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                // db.close();
+                return callback(err, null);
+            }
+            if (!doc) newTag._id = 1;
+            else newTag._id = doc._id + 1;
             that.insert(
             newTag, {
                 w: 1
             }, function(err, doc) {
-                db.close();
+                // db.close();
                 return callback(err, doc);
             });
-        }
+        });
     },
 
     delTag: function(_id, callback) {
@@ -210,7 +199,7 @@ var that = db.bind('tags', {
         }, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            // db.close();
             return callback(err, doc);
         });
     },

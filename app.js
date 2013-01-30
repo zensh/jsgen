@@ -1,4 +1,6 @@
 var conf = module.exports.conf = require('./config/config'),
+    http = require('http'),
+    rrest = require('rrestjs'),
     jsGen = {};
 
 jsGen.index = require('./server/index.js');
@@ -11,10 +13,9 @@ jsGen.collection = require('./server/collection.js');
 jsGen.comment = require('./server/comment.js');
 jsGen.message = require('./server/message.js');
 jsGen.test = require('./server/test.js');
+jsGen.install = require('./server/install.js');
 
-var http = require('http'),
-    rrest = require('rrestjs'),
-    server = http.createServer(function(req, res) {
+var server = http.createServer(function(req, res) {
         try {
             if (req.path[0] === 'api') {
                 jsGen[req.path[1]][req.method](req, res);

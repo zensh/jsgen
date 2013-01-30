@@ -20,7 +20,7 @@ var db = require('./mongoDao.js').db,
     defautCollection = require('./json.js').Collection;
 
 var callbackFn = function(err, doc) {
-    if (err) console.log(err);
+    if(err) console.log(err);
     return doc;
 };
 
@@ -47,7 +47,7 @@ var that = db.bind('collections', {
     getCollectionsNum: function(callback) {
         callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            db.close();
+            //db.close();
             return callback(err, count);
         });
     },
@@ -65,7 +65,7 @@ var that = db.bind('collections', {
                 _id: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -91,7 +91,7 @@ var that = db.bind('collections', {
                 updateTime: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -105,16 +105,17 @@ var that = db.bind('collections', {
             }
         }, {
             fields: {
-                    author: 1,
-                    date: 1,
-                    title: 1,
-                    summary: 1,
-                    articles: 1,
-                    updateTime: 1,
-                    collectors: 1
+                author: 1,
+                date: 1,
+                title: 1,
+                summary: 1,
+                cover: 1,
+                articles: 1,
+                updateTime: 1,
+                collectors: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -128,17 +129,20 @@ var that = db.bind('collections', {
                 _id: -1
             },
             fields: {
-                    author: 1,
-                    date: 1,
-                    title: 1,
-                    summary: 1,
-                    subsection: 1,
-                    articles: 1,
-                    updateTime: 1,
-                    collectors: 1
+                author: 1,
+                date: 1,
+                title: 1,
+                summary: 1,
+                cover: 1,
+                subsection: 1,
+                articles: 1,
+                updateTime: 1,
+                comment: 1,
+                comments: 1,
+                commentsList: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -156,15 +160,17 @@ var that = db.bind('collections', {
                 date: 1,
                 title: 1,
                 summary: 1,
+                cover: 1,
                 subsection: 1,
                 articles: 1,
                 updateTime: 1,
                 update: 1,
-                collectors: 1,
-                collectorsList: 1
+                comment: 1,
+                comments: 1,
+                commentsList: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -173,35 +179,31 @@ var that = db.bind('collections', {
         var result = 0,
             resulterr = null,
             defaultObj = {
-                    title: null,
-                    summary: null,
-                    subsection: [{
-                        title: null,
-                        summary: null,
-                        topics: [{
-                            _id: 0,
-                            author: 0,
-                            }]
-                        }
-                    ],
-                    articles: 0
+                title: '',
+                summary: '',
+                cover: '',
+                subsection: [{
+                    title: '',
+                    summary: '',
+                    topics: []
+                }],
+                articles: 0,
+                comment: true
             };
         callback = callback || callbackFn;
 
         if(!Array.isArray(CollectionObjArray)) CollectionObjArray = [CollectionObjArray];
 
         function setCollectionInfoExec() {
-            var newObj = {},
-                setObj = {},
-                collectionObj = {};
+            var setObj = {},
+                newObj = merge(defaultObj),
+                collectionObj = CollectionObjArray.pop();
 
-            collectionObj = CollectionObjArray.pop();
             if(!collectionObj) {
-                db.close();
+                //db.close();
                 return callback(resulterr, result);
             }
 
-            newObj = merge(newObj, defaultObj);
             newObj = intersect(newObj, collectionObj);
             setObj.$set = newObj;
 
@@ -211,7 +213,7 @@ var that = db.bind('collections', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    db.close();
+                    //db.close();
                     resulterr = err;
                     return callback(resulterr, result);
                 } else {
@@ -244,7 +246,7 @@ var that = db.bind('collections', {
         that.update({
             _id: collectionObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setComments: function(collectionObj) {
@@ -274,43 +276,32 @@ var that = db.bind('collections', {
         that.update({
             _id: collectionObj._id
         }, setObj);
-        db.close();
+        //db.close();
     },
 
     setNewCollection: function(collectionObj, callback) {
-        var collection = {},
-            newCollection = {};
+        var collection = merge(defautCollection),
+            newCollection = merge(defautCollection);
         callback = callback || callbackFn;
 
-        collection = merge(collection, defautCollection);
-        newCollection = merge(newCollection, defautCollection);
         newCollection = intersect(newCollection, collectionObj);
         newCollection = merge(collection, newCollection);
 
-        if(!newCollection._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    db.close();
-                    return callback(err, null);
-                }
-                newCollection._id = doc._id + 1;
-                that.insert(
-                newCollection, {
-                    w: 1
-                }, function(err, doc) {
-                    db.close();
-                    return callback(err, doc);
-                });
-            });
-        } else {
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                //db.close();
+                return callback(err, null);
+            }
+            if(!doc) newCollection._id = 1;
+            else newCollection._id = doc._id + 1;
             that.insert(
             newCollection, {
                 w: 1
             }, function(err, doc) {
-                db.close();
+                //db.close();
                 return callback(err, doc);
             });
-        }
+        });
     },
 
     delCollection: function(_id, callback) {
@@ -320,7 +311,7 @@ var that = db.bind('collections', {
         }, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     }

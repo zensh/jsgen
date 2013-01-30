@@ -43,7 +43,7 @@ var that = db.bind('messages', {
     getMessagesNum: function(callback) {
         callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            db.close();
+            //db.close();
             return callback(err, count);
         });
     },
@@ -61,7 +61,7 @@ var that = db.bind('messages', {
                 _id: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -81,7 +81,7 @@ var that = db.bind('messages', {
                 content: 1
             }
         }).toArray(function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -102,7 +102,7 @@ var that = db.bind('messages', {
                 content: 1
             }
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -127,43 +127,32 @@ var that = db.bind('messages', {
                 'receiver.$.read': true
             }
         });
-        db.close();
+        //db.close();
     },
 
     setNewMessage: function(messageObj, callback) {
-        var message = {},
-            newMessage = {};
+        var message = merge(defautMessage),
+            newMessage = merge(defautMessage);
         callback = callback || callbackFn;
 
-        message = merge(message, defautMessage);
-        newMessage = merge(newMessage, defautMessage);
         newMessage = intersect(newMessage, messageObj);
         newMessage = merge(message, newMessage);
 
-        if(!newMessage._id) {
-            that.getLatestId(function(err, doc) {
-                if(err) {
-                    db.close();
-                    return callback(err, null);
-                }
-                newMessage._id = doc._id + 1;
-                that.insert(
-                newMessage, {
-                    w: 1
-                }, function(err, doc) {
-                    db.close();
-                    return callback(err, doc);
-                });
-            });
-        } else {
+        that.getLatestId(function(err, doc) {
+            if(err) {
+                //db.close();
+                return callback(err, null);
+            }
+            if (!doc) newMessage._id = 1;
+            else newMessage._id = doc._id + 1;
             that.insert(
             newMessage, {
                 w: 1
             }, function(err, doc) {
-                db.close();
+                //db.close();
                 return callback(err, doc);
             });
-        }
+        });
     },
 
     delMessage: function(_id, callback) {
@@ -173,7 +162,7 @@ var that = db.bind('messages', {
         }, {
             w: 1
         }, function(err, doc) {
-            db.close();
+            //db.close();
             return callback(err, doc);
         });
     },
