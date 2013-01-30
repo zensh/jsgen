@@ -3,17 +3,17 @@ var conf = module.exports.conf = require('./config/config'),
     rrest = require('rrestjs'),
     jsGen = {};
 
-jsGen.index = require('./server/index.js');
-jsGen.home = require('./server/home.js');
-jsGen.admin = require('./server/admin.js');
-jsGen.user = require('./server/user.js');
-jsGen.article = require('./server/article.js');
-jsGen.tag = require('./server/tag.js');
-jsGen.collection = require('./server/collection.js');
-jsGen.comment = require('./server/comment.js');
-jsGen.message = require('./server/message.js');
-jsGen.test = require('./server/test.js');
-jsGen.install = require('./server/install.js');
+jsGen.index = require('./api/index.js');
+jsGen.home = require('./api/home.js');
+jsGen.admin = require('./api/admin.js');
+jsGen.user = require('./api/user.js');
+jsGen.article = require('./api/article.js');
+jsGen.tag = require('./api/tag.js');
+jsGen.collection = require('./api/collection.js');
+jsGen.comment = require('./api/comment.js');
+jsGen.message = require('./api/message.js');
+//jsGen.test = require('./api/test.js');
+jsGen.install = require('./api/install.js');
 
 var server = http.createServer(function(req, res) {
         try {

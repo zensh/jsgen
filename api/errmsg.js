@@ -1,0 +1,16 @@
+module.exports = {
+    dbErr: '数据库链接错误',
+    UidNone: '用户Uid不存在',
+    userNameNone: '用户名不存在',
+    userNameErr: '用户名格式错误',
+    userNameExist: '用户名已存在',
+    userEmailNone: 'Email不存在',
+    userEmailErr: 'Email格式错误',
+    userEmailExist: 'Email已存在',
+    userPasswd: '密码错误',
+    userNeedLogin: '',
+    userLocked: '',
+    resetpwdKey: 'resetpwdKey',
+    resetDate: 'resetDate',
+    loginAttempts: 'loginAttempts',
+};

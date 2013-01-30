@@ -32,7 +32,7 @@ module.exports = {
 	adminListenPort:20910,//管理员监听端口号
 	adminAuthorIp:/^127.0.0.1$/,//允许访问管理的IP地址
 	ClusterNum:1, //开启的进程数
-	ClusterReload:'/controller',//只有当进程数为1时，进入开发模式，可以监听此文件夹下的改动，包括子文件夹，不用重复 ctrl+c 和 上键+enter
+	ClusterReload:'/api',//只有当进程数为1时，进入开发模式，可以监听此文件夹下的改动，包括子文件夹，不用重复 ctrl+c 和 上键+enter
 	ClusterReloadExcept:['.swo', '.swp', '.swn', '.swx', '.bak'],//排除后缀名是此数组内的文件修改的重启进程
 	Heartbeat:false, //各个子进程和master进程之间的心跳间隔时间，如果为false表示不进行心跳检测，如果为1000表示每秒进行心跳检测，如果主进程没有收到子进程心跳，则会kill掉此子进程重新打开，防止子进程卡死，建议设置为1-5分钟。
 	ClusterMaxMemory:false,//各个子进程最大的消耗内存数，如果超过这个上限则会记录错误日志，并且重启该子进程，设置为false表示不检测。建议设置为200MB以上
