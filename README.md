@@ -1,5 +1,5 @@
-jsGen
-=====
+var jsGen = module.exports = function() {return coding(true);}
+================================================================
 
 jsGen is web software you can generate a beautiful website or blog with javascript, Building with MongoDB, Node.js and Angular.js
 
