@@ -20,8 +20,8 @@ jsGen是专门正对移动网站开发的系统。其基本原理：客户端浏
     /user  //注册用户列表
     /Uxxxxx
     /user/Uxxxxx  //ID为Uxxxxx的用户页面，他人查看的用户信息页面
-    /user/login  //用户登录独立页面
-    /user/register  //用户注册独立页面
+    /login  //用户登录独立页面
+    /register  //用户注册独立页面
 
     /article  //最新发表的文章列表
     /article/update //最新更新文章列表，按新修改或新回复排序

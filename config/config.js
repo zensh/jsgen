@@ -37,9 +37,9 @@ module.exports = {
 	Heartbeat:false, //各个子进程和master进程之间的心跳间隔时间，如果为false表示不进行心跳检测，如果为1000表示每秒进行心跳检测，如果主进程没有收到子进程心跳，则会kill掉此子进程重新打开，防止子进程卡死，建议设置为1-5分钟。
 	ClusterMaxMemory:false,//各个子进程最大的消耗内存数，如果超过这个上限则会记录错误日志，并且重启该子进程，设置为false表示不检测。建议设置为200MB以上
 //静态文件配置
-	staticMaxAge : 86400000*0, //静态文件的缓存周期，建议设置为7天
+	staticMaxAge : 1, //静态文件的缓存周期，建议设置为7天
 	staticGetOnly : true, //静态是否只能通过get获取
-	staticLv2MaxAge : 1000*60*60*0, //静态文件2级缓存更新周期，建议设置为1小时
+	staticLv2MaxAge : 1, //静态文件2级缓存更新周期，建议设置为1小时
 	staticLv2Number : 10000,//静态文件2级缓存数量，可以根据内存的大小适当调整
 //session配置
 	isSession:true, //是否开启session，开启会影响性能。
@@ -47,7 +47,7 @@ module.exports = {
 	sessionName:'jsGenSid', //保存session id 的cookie 的name
 	sessionExpire:1000*60, //false表示会话session，否则填入1000*60，表示session有效1分钟
 	clearSessionSetInteval:1000*60*60, //自动清理垃圾session时间，建设设置为1小时
-	clearSessionTime:1000*60*60*24,//会话session超时，建议设置为1天
+	clearSessionTime:1000*60*60*2,//会话session超时，建议设置为1天
 //session内存存储
 	sessionDbStore:true,//是否使用mongodb数据库存储session，如果设置为true，则不需要同步session
 //deflate和gzip配置

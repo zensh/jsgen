@@ -69,9 +69,8 @@ cache.getByid = function(num) {
 };
 
 function login(req, res) {
-    console.log(req.bodyparam);
-    var data = JSON.parse(req.bodyparam);
-    var _id = 0,
+    var data = JSON.parse(req.bodyparam.json);
+    var _id = null,
         loginBy = null,
         body = {};
 
@@ -85,9 +84,9 @@ function login(req, res) {
     } else if(checkUserName(data.logname)) {
         _id = cache.getidByName(data.logname);
         loginBy = data.logname;
-    }
+    } else body.err = Err.logNameErr;
 
-    if(typeof _id === 'number') {
+    if(!body.err) {
         userDao.getAuth(_id, function(err, doc) {
             if(err) {
                 body.err = Err.dbErr;
@@ -126,7 +125,6 @@ function login(req, res) {
                 });
                 db.close();
                 if(data.redirect) return res.redirect(data.redirect);
-                else return res.sendjson(body);
             } else {
                 body.err = Err.userPasswd;
                 userDao.setLoginAttempt({
@@ -134,13 +132,10 @@ function login(req, res) {
                     loginAttempts: 1
                 });
                 db.close();
-                return res.sendjson(body);
             }
         });
-    } else {
-        body.err = _id;
-        return res.sendjson(body);
     }
+    return res.sendjson(body);
 };
 
 function register(req, res) {

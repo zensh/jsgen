@@ -9,8 +9,9 @@ module.exports = {
     userEmailExist: 'Email已存在',
     userPasswd: '密码错误',
     userNeedLogin: '',
-    userLocked: '',
+    userLocked: '用户已被锁定',
     resetpwdKey: 'resetpwdKey',
     resetDate: 'resetDate',
-    loginAttempts: 'loginAttempts',
+    loginAttempts: '登录失败超过5次，用户被锁定',
+    logNameErr: '该用户不存在，请使用用户名、用户邮箱或用户UID登录',
 };
