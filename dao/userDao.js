@@ -78,7 +78,8 @@ var that = db.bind('users', {
             fields: {
                 _id: 1,
                 name: 1,
-                email: 1
+                email: 1,
+                avatar: 1
             }
         }).each(function(err, doc) {
             //db.close();
@@ -113,7 +114,7 @@ var that = db.bind('users', {
                 name: 1,
                 email: 1,
                 passwd: 1,
-                resetpwdKey: 1,
+                resetKey: 1,
                 resetDate: 1,
                 loginAttempts: 1,
                 locked: 1,
@@ -155,6 +156,7 @@ var that = db.bind('users', {
                 email: 1,
                 sex: 1,
                 role: 1,
+                avatar: 1,
                 date: 1,
                 score: 1,
                 lastLoginDate: 1,
@@ -166,7 +168,7 @@ var that = db.bind('users', {
                 collectionsList: 1,
                 comments: 1
             }
-        }).toArray(function(err, doc) {
+        }).each(function(err, doc) {
             //db.close();
             return callback(err, doc);
         });
@@ -179,7 +181,7 @@ var that = db.bind('users', {
         }, {
             fields: {
                 passwd: 0,
-                resetpwdKey: 0,
+                resetKey: 0,
                 resetDate: 0,
                 loginAttempts: 0,
                 locked: 0,
@@ -198,7 +200,7 @@ var that = db.bind('users', {
                 name: '',
                 email: '',
                 passwd: '',
-                resetpwdKey: '',
+                resetKey: '',
                 resetDate: 0,
                 locked: false,
                 sex: '',
@@ -672,6 +674,7 @@ var that = db.bind('users', {
 
         newUser = intersect(newUser, userObj);
         newUser = merge(user, newUser);
+        newUser.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if(err) {
@@ -691,11 +694,7 @@ var that = db.bind('users', {
                 }
                 that.findAndModify({
                     _id: preAllocate._id
-                }, {
-                    sort: {
-                        _id: -1
-                    }
-                }, newUser, {
+                }, [], newUser, {
                     w: 1,
                     new: true
                 }, function(err, doc) {

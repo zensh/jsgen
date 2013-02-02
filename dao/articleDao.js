@@ -427,6 +427,7 @@ var that = db.bind('articles', {
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
         newArticle = merge(article, newArticle);
+        newArticle.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if(err) {

@@ -3,86 +3,127 @@ var userDao = require('../dao/userDao.js'),
     collectionDao = require('../dao/collectionDao.js'),
     commentDao = require('../dao/commentDao.js'),
     messageDao = require('../dao/messageDao.js'),
+    globalDao = require('../dao/globalDao.js'),
     tagDao = require('../dao/tagDao.js'),
     db = require('../dao/mongoDao.js').db,
     errlog = require('rrestjs').restlog,
+    platform = require('platform'),
+    callbackFn = require('../lib/tools.js').callbackFn,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     checkEmail = require('../lib/tools.js').checkEmail,
     checkUserID = require('../lib/tools.js').checkUserID,
     checkUserName = require('../lib/tools.js').checkUserName,
     HmacSHA256 = require('../lib/tools.js').HmacSHA256,
-    userErr = require('./errmsg.js').userErr;
+    Err = require('./errmsg.js');
 
-var cache = {};
-var callbackFn = function(err, doc) {
-    if(err) console.log(err);
-    return doc;
+var cache = {
+    _initTime: 0,
+    data: {}
 };
 cache.init = function(callback) {
-    var that = this;
-    callback = callback || callbackFn;
-    return globalDao.getGlobalConfig(function(err, doc) {
-        if(err) errlog.error(err);
-        else merge(that, doc);
-        return callback(err, that);
+        var that = this;
+        globalDao.getGlobalConfig(function(err, doc) {
+            if(err) errlog.error(err);
+            else that.update(doc);
+            if(callback) callback(err, that.data);
+        });
+        return this;
+};
+cache.update = function(obj) {
+    this.data = obj;
+    this._initTime = Date.now();
+};
+
+function setVisitHistory(req) {
+    var visit = {
+        _id: 0,
+        data: []
+    };
+    var info = platform.parse(req.useragent);
+    visit._id = cache._initTime ? cache.data.visitHistory[cache.data.visitHistory.length - 1] : 1;
+    visit.data[0] = Date.now();
+    visit.data[1] = req.session.Uid ? userDao.convertID(req.session.Uid) : 0;
+    visit.data[2] = req.ip || '0.0.0.0';
+    visit.data[3] = req.referer || 'direct';
+    visit.data[4] = info.name || 'unknow';
+    visit.data[5] = info.os.toString() || 'unknow';
+    process.nextTick(function() {
+        setGlobalConfig({visit: 1});
+        globalDao.setVisitHistory(visit, function(err, doc) {
+            if(err && err.code === 10131) {
+                visit._id += 1;
+                globalDao.newVisitHistory(visit, function(err, doc) {
+                    if(!err) {
+                        setGlobalConfig({
+                            visitHistory: visit._id
+                        });
+                        globalDao.setVisitHistory(visit);
+                    }
+                    db.close();
+                });
+            }
+            db.close();
+        });
+    });
+};
+
+function getvisitHistory(req, res) {
+    var body = {
+        data: []
+    };
+    if(req.session.role === 'admin') {
+        globalDao.getVisitHistory(cache.data.visitHistory, function(err, doc) {
+            db.close();
+            if(err) {
+                errlog.error(err);
+                body.err = Err.dbErr;
+            }
+            if(!doc) return res.sendjson(body);
+            else body.data = body.data.concat(doc.data);
+        });
+    } else {
+        body.err = Err.userRoleErr;
+        return res.sendjson(body);
+    }
+};
+
+function setGlobalConfig(obj, callback) {
+    globalDao.setGlobalConfig(obj, function(err, doc) {
+        if (doc) cache.update(doc);
+        if (callback) return callback(err, doc);
     });
 };
 
 function getFn(req, res) {
-    var body = {};
-    if(cache.date > 0) return res.sendjson(cache);
-    else cache.init(function(err, doc) {
-        if(err) body.err = err;
-        else body = doc;
-        return res.sendjson(body);
-    });
+    var body = merge(cache.data);
+    delete body.visitHistory;
+    delete body.email;
+    return res.sendjson(cache.data);
 };
 
 function postFn(req, res) {
-    if(req.session.name === 'admin') {
-        var data = JSON.parse(req.bodyparam),
-            newObj = {
-                domain: '',
-                website: '',
-                description: '',
-                metatitle: '',
-                metadesc: '',
-                maxOnlineNum: 0,
-                maxOnlineTime: 0,
-                ArticleTagsMax: 0,
-                UserTagsMax: 0,
-                TitleMinLen: 0,
-                TitleMaxLen: 0,
-                SummaryMinLen: 0,
-                SummaryMaxLen: 0,
-                CommentMinLen: 0,
-                CommentMaxLen: 0,
-                ContentMinLen: 0,
-                ContentMaxLen: 0,
-                UserNameMinLen: 0,
-                UserNameMaxLen: 0
-            };
-        newObj = intersect(newObj, data);
-        globalDao.setGlobalConfig(newObj, function(err, doc) {
+    var body = {};
+    if(req.session.Uid === 'Uadmin') {
+        newObj = req.apibody;
+        setGlobalConfig(newObj, function(err, doc) {
             if(err) {
-                body.err = userErr.db;
+                body.err = Err.db.Err;
                 errlog.error(err);
             } else {
-                doc._id = userDao.convertID(doc._id);
                 body = doc;
             }
-            db.close();
             return res.sendjson(body);
         });
-    } else {}
+    } else {
+        body.err = Err.userRoleErr;
+        return res.sendjson(body);
+    }
 };
 
-if(!(cache.date > 0)) process.nextTick(function() {
-    return cache.init();
-});
 module.exports = {
     GET: getFn,
     POST: postFn,
+    setVisitHistory: setVisitHistory,
     cache: cache
 };

@@ -2022,7 +2022,7 @@ li .icon-large:before {
  * Typography.less
  *
  */
-@font-face {
+/*@font-face {
   font-family: "PT Serif Caption";
   font-style: normal;
   font-weight: 400;
@@ -2051,7 +2051,7 @@ li .icon-large:before {
   font-style: normal;
   font-weight: 400;
   src: local("Open Sans"), local("OpenSans"), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/K88pR3goAWT7BTt32Z01mz8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
-}
+}*/
 .text-rest-state {
   color: #000000;
 }
@@ -2578,8 +2578,8 @@ ol.unstyled,
   display: block;
 }
 .page .page-header .page-header-content {
-  height: 100px;
-  min-height: 100px;
+  height: 60px;
+  min-height: 30px;
   width: 100%;
   position: relative;
   display: block;
@@ -2592,7 +2592,7 @@ ol.unstyled,
   position: absolute;
   margin: 0;
   padding: 0;
-  left: 20px;
+  left: 5px;
   bottom: 0;
 }
 .page .page-header .page-header-content h1 small {
@@ -2657,8 +2657,8 @@ ol.unstyled,
 }
 .page .page-region .page-region-content {
   padding-top: 10px;
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: 5px;
+  padding-right: 5px;
   padding-bottom: 20px;
   display: block;
   height: 100%;
@@ -3780,7 +3780,7 @@ table.bordered tbody tr:last-child td {
   height: auto;
 }
 .grid {
-  margin: 0 0 20px;
+  margin: 0;
   display: block;
   height: auto;
   width: 100%;

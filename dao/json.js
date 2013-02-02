@@ -13,7 +13,7 @@ module.exports.User = {
     // String，用户邮箱，name 或 email 均可做为登录名
     passwd: '',
     // String，SHA256(用户密码)
-    resetpwdKey: '',
+    resetKey: '',
     // String，密码重置密钥
     resetDate: 0,
     // Date，密码重置时间
@@ -269,7 +269,7 @@ module.exports.GlobalConfig = {
     //最大用户在线记录数量
     maxOnlineTime: 0,
     //最大用户在线记录时间，年月日时分
-    visitHistory: [],  //网站访问数据文档，由于文档大小受限，一个文档记录满之后新开一个文档，并追加到此数组
+    visitHistory: [1],  //网站访问数据文档，由于文档大小受限，一个文档记录满之后新开一个文档，并追加到此数组
     ArticleTagsMax: 5,
     UserTagsMax: 5,
     TitleMinLen: 9,

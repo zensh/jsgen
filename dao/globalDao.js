@@ -1,15 +1,10 @@
 /*
-
  */
 var db = require('./mongoDao.js').db,
+    callbackFn = require('../lib/tools.js').callbackFn,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
     globalConfig = require('./json.js').GlobalConfig;
-
-var callbackFn = function(err, doc) {
-    if (err) console.log(err);
-    return doc;
-};
 
 var that = db.bind('global', {
 
@@ -20,20 +15,15 @@ var that = db.bind('global', {
         }, {
             sort: {
                 _id: -1
-            },
-            fields: {
-                _id: 0,
-                visitHistory: 0
             }
         }, function(err, doc) {
-            if (doc === null) doc = merge(globalConfig);
+            if(doc === null) doc = merge(globalConfig);
             return callback(err, doc);
         });
     },
 
     setGlobalConfig: function(Obj, callback) {
         var setObj = {},
-            newObj = merge(defaultObj),
             defaultObj = {
                 domain: '',
                 title: '',
@@ -63,24 +53,29 @@ var that = db.bind('global', {
                 UserNameMinLen: 0,
                 UserNameMaxLen: 0,
                 register: true
-            };
-            callback = callback || callbackFn;
+            },
+            newObj = merge(defaultObj);
+        callback = callback || callbackFn;
 
-            newObj = intersect(newObj, Obj);
-            if (newObj.visitHistory) {
-                setObj.$push = {
-                    visitHistory: newObj.visitHistory
-                };
-                delete newObj.visitHistory;
-            }
-            setObj.$set = newObj;
-            that.update({
-                _id: globalConfig._id
-            }, setObj, {
-                w: 1
-            }, function(err, doc) {
-                return callback(err, doc);
-            });
+        newObj = intersect(newObj, Obj);
+        if(Obj.visitHistory) {
+            setObj.$push = {
+                visitHistory: newObj.visitHistory
+            };
+            delete newObj.visitHistory;
+        } else if(Obj.visit) {
+            setObj.$inc = {
+                visit: 1
+            };
+        } else setObj.$set = newObj;
+        that.findAndModify({
+            _id: globalConfig._id
+        }, [], setObj, {
+            w: 1,
+            new: true
+        }, function(err, doc) {
+            return callback(err, doc);
+        });
     },
 
     initGlobalConfig: function(callback) {
@@ -114,39 +109,33 @@ var that = db.bind('global', {
     setVisitHistory: function(Obj, callback) {
         var setObj = {},
             defaultObj = {
-                data: [0,0,'','']
+                data: [0, 0, '', '', '', ''] //[number,_id,IP,]
             };
-            callback = callback || callbackFn;
-            defaultObj = intersect(defaultObj, Obj);
-            setObj.$push = {
-                data: defaultObj.data
-            };
-            console.log(setObj);
-            that.update({
-                _id: Obj._id
-            }, setObj, {
-                w: 1
-            }, function(err, doc) {
-                if (err) {
-                    Obj._id +=1;
-                    that.initVisitHistory(Obj, callback);}
-                else return callback(err, doc);
-            });
+        defaultObj = intersect(defaultObj, Obj);
+        setObj.$push = {
+            data: defaultObj.data
+        };
+        that.update({
+            _id: Obj._id
+        }, setObj, {
+            w: 1
+        }, function(err, doc) {
+            if(callback) return callback(err, doc);
+        });
     },
 
-    initVisitHistory: function(Obj, callback) {
+    newVisitHistory: function(Obj, callback) {
         var newObj = {
             _id: 1,
             data: []
         }
-        if (Obj && Obj._id) newObj._id = Obj._id;
-        callback = callback || callbackFn;
+        if(Obj && Obj._id) newObj._id = Obj._id;
 
         that.insert(
         newObj, {
             w: 1
         }, function(err, doc) {
-            return callback(err, doc);
+            if(callback) return callback(err, doc);
         });
     }
 
@@ -158,5 +147,5 @@ module.exports = {
     initGlobalConfig: that.initGlobalConfig,
     getVisitHistory: that.getVisitHistory,
     setVisitHistory: that.setVisitHistory,
-    initVisitHistory: that.initVisitHistory
+    newVisitHistory: that.newVisitHistory
 };

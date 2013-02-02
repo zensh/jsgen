@@ -286,6 +286,7 @@ var that = db.bind('collections', {
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = merge(collection, newCollection);
+        newCollection.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if(err) {

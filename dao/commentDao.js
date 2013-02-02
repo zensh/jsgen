@@ -210,6 +210,7 @@ var that = db.bind('comments', {
         callback = callback || callbackFn;
         newComment = intersect(newComment, commentObj);
         newComment = merge(comment, newComment);
+        newComment.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if(err) {

@@ -7,6 +7,7 @@ var userDao = require('../dao/userDao.js'),
     checkUserName = require('../lib/tools.js').checkUserName,
     HmacSHA256 = require('../lib/tools.js').HmacSHA256,
     SHA256 = require('../lib/tools.js').SHA256,
+    gravatar = require('../lib/tools.js').gravatar,
     userErr = require('./errmsg.js').userErr;
 
 function getFn(req, res) {
@@ -77,7 +78,7 @@ function getFn(req, res) {
             background: true
         });
         globalDao.initGlobalConfig();
-        globalDao.initVisitHistory();
+        globalDao.newVisitHistory();
     });
 
     db.createCollection("users", {
@@ -97,7 +98,7 @@ function getFn(req, res) {
                 email: 'admin@zensh.com',
                 passwd: SHA256('admin'),
                 role: 'admin',
-                date: Date.now()
+                avatar: gravatar('admin@zensh.com')
             }, function(err, doc) {
                 db.close();
                 res.sendjson(doc);

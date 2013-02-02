@@ -1,5 +1,5 @@
 module.exports = {
-    dbErr: '数据库链接错误',
+    dbErr: '数据库错误',
     UidNone: '用户Uid不存在',
     userNameNone: '用户名不存在',
     userNameErr: '用户名格式错误',
@@ -8,8 +8,9 @@ module.exports = {
     userEmailErr: 'Email格式错误',
     userEmailExist: 'Email已存在',
     userPasswd: '密码错误',
-    userNeedLogin: '',
+    userNeedLogin: 'need login',
     userLocked: '用户已被锁定',
+    userRoleErr: 'quan xian bu gou',
     resetpwdKey: 'resetpwdKey',
     resetDate: 'resetDate',
     loginAttempts: '登录失败超过5次，用户被锁定',

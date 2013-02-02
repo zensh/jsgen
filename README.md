@@ -47,7 +47,7 @@ jsGen是专门正对移动网站开发的系统。其基本原理：客户端浏
     /api/user/login  //POST请求，登录认证 {logname: 'name or email or Uid', logpwd: 'HmacSHA256(sha256(pwd), logname)', redirect:'uri'},{err: null}
     /api/user/logout  //GET请求，注销
     /api/user/register  //PUT请求，注册用户
-    /api/user/admin  //管理员后台用户管理
+    /api/user/admin  //GET POST PUT管理员后台用户管理
 
     /api/article/index
     /api/article/latest

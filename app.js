@@ -15,13 +15,20 @@ jsGen.message = require('./api/message.js');
 //jsGen.test = require('./api/test.js');
 jsGen.install = require('./api/install.js');
 
+jsGen.index.cache.init();
+jsGen.user.cache.init();
+
+
 var server = http.createServer(function(req, res) {
-        try {
-            if (req.path[0] === 'api') {
-                jsGen[req.path[1]][req.method](req, res);
-            } else res.file('/static/index.html');
-        } catch(err) {
-            restlog.error(err); //有error，info，等多种等级
-            res.r404();
+    try {
+        if(req.path[0] === 'api') {
+            jsGen[req.path[1]][req.method](req, res);
+            jsGen.index.setVisitHistory(req);
+        } else {
+            res.file('/static/index.html');
         }
-    }).listen(rrest.config.listenPort);
+    } catch(err) {
+        restlog.error(err); //有error，info，等多种等级
+        res.r404();
+    }
+}).listen(rrest.config.listenPort);

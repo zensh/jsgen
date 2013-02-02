@@ -137,6 +137,7 @@ var that = db.bind('messages', {
 
         newMessage = intersect(newMessage, messageObj);
         newMessage = merge(message, newMessage);
+        newMessage.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if(err) {
