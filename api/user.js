@@ -6,6 +6,7 @@ var userDao = require('../dao/userDao.js'),
     tagDao = require('../dao/tagDao.js'),
     db = require('../dao/mongoDao.js').db,
     errlog = require('rrestjs').restlog,
+    merge = require('../lib/tools.js').merge,
     checkEmail = require('../lib/tools.js').checkEmail,
     checkUserID = require('../lib/tools.js').checkUserID,
     checkUserName = require('../lib/tools.js').checkUserName,
@@ -83,21 +84,22 @@ function adduser(userObj, callback) {
     } else if(cache.name.indexOf(userObj.name) >= 0) {
         result.err = Err.userNameExist;
     }
-    if(result.err) return callback(result.err, null);
+    if(result.err) return callback(result);
     delete userObj._id;
     userObj.avatar = gravatar(userObj.email);
+    userObj.resetDate = Date.now();
     userDao.setNewUser(userObj, function(err, doc) {
         if(err) {
             result.err = Err.dbErr;
             errlog.error(err);
-        } else {
+        }
+        if(doc) {
             cache.update(doc);
+            result = merge(result, doc);
             result.err = null;
             result._id = userDao.convertID(doc._id);
-            result.name = doc.name;
-            result.email = doc.email;
         }
-        return callback(result.err, result);
+        return callback(result);
     });
 };
 
@@ -179,11 +181,8 @@ function login(req, res) {
 };
 
 function register(req, res) {
-    var data = req.apibody,
-        body = {};
-        console.log('register');
-    adduser(data, function(err, doc){
-        if (err) doc.err = err;
+    var data = req.apibody;
+    adduser(data, function(doc){
         return res.sendjson(doc);
     });
 };
@@ -194,9 +193,8 @@ function addUsers(req, res) {
         function addUserExec() {
             var userObj = req.apibody.shift();
             if (!userObj) return res.sendjson(body);
-            adduser(userObj, function(err, doc){
-                if (err) {
-                    doc.err = err;
+            adduser(userObj, function(doc){
+                if (doc.err) {
                     body.push(doc);
                     return res.sendjson(body);
                 } else {
@@ -207,7 +205,7 @@ function addUsers(req, res) {
         };
         addUserExec();
     }
-    else body.err = Err.userRoleErr;
+    else body[0] = {err: Err.userRoleErr};
     return res.sendjson(body);
 };
 
@@ -311,6 +309,8 @@ function postFn(req, res) {
     switch(req.path[2]) {
     case 'login':
         return login(req, res);
+    case 'register':
+        return register(req, res);
     case 'admin':
         return getUsers(req, res);
     default:
@@ -332,6 +332,5 @@ function putFn(req, res) {
 module.exports = {
     GET: getFn,
     POST: postFn,
-    PUT: putFn,
     cache: cache
 };

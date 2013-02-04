@@ -99,7 +99,14 @@ function getFn(req, res) {
     var body = merge(cache.data);
     delete body.visitHistory;
     delete body.email;
-    return res.sendjson(cache.data);
+    if(req.session.Uid) {
+        body.user = {};
+        body.user._id = req.session.Uid;
+        body.user.name = req.session.name;
+        body.user.email = req.session.email;
+        body.user.avatar = req.session.avatar;
+    } else body.user = null;
+    return res.sendjson(body);
 };
 
 function postFn(req, res) {

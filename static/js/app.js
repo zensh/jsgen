@@ -6,11 +6,19 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives'])
     $routeProvider.
       when('/', {
         templateUrl: '/static/tpl/index.html',
-        controller: IndexCtrl
+        controller: jsGen.IndexCtrl
       }).
       when('/login', {
         templateUrl: 'static/tpl/login.html',
-        controller: UserLoginCtrl
+        controller: jsGen.UserLoginCtrl
+      }).
+      when('/register', {
+        templateUrl: 'static/tpl/register.html',
+        controller: jsGen.UserRegisterCtrl
+      }).
+      when('/home', {
+        templateUrl: 'static/tpl/home.html',
+        controller: jsGen.UserHomeCtrl
       }).
       otherwise({
         redirectTo: '/'

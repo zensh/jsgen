@@ -24,6 +24,7 @@ var server = http.createServer(function(req, res) {
         if(req.path[0] === 'api') {
             jsGen[req.path[1]][req.method](req, res);
             jsGen.index.setVisitHistory(req);
+            console.log(req.method + ' : ' + req.path);
         } else {
             res.file('/static/index.html');
         }

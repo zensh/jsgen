@@ -14,7 +14,10 @@ function getFn(req, res) {
     db.createCollection("articles", {
         w: 1
     }, function(err, collection) {
-        db.command({collMod: "articles", usePowerOf2Sizes:true });
+        db.command({
+            collMod: "articles",
+            usePowerOf2Sizes: true
+        });
         collection.ensureIndex({
             _id: -1,
             hots: -1
@@ -26,7 +29,10 @@ function getFn(req, res) {
     db.createCollection("collections", {
         w: 1
     }, function(err, collection) {
-        db.command({collMod: "collections", usePowerOf2Sizes:true });
+        db.command({
+            collMod: "collections",
+            usePowerOf2Sizes: true
+        });
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
@@ -57,9 +63,12 @@ function getFn(req, res) {
     });
 
     db.createCollection("tags", {
-       w: 1
+        w: 1
     }, function(err, collection) {
-        db.command({collMod: "tags", usePowerOf2Sizes:true });
+        db.command({
+            collMod: "tags",
+            usePowerOf2Sizes: true
+        });
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
@@ -71,7 +80,10 @@ function getFn(req, res) {
     db.createCollection("global", {
         w: 1
     }, function(err, collection) {
-        db.command({collMod: "global", usePowerOf2Sizes:true });
+        db.command({
+            collMod: "global",
+            usePowerOf2Sizes: true
+        });
         collection.ensureIndex({
             _id: -1
         }, {
@@ -84,26 +96,29 @@ function getFn(req, res) {
     db.createCollection("users", {
         w: 1
     }, function(err, collection) {
-        db.command({collMod: "users", usePowerOf2Sizes:true });
+        db.command({
+            collMod: "users",
+            usePowerOf2Sizes: true
+        });
         collection.ensureIndex({
             _id: -1,
             score: -1
         }, {
-            background: true,
-            w: 1
-        }, function(err, indexName) {
-            userDao.setNewUser({
-                _id: userDao.convertID('Uadmin'),
-                name: 'admin',
-                email: 'admin@zensh.com',
-                passwd: SHA256('admin'),
-                role: 'admin',
-                avatar: gravatar('admin@zensh.com')
-            }, function(err, doc) {
-                db.close();
-                res.sendjson(doc);
-            });
+            background: true
         });
+    });
+
+    userDao.setNewUser({
+        _id: userDao.convertID('Uadmin'),
+        name: 'admin',
+        email: 'admin@zensh.com',
+        passwd: SHA256('admin123'),
+        role: 'admin',
+        avatar: gravatar('admin@zensh.com'),
+        desc: '梦造互联网 By ZENSH'
+    }, function(err, doc) {
+        db.close();
+        res.sendjson(doc);
     });
 
 };
@@ -114,3 +129,4 @@ module.exports = {
     GET: getFn,
     POST: postFn
 };
+//getFn();

@@ -2816,7 +2816,7 @@ button,
 .button {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
-  font-size: 9pt;
+  font-size: 10pt;
   font-smooth: always;
   min-width: 90px;
   min-height: 32px;
@@ -3951,12 +3951,25 @@ th[class*="span"] {
   display: inline-block;
   padding: 0;
   font-weight: normal;
-  font-size: 10pt;
+  font-size: 11pt;
   color: #fff;
 }
 .nav-bar .nav-bar-inner .element.brand,
 .nav-bar .nav-bar-inner a .element.brand {
-  font-size: 1.15em;
+  line-height: 40px;
+  height: 40px;
+  font-size: 14pt;
+  margin-right: 20px;
+}
+.nav-bar .nav-bar-inner .user{
+  line-height: 40px;
+  height: 40px;
+}
+.nav-bar .nav-bar-inner .user a {
+  font-size: 11pt;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  color: #fff;
 }
 .nav-bar .nav-bar-inner .element img,
 .nav-bar .nav-bar-inner a .element img {
@@ -3964,9 +3977,8 @@ th[class*="span"] {
 }
 .nav-bar .nav-bar-inner .element a,
 .nav-bar .nav-bar-inner a .element a {
-  line-height: 20px;
   height: 20px;
-  font-size: 10pt;
+  font-size: 11pt;
 }
 .nav-bar .nav-bar-inner .element [class^="icon-"]:before,
 .nav-bar .nav-bar-inner a .element [class^="icon-"]:before,
@@ -3991,12 +4003,13 @@ th[class*="span"] {
   margin-right: 10px;
   position: relative;
   padding: 5px;
+  line-height: 40px;
 }
 .nav-bar .nav-bar-inner  > ul.menu  > li a {
   display: block;
   float: left;
   color: #ffffff;
-  font-size: 10pt;
+  font-size: 11pt;
 }
 .nav-bar .nav-bar-inner  > ul.menu  > li ul.dropdown-menu {
   border: 0;
@@ -4010,24 +4023,30 @@ th[class*="span"] {
 .nav-bar .nav-bar-inner  > ul.menu.open {
   display: block !important;
 }
+.nav-bar .nav-bar-inner  > .divider{
+  line-height: 40px;
+  height: 40px;
+}
+.nav-bar .nav-bar-inner  > ul.menu > li.divider {
+  line-height: 20px;
+  height: 20px;
+}
 .nav-bar .nav-bar-inner  > .divider,
 .nav-bar .nav-bar-inner  > ul.menu > li.divider {
   position: relative;
   margin: 5px;
-  line-height: 20px;
-  height: 20px;
   float: left;
   display: inline-block;
   padding: 0;
   font-weight: normal;
-  font-size: 10pt;
+  font-size: 11pt;
   color: #fff;
   width: 1px;
   border-right: 1px #e6e6e6 solid;
 }
 .nav-bar .nav-bar-inner  > .divider.brand,
 .nav-bar .nav-bar-inner  > ul.menu > li.divider.brand {
-  font-size: 1.15em;
+  font-size: 11pt;
 }
 .nav-bar .nav-bar-inner  > .divider img,
 .nav-bar .nav-bar-inner  > ul.menu > li.divider img {
@@ -4037,7 +4056,7 @@ th[class*="span"] {
 .nav-bar .nav-bar-inner  > ul.menu > li.divider a {
   line-height: 20px;
   height: 20px;
-  font-size: 10pt;
+  font-size: 11pt;
 }
 .nav-bar .nav-bar-inner  > .divider [class^="icon-"]:before,
 .nav-bar .nav-bar-inner  > ul.menu > li.divider [class^="icon-"]:before,
@@ -6359,4 +6378,9 @@ pre code {
 .slider:active .complete,
 .slider:active + .marker:active .complete {
   background-color: #25bbc4;
+}
+.userinfo > div {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-bottom: 2px dotted #ddd;
 }

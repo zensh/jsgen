@@ -45,9 +45,9 @@ module.exports = {
 	isSession:true, //是否开启session，开启会影响性能。
 	syncSession:false,//当多进程时是否开启session同步，开启会影响性能。
 	sessionName:'jsGenSid', //保存session id 的cookie 的name
-	sessionExpire:1000*60, //false表示会话session，否则填入1000*60，表示session有效1分钟
+	sessionExpire:1000*60*30, //false表示会话session，否则填入1000*60，表示session有效1分钟
 	clearSessionSetInteval:1000*60*60, //自动清理垃圾session时间，建设设置为1小时
-	clearSessionTime:1000*60*60*2,//会话session超时，建议设置为1天
+	clearSessionTime:1000*60*60*24,//会话session超时，建议设置为1天
 //session内存存储
 	sessionDbStore:true,//是否使用mongodb数据库存储session，如果设置为true，则不需要同步session
 //deflate和gzip配置

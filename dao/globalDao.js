@@ -33,6 +33,7 @@ var that = db.bind('global', {
                 description: '',
                 metatitle: '',
                 metadesc: '',
+                keywords: '',
                 visit: 0,
                 users: 0,
                 topics: 0,

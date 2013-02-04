@@ -42,7 +42,7 @@ module.exports.User = {
     sex: '',
     // String，用户性别，male/female
     role: 'guest',
-    // String，用户角色，admin/editor/author/user/guest/forbid
+    // String，用户权限，admin/editor/author/user/guest/forbid：管理员/编辑/特约作者/会员/未验证会员/禁言
     avatar: '',
     // String，用户头像URI，追加'?s=size'即可获得对应size的头像
     desc: '',
@@ -255,6 +255,7 @@ module.exports.GlobalConfig = {
     //Meta标题
     metadesc: '',
     //Meta描述
+    keywords: '',
     date: 0,
     //上线时间
     visit: 0,
