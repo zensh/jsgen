@@ -17,7 +17,7 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives'])
         controller: jsGen.UserRegisterCtrl
       }).
       when('/home', {
-        templateUrl: 'static/tpl/home.html',
+        templateUrl: 'static/tpl/user.html',
         controller: jsGen.UserHomeCtrl
       }).
       otherwise({

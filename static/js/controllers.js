@@ -4,15 +4,15 @@
 var jsGen = {
     global: null
 };
-if(!$) var $ = angular.element;
 
-jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', function($scope, globalServ, logoutServ) {
+jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', '$location', function($scope, globalServ, logoutServ, $location) {
     jsGen.global = globalServ.get({}, function() {
         $scope.global = jsGen.global;
     });
     $scope.logout = function() {
-        logoutServ.get({}, function(){
-            delete jsGen.global.user;
+        $scope.logoutResult = logoutServ.get({}, function(){
+            if($scope.logoutResult.logout) delete jsGen.global.user;
+            $location.path('/');
         });
     };
     $scope.clearUser = function() {
@@ -31,9 +31,8 @@ jsGen.UserLoginCtrl = ['$scope', 'loginServ', '$location', function($scope, logi
         data.logname = $scope.logname;
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
-        jsGen.global.user = loginServ.save({}, data, function(data) {
-            jsGen.global.user = data;
-            if(!data.err) $location.path('/home');
+        jsGen.global.user = loginServ.save({}, data, function() {
+            if(!jsGen.global.user.err) $location.path('/home');
         });
     };
 }];
@@ -46,9 +45,8 @@ jsGen.UserRegisterCtrl = ['$scope', 'registerServ', '$location', function($scope
         data.name = $scope.name;
         data.passwd = CryptoJS.SHA256($scope.passwd).toString();
         data.email = $scope.email;
-        jsGen.global.user = registerServ.save({}, data, function(data) {
-            jsGen.global.user = data;
-            if(!data.err) $location.path('/home');
+        jsGen.global.user = registerServ.save({}, data, function() {
+            if(jsGen.global.user._id) $location.path('/home');
         });
     };
     $scope.checkName = function() {

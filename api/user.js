@@ -109,7 +109,7 @@ function editUser(userObj, callback) {
 
 function logout(req, res) {
     req.delsession();
-    res.redirect('/');
+    res.sendjson({logout:true});
 };
 
 function login(req, res) {
@@ -183,6 +183,22 @@ function login(req, res) {
 function register(req, res) {
     var data = req.apibody;
     adduser(data, function(doc){
+    if (!doc.err) {
+            req.session.Uid = doc._id;
+            req.session.avatar = doc.avatar;
+            req.session.email = doc.email;
+            req.session.name = doc.name;
+            req.session.role = doc.role;
+            var date = Date.now();
+            userDao.setLogin({
+                _id: doc._id,
+                lastLoginDate: date,
+                login: {
+                    date: date,
+                    ip: req.ip
+                }
+            });
+        }
         return res.sendjson(doc);
     });
 };
