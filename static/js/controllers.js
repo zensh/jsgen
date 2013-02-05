@@ -2,16 +2,57 @@
 
 /* Controllers */
 var jsGen = {
-    global: null
+    global: null,
+    lib: {}
 };
 
-jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', '$location', function($scope, globalServ, logoutServ, $location) {
-    jsGen.global = globalServ.get({}, function() {
+jsGen.lib.merge = function (a, b) {
+    if(a && b) {
+        for(var key in b) {
+            if(typeof b[key] === 'object' && b[key] !== null) {
+                a[key] = b[key];
+                jsGen.lib.merge(a[key], b[key]);
+            } else a[key] = b[key];
+        }
+    } else if(a && b === undefined) return JSON.parse(JSON.stringify(a));
+    return a;
+}
+
+jsGen.CacheFa = function(capacity) {
+    this.capacity = capacity || 0;
+    this.cache = {};
+    this.hash = {};
+};
+jsGen.CacheFa.prototype.get = function(key) {
+    if(this.hash[key]) this.hash[key] +=1;
+    return JSON.parse(JSON.stringify(this.cache[key]));
+};
+jsGen.CacheFa.prototype.put = function(key, value) {
+    if(this.capacity === 0) {
+        this.cache[key] = value;
+    }
+};
+jsGen.CacheFa.prototype.info = function(key, value) {
+
+};
+jsGen.CacheFa.prototype.remove = function(key, value) {
+
+};
+jsGen.CacheFa.prototype.removeAll = function(key, value) {
+
+};
+jsGen.CacheFa.prototype.destroy = function(key, value) {
+
+};
+jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', '$location', 'usersInfoCache', function($scope, globalServ, logoutServ, $location, usersInfoCache) {
+    $scope.global = jsGen.global;
+    if(!jsGen.global) jsGen.global = globalServ.get({}, function() {
         $scope.global = jsGen.global;
     });
+    if(!jsGen.usersInfoCache) jsGen.usersInfoCache = usersInfoCache;
     $scope.logout = function() {
-        $scope.logoutResult = logoutServ.get({}, function(){
-            if($scope.logoutResult.logout) delete jsGen.global.user;
+        var doc = logoutServ.get({}, function() {
+            if(doc.logout) delete jsGen.global.user;
             $location.path('/');
         });
     };
@@ -49,19 +90,23 @@ jsGen.UserRegisterCtrl = ['$scope', 'registerServ', '$location', function($scope
             if(jsGen.global.user._id) $location.path('/home');
         });
     };
-    $scope.checkName = function() {
-        var reg = /^[(\u4e00-\u9fa5)a-z0-9_]{1,}$/;
-        var len = utf8.stringToBytes($scope.name).length;
-        if (!reg.test($scope.name)) $scope.checkNameResult = '支持汉字、小写字母a-z、数字0-9、或下划线_';
-        else if (len > 0 && len < 5) $scope.checkNameResult = '长度必须大于5字节，一个汉字3字节';
-        else if (len > 15) $scope.checkNameResult = '长度必须小于15字节，一个汉字3字节';
-        else $scope.checkNameResult = false;
-    };
 }];
 
 jsGen.UserHomeCtrl = ['$scope', 'homeServ', '$location', function($scope, homeServ, $location) {
-    if (!jsGen.global.user) $location.path('/');
-    else jsGen.global.user = homeServ.get({}, function() {
-        $scope.user = jsGen.global.user;
+    if(!jsGen.global.user) $location.path('/');
+    $scope.user = jsGen.usersInfoCache.get(jsGen.global.user._id);
+    if(!$scope.user) jsGen.global.user = homeServ.get({}, function() {
+        jsGen.usersInfoCache.put(jsGen.global.user._id, jsGen.global.user);
+        $scope.user = jsGen.usersInfoCache.get(jsGen.global.user._id);
+    });
+}];
+jsGen.UserViewCtrl = ['$scope', 'userViewServ', '$location', '$routeParams', function($scope, userViewServ, $location, $routeParams) {
+    $scope.user = jsGen.usersInfoCache.get('U' + $routeParams.id);
+    if(!$scope.user) $scope.user = userViewServ.get({
+        Uid: 'U' + $routeParams.id
+    }, function() {
+        if($scope.user.err) $location.path('/');
+        $scope.test = jsGen.usersInfoCache.info();
+        jsGen.usersInfoCache.put($scope.user._id, $scope.user);
     });
 }];

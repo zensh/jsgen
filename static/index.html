@@ -86,7 +86,7 @@
                         <a href="/register" ng-click="clearUser()">注册</a>
                     </span>
                     <span class="place-right element user" ng-show="global.user.name">
-                        <span class="user"><img ng-src="{{global.user.avatar}}?s=40" /></span>
+                        <span class="user"><img ng-src="{{global.user.avatar+'?s=40'}}" /></span>
                         <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}</a>
                         <a ng-href="/" ng-click="logout()">退出</a>
                     </span>
@@ -98,7 +98,7 @@
         <footer class="page">
             <nav class="nav-bar">
                 <div class="nav-bar-inner padding10">
-                    <span class="element"><a class="fg-color-white" ng-href="http://{{global.url}}">{{global.title}}</a> ©2013 | Powered by <a class="fg-color-white" href="https://github.com/zensh/jsgen">jsGen</a></span>
+                    <span class="element"><a class="fg-color-white" ng-href="{{'http://'+global.url}}">{{global.title}}</a> ©2013 | Powered by <a class="fg-color-white" href="https://github.com/zensh/jsgen">jsGen</a></span>
                 </div>
             </nav>
         </footer>

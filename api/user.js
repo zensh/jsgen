@@ -242,7 +242,7 @@ function getUser(req, res) {
         if(err) {
             body.err = Err.dbErr;
             errlog.error(err);
-        } else {
+        } else if(doc) {
             body = doc;
             body._id = userDao.convertID(doc._id);
             delete body.email;

@@ -20,6 +20,22 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives'])
         templateUrl: 'static/tpl/user.html',
         controller: jsGen.UserHomeCtrl
       }).
+      when('/U:id', {
+        templateUrl: 'static/tpl/user.html',
+        controller: jsGen.UserViewCtrl
+      }).
+      when('/A:id', {
+        templateUrl: 'static/tpl/article.html',
+        controller: jsGen.ArticleCtrl
+      }).
+      when('/T:id', {
+        templateUrl: 'static/tpl/tag.html',
+        controller: jsGen.TagCtrl
+      }).
+      when('/O:id', {
+        templateUrl: 'static/tpl/collection.html',
+        controller: jsGen.CollectionCtrl
+      }).
       otherwise({
         redirectTo: '/'
       });

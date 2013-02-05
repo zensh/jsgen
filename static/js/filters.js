@@ -15,4 +15,14 @@ angular.module('jsGen.filters', []).
         default: return text;
       }
     }
+  }).
+  filter('checkName', function() {
+    return function(text) {
+        var reg = /^[(\u4e00-\u9fa5)a-z0-9_]{1,}$/;
+        var len = utf8.stringToBytes(text).length;
+        if (!reg.test(text)) return '支持汉字、小写字母a-z、数字0-9、或下划线_';
+        else if (len > 0 && len < 5) return '长度必须大于5字节，一个汉字3字节';
+        else if (len > 15) return '长度必须小于15字节，一个汉字3字节';
+        else return false;
+    }
   });

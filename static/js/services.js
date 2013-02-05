@@ -24,9 +24,14 @@ angular.module('jsGen.services', ['ngResource']).
     factory('homeServ', ['$resource', function($resource){
       return $resource('/api/user/index');
     }]).
-    factory('getUserServ', ['$resource', function($resource){
-      return $resource('/api/user/:Uid');
+    factory('userViewServ', ['$resource', function($resource){
+      return $resource('/api/user/:Uid', {Uid: 'index'});
     }]).
     factory('userAdminServ', ['$resource', function($resource){
       return $resource('/api/user/admin');
+    }]).
+    factory('usersInfoCache', ['$cacheFactory', function($cacheFactory) {
+        return $cacheFactory('usersInfoCache', {
+            capacity: 20
+        });
     }]);
