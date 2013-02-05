@@ -2,56 +2,50 @@
 
 /* Controllers */
 var jsGen = {
-    global: null,
+    global: {},
     lib: {}
 };
-
+jsGen.lib.checkClass =  function (obj) {
+    if(obj === null) return 'Null';
+    if(obj === undefined) return 'Undefined';
+    return Object.prototype.toString.call(obj).slice(8, -1);
+};
 jsGen.lib.merge = function (a, b) {
     if(a && b) {
         for(var key in b) {
-            if(typeof b[key] === 'object' && b[key] !== null) {
-                a[key] = b[key];
+            if(jsGen.lib.checkClass(b[key]) === 'Object') {
+                a[key] = {};
+                jsGen.lib.merge(a[key], b[key]);
+            } else if(jsGen.lib.checkClass(b[key]) === 'Array') {
+                a[key] = [];
                 jsGen.lib.merge(a[key], b[key]);
             } else a[key] = b[key];
         }
-    } else if(a && b === undefined) return JSON.parse(JSON.stringify(a));
-    return a;
-}
-
-jsGen.CacheFa = function(capacity) {
-    this.capacity = capacity || 0;
-    this.cache = {};
-    this.hash = {};
-};
-jsGen.CacheFa.prototype.get = function(key) {
-    if(this.hash[key]) this.hash[key] +=1;
-    return JSON.parse(JSON.stringify(this.cache[key]));
-};
-jsGen.CacheFa.prototype.put = function(key, value) {
-    if(this.capacity === 0) {
-        this.cache[key] = value;
+    } else if(a && b === undefined) {
+        switch (jsGen.lib.checkClass(a)){
+            case 'Object': var s = {}; break;
+            case 'Array': var s = []; break;
+            default: return a;
+        }
+        for(var key in a) {
+            if(typeof a[key] === 'object' && a[key] !== null) {
+                s[key] = jsGen.lib.merge(a[key]);
+            } else s[key] = a[key];
+        }
+        return s;
     }
+    return a;
 };
-jsGen.CacheFa.prototype.info = function(key, value) {
 
-};
-jsGen.CacheFa.prototype.remove = function(key, value) {
-
-};
-jsGen.CacheFa.prototype.removeAll = function(key, value) {
-
-};
-jsGen.CacheFa.prototype.destroy = function(key, value) {
-
-};
-jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', '$location', 'usersInfoCache', function($scope, globalServ, logoutServ, $location, usersInfoCache) {
+jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, rest, $location, cache) {
+    if(!jsGen.cache) jsGen.cache = cache;
     $scope.global = jsGen.global;
-    if(!jsGen.global) jsGen.global = globalServ.get({}, function() {
+    if(!jsGen.global.date) jsGen.global = rest.global.get({}, function() {
         $scope.global = jsGen.global;
     });
-    if(!jsGen.usersInfoCache) jsGen.usersInfoCache = usersInfoCache;
+
     $scope.logout = function() {
-        var doc = logoutServ.get({}, function() {
+        var doc = rest.logout.get({}, function() {
             if(doc.logout) delete jsGen.global.user;
             $location.path('/');
         });
@@ -61,24 +55,24 @@ jsGen.globalCtrl = ['$scope', 'globalServ', 'logoutServ', '$location', 'usersInf
     };
 }];
 
-jsGen.IndexCtrl = ['$scope', '$http', function($scope, $http) {
+jsGen.IndexCtrl = ['$scope', 'rest', function($scope, rest) {
 
 }];
 
-jsGen.UserLoginCtrl = ['$scope', 'loginServ', '$location', function($scope, loginServ, $location) {
+jsGen.UserLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
     delete jsGen.global.user;
     $scope.submit = function() {
         data.logname = $scope.logname;
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
-        jsGen.global.user = loginServ.save({}, data, function() {
+        jsGen.global.user = rest.login.save({}, data, function() {
             if(!jsGen.global.user.err) $location.path('/home');
         });
     };
 }];
 
-jsGen.UserRegisterCtrl = ['$scope', 'registerServ', '$location', function($scope, registerServ, $location) {
+jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
     delete jsGen.global.user;
     $scope.checkNameResult = false;
@@ -86,27 +80,27 @@ jsGen.UserRegisterCtrl = ['$scope', 'registerServ', '$location', function($scope
         data.name = $scope.name;
         data.passwd = CryptoJS.SHA256($scope.passwd).toString();
         data.email = $scope.email;
-        jsGen.global.user = registerServ.save({}, data, function() {
+        jsGen.global.user = rest.register.save({}, data, function() {
             if(jsGen.global.user._id) $location.path('/home');
         });
     };
 }];
 
-jsGen.UserHomeCtrl = ['$scope', 'homeServ', '$location', function($scope, homeServ, $location) {
+jsGen.UserHomeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!jsGen.global.user) $location.path('/');
-    $scope.user = jsGen.usersInfoCache.get(jsGen.global.user._id);
-    if(!$scope.user) jsGen.global.user = homeServ.get({}, function() {
-        jsGen.usersInfoCache.put(jsGen.global.user._id, jsGen.global.user);
-        $scope.user = jsGen.usersInfoCache.get(jsGen.global.user._id);
+    $scope.user = jsGen.global.user;
+    if(!$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
+        $scope.user = jsGen.global.user;
     });
 }];
-jsGen.UserViewCtrl = ['$scope', 'userViewServ', '$location', '$routeParams', function($scope, userViewServ, $location, $routeParams) {
-    $scope.user = jsGen.usersInfoCache.get('U' + $routeParams.id);
-    if(!$scope.user) $scope.user = userViewServ.get({
+
+jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
+    $scope.user = jsGen.cache.users.get('U' + $routeParams.id);
+    $scope.test = $location.absUrl();
+    if(!$scope.user) $scope.user = rest.userView.get({
         Uid: 'U' + $routeParams.id
     }, function() {
         if($scope.user.err) $location.path('/');
-        $scope.test = jsGen.usersInfoCache.info();
-        jsGen.usersInfoCache.put($scope.user._id, $scope.user);
+        jsGen.cache.users.put($scope.user._id, $scope.user);
     });
 }];

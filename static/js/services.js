@@ -7,31 +7,27 @@
 // In this case it is a simple value service.
 // angular.module('jsGen.services', []).
 //   value('version', '0.1');
-
 angular.module('jsGen.services', ['ngResource']).
-    factory('globalServ', ['$resource', function($resource){
-      return $resource('/api/index');
-    }]).
-    factory('loginServ', ['$resource', function($resource){
-      return $resource('/api/user/login');
-    }]).
-    factory('logoutServ', ['$resource', function($resource){
-      return $resource('/api/user/logout');
-    }]).
-    factory('registerServ', ['$resource', function($resource){
-      return $resource('/api/user/register');
-    }]).
-    factory('homeServ', ['$resource', function($resource){
-      return $resource('/api/user/index');
-    }]).
-    factory('userViewServ', ['$resource', function($resource){
-      return $resource('/api/user/:Uid', {Uid: 'index'});
-    }]).
-    factory('userAdminServ', ['$resource', function($resource){
-      return $resource('/api/user/admin');
-    }]).
-    factory('usersInfoCache', ['$cacheFactory', function($cacheFactory) {
-        return $cacheFactory('usersInfoCache', {
+factory('rest', ['$resource', function($resource) {
+    return {
+        global: $resource('/api/index'),
+        login: $resource('/api/user/login'),
+        logou: $resource('/api/user/logout'),
+        register: $resource('/api/user/register'),
+        home: $resource('/api/user/index'),
+        userView: $resource('/api/user/:Uid', {
+            Uid: 'index'
+        }),
+        userAdmin: $resource('/api/user/admin')
+    }
+}]).
+factory('cache', ['$cacheFactory', function($cacheFactory) {
+    return {
+        users: $cacheFactory('users', {
+            capacity: 10
+        }),
+        articles: $cacheFactory('articles', {
             capacity: 20
-        });
-    }]);
+        })
+    }
+}]);
