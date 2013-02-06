@@ -12,7 +12,7 @@ factory('rest', ['$resource', function($resource) {
     return {
         global: $resource('/api/index'),
         login: $resource('/api/user/login'),
-        logou: $resource('/api/user/logout'),
+        logout: $resource('/api/user/logout'),
         register: $resource('/api/user/register'),
         home: $resource('/api/user/index'),
         userView: $resource('/api/user/:Uid', {

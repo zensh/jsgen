@@ -15,17 +15,9 @@ var userDao = require('../dao/userDao.js'),
     Err = require('./errmsg.js');
 
 var cache = {
-    _initTime: 0,
-    Uid: [],
-    name: [],
-    email: [],
-    avatar: []
+    _initTime: 0
 };
 cache.init = function(callback) {
-    this.Uid = [];
-    this.name = [];
-    this.email = [];
-    this.avatar = [];
     var that = this;
     userDao.getUsersIndex(function(err, doc) {
         if(err) return errlog.error(err);
@@ -36,52 +28,27 @@ cache.init = function(callback) {
 };
 cache.update = function(obj) {
     var Uid = userDao.convertID(obj._id);
-    var index = this.Uid.indexOf(Uid);
-    if(index >= 0) {
-        this.name[index] = obj.name;
-        this.email[index] = obj.email;
-        this.avatar[index] = obj.avatar;
-    } else {
-        this.Uid.push(Uid);
-        this.name.push(obj.name);
-        this.email.push(obj.email);
-        this.avatar.push(obj.avatar);
-    }
+    if(!this[Uid]) this[Uid] = {};
+    this[Uid]._id = Uid;
+    this[Uid].name = obj.name;
+    this[Uid].email = obj.email;
+    this[Uid].avatar = obj.avatar;
+    this[obj.name] = this[Uid];
+    this[obj.email] = this[Uid];
     this._initTime = Date.now();
     return this;
-};
-cache.getidByEmail = function(str) {
-    var index = this.email.indexOf(str);
-    if(index === -1) return null;
-    return userDao.convertID(this.Uid[index]);
-};
-cache.getidByName = function(str) {
-    var index = this.name.indexOf(str);
-    if(index === -1) return null;
-    return userDao.convertID(this.Uid[index]);
-};
-cache.getByid = function(num) {
-    var Uid = userDao.convertID(num);
-    var index = this.Uid.indexOf(Uid);
-    if(index === -1) return null;
-    return {
-        Uid: Uid,
-        name: this.name[index],
-        email: this.email[index],
-        avatar: this.avatar[index]
-    };
 };
 
 function adduser(userObj, callback) {
     var result = {};
     if(!checkEmail(userObj.email)) {
         result.err = Err.userEmailErr;
-    } else if(cache.email.indexOf(userObj.email) >= 0) {
+    } else if(cache[userObj.email]) {
         result.err = Err.userEmailExist;
     }
     if(!checkUserName(userObj.name)) {
         result.err = Err.userNameErr;
-    } else if(cache.name.indexOf(userObj.name) >= 0) {
+    } else if(cache[userObj.name]) {
         result.err = Err.userNameExist;
     }
     if(result.err) return callback(result);
@@ -109,7 +76,9 @@ function editUser(userObj, callback) {
 
 function logout(req, res) {
     req.delsession();
-    res.sendjson({logout:true});
+    res.sendjson({
+        logout: true
+    });
 };
 
 function login(req, res) {
@@ -117,18 +86,14 @@ function login(req, res) {
     var _id = null,
         body = {};
 
-    if(checkEmail(data.logname)) {
-        _id = cache.getidByEmail(data.logname);
-        if(!_id) body.err = Err.userEmailNone;
-    } else if(checkUserID(data.logname)) {
-        _id = userDao.convertID(data.logname);
-        if(!cache.getByid(_id)) body.err = Err.UidNone;
-    } else if(checkUserName(data.logname)) {
-        _id = cache.getidByName(data.logname);
-        if(!_id) body.err = Err.userNameNone;
-    } else body.err = Err.logNameErr;
-
-    if(!body.err) {
+    if(!cache[data.logname]) {
+        if(checkEmail(data.logname)) body.err = Err.userEmailNone;
+        else if(checkUserID(data.logname)) body.err = Err.UidNone;
+        else if(checkUserName(data.logname)) body.err = Err.userNameNone;
+        else body.err = Err.logNameErr;
+        return res.sendjson(body);
+    } else {
+        _id = userDao.convertID(cache[data.logname]._id);
         userDao.getAuth(_id, function(err, doc) {
             if(err) {
                 body.err = Err.dbErr;
@@ -177,13 +142,13 @@ function login(req, res) {
             db.close();
             return res.sendjson(body);
         });
-    } else return res.sendjson(body);
+    }
 };
 
 function register(req, res) {
     var data = req.apibody;
-    adduser(data, function(doc){
-    if (!doc.err) {
+    adduser(data, function(doc) {
+        if(!doc.err) {
             req.session.Uid = doc._id;
             req.session.avatar = doc.avatar;
             req.session.email = doc.email;
@@ -208,9 +173,9 @@ function addUsers(req, res) {
     if(req.session.role === 'admin') {
         function addUserExec() {
             var userObj = req.apibody.shift();
-            if (!userObj) return res.sendjson(body);
-            adduser(userObj, function(doc){
-                if (doc.err) {
+            if(!userObj) return res.sendjson(body);
+            adduser(userObj, function(doc) {
+                if(doc.err) {
                     body.push(doc);
                     return res.sendjson(body);
                 } else {
@@ -220,8 +185,9 @@ function addUsers(req, res) {
             });
         };
         addUserExec();
-    }
-    else body[0] = {err: Err.userRoleErr};
+    } else body[0] = {
+        err: Err.userRoleErr
+    };
     return res.sendjson(body);
 };
 
@@ -269,7 +235,7 @@ function getUsers(req, res) {
             if(cache.Uid.indexOf(req.apibody.UidArray[i]) >= 0) UidArray.push(req.apibody.UidArray[i]);
         };
         userDao.getUsers(UidArray, function(err, doc) {
-            if (doc) {
+            if(doc) {
                 doc._id = userDao.convertID(doc._id);
                 body.push(doc);
             }
