@@ -17,7 +17,7 @@ jsGen.install = require('./api/install.js');
 
 jsGen.index.cache.init();
 jsGen.user.cache.init();
-
+jsGen.tag.cache.init();
 
 var server = http.createServer(function(req, res) {
     try {

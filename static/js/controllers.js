@@ -2,40 +2,51 @@
 
 /* Controllers */
 var jsGen = {
-    global: {},
-    lib: {}
+    global: {}
 };
-jsGen.lib.checkClass =  function (obj) {
-    if(obj === null) return 'Null';
-    if(obj === undefined) return 'Undefined';
-    return Object.prototype.toString.call(obj).slice(8, -1);
-};
-jsGen.lib.merge = function (a, b) {
-    if(a && b) {
-        for(var key in b) {
-            if(jsGen.lib.checkClass(b[key]) === 'Object') {
-                a[key] = {};
-                jsGen.lib.merge(a[key], b[key]);
-            } else if(jsGen.lib.checkClass(b[key]) === 'Array') {
-                a[key] = [];
-                jsGen.lib.merge(a[key], b[key]);
-            } else a[key] = b[key];
+jsGen = function() {
+    function checkClass(obj) {
+        if(obj === null) return 'Null';
+        if(obj === undefined) return 'Undefined';
+        return Object.prototype.toString.call(obj).slice(8, -1);
+    };
+
+    function merge(a, b) {
+        if(a && b) {
+            for(var key in b) {
+                if(checkClass(b[key]) === 'Object') {
+                    a[key] = {};
+                    merge(a[key], b[key]);
+                } else if(checkClass(b[key]) === 'Array') {
+                    a[key] = [];
+                    merge(a[key], b[key]);
+                } else a[key] = b[key];
+            }
+        } else if(a && b === undefined) {
+            switch(checkClass(a)) {
+            case 'Object':
+                var s = {};
+                break;
+            case 'Array':
+                var s = [];
+                break;
+            default:
+                return a;
+            }
+            for(var key in a) {
+                if(typeof a[key] === 'object' && a[key] !== null) {
+                    s[key] = merge(a[key]);
+                } else s[key] = a[key];
+            }
+            return s;
         }
-    } else if(a && b === undefined) {
-        switch (jsGen.lib.checkClass(a)){
-            case 'Object': var s = {}; break;
-            case 'Array': var s = []; break;
-            default: return a;
-        }
-        for(var key in a) {
-            if(typeof a[key] === 'object' && a[key] !== null) {
-                s[key] = jsGen.lib.merge(a[key]);
-            } else s[key] = a[key];
-        }
-        return s;
-    }
-    return a;
-};
+        return a;
+    };
+
+    jsGen.checkClass = checkClass;
+    jsGen.merge = merge;
+    return jsGen;
+}();
 
 jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, rest, $location, cache) {
     if(!jsGen.cache) jsGen.cache = cache;

@@ -67,21 +67,23 @@ var that = db.bind('tags', {
         });
     },
 
-    getTagsList: function(_idArray, callback) {
+    getTagsIndex: function(callback) {
         callback = callback || callbackFn;
-        if(!Array.isArray(_idArray)) _idArray = [_idArray];
-        that.find({
-            _id: {
-                $in: _idArray
-            }
-        }, {
+        that.find({}, {
+            sort: {
+                _id: -1
+            },
+            hint: {
+                _id: 1
+            },
             fields: {
+                _id: 1,
                 tag: 1,
                 articles: 1,
                 users: 1
             }
-        }).toArray(function(err, doc) {
-            // db.close();
+        }).each(function(err, doc) {
+            //db.close();
             return callback(err, doc);
         });
     },
@@ -182,13 +184,16 @@ var that = db.bind('tags', {
             }
             if (!doc) newTag._id = 1;
             else newTag._id = doc._id + 1;
-            that.insert(
-            newTag, {
-                w: 1
-            }, function(err, doc) {
-                // db.close();
-                return callback(err, doc);
-            });
+            that.findAndModify({
+                    _id: newTag._id
+                }, [], newTag, {
+                    w: 1,
+                    new: true,
+                    upsert: true
+                }, function(err, doc) {
+                    //db.close();
+                    return callback(err, doc);
+                });
         });
     },
 
@@ -209,7 +214,7 @@ module.exports = {
     convertID: that.convertID,
     getTagsNum: that.getTagsNum,
     getLatestId: that.getLatestId,
-    getTagsList: that.getTagsList,
+    getTagsIndex: that.getTagsIndex,
     getTag: that.getTag,
     setArticles: that.setArticles,
     setUsers: that.setUsers,

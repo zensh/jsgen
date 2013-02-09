@@ -231,7 +231,7 @@
  */
 /* Large desktop */
 @media (min-width: 1200px) {
-  
+
 }
 @media (min-width: 980px) {
   .nav-bar .nav-bar-inner .pull-menu {
@@ -390,11 +390,9 @@
  */
 .place-left {
   float: left !important;
-  margin-right: 10px;
 }
 .place-right {
   float: right !important;
-  margin-left: 10px;
 }
 .scroll-y,
 .scroll-vertical {

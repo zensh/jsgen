@@ -21,20 +21,22 @@ cache.init = function(callback) {
     var that = this;
     userDao.getUsersIndex(function(err, doc) {
         if(err) return errlog.error(err);
-        if(doc) that.update(doc);
+        if(doc) {
+            doc._id = userDao.convertID(doc._id);
+            that.update(doc);
+        }
         if(callback) callback(err, doc);
-        return that;
     });
+    return this;
 };
 cache.update = function(obj) {
-    var Uid = userDao.convertID(obj._id);
-    if(!this[Uid]) this[Uid] = {};
-    this[Uid]._id = Uid;
-    this[Uid].name = obj.name;
-    this[Uid].email = obj.email;
-    this[Uid].avatar = obj.avatar;
-    this[obj.name] = this[Uid];
-    this[obj.email] = this[Uid];
+    if(!this[obj._id]) this[obj._id] = {};
+    this[obj._id]._id = obj._id;
+    this[obj._id].name = obj.name;
+    this[obj._id].email = obj.email;
+    this[obj._id].avatar = obj.avatar;
+    this[obj.name] = this[obj._id];
+    this[obj.email] = this[obj._id];
     this._initTime = Date.now();
     return this;
 };
@@ -61,10 +63,12 @@ function adduser(userObj, callback) {
             errlog.error(err);
         }
         if(doc) {
-            cache.update(doc);
-            result = merge(result, doc);
+            result = doc;
             result.err = null;
             result._id = userDao.convertID(doc._id);
+            process.nextTick(function() {
+                return cache.update(doc);
+            });
         }
         return callback(result);
     });

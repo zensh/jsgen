@@ -458,11 +458,9 @@ table {
  */
 .place-left {
   float: left !important;
-  margin-right: 10px;
 }
 .place-right {
   float: right !important;
-  margin-left: 10px;
 }
 .scroll-y,
 .scroll-vertical {
@@ -3961,16 +3959,6 @@ th[class*="span"] {
   font-size: 14pt;
   margin-right: 20px;
 }
-.nav-bar .nav-bar-inner .user{
-  line-height: 40px;
-  height: 40px;
-}
-.nav-bar .nav-bar-inner .user a {
-  font-size: 11pt;
-  margin-right: 10px;
-  margin-bottom: 5px;
-  color: #fff;
-}
 .nav-bar .nav-bar-inner .element img,
 .nav-bar .nav-bar-inner a .element img {
   height: 100%;
@@ -4004,6 +3992,10 @@ th[class*="span"] {
   position: relative;
   padding: 5px;
   line-height: 40px;
+}
+.nav-bar .nav-bar-inner  > ul.menu  > li.user {
+  margin-right: 0;
+  height: 50px;
 }
 .nav-bar .nav-bar-inner  > ul.menu  > li a {
   display: block;

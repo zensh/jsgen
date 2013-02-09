@@ -81,15 +81,21 @@
                         <li>
                             <a href="https://github.com/zensh/jsgen">jsGen</a>
                         </li>
-                       <span class="place-right element user" ng-hide="global.user.name">
-                        <a href="/login" ng-click="clearUser()">登录</a>
-                        <a href="/register" ng-click="clearUser()">注册</a>
-                    </span>
-                    <span class="place-right element user" ng-show="global.user.name">
-                        <span class="user"><img ng-src="{{global.user.avatar+'?s=40'}}" /></span>
-                        <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}</a>
-                        <a ng-href="/" ng-click="logout()">退出</a>
-                    </span>
+                        <li class="place-right user" ng-hide="global.user.name">
+                            <a class="fg-color-white" href="/register" ng-click="clearUser()">注册</a>
+                        </li>
+                        <li class="place-right user" ng-hide="global.user.name">
+                            <a class="fg-color-white" href="/login" ng-click="clearUser()">登录</a>
+                        </li>
+                        <li class="place-right user" ng-show="global.user.name">
+                            <a class="fg-color-white" ng-href="/" ng-click="logout()">退出</a>
+                        </li>
+                        <li class="place-right user" ng-show="global.user.name">
+                            <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}<em> [{{global.user.role | role}}]</em></a>
+                        </li>
+                        <li class="place-right user" ng-show="global.user.name">
+                            <img ng-src="{{global.user.avatar+'?s=40'}}" />
+                        </li>
                     </ul>
                 </div>
             </nav>
