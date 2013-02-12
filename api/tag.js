@@ -19,7 +19,7 @@ cache.init = function(callback) {
     tagDao.getTagsIndex(function(err, doc) {
         if(err) return errlog.error(err);
         if(doc) {
-            doc.obj._id = tagDao.convertID(doc.obj._id);
+            doc._id = tagDao.convertID(doc._id);
             that.update(doc);
         }
         if(callback) callback(err, doc);
@@ -72,4 +72,4 @@ module.exports = {
     DELETE: deleteFn,
     cache: cache
 };
-addTag({tag:'mongoDB'},function(doc){console.log(doc);});
+//addTag({tag:'mongoDB'},function(doc){console.log(doc);});

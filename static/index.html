@@ -35,16 +35,16 @@
             });
         </script>
         <!--[if lt IE 9]>
-                <script src="/static/?parse=/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
+                <script src="/static/?parse=/js/lib/json3.min.js|/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
                 </script>
             <![endif]-->
-        <title>{{global.title}} | {{global.description}}</title>
+        <title ng-bind-template="{{global.title}} | {{global.description}}"></title>
         <meta http-equiv="content-type" content="text/html">
         <meta name="title" content="{{global.metatitle}}">
         <meta name="description" content="{{global.metadesc}}">
         <meta name="keywords" content="{{global.keywords}}">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
         <link rel="stylesheet" href="/static/?parse=/css/modern.css|/css/modern-responsive.css|/css/site.css|/css/prettify.css" media="screen" type="text/css">
     </head>
     <body class="modern-ui" class="ng-cloak" ng-cloak>
@@ -93,8 +93,8 @@
                         <li class="place-right user" ng-show="global.user.name">
                             <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}<em> [{{global.user.role | role}}]</em></a>
                         </li>
-                        <li class="place-right user" ng-show="global.user.name">
-                            <img ng-src="{{global.user.avatar+'?s=40'}}" />
+                        <li class="place-right user" ng-show="global.user.avatar">
+                            <img class="small-avatar" ng-src="{{global.user.avatar}}" />
                         </li>
                     </ul>
                 </div>

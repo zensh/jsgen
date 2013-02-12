@@ -200,10 +200,10 @@ function getUser(req, res) {
     var _id = null,
         body = {};
 
-    if(checkUserID(user) && cache.Uid.indexOf(user) >= 0) {
+    if(checkUserID(user) && cache[user]) {
         _id = userDao.convertID(user);
-    } else if(checkUserName(user) && cache.name.indexOf(user) >= 0) {
-        _id = cache.getidByName(user);
+    } else if(checkUserName(user) && cache[user]) {
+        _id = userDao.convertID(cache[user]);
     } else {
         body.err = Err.UidNone;
         return res.sendjson(body);
@@ -222,26 +222,32 @@ function getUser(req, res) {
     });
 };
 
-function getUidArray(req, res) {
-    var body = {};
-
-    if(req.session.role === 'admin') body.UidArray = cache.Uid;
-    else body.err = Err.userRoleErr;
-    return res.sendjson(body);
-};
-
 function getUsers(req, res) {
-    var UidArray = [],
-        body = [];
+    var idArray = [],
+        body = {
+            idArray: [],
+            data: []
+        };
 
     if(req.session.role === 'admin') {
-        for(var i = req.apibody.UidArray.length - 1; i >= 0; i--) {
-            if(cache.Uid.indexOf(req.apibody.UidArray[i]) >= 0) UidArray.push(req.apibody.UidArray[i]);
-        };
-        userDao.getUsers(UidArray, function(err, doc) {
+        if(req.apibody && req.apibody.idArray && req.apibody.idArray.length >= 1) {
+            for(var i = req.apibody.idArray.length - 1; i >= 0; i--) {
+                if(cache[req.apibody.idArray[i]]) idArray.push(req.apibody.idArray[i]);
+            };
+        } else {
+            for(var key in cache) {
+                if(checkUserID(key)) body.idArray.push(key);
+            }
+            idArray = body.idArray;
+        }
+        idArray = idArray.slice(0, 50);
+        idArray.forEach(function(x, i, idArray){
+            idArray[i] = userDao.convertID(x);
+        });
+        userDao.getUsers(idArray, function(err, doc) {
             if(doc) {
                 doc._id = userDao.convertID(doc._id);
-                body.push(doc);
+                body.data.push(doc);
             }
             if(err) {
                 body.err = Err.dbErr;
@@ -254,8 +260,10 @@ function getUsers(req, res) {
                 return res.sendjson(body);
             }
         });
-    } else body.err = Err.userRoleErr;
-    return res.sendjson(body);
+    } else {
+        body.err = Err.userRoleErr;
+        return res.sendjson(body);
+    }
 };
 
 function getUserInfo(req, res) {
@@ -285,7 +293,7 @@ function getFn(req, res) {
     case 'logout':
         return logout(req, res);
     case 'admin':
-        return getUidArray(req, res);
+        return getUsers(req, res);
     default:
         return getUser(req, res);
     }

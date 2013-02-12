@@ -3957,7 +3957,11 @@ th[class*="span"] {
   line-height: 40px;
   height: 40px;
   font-size: 14pt;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+.nav-bar .nav-bar-inner .element.brand img,
+.nav-bar .nav-bar-inner a .element.brand img{
+  margin-right: 10px;
 }
 .nav-bar .nav-bar-inner .element img,
 .nav-bar .nav-bar-inner a .element img {
@@ -6375,4 +6379,7 @@ pre code {
     margin-bottom: 10px;
     padding: 5px;
     border-bottom: 2px dotted #ddd;
+}
+.small-avatar {
+    width: 40px;
 }

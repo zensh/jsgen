@@ -18,7 +18,7 @@ module.exports.User = {
     resetDate: 0,
     // Date，密码重置时间
     loginAttempts: 0,
-    // 尝试登录次数（失败登录次数），成功登录后置0，5次失败则锁定，并发送解锁邮件至email
+    // Number 尝试登录次数（失败登录次数），成功登录后置0，5次失败则锁定，并发送解锁邮件至email
     locked: false,
     // Boolean，是否锁定帐号，锁定后禁止登录
     social: { // 第三方Auth认证信息，预留，待完善
@@ -102,17 +102,21 @@ module.exports.User = {
     sendList: [] // Array，用户发出的站内短信_id列表数组
 };
 
+//文章和评论
 module.exports.Article = {
     _id: 0,
-    // Number，文章的数据库id，整数，对外显示ID形式为‘Axxx’，其中x为id字母表字符，长度>=3
-    author: 0,
-    // Number，文章作者_id
+    // Number，数据库id，整数，对外显示ID形式为‘Axxx’，其中x为id字母表字符，长度>=3
+    author: [0],
+    // Number，作者_id数组
     date: 0,
-    // Number，文章创建时间
+    // Number，创建时间
     display: 0,
-    // Number，文章状态，0:公开;1:朋友（相互关注的）可见;2:作者、管理员、编辑可见;3:作者、管理员、编辑可见，禁止编辑
-    commend: 0,
-    // Number，是否推荐，0:正常;1:推荐;2:置顶
+    // Number，状态，0:公开;1:朋友（相互关注的）可见;2:作者、管理员、编辑可见;3:作者、管理员、编辑可见，禁止编辑;-1:开放编辑，注册用户可编辑
+    status: 0,
+    // Number，是否推荐，0:正常文章;1:推荐文章;2:置顶文章;-1:正常评论，
+    // 当commentsList达到5时，自动提升为0:正常文章，达到10时，自动提升为1:推荐文章（可全局设定）
+    refer: '',
+    // String，引用（关联）文章URL，绝对地址
     title: '',
     // String，文章标题，小于90字节（30汉字）
     summary: '',
@@ -121,19 +125,16 @@ module.exports.Article = {
     //cover img
     content: '',
     // String，文章内容，小于1024×20字节（6826汉字）
-    draft: '',
-    // String，文章内容存稿|草稿，未发表的版本，小于1024×20字节（6826汉字）
+    draft: [
+    {author: 0, date: 0, content: ''}
+    ],
+    // 文章内容历史版本，未发表的版本，小于1024×20字节（6826汉字），第一作者、管理员或编辑选定其中一个版本公开发布
     hots: 0,
     // Number，文章热度，访问+1，评论+2,支持+2,收藏+5,推荐+20
     visitors: 0,
     // Number 访问次数
     updateTime: 0,
     // Date 最后更新时间，包括文章更新和新评论
-    update: [{ // 文章修改更新记录，
-        _id: 0,
-        // Number，修改者的_id
-        date: 0 // Date，修改时间
-    }],
     collection: 0,
     // Number，所属合集的_id
     tagsList: [],
@@ -142,41 +143,24 @@ module.exports.Article = {
     // Number，支持的数量
     favorsList: [],
     // Array，支持者的_id列表数组
+    opposes: 0,
+    // Number，反对者的数量
+    opposesList: [],
+    // Array，反对者的_id列表数组
     collectors: 0,
     // Number，收藏的数量
     collectorsList: [],
     // Array，收藏者的_id列表数组
     comment: true,
+    // Boolean，是否允许评论
     comments: 0,
     // Number，用户发表评论数
     commentsList: [] // Array，评论的_id列表数组
 };
 
-module.exports.Comment = {
-    _id: 0,
-    // Number，评论的数据库id，整数，对外显示ID形式为‘Cxxx’，其中x为id字母表字符，长度>=3
-    author: 0,
-    // Number，评论作者的_id
-    article: 0,
-    // Number，评论（引用）文章的_id
-    refer: [],
-    //引用的评论，
-    date: 0,
-    // Date，评论发表时间
-    content: '',
-    // String，评论内容，小于420字节（140汉字），引用评论部分不计入
-    favors: 0,
-    // Number，支持的数量
-    favorsList: [],
-    // Array，支持者的_id列表数组
-    opposes: 0,
-    // Number，反对者的数量
-    opposesList: [] // Array，反对者的_id列表数组
-};
-
 module.exports.Collection = {
     _id: 0,
-    // Number，合集的数据库id，整数，对外显示ID形式为‘Oxxx’，其中x为id字母表字符，长度>=3
+    // Number，合集的数据库id，整数，对外显示ID形式为‘Cxxx’，其中x为id字母表字符，长度>=3
     author: 0,
     // Number，合集创建者的_id
     date: 0,
@@ -251,11 +235,11 @@ module.exports.GlobalConfig = {
     email: '',
     description: 'You can generate a beautiful website or blog with javascript!',
     //网站副标题
-    metatitle: '',
+    metatitle: 'jsGen',
     //Meta标题
-    metadesc: '',
+    metadesc: 'You can generate a beautiful website or blog with javascript!',
     //Meta描述
-    keywords: '',
+    keywords: 'jsGen,Node.js,MongoDB',
     date: 0,
     //上线时间
     visit: 0,
@@ -270,20 +254,30 @@ module.exports.GlobalConfig = {
     //最大用户在线记录数量
     maxOnlineTime: 0,
     //最大用户在线记录时间，年月日时分
-    visitHistory: [1],  //网站访问数据文档，由于文档大小受限，一个文档记录满之后新开一个文档，并追加到此数组
+    visitHistory: [1],
+    //网站访问数据文档，由于文档大小受限，一个文档记录满之后新开一个文档，并追加到此数组
     ArticleTagsMax: 5,
+    //文章允许设置的标签数量
     UserTagsMax: 5,
+    //用户允许设置的标签数量
     TitleMinLen: 9,
+    //标题最短字节数
     TitleMaxLen: 90,
-    SummaryMinLen: 24,
+    //标题最长字节数
     SummaryMaxLen: 240,
-    CommentMinLen: 15,
-    CommentMaxLen: 420,
-    ContentMinLen: 240,
+    //摘要最长字节数
+    ContentMinLen: 24,
+    //文章最短字节数
     ContentMaxLen: 20480,
+    //文章最长字节数
     UserNameMinLen: 5,
+    //用户名最短字节数
     UserNameMaxLen: 15,
-    register: true,
-    headerMenu: [{title:'',url:'',target:'_self',sub:null},],
-    footerMenu: [{title:'',url:'',target:'_self',sub:null},],
+    //用户名最长字节数
+    CommentUp: 5,
+    //评论自动转为文章的评论数
+    RecommendUp: 15,
+    //文章自动推荐的评论数
+    register: true
+    //是否开放注册
 };

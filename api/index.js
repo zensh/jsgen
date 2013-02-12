@@ -105,6 +105,7 @@ function getFn(req, res) {
         body.user.name = req.session.name;
         body.user.email = req.session.email;
         body.user.avatar = req.session.avatar;
+        body.user.role = req.session.role;
     } else body.user = null;
     return res.sendjson(body);
 };

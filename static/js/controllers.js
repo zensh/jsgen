@@ -72,7 +72,7 @@ jsGen.IndexCtrl = ['$scope', 'rest', function($scope, rest) {
 
 jsGen.UserLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
-    delete jsGen.global.user;
+    //delete jsGen.global.user;
     $scope.submit = function() {
         data.logname = $scope.logname;
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
@@ -85,7 +85,7 @@ jsGen.UserLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
 
 jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
-    delete jsGen.global.user;
+    //delete jsGen.global.user;
     $scope.checkNameResult = false;
     $scope.submit = function() {
         data.name = $scope.name;
@@ -99,19 +99,32 @@ jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, 
 
 jsGen.UserHomeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!jsGen.global.user) $location.path('/');
-    $scope.user = jsGen.global.user;
+    $scope.user = jsGen.merge(jsGen.global.user);
+    $scope.user.avatar += '?s=285';
     if(!$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
-        $scope.user = jsGen.global.user;
+        $scope.user = jsGen.merge(jsGen.global.user);
+        $scope.user.avatar += '?s=285';
     });
 }];
 
 jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
     $scope.user = jsGen.cache.users.get('U' + $routeParams.id);
-    $scope.test = $location.absUrl();
+    //$scope.test = $location.absUrl();
     if(!$scope.user) $scope.user = rest.userView.get({
         Uid: 'U' + $routeParams.id
     }, function() {
         if($scope.user.err) $location.path('/');
+        $scope.user.avatar += '?s=285';
         jsGen.cache.users.put($scope.user._id, $scope.user);
+    });
+}];
+
+jsGen.UserAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+    if(!jsGen.global.user) $location.path('/');
+    $scope.user = jsGen.merge(jsGen.global.user);
+    $scope.user.avatar += '?s=285';
+    if(!$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
+        $scope.user = jsGen.merge(jsGen.global.user);
+        $scope.user.avatar += '?s=285';
     });
 }];

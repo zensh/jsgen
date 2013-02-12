@@ -41,16 +41,16 @@ function getFn(req, res) {
         });
     });
 
-    db.createCollection("comments", {
-        w: 1
-    }, function(err, collection) {
-        collection.ensureIndex({
-            _id: -1,
-            favors: -1
-        }, {
-            background: true
-        });
-    });
+    // db.createCollection("comments", {
+    //     w: 1
+    // }, function(err, collection) {
+    //     collection.ensureIndex({
+    //         _id: -1,
+    //         favors: -1
+    //     }, {
+    //         background: true
+    //     });
+    // });
 
     db.createCollection("messages", {
         w: 1

@@ -37,7 +37,7 @@ var that = db.bind('collections', {
             while(id.length < 3) {
                 id = '0' + id;
             }
-            id = 'O' + id;
+            id = 'C' + id;
             return id;
         default:
             return null;
