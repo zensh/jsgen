@@ -15,4 +15,5 @@ module.exports = {
     resetDate: 'resetDate',
     loginAttempts: '登录失败超过5次，用户被锁定',
     logNameErr: '该用户不存在，请使用用户名、用户邮箱或用户UID登录',
+    tagNone: 'tagNone',
 };

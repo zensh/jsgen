@@ -13,14 +13,10 @@
 var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
+    callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
     defautComment = require('./json.js').Comment;
-
-var callbackFn = function(err, doc) {
-    if (err) console.log(err);
-    return doc;
-};
 
 var that = db.bind('comments', {
 
@@ -43,7 +39,7 @@ var that = db.bind('comments', {
     },
 
     getCommentsNum: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.count({}, function(err, count) {
             // db.close();
             return callback(err, count);
@@ -51,7 +47,7 @@ var that = db.bind('comments', {
     },
 
     getLatestId: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -70,7 +66,7 @@ var that = db.bind('comments', {
 
     getCommentsIndex: function(date, limit, callback) {
         var query = {};
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -96,7 +92,7 @@ var that = db.bind('comments', {
     },
 
     getCommentsList: function(_idArray, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -119,7 +115,7 @@ var that = db.bind('comments', {
     },
 
     getComment: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -207,7 +203,7 @@ var that = db.bind('comments', {
         var comment = merge(defautComment),
             newComment = merge(defautComment);
 
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         newComment = intersect(newComment, commentObj);
         newComment = merge(comment, newComment);
         newComment.date = Date.now();
@@ -230,7 +226,7 @@ var that = db.bind('comments', {
     },
 
     delComment: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

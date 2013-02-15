@@ -20,15 +20,11 @@
 var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
+    callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
     defautArticle = require('./json.js').Article,
     globalConfig = require('./json.js').GlobalConfig;
-
-var callbackFn = function(err, doc) {
-    if (err) console.log(err);
-    return doc;
-};
 
 var that = db.bind('articles', {
 
@@ -51,7 +47,7 @@ var that = db.bind('articles', {
     },
 
     getArticlesNum: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.count({}, function(err, count) {
             //db.close();
             return callback(err, count);
@@ -59,7 +55,7 @@ var that = db.bind('articles', {
     },
 
     getLatestId: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -78,7 +74,7 @@ var that = db.bind('articles', {
 
     getArticlesIndex: function(date, limit, callback) {
         var query = {};
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -106,7 +102,7 @@ var that = db.bind('articles', {
     },
 
     getArticlesList: function(_idArray, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -134,7 +130,7 @@ var that = db.bind('articles', {
     },
 
     getArticle: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -169,7 +165,7 @@ var that = db.bind('articles', {
     },
 
     getArticleInfo: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -224,7 +220,7 @@ var that = db.bind('articles', {
             };
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) defaultObj.tagsList[i] = 0;
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
 
         if(!Array.isArray(ArticleObjArray)) ArticleObjArray = [ArticleObjArray];
 
@@ -425,7 +421,7 @@ var that = db.bind('articles', {
     setNewArticle: function(articleObj, callback) {
         var article = merge(defautArticle),
             newArticle = merge(defautArticle);
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
@@ -450,7 +446,7 @@ var that = db.bind('articles', {
     },
 
     delArticle: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

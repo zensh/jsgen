@@ -6378,8 +6378,15 @@ pre code {
 .userinfo > div {
     margin-bottom: 10px;
     padding: 5px;
-    border-bottom: 2px dotted #ddd;
 }
-.small-avatar {
+.width-small {
     width: 40px;
+    max-width: 100%;
+}
+.width-middle {
+    width: 285px;
+    max-width: 100%;
+}
+.width-50 {
+    width: 50%;
 }

@@ -5,32 +5,65 @@ var userDao = require('../dao/userDao.js'),
     messageDao = require('../dao/messageDao.js'),
     tagDao = require('../dao/tagDao.js'),
     db = require('../dao/mongoDao.js').db,
+    globalConfig = require('../dao/json.js').GlobalConfig,
+    UserPublicTpl = require('../dao/json.js').UserPublicTpl,
+    UserPrivateTpl = require('../dao/json.js').UserPrivateTpl,
     errlog = require('rrestjs').restlog,
     merge = require('../lib/tools.js').merge,
+    intersect = require('../lib/tools.js').intersect,
     checkEmail = require('../lib/tools.js').checkEmail,
     checkUserID = require('../lib/tools.js').checkUserID,
     checkUserName = require('../lib/tools.js').checkUserName,
+    checkUrl = require('../lib/tools.js').checkUrl,
     HmacSHA256 = require('../lib/tools.js').HmacSHA256,
     gravatar = require('../lib/tools.js').gravatar,
+    CacheFn = require('../lib/tools.js').CacheFn,
+    callbackFn = require('../lib/tools.js').callbackFn,
+    filterSummary = require('../lib/tools.js').filterSummary,
+    filterTags = require('./tag.js').filterTags,
+    setTag = require('./tag.js').setTag,
     Err = require('./errmsg.js');
 
-var cache = {
-    _initTime: 0
+var userCache = new CacheFn(100);
+var paginationCache = new CacheFn(5);
+userCache.getUser = function(userID, callback) {
+    var that = this,
+        callback = callback || callbackFn,
+        doc = this.get(userID);
+
+    if(doc) return callback(null, doc);
+    else userDao.getUserInfo(userDao.convertID(userID), function(err, doc) {
+        if(err) errlog.error(err);
+        if(doc) {
+            doc._id = userID;
+            that.put(userID, doc);
+        }
+        return callback(err, doc);
+    });
 };
-cache.init = function(callback) {
-    var that = this;
+
+var cache = {
+    _initTime: 0,
+    _index: []
+};
+cache._init = function(callback) {
+    var that = this,
+        callback = callback || callbackFn;
     userDao.getUsersIndex(function(err, doc) {
         if(err) return errlog.error(err);
         if(doc) {
             doc._id = userDao.convertID(doc._id);
-            that.update(doc);
+            that._update(doc);
         }
         if(callback) callback(err, doc);
     });
     return this;
 };
-cache.update = function(obj) {
-    if(!this[obj._id]) this[obj._id] = {};
+cache._update = function(obj) {
+    if(!this[obj._id]) {
+        this[obj._id] = {};
+        this._index.push(obj._id);
+    }
     this[obj._id]._id = obj._id;
     this[obj._id].name = obj.name;
     this[obj._id].email = obj.email;
@@ -40,42 +73,49 @@ cache.update = function(obj) {
     this._initTime = Date.now();
     return this;
 };
+cache._remove = function(userID) {
+    var that = this;
+    if(this[userID]) {
+        delete this[this[userID].name];
+        delete this[this[userID].email];
+        delete this[userID];
+        this._index.splice(this._index.indexOf(userID), 1);
+        this._initTime = Date.now();
+    }
+    return this;
+};
 
 function adduser(userObj, callback) {
-    var result = {};
+    var body = {},
+        callback = callback || callbackFn;
     if(!checkEmail(userObj.email)) {
-        result.err = Err.userEmailErr;
+        body.err = Err.userEmailErr;
     } else if(cache[userObj.email]) {
-        result.err = Err.userEmailExist;
+        body.err = Err.userEmailExist;
     }
     if(!checkUserName(userObj.name)) {
-        result.err = Err.userNameErr;
+        body.err = Err.userNameErr;
     } else if(cache[userObj.name]) {
-        result.err = Err.userNameExist;
+        body.err = Err.userNameExist;
     }
-    if(result.err) return callback(result);
+    if(body.err) return callback(body.err, body);
     delete userObj._id;
     userObj.avatar = gravatar(userObj.email);
     userObj.resetDate = Date.now();
     userDao.setNewUser(userObj, function(err, doc) {
         if(err) {
-            result.err = Err.dbErr;
+            body.err = Err.dbErr;
             errlog.error(err);
         }
         if(doc) {
-            result = doc;
-            result.err = null;
-            result._id = userDao.convertID(doc._id);
-            process.nextTick(function() {
-                return cache.update(doc);
-            });
+            doc._id = userDao.convertID(doc._id);
+            body = merge(UserPrivateTpl);
+            body = intersect(body, doc);
+            body.err = null;
+            cache._update(body);
         }
-        return callback(result);
+        return callback(body.err, body);
     });
-};
-
-function editUser(userObj, callback) {
-
 };
 
 function logout(req, res) {
@@ -107,12 +147,12 @@ function login(req, res) {
             } else if(doc.loginAttempts >= 5) {
                 body.err = Err.loginAttempts;
                 userDao.setUserInfo({
-                    _id: doc._id,
+                    _id: _id,
                     locked: true
                 }, function(err) {
                     if(err) return errlog.error(err);
                     return userDao.setLoginAttempt({
-                        _id: doc._id,
+                        _id: _id,
                         loginAttempts: 0
                     });
                 });
@@ -122,14 +162,13 @@ function login(req, res) {
                 return res.sendjson(body);
             }
             if(data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
-                req.session.Uid = body._id = userDao.convertID(doc._id);
-                req.session.avatar = body.avatar = doc.avatar;
-                req.session.email = body.email = doc.email;
-                req.session.name = body.name = doc.name;
-                req.session.role = body.role = doc.role;
+                body = doc;
+                body._id = userDao.convertID(body._id);
+                req.session.Uid = body._id;
+                req.session.role = body.role;
                 var date = Date.now();
                 userDao.setLogin({
-                    _id: doc._id,
+                    _id: _id,
                     lastLoginDate: date,
                     login: {
                         date: date,
@@ -139,7 +178,7 @@ function login(req, res) {
             } else {
                 body.err = Err.userPasswd;
                 userDao.setLoginAttempt({
-                    _id: doc._id,
+                    _id: _id,
                     loginAttempts: 1
                 });
             }
@@ -151,23 +190,12 @@ function login(req, res) {
 
 function register(req, res) {
     var data = req.apibody;
-    adduser(data, function(doc) {
-        if(!doc.err) {
+    adduser(data, function(err, doc) {
+        if(doc && !doc.err) {
             req.session.Uid = doc._id;
-            req.session.avatar = doc.avatar;
-            req.session.email = doc.email;
-            req.session.name = doc.name;
             req.session.role = doc.role;
-            var date = Date.now();
-            userDao.setLogin({
-                _id: doc._id,
-                lastLoginDate: date,
-                login: {
-                    date: date,
-                    ip: req.ip
-                }
-            });
         }
+        db.close();
         return res.sendjson(doc);
     });
 };
@@ -178,44 +206,46 @@ function addUsers(req, res) {
         function addUserExec() {
             var userObj = req.apibody.shift();
             if(!userObj) return res.sendjson(body);
-            adduser(userObj, function(doc) {
-                if(doc.err) {
+            adduser(userObj, function(err, doc) {
+                if(err) {
                     body.push(doc);
                     return res.sendjson(body);
-                } else {
+                }
+                if(doc && !doc.err) {
                     body.push(doc);
                     addUserExec();
                 }
             });
         };
         addUserExec();
-    } else body[0] = {
-        err: Err.userRoleErr
-    };
-    return res.sendjson(body);
+    } else {
+        body[0] = {
+            err: Err.userRoleErr
+        };
+        return res.sendjson(body);
+    }
 };
 
 function getUser(req, res) {
     var user = req.path[2];
-    var _id = null,
+    var Uid = null,
         body = {};
 
     if(checkUserID(user) && cache[user]) {
-        _id = userDao.convertID(user);
+        Uid = user;
     } else if(checkUserName(user) && cache[user]) {
-        _id = userDao.convertID(cache[user]);
+        Uid = cache[user]._id;
     } else {
         body.err = Err.UidNone;
         return res.sendjson(body);
     }
-    if(_id) userDao.getUsers(_id, function(err, doc) {
+    if(Uid) userCache.getUser(Uid, function(err, doc) {
         if(err) {
             body.err = Err.dbErr;
             errlog.error(err);
         } else if(doc) {
-            body = doc;
-            body._id = userDao.convertID(doc._id);
-            delete body.email;
+            body = merge(UserPublicTpl);
+            body = intersect(body, doc);
         }
         db.close();
         return res.sendjson(body);
@@ -223,42 +253,52 @@ function getUser(req, res) {
 };
 
 function getUsers(req, res) {
-    var idArray = [],
+    var array = [],
+        p = 1,
         body = {
-            idArray: [],
+            pagination: {},
             data: []
         };
 
     if(req.session.role === 'admin') {
-        if(req.apibody && req.apibody.idArray && req.apibody.idArray.length >= 1) {
-            for(var i = req.apibody.idArray.length - 1; i >= 0; i--) {
-                if(cache[req.apibody.idArray[i]]) idArray.push(req.apibody.idArray[i]);
+        if(!req.session.pagination) {
+            req.session.pagination = {
+                pagination: cache._initTime,
+                total: cache._index.length,
+                num: 20
             };
-        } else {
-            for(var key in cache) {
-                if(checkUserID(key)) body.idArray.push(key);
-            }
-            idArray = body.idArray;
+            paginationCache.put(req.session.pagination.pagination, cache._index);
         }
-        idArray = idArray.slice(0, 50);
-        idArray.forEach(function(x, i, idArray){
-            idArray[i] = userDao.convertID(x);
-        });
-        userDao.getUsers(idArray, function(err, doc) {
-            if(doc) {
-                doc._id = userDao.convertID(doc._id);
-                body.data.push(doc);
-            }
-            if(err) {
-                body.err = Err.dbErr;
-                errlog.error(err);
-                db.close();
-                return res.sendjson(body);
-            }
-            if(!doc) {
-                db.close();
-                return res.sendjson(body);
-            }
+        console.log(req.getparam);
+        if(req.getparam.n && req.getparam.n >= 1 && req.getparam.n <=100) req.session.pagination.num = Math.floor(req.getparam.n);
+        if(req.getparam.p  && req.getparam.p >= 1) p = Math.floor(req.getparam.p);
+        else p = 1;
+        if(p ===1 && req.session.pagination.pagination !== cache._initTime) {
+            req.session.pagination.pagination = cache._initTime;
+            req.session.pagination.total = cache._index.length;
+            paginationCache.put(req.session.pagination.pagination, cache._index);
+        }
+        array = paginationCache.get(req.session.pagination.pagination).slice((p - 1)*req.session.pagination.num, p * req.session.pagination.num);
+        body.pagination.now = p;
+        body.pagination.total = req.session.pagination.total;
+        body.pagination.num = req.session.pagination.num;
+        array.forEach(function(Uid, i, array) {
+            userCache.getUser(Uid, function(err, doc) {
+                var data = {};
+                if(err) {
+                    data.err = Err.dbErr;
+                    errlog.error(err);
+                } else if(doc) {
+                    data = merge(UserPublicTpl);
+                    data = intersect(data, doc);
+                    data.email = doc.email;
+                }
+                body.data.push(data);
+                if(i === array.length - 1) {
+                    db.close();
+                    return res.sendjson(body);
+                }
+            });
         });
     } else {
         body.err = Err.userRoleErr;
@@ -268,22 +308,115 @@ function getUsers(req, res) {
 
 function getUserInfo(req, res) {
     var body = {};
-
-    if(req.session.Uid) userDao.getUserInfo(userDao.convertID(req.session.Uid), function(err, doc) {
-        if(err) {
-            body.err = Err.dbErr;
-            errlog.error(err);
-        } else {
-            body = doc;
-            body._id = req.session.Uid;
-        }
-        return res.sendjson(body);
-    });
-    else {
+    if(req.session.Uid) {
+        userCache.getUser(req.session.Uid, function(err, doc) {
+            if(err) {
+                body.err = Err.dbErr;
+                return res.sendjson(body);
+            }
+            if(doc) {
+                body = doc;
+                filterTags(body.tagsList, false, function(err, doc) {
+                    if(doc) body.tagsList = doc;
+                    return res.sendjson(body);
+                });
+            }
+        });
+    } else {
         body.err = Err.userNeedLogin;
         return res.sendjson(body);
     }
 };
+
+function editUser(req, res) {
+    var defaultObj = {
+        name: '',
+        email: '',
+        passwd: '',
+        sex: '',
+        avatar: '',
+        desc: '',
+        tagsList: ['']
+    },
+        body = {},
+        userObj = {};
+
+    if(req.session.Uid) {
+        userObj = merge(defaultObj);
+        userObj = intersect(userObj, req.apibody);
+        userObj._id = userDao.convertID(req.session.Uid);
+        if(userObj.name) {
+            if(!checkUserName(userObj.name)) {
+                body.err = Err.userNameErr;
+            } else if(userObj.name === cache[req.session.Uid].name) {
+                delete userObj.name;
+            } else if(cache[userObj.name]) {
+                body.err = Err.userNameExist;
+            }
+        }
+        if(userObj.email) {
+            if(!checkEmail(userObj.email)) {
+                body.err = Err.userEmailErr;
+            } else if(userObj.email === cache[req.session.Uid].email) {
+                delete userObj.email;
+            } else if(cache[userObj.email]) {
+                body.err = Err.userEmailExist;
+            }
+        }
+        if(userObj.sex) {
+            if(userObj.sex !== 'male' && userObj.sex !== 'female') delete userObj.sex;
+        }
+        if(userObj.avatar) {
+            if(!checkUrl(userObj.avatar)) delete userObj.avatar;
+        }
+        if(userObj.desc) userObj.desc = filterSummary(userObj.desc);
+        if(userObj.tagsList) {
+            filterTags(userObj.tagsList.slice(0, globalConfig.UserTagsMax), true, function(err, doc) {
+                if(doc) userObj.tagsList = doc;
+                daoExec();
+            });
+        } else daoExec();
+
+        function setCache(doc) {
+            cache._remove(doc._id);
+            cache._update(doc);
+            userCache.put(doc._id, doc);
+        };
+
+        function daoExec() {
+            console.log(userObj);
+            if(body.err) return res.sendjson(body);
+            else return userDao.setUserInfo(userObj, function(err, doc) {
+                if(err) {
+                    body.err = Err.dbErr;
+                    errlog.error(err);
+                    return res.sendjson(body);
+                } else {
+                    body = doc[0];
+                    // body.tagsList.forEach(function(tag) {
+                    //     setTag({_id: tag, usersList: body._id});
+                    // });
+                    filterTags(body.tagsList, false, function(err, doc) {
+                        if(doc) body.tagsList = doc;
+                        body._id = req.session.Uid;
+                        delete body.passwd;
+                        setCache(body);
+                        body = intersect(defaultObj, body);
+                        body._id = req.session.Uid;
+                        delete body.passwd;
+                        setCache(body);
+                        return res.sendjson(body);
+                    });
+                }
+            });
+        };
+    } else {
+        body.err = Err.userNeedLogin;
+        return res.sendjson(body);
+    }
+};
+
+function editUsers(req, res) {};
 
 function getFn(req, res) {
     switch(req.path[2]) {
@@ -301,23 +434,15 @@ function getFn(req, res) {
 
 function postFn(req, res) {
     switch(req.path[2]) {
+    case undefined:
+    case 'index':
+        return editUser(req, res);
     case 'login':
         return login(req, res);
     case 'register':
         return register(req, res);
     case 'admin':
-        return getUsers(req, res);
-    default:
-        return res.r404();
-    }
-};
-
-function putFn(req, res) {
-    switch(req.path[2]) {
-    case 'register':
-        return register(req, res);
-    case 'admin':
-        return addUsers(req, res);
+        return editUsers(req, res);
     default:
         return res.r404();
     }

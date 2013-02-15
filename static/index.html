@@ -91,10 +91,11 @@
                             <a class="fg-color-white" ng-href="/" ng-click="logout()">退出</a>
                         </li>
                         <li class="place-right user" ng-show="global.user.name">
-                            <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}<em> [{{global.user.role | role}}]</em></a>
+                            <a ng-href="/home" title="Uid:{{global.user._id}}">{{global.user.name}}</a>
+                            <a ng-href="{{global.user.adminUrl}}"><em> [{{global.user.role | role}}]</em></a>
                         </li>
                         <li class="place-right user" ng-show="global.user.avatar">
-                            <img class="small-avatar" ng-src="{{global.user.avatar}}" />
+                            <img class="width-small" ng-src="{{global.user.avatar}}" />
                         </li>
                     </ul>
                 </div>

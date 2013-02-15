@@ -18,11 +18,11 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives'])
       }).
       when('/home', {
         templateUrl: 'static/tpl/user.html',
-        controller: jsGen.UserHomeCtrl
+        controller: jsGen.homeCtrl
       }).
       when('/admin', {
         templateUrl: 'static/tpl/admin.html',
-        controller: jsGen.UserAdminCtrl
+        controller: jsGen.adminCtrl
       }).
       when('/U:id', {
         templateUrl: 'static/tpl/user.html',

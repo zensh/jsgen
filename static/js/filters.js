@@ -14,7 +14,16 @@ angular.module('jsGen.filters', []).
         case 'forbid': return '禁言';
         default: return text;
       }
-    }
+    };
+  }).
+  filter('sex', function() {
+    return function(text) {
+      switch (text) {
+        case 'male': return '男性';
+        case 'female': return '女性';
+        default: return text;
+      }
+    };
   }).
   filter('checkName', function() {
     return function(text) {
@@ -25,5 +34,5 @@ angular.module('jsGen.filters', []).
         else if (len > 0 && len < 5) return '长度必须大于5字节，一个汉字3字节';
         else if (len > 15) return '长度必须小于15字节，一个汉字3字节';
         } else return false;
-    }
+    };
   });

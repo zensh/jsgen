@@ -15,22 +15,23 @@ var userDao = require('../dao/userDao.js'),
     checkUserID = require('../lib/tools.js').checkUserID,
     checkUserName = require('../lib/tools.js').checkUserName,
     HmacSHA256 = require('../lib/tools.js').HmacSHA256,
+    cacheUser = require('./user.js').cache,
     Err = require('./errmsg.js');
 
 var cache = {
     _initTime: 0,
     data: {}
 };
-cache.init = function(callback) {
+cache._init = function(callback) {
         var that = this;
         globalDao.getGlobalConfig(function(err, doc) {
             if(err) errlog.error(err);
-            else that.update(doc);
+            else that._update(doc);
             if(callback) callback(err, that.data);
         });
         return this;
 };
-cache.update = function(obj) {
+cache._update = function(obj) {
     this.data = obj;
     this._initTime = Date.now();
 };
@@ -90,7 +91,7 @@ function getvisitHistory(req, res) {
 
 function setGlobalConfig(obj, callback) {
     globalDao.setGlobalConfig(obj, function(err, doc) {
-        if (doc) cache.update(doc);
+        if (doc) cache._update(doc);
         if (callback) return callback(err, doc);
     });
 };
@@ -102,10 +103,10 @@ function getFn(req, res) {
     if(req.session.Uid) {
         body.user = {};
         body.user._id = req.session.Uid;
-        body.user.name = req.session.name;
-        body.user.email = req.session.email;
-        body.user.avatar = req.session.avatar;
         body.user.role = req.session.role;
+        body.user.name = cacheUser[req.session.Uid].name;
+        body.user.email = cacheUser[req.session.Uid].email;
+        body.user.avatar = cacheUser[req.session.Uid].avatar;
     } else body.user = null;
     return res.sendjson(body);
 };

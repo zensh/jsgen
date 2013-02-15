@@ -9,7 +9,7 @@ var db = require('./mongoDao.js').db,
 var that = db.bind('global', {
 
     getGlobalConfig: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({
             _id: globalConfig._id
         }, {
@@ -56,7 +56,7 @@ var that = db.bind('global', {
                 register: true
             },
             newObj = merge(defaultObj);
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
 
         newObj = intersect(newObj, Obj);
         if(Obj.visitHistory) {
@@ -80,7 +80,7 @@ var that = db.bind('global', {
     },
 
     initGlobalConfig: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         globalConfig.date = Date.now();
         that.insert(
         globalConfig, {
@@ -91,7 +91,7 @@ var that = db.bind('global', {
     },
 
     getVisitHistory: function(_idArray, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {

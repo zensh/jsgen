@@ -102,6 +102,81 @@ module.exports.User = {
     sendList: [] // Array，用户发出的站内短信_id列表数组
 };
 
+module.exports.UserPublicTpl = {
+    _id: '',
+    name: '',
+    sex: '',
+    role: '',
+    avatar: '',
+    desc: '',
+    date: 0,
+    score: 0,
+    lastLoginDate: 0,
+    fans: 0,
+    follow: 0,
+    tagsList: [0],
+    articles: 0,
+    articlesList: [0],
+    collections: 0,
+    collectionsList: [0],
+    comments: 0,
+    commentsList: [0]
+};
+
+module.exports.UserPrivateTpl = {
+    _id: '',
+    name: '',
+    email: '',
+    social: {
+        weibo: {
+            id: '',
+            name: ''
+        },
+        qq: {
+            id: '',
+            name: ''
+        },
+        google: {
+            id: '',
+            name: ''
+        },
+        baidu: {
+            id: '',
+            name: ''
+        }
+    },
+    sex: '',
+    role: '',
+    avatar: '',
+    desc: '',
+    date: 0,
+    score: 0,
+    readtimestamp: 0,
+    lastLoginDate: 0,
+    fans: 0,
+    fansList: [0],
+    follow: 0,
+    followList: [0],
+    tagsList: [0],
+    articles: 0,
+    articlesList: [0],
+    collections: 0,
+    collectionsList: [0],
+    comments: 0,
+    commentsList: [0],
+    collect: 0,
+    collectList: [0],
+    messages: {
+        article: [0],
+        collection: [0],
+        comment: [0],
+        fan: [0],
+        receive: [0]
+    },
+    receiveList: [0],
+    sendList: [0]
+};
+
 //文章和评论
 module.exports.Article = {
     _id: 0,

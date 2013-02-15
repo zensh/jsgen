@@ -11,14 +11,10 @@
 var db = require('./mongoDao.js').db,
     merge = require('../lib/tools.js').merge,
     intersect = require('../lib/tools.js').intersect,
+    callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
     IDString = require('./json.js').IDString,
     defautMessage = require('./json.js').Message;
-
-var callbackFn = function(err, doc) {
-    if (err) console.log(err);
-    return doc;
-};
 
 var that = db.bind('messages', {
 
@@ -41,7 +37,7 @@ var that = db.bind('messages', {
     },
 
     getMessagesNum: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.count({}, function(err, count) {
             //db.close();
             return callback(err, count);
@@ -49,7 +45,7 @@ var that = db.bind('messages', {
     },
 
     getLatestId: function(callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -67,7 +63,7 @@ var that = db.bind('messages', {
     },
 
     getMessagesList: function(_idArray, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -87,7 +83,7 @@ var that = db.bind('messages', {
     },
 
     getMessage: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -133,7 +129,7 @@ var that = db.bind('messages', {
     setNewMessage: function(messageObj, callback) {
         var message = merge(defautMessage),
             newMessage = merge(defautMessage);
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
 
         newMessage = intersect(newMessage, messageObj);
         newMessage = merge(message, newMessage);
@@ -157,7 +153,7 @@ var that = db.bind('messages', {
     },
 
     delMessage: function(_id, callback) {
-        callback = callback || callbackFn;
+        var callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

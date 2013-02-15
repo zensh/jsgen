@@ -15,9 +15,9 @@ jsGen.message = require('./api/message.js');
 //jsGen.test = require('./api/test.js');
 jsGen.install = require('./api/install.js');
 
-jsGen.index.cache.init();
-jsGen.user.cache.init();
-jsGen.tag.cache.init();
+jsGen.index.cache._init();
+jsGen.user.cache._init();
+jsGen.tag.cache._init();
 
 var server = http.createServer(function(req, res) {
     try {
