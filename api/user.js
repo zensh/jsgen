@@ -310,6 +310,7 @@ function getUserInfo(req, res) {
     var body = {};
     if(req.session.Uid) {
         userCache.getUser(req.session.Uid, function(err, doc) {
+            console.log(doc);
             if(err) {
                 body.err = Err.dbErr;
                 return res.sendjson(body);
@@ -384,7 +385,6 @@ function editUser(req, res) {
         };
 
         function daoExec() {
-            console.log(userObj);
             if(body.err) return res.sendjson(body);
             else return userDao.setUserInfo(userObj, function(err, doc) {
                 if(err) {
@@ -392,19 +392,16 @@ function editUser(req, res) {
                     errlog.error(err);
                     return res.sendjson(body);
                 } else {
-                    body = doc[0];
+                    doc[0]._id = req.session.Uid;
+                    body = merge(UserPrivateTpl);
+                    body = intersect(body, doc[0]);
+                    setCache(body);
                     // body.tagsList.forEach(function(tag) {
                     //     setTag({_id: tag, usersList: body._id});
                     // });
                     filterTags(body.tagsList, false, function(err, doc) {
                         if(doc) body.tagsList = doc;
-                        body._id = req.session.Uid;
-                        delete body.passwd;
-                        setCache(body);
                         body = intersect(defaultObj, body);
-                        body._id = req.session.Uid;
-                        delete body.passwd;
-                        setCache(body);
                         return res.sendjson(body);
                     });
                 }

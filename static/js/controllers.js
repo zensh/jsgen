@@ -109,6 +109,10 @@ jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locatio
     if(!$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
         $scope.user = jsGen.global.user;
     });
+    $scope.$on('update', function(event, doc) {
+        event.stopPropagation();
+        $scope.user = jsGen.merge($scope.user, doc);
+    });
 }];
 
 jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
@@ -135,14 +139,17 @@ jsGen.UserAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
         total: 0,
         num: 20
     };
-    $scope.$on('pagination', function(event, params) {
+    $scope.$on('pagination', function(event, doc) {
         event.stopPropagation();
-        result = rest.userAdmin.get(params, function() {
-        $scope.data = result.data;
-        $scope.pagination = result.pagination;
+        result = rest.userAdmin.get(doc, function() {
+            $scope.data = result.data;
+            $scope.pagination = result.pagination;
+        });
     });
+    $scope.$emit('pagination', {
+        n: $scope.pagination.num,
+        p: $scope.pagination.now
     });
-    $scope.$emit('pagination', {n:4, p:1});
 }];
 
 jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
@@ -169,8 +176,7 @@ jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         if($scope.user.desc !== jsGen.global.user.desc) data.desc = $scope.user.desc;
         if(!angular.equals($scope.user.tagsList, jsGen.global.user.tagsList)) data.tagsList = $scope.user.tagsList;
         result = rest.home.save({}, data, function() {
-            jsGen.merge(jsGen.global.User, result);
-            $scope.user = jsGen.merge(jsGen.global.user);
+            $scope.$emit('update', result);
         });
     };
 }];
@@ -203,6 +209,9 @@ jsGen.paginationCtrl = ['$scope', function($scope) {
         $scope.$emit('pagination', params);
     };
     $scope.setNum = function(num) {
-        $scope.$emit('pagination', {n: num, p: 1});
+        $scope.$emit('pagination', {
+            n: num,
+            p: 1
+        });
     };
 }];

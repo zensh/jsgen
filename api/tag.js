@@ -190,6 +190,7 @@ function filterTags(tagArray, convert, callback) {
         callback = callback || callbackFn;
 
     if(!Array.isArray(tagArray)) tagArray = [tagArray];
+    if(tagArray.length === 0) return callback(null, null);
     tagArray.forEach(function(tag, i, array) {
         if(i === 0) type = typeof tag;
         if(type === typeof tag) {
