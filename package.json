@@ -13,7 +13,7 @@
     "node": ">=0.6.6"
   },
   "dependencies": {
-    "rrestjs": "0.9.x",
+    "rrestjs": ">=1.0.x",
     "mongoskin": "0.5.X",
     "validator": "0.4.x",
     "marked": "0.2.x",

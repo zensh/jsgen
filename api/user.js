@@ -162,10 +162,15 @@ function login(req, res) {
                 return res.sendjson(body);
             }
             if(data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
-                body = doc;
-                body._id = userDao.convertID(body._id);
+                doc._id = userDao.convertID(doc._id);
+                body = merge(UserPrivateTpl);
+                body = intersect(body, doc);
                 req.session.Uid = body._id;
                 req.session.role = body.role;
+                if(doc.loginAttempts > 0) userDao.setLoginAttempt({
+                    _id: _id,
+                    loginAttempts: 0
+                });
                 var date = Date.now();
                 userDao.setLogin({
                     _id: _id,
@@ -269,7 +274,6 @@ function getUsers(req, res) {
             };
             paginationCache.put(req.session.pagination.pagination, cache._index);
         }
-        console.log(req.getparam);
         if(req.getparam.n && req.getparam.n >= 1 && req.getparam.n <=100) req.session.pagination.num = Math.floor(req.getparam.n);
         if(req.getparam.p  && req.getparam.p >= 1) p = Math.floor(req.getparam.p);
         else p = 1;
@@ -310,7 +314,6 @@ function getUserInfo(req, res) {
     var body = {};
     if(req.session.Uid) {
         userCache.getUser(req.session.Uid, function(err, doc) {
-            console.log(doc);
             if(err) {
                 body.err = Err.dbErr;
                 return res.sendjson(body);
@@ -340,7 +343,8 @@ function editUser(req, res) {
         tagsList: ['']
     },
         body = {},
-        userObj = {};
+        userObj = {},
+        setTagList = [];
 
     if(req.session.Uid) {
         userObj = merge(defaultObj);
@@ -374,7 +378,18 @@ function editUser(req, res) {
         if(userObj.tagsList) {
             filterTags(userObj.tagsList.slice(0, globalConfig.UserTagsMax), true, function(err, doc) {
                 if(doc) userObj.tagsList = doc;
-                daoExec();
+                userCache.getUser(req.session.Uid, function(err, doc) {
+                    var tagList = {};
+                    if(doc) doc.tagsList.forEach(function(x) {
+                        tagList[x] = -userObj._id;
+                    });
+                    userObj.tagsList.forEach(function(x) {
+                        if(tagList[x]) delete tagList[x];
+                        else tagList[x] = userObj._id;
+                    });
+                    for(var key in tagList) setTagList.push({_id: Number(key), usersList: tagList[key]});
+                    daoExec();
+                });
             });
         } else daoExec();
 
@@ -396,12 +411,12 @@ function editUser(req, res) {
                     body = merge(UserPrivateTpl);
                     body = intersect(body, doc[0]);
                     setCache(body);
-                    // body.tagsList.forEach(function(tag) {
-                    //     setTag({_id: tag, usersList: body._id});
-                    // });
+                    if(setTagList.length > 0) setTagList.forEach(function(x) {
+                        setTag(x);
+                    });
                     filterTags(body.tagsList, false, function(err, doc) {
-                        if(doc) body.tagsList = doc;
                         body = intersect(defaultObj, body);
+                        if(doc) body.tagsList = doc;
                         return res.sendjson(body);
                     });
                 }

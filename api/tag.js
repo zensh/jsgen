@@ -79,18 +79,6 @@ cache._remove = function(tagID) {
     return this;
 };
 
-function addTag(tagObj, callback) {
-    var callback = callback || callbackFn;
-    tagDao.setNewTag(tagObj, function(err, doc) {
-        if(err) errlog.error(err);
-        if(doc) {
-            doc._id = tagDao.convertID(doc._id);
-            cache._update(doc);
-        }
-        return callback(err, doc);
-    });
-}
-
 function setTag(tagObj, callback) {
     var tagID = null,
         setKey = null,
@@ -180,7 +168,8 @@ function setTag(tagObj, callback) {
             } else return callback(null, null);
         });
         break;
-    default: return callback(null, null);
+    default:
+        return callback(null, null);
     }
 };
 
@@ -190,51 +179,53 @@ function filterTags(tagArray, convert, callback) {
         callback = callback || callbackFn;
 
     if(!Array.isArray(tagArray)) tagArray = [tagArray];
-    if(tagArray.length === 0) return callback(null, null);
-    tagArray.forEach(function(tag, i, array) {
-        if(i === 0) type = typeof tag;
+    if(tagArray.length === 0) return callback(null, tags);
+    type = typeof tagArray[0];
+    tagArray.reverse();
+
+    function filterTag() {
+        var asyn = false,
+            tag = tagArray.pop();
+        if(!tag) return callback(null, tags);
         if(type === typeof tag) {
-            if(type === 'string' && checkTag(tag)) {
-                if(convert) {
-                    if(cache[tag]) {
-                        tags.push(tagDao.convertID(cache[tag]._id));
-                        if(i === array.length - 1) return callback(null, tags);
-                    } else if(cache[tag.toLowerCase()]) {
-                        tags.push(tagDao.convertID(cache[tag.toLowerCase()]._id));
-                        if(i === array.length - 1) return callback(null, tags);
+            switch(type) {
+                case 'string':
+                    if(convert) {
+                        if(cache[tag]) {
+                            tags.push(tagDao.convertID(cache[tag]._id));
+                        } else if(cache[tag.toLowerCase()]) {
+                            tags.push(tagDao.convertID(cache[tag.toLowerCase()]._id));
+                        } else {
+                            asyn = true;
+                            tagDao.setNewTag({
+                                tag: tag
+                            }, function(err, doc) {
+                                if(err) errlog.error(err);
+                                if(doc) {
+                                    tags.push(doc._id);
+                                    doc._id = tagDao.convertID(doc._id);
+                                    cache._update(doc);
+                                }
+                                filterTag();
+                            });
+                        }
                     } else {
-                        addTag({
-                            tag: tag
-                        }, function(err, doc) {
-                            if(doc) tags.push(doc._id);
-                            if(i === array.length - 1) return callback(err, tags);
-                        });
+                        if(cache[tag]) {
+                            tags.push({_id: cache[tag]._id, tag: cache[tag].tag});
+                        } else if(cache[tag.toLowerCase()]) {
+                            tags.push({_id: cache[tag.toLowerCase()]._id, tag: cache[tag.toLowerCase()].tag});
+                        }
                     }
-                } else {
-                    if(cache[tag]) {
-                        tags.push(cache[tag].tag);
-                        if(i === array.length - 1) return callback(null, tags);
-                    } else if(cache[tag.toLowerCase()]) {
-                        tags.push(cache[tag.toLowerCase()].tag);
-                        if(i === array.length - 1) return callback(null, tags);
-                    } else {
-                        addTag({
-                            tag: tag
-                        }, function(err, doc) {
-                            if(doc) tags.push(doc.tag);
-                            if(i === array.length - 1) return callback(err, tags);
-                        });
-                    }
-                }
-            } else if(type === 'number') {
-                tag = tagDao.convertID(tag);
-                if(cache[tag]) tags.push(cache[tag].tag);
-                if(i === array.length - 1) return callback(null, tags);
+                break;
+                case 'number':
+                    tag = tagDao.convertID(tag);
+                    if(cache[tag]) tags.push({_id: cache[tag]._id, tag: cache[tag].tag});
+                break;
             }
-        } else {
-            if(i === array.length - 1) return callback(null, tags);
         }
-    });
+        if(!asyn) filterTag();
+    };
+    filterTag();
 };
 
 function getTag(req, res) {

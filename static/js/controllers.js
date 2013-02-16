@@ -106,7 +106,7 @@ jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locatio
         $scope.url = '/static/tpl/' + tpl;
     };
     $scope.user = jsGen.global.user;
-    if(!$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
+    if(!($scope.user && $scope.user.date)) jsGen.global.user = rest.home.get({}, function() {
         $scope.user = jsGen.global.user;
     });
     $scope.$on('update', function(event, doc) {
@@ -154,13 +154,22 @@ jsGen.UserAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
 
 jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var result = {};
+    var tagsArray = [];
+    function initTags(tagsList) {
+        tagsArray = [];
+        for (var i = tagsList.length - 1; i >= 0; i--) {
+            tagsArray[i] = tagsList[i].tag;
+        };
+        $scope.tagsList = jsGen.merge(tagsArray);
+        $scope.tags = $scope.tagsList.join(' ');
+    };
     $scope.sexArray = ['male', 'female'];
     $scope.user = jsGen.merge(jsGen.global.user);
-    $scope.tags = $scope.user.tagsList.join(' ');
+    initTags($scope.user.tagsList);
     $scope.checkResult = true;
     $scope.user.err = null;
     $scope.convertTags = function() {
-        $scope.user.tagsList = $scope.tags.split(/[,，\s]/, (jsGen.global.UserTagsMax || 5));
+        $scope.tagsList = $scope.tags.split(/[,，\s]/, (jsGen.global.UserTagsMax || 5));
     };
     $scope.checkPwd = function() {
         if($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = false;
@@ -174,8 +183,10 @@ jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         if($scope.user.sex !== jsGen.global.user.sex) data.sex = $scope.user.sex;
         if($scope.user.avatar !== jsGen.global.user.avatar) data.avatar = $scope.user.avatar;
         if($scope.user.desc !== jsGen.global.user.desc) data.desc = $scope.user.desc;
-        if(!angular.equals($scope.user.tagsList, jsGen.global.user.tagsList)) data.tagsList = $scope.user.tagsList;
+        if(!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         result = rest.home.save({}, data, function() {
+            $scope.user = result;
+            initTags($scope.user.tagsList);
             $scope.$emit('update', result);
         });
     };
