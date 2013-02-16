@@ -18,7 +18,7 @@
     delArticle(_idArray, callback);
  */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -226,7 +226,7 @@ var that = db.bind('articles', {
 
         function setArticleInfoExec() {
             var setObj = {},
-                newObj = merge(defaultObj),
+                newObj = union(defaultObj),
                 articleObj = ArticleObjArray.pop();
 
             if(!articleObj) {
@@ -419,13 +419,13 @@ var that = db.bind('articles', {
     },
 
     setNewArticle: function(articleObj, callback) {
-        var article = merge(defautArticle),
-            newArticle = merge(defautArticle);
+        var article = union(defautArticle),
+            newArticle = union(defautArticle);
         var callback = callback || callbackFn;
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
-        newArticle = merge(article, newArticle);
+        newArticle = union(article, newArticle);
         newArticle.date = Date.now();
 
         that.getLatestId(function(err, doc) {

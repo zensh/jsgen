@@ -12,15 +12,15 @@ var jsGen = {
         return Object.prototype.toString.call(obj).slice(8, -1);
     };
 
-    function merge(a, b) {
+    function union(a, b) {
         if(a && b) {
             for(var key in b) {
                 if(checkClass(b[key]) === 'Object') {
                     a[key] = {};
-                    merge(a[key], b[key]);
+                    union(a[key], b[key]);
                 } else if(checkClass(b[key]) === 'Array') {
                     a[key] = [];
-                    merge(a[key], b[key]);
+                    union(a[key], b[key]);
                 } else a[key] = b[key];
             }
         } else if(a && b === undefined) {
@@ -36,7 +36,7 @@ var jsGen = {
             }
             for(var key in a) {
                 if(typeof a[key] === 'object' && a[key] !== null) {
-                    s[key] = merge(a[key]);
+                    s[key] = union(a[key]);
                 } else s[key] = a[key];
             }
             return s;
@@ -45,7 +45,7 @@ var jsGen = {
     };
 
     this.checkClass = checkClass;
-    this.merge = merge;
+    this.union = union;
     return this;
 }).call(jsGen);
 
@@ -111,7 +111,7 @@ jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locatio
     });
     $scope.$on('update', function(event, doc) {
         event.stopPropagation();
-        $scope.user = jsGen.merge($scope.user, doc);
+        $scope.user = jsGen.union($scope.user, doc);
     });
 }];
 
@@ -160,11 +160,11 @@ jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         for (var i = tagsList.length - 1; i >= 0; i--) {
             tagsArray[i] = tagsList[i].tag;
         };
-        $scope.tagsList = jsGen.merge(tagsArray);
+        $scope.tagsList = jsGen.union(tagsArray);
         $scope.tags = $scope.tagsList.join(' ');
     };
     $scope.sexArray = ['male', 'female'];
-    $scope.user = jsGen.merge(jsGen.global.user);
+    $scope.user = jsGen.union(jsGen.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = true;
     $scope.user.err = null;

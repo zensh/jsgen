@@ -9,7 +9,7 @@ var userDao = require('../dao/userDao.js'),
     UserPublicTpl = require('../dao/json.js').UserPublicTpl,
     UserPrivateTpl = require('../dao/json.js').UserPrivateTpl,
     errlog = require('rrestjs').restlog,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     checkEmail = require('../lib/tools.js').checkEmail,
     checkUserID = require('../lib/tools.js').checkUserID,
@@ -109,7 +109,7 @@ function adduser(userObj, callback) {
         }
         if(doc) {
             doc._id = userDao.convertID(doc._id);
-            body = merge(UserPrivateTpl);
+            body = union(UserPrivateTpl);
             body = intersect(body, doc);
             body.err = null;
             cache._update(body);
@@ -163,7 +163,7 @@ function login(req, res) {
             }
             if(data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
                 doc._id = userDao.convertID(doc._id);
-                body = merge(UserPrivateTpl);
+                body = union(UserPrivateTpl);
                 body = intersect(body, doc);
                 req.session.Uid = body._id;
                 req.session.role = body.role;
@@ -249,7 +249,7 @@ function getUser(req, res) {
             body.err = Err.dbErr;
             errlog.error(err);
         } else if(doc) {
-            body = merge(UserPublicTpl);
+            body = union(UserPublicTpl);
             body = intersect(body, doc);
         }
         db.close();
@@ -293,7 +293,7 @@ function getUsers(req, res) {
                     data.err = Err.dbErr;
                     errlog.error(err);
                 } else if(doc) {
-                    data = merge(UserPublicTpl);
+                    data = union(UserPublicTpl);
                     data = intersect(data, doc);
                     data.email = doc.email;
                 }
@@ -347,7 +347,7 @@ function editUser(req, res) {
         setTagList = [];
 
     if(req.session.Uid) {
-        userObj = merge(defaultObj);
+        userObj = union(defaultObj);
         userObj = intersect(userObj, req.apibody);
         userObj._id = userDao.convertID(req.session.Uid);
         if(userObj.name) {
@@ -408,7 +408,7 @@ function editUser(req, res) {
                     return res.sendjson(body);
                 } else {
                     doc[0]._id = req.session.Uid;
-                    body = merge(UserPrivateTpl);
+                    body = union(UserPrivateTpl);
                     body = intersect(body, doc[0]);
                     setCache(body);
                     if(setTagList.length > 0) setTagList.forEach(function(x) {

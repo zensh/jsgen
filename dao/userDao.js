@@ -25,7 +25,7 @@ setSend(userObj); 增加或减少用户发送的消息;
 setNewUser(userObj, callback); 注册新用户;
 */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -202,7 +202,7 @@ var that = db.bind('users', {
 
         function setUserInfoExec() {
             var setObj = {},
-                newObj = merge(defaultObj),
+                newObj = union(defaultObj),
                 userObj = userObjArray.pop();;
 
             if(!userObj) {
@@ -652,12 +652,12 @@ var that = db.bind('users', {
     },
 
     setNewUser: function(userObj, callback) {
-        var user = merge(defautUser),
-            newUser = merge(defautUser);
+        var user = union(defautUser),
+            newUser = union(defautUser);
         var callback = callback || callbackFn;
 
         newUser = intersect(newUser, userObj);
-        newUser = merge(user, newUser);
+        newUser = union(user, newUser);
         newUser.date = Date.now();
 
         that.getLatestId(function(err, doc) {

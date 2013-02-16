@@ -9,7 +9,7 @@
     delTag(_idArray, callback);
  */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -163,12 +163,12 @@ var that = db.bind('tags', {
     },
 
     setNewTag: function(tagObj, callback) {
-        var tag = merge(defautTag),
-            newTag = merge(defautTag);
+        var tag = union(defautTag),
+            newTag = union(defautTag);
         var callback = callback || callbackFn;
 
         newTag = intersect(newTag, tagObj);
-        newTag = merge(tag, newTag);
+        newTag = union(tag, newTag);
 
         that.getLatestId(function(err, doc) {
             if(err) {

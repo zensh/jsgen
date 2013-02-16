@@ -13,7 +13,7 @@
     delCollection(_idArray, callback);
  */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -192,7 +192,7 @@ var that = db.bind('collections', {
 
         function setCollectionInfoExec() {
             var setObj = {},
-                newObj = merge(defaultObj),
+                newObj = union(defaultObj),
                 collectionObj = CollectionObjArray.pop();
 
             if(!collectionObj) {
@@ -276,12 +276,12 @@ var that = db.bind('collections', {
     },
 
     setNewCollection: function(collectionObj, callback) {
-        var collection = merge(defautCollection),
-            newCollection = merge(defautCollection);
+        var collection = union(defautCollection),
+            newCollection = union(defautCollection);
         var callback = callback || callbackFn;
 
         newCollection = intersect(newCollection, collectionObj);
-        newCollection = merge(collection, newCollection);
+        newCollection = union(collection, newCollection);
         newCollection.date = Date.now();
 
         that.getLatestId(function(err, doc) {

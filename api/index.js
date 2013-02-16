@@ -9,7 +9,7 @@ var userDao = require('../dao/userDao.js'),
     errlog = require('rrestjs').restlog,
     platform = require('platform'),
     callbackFn = require('../lib/tools.js').callbackFn,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     checkEmail = require('../lib/tools.js').checkEmail,
     checkUserID = require('../lib/tools.js').checkUserID,
@@ -97,7 +97,7 @@ function setGlobalConfig(obj, callback) {
 };
 
 function getFn(req, res) {
-    var body = merge(cache.data);
+    var body = union(cache.data);
     delete body.visitHistory;
     delete body.email;
     if(req.session.Uid) {

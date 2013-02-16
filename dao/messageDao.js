@@ -9,7 +9,7 @@
     delMessage(_idArray, callback);
  */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -127,12 +127,12 @@ var that = db.bind('messages', {
     },
 
     setNewMessage: function(messageObj, callback) {
-        var message = merge(defautMessage),
-            newMessage = merge(defautMessage);
+        var message = union(defautMessage),
+            newMessage = union(defautMessage);
         var callback = callback || callbackFn;
 
         newMessage = intersect(newMessage, messageObj);
-        newMessage = merge(message, newMessage);
+        newMessage = union(message, newMessage);
         newMessage.date = Date.now();
 
         that.getLatestId(function(err, doc) {

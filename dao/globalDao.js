@@ -2,7 +2,7 @@
  */
 var db = require('./mongoDao.js').db,
     callbackFn = require('../lib/tools.js').callbackFn,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     globalConfig = require('./json.js').GlobalConfig;
 
@@ -17,7 +17,7 @@ var that = db.bind('global', {
                 _id: -1
             }
         }, function(err, doc) {
-            if(doc === null) doc = merge(globalConfig);
+            if(doc === null) doc = union(globalConfig);
             return callback(err, doc);
         });
     },
@@ -55,7 +55,7 @@ var that = db.bind('global', {
                 UserNameMaxLen: 0,
                 register: true
             },
-            newObj = merge(defaultObj);
+            newObj = union(defaultObj);
         var callback = callback || callbackFn;
 
         newObj = intersect(newObj, Obj);

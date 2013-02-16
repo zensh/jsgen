@@ -11,7 +11,7 @@
     delComment(_idArray, callback);
  */
 var db = require('./mongoDao.js').db,
-    merge = require('../lib/tools.js').merge,
+    union = require('../lib/tools.js').union,
     intersect = require('../lib/tools.js').intersect,
     callbackFn = require('../lib/tools.js').callbackFn,
     converter = require('../lib/nodeAnyBaseConverter.js'),
@@ -200,12 +200,12 @@ var that = db.bind('comments', {
     },
 
     setNewComment: function(commentObj, callback) {
-        var comment = merge(defautComment),
-            newComment = merge(defautComment);
+        var comment = union(defautComment),
+            newComment = union(defautComment);
 
         var callback = callback || callbackFn;
         newComment = intersect(newComment, commentObj);
-        newComment = merge(comment, newComment);
+        newComment = union(comment, newComment);
         newComment.date = Date.now();
 
         that.getLatestId(function(err, doc) {
