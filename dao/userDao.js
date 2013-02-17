@@ -8,7 +8,7 @@ getAuth(_id, callback); 根据_id获取对应用户的认证数据;
 getSocial(_id, callback); 根据_id获取对应用户的社交媒体认证数据（weibo\qq\google\baidu）;
 //getUsers(_idArray, callback); 根据_id数组批量获取对应用户基本信息;
 getUserInfo(_id, callback); 根据_id获取对应用户详细信息;
-setUserInfo(userObjArray, callback); 批量设置用户信息;
+setUserInfo(userObj, callback); 批量设置用户信息;
 setLoginAttempt(userObj); 记录用户尝试登录的次数（未成功登录）;
 setLogin(userObj); 记录用户成功登录的时间和IP;
 setSocial(userObj, callback); 设置用户的社交媒体认证数据
@@ -56,7 +56,7 @@ var that = db.bind('users', {
     getUsersNum: function(callback) {
         var callback = callback || callbackFn;
         that.count({}, function(err, count) {
-            //db.close();
+
             return callback(err, count);
         });
     },
@@ -77,7 +77,7 @@ var that = db.bind('users', {
                 avatar: 1
             }
         }).each(function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -95,7 +95,7 @@ var that = db.bind('users', {
                 _id: 1
             }
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -117,7 +117,7 @@ var that = db.bind('users', {
                 avatar: 1
             }
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -133,32 +133,10 @@ var that = db.bind('users', {
                 social: 1
             }
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
-
-/*    getUsers: function(_idArray, callback) {
-        var callback = callback || callbackFn;
-        if(!Array.isArray(_idArray)) _idArray = [_idArray];
-        that.find({
-            _id: {
-                $in: _idArray
-            }
-        }, {
-            fields: {
-                passwd: 0,
-                resetKey: 0,
-                resetDate: 0,
-                loginAttempts: 0,
-                locked: 0,
-                login: 0
-            }
-        }).each(function(err, doc) {
-            //db.close();
-            return callback(err, doc);
-        });
-    },*/
 
     getUserInfo: function(_id, callback) {
         var callback = callback || callbackFn;
@@ -174,14 +152,14 @@ var that = db.bind('users', {
                 login: 0
             }
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
 
-    setUserInfo: function(userObjArray, callback) {
-        var result = [],
-            defaultObj = {
+    setUserInfo: function(userObj, callback) {
+        var setObj = {},
+            newObj = {
                 name: '',
                 email: '',
                 passwd: '',
@@ -198,38 +176,17 @@ var that = db.bind('users', {
 
         var callback = callback || callbackFn;
 
-        if(!Array.isArray(userObjArray)) userObjArray = [userObjArray];
+        newObj = intersect(newObj, userObj);
+        setObj.$set = newObj;
 
-        function setUserInfoExec() {
-            var setObj = {},
-                newObj = union(defaultObj),
-                userObj = userObjArray.pop();;
-
-            if(!userObj) {
-                //db.close();
-                return callback(null, result);
-            }
-
-            newObj = intersect(newObj, userObj);
-            setObj.$set = newObj;
-
-            that.findAndModify({
-                _id: userObj._id
-            }, [], setObj, {
-                w: 1,
-                new: true
-            }, function(err, doc) {
-                if(err) {
-                    return callback(err, result);
-                }
-                if(doc) {
-                    result.push(doc);
-                    setUserInfoExec();
-                }
-            });
-        }
-
-        setUserInfoExec();
+        that.findAndModify({
+            _id: userObj._id
+        }, [], setObj, {
+            w: 1,
+            new: true
+        }, function(err, doc) {
+            return callback(err, doc);
+        });
     },
 
     setLoginAttempt: function(userObj) {
@@ -248,7 +205,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setLogin: function(userObj) {
@@ -271,7 +227,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setSocial: function(userObj, callback) {
@@ -320,7 +275,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -339,7 +294,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setFans: function(userObj) {
@@ -369,7 +323,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setFollow: function(userObj, callback) {
@@ -402,7 +355,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -437,7 +390,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -472,7 +425,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -507,7 +460,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -542,7 +495,7 @@ var that = db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-            //db.close();
+
             return callback(err, doc);
         });
     },
@@ -600,7 +553,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setReceive: function(userObj) {
@@ -624,7 +576,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setSend: function(userObj) {
@@ -648,7 +599,6 @@ var that = db.bind('users', {
         that.update({
             _id: userObj._id
         }, setObj);
-        //db.close();
     },
 
     setNewUser: function(userObj, callback) {
@@ -662,7 +612,7 @@ var that = db.bind('users', {
 
         that.getLatestId(function(err, doc) {
             if(err) {
-                //db.close();
+
                 return callback(err, null);
             }
             if(!doc) preAllocate._id = newUser._id || 1;
@@ -673,7 +623,7 @@ var that = db.bind('users', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    //db.close();
+
                     return callback(err, doc);
                 }
                 that.findAndModify({
@@ -682,7 +632,6 @@ var that = db.bind('users', {
                     w: 1,
                     new: true
                 }, function(err, doc) {
-                    //db.close();
                     return callback(err, doc);
                 });
             });
@@ -697,7 +646,6 @@ module.exports = {
     getLatestId: that.getLatestId,
     getAuth: that.getAuth,
     getSocial: that.getSocial,
-    //getUsers: that.getUsers,
     getUserInfo: that.getUserInfo,
     setUserInfo: that.setUserInfo,
     setLoginAttempt: that.setLoginAttempt,

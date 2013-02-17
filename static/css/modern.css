@@ -263,6 +263,7 @@ nav ol {
  */
 img {
   border: 0;
+  max-width: 100%;
   /* 1 */
 
   -ms-interpolation-mode: bicubic;

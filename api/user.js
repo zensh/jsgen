@@ -15,6 +15,7 @@ var userDao = require('../dao/userDao.js'),
     checkUserID = require('../lib/tools.js').checkUserID,
     checkUserName = require('../lib/tools.js').checkUserName,
     checkUrl = require('../lib/tools.js').checkUrl,
+    SHA256 = require('../lib/tools.js').SHA256,
     HmacSHA256 = require('../lib/tools.js').HmacSHA256,
     gravatar = require('../lib/tools.js').gravatar,
     CacheFn = require('../lib/tools.js').CacheFn,
@@ -85,6 +86,12 @@ cache._remove = function(userID) {
     return this;
 };
 
+function setCache(obj) {
+    cache._remove(obj._id);
+    cache._update(obj);
+    userCache.put(obj._id, doc);
+};
+
 function adduser(userObj, callback) {
     var body = {},
         callback = callback || callbackFn;
@@ -151,7 +158,7 @@ function login(req, res) {
                 userDao.setUserInfo({
                     _id: _id,
                     locked: true
-                }, function(err) {
+                }, function(err, doc) {
                     if(err) return errlog.error(err);
                     return userDao.setLoginAttempt({
                         _id: _id,
@@ -276,15 +283,15 @@ function getUsers(req, res) {
             };
             paginationCache.put(req.session.pagination.pagination, cache._index);
         }
-        if(req.getparam.n && req.getparam.n >= 1 && req.getparam.n <=100) req.session.pagination.num = Math.floor(req.getparam.n);
-        if(req.getparam.p  && req.getparam.p >= 1) p = Math.floor(req.getparam.p);
+        if(req.getparam.n && req.getparam.n >= 1 && req.getparam.n <= 100) req.session.pagination.num = Math.floor(req.getparam.n);
+        if(req.getparam.p && req.getparam.p >= 1) p = Math.floor(req.getparam.p);
         else p = 1;
-        if(p ===1 && req.session.pagination.pagination !== cache._initTime) {
+        if(p === 1 && req.session.pagination.pagination !== cache._initTime) {
             req.session.pagination.pagination = cache._initTime;
             req.session.pagination.total = cache._index.length;
             paginationCache.put(req.session.pagination.pagination, cache._index);
         }
-        array = paginationCache.get(req.session.pagination.pagination).slice((p - 1)*req.session.pagination.num, p * req.session.pagination.num);
+        array = paginationCache.get(req.session.pagination.pagination).slice((p - 1) * req.session.pagination.num, p * req.session.pagination.num);
         body.pagination.now = p;
         body.pagination.total = req.session.pagination.total;
         body.pagination.num = req.session.pagination.num;
@@ -389,17 +396,14 @@ function editUser(req, res) {
                         if(tagList[x]) delete tagList[x];
                         else tagList[x] = userObj._id;
                     });
-                    for(var key in tagList) setTagList.push({_id: Number(key), usersList: tagList[key]});
+                    for(var key in tagList) setTagList.push({
+                        _id: Number(key),
+                        usersList: tagList[key]
+                    });
                     daoExec();
                 });
             });
         } else daoExec();
-
-        function setCache(doc) {
-            cache._remove(doc._id);
-            cache._update(doc);
-            userCache.put(doc._id, doc);
-        };
 
         function daoExec() {
             if(body.err) return res.sendjson(body);
@@ -409,9 +413,9 @@ function editUser(req, res) {
                     errlog.error(err);
                     return res.sendjson(body);
                 } else {
-                    doc[0]._id = req.session.Uid;
+                    doc._id = req.session.Uid;
                     body = union(UserPrivateTpl);
-                    body = intersect(body, doc[0]);
+                    body = intersect(body, doc);
                     setCache(body);
                     if(setTagList.length > 0) setTagList.forEach(function(x) {
                         setTag(x);
@@ -434,13 +438,60 @@ function editUsers(req, res) {};
 
 function resetUser(req, res) {
     var body = {};
+    var _id = null;
     try {
         var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
-
-
-    } catch(err) {
-        console.log('Err:');
-        console.log(err);
+        if(reset[email] && reset[request] && reset[resetKey]) {
+            if(reset[Uid] && cache[reset[Uid]]) _id = userDao.convertID(cache[reset[Uid]]._id);
+            else if(cache[reset[email]]) _id = userDao.convertID(cache[reset[email]]._id);
+            else throw new Error(Err.resetInvalid);
+            userDao.getAuth(_id, function(err, doc) {
+                var userObj = {};
+                userObj._id = _id;
+                if(err) {
+                    errlog.error(err);
+                    throw new Error(Err.dbErr);
+                } else if(doc && (Date.now() - doc.resetDate) / 86400000 < 3) {
+                    if(HmacSHA256(HmacSHA256(doc.resetKey, reset[resetKey]), reset[email]) === reset[resetKey]) {
+                        switch(reset[request]) {
+                        case 'locked':
+                            userObj.locked = false;
+                            break;
+                        case 'role':
+                            userObj.role = user;
+                            break;
+                        case 'email':
+                            userObj.email = reset[email];
+                            break;
+                        case 'passwd':
+                            userObj.passwd = SHA256(reset[email]);
+                            break;
+                        default:
+                            throw new Error(Err.resetInvalid);
+                        }
+                        userDao.setUserInfo(userObj, function(err, doc) {
+                            if(err) {
+                                errlog.error(err);
+                                throw new Error(Err.dbErr);
+                            } else if(doc) {
+                                doc._id = userDao.convertID(doc._id);
+                                body = union(UserPrivateTpl);
+                                body = intersect(body, doc);
+                                setCache(body);
+                                req.session.Uid = body._id;
+                                req.session.role = body.role;
+                                db.close();
+                                return res.sendjson(body);
+                            }
+                        });
+                    } else throw new Error(Err.resetInvalid);
+                } else throw new Error(Err.resetOutdate);
+            });
+        } else throw new Error(Err.resetInvalid);
+    } catch(e) {
+        db.close();
+        body.err = e.toString();
+        return res.sendjson(body);
     }
 };
 
