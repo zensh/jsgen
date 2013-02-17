@@ -45,3 +45,53 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives'])
       });
     $locationProvider.html5Mode(true);
   }]);
+
+var jsGen = {
+    global: {}
+};
+
+(function() {
+    function checkClass(obj) {
+        if(obj === null) return 'Null';
+        if(obj === undefined) return 'Undefined';
+        return Object.prototype.toString.call(obj).slice(8, -1);
+    };
+
+    function union(a, b) {
+        if(checkClass(a) === checkClass(b)) {
+            for(var key in b) {
+                if(!b.hasOwnProperty(key)) continue;
+                if(checkClass(b[key]) === 'Object') {
+                    if(checkClass(a[key]) !== 'Object') a[key] = {};
+                    union(a[key], b[key]);
+                } else if(checkClass(b[key]) === 'Array') {
+                    if(checkClass(a[key]) !== 'Array') a[key] = [];
+                    union(a[key], b[key]);
+                } else a[key] = b[key];
+            }
+        } else if(b === undefined) {
+            switch(checkClass(a)) {
+            case 'Object':
+                var s = {};
+                break;
+            case 'Array':
+                var s = [];
+                break;
+            default:
+                return a;
+            }
+            for(var key in a) {
+                if(!a.hasOwnProperty(key)) continue;
+                if(typeof a[key] === 'object' && a[key] !== null) {
+                    s[key] = union(a[key]);
+                } else s[key] = a[key];
+            }
+            return s;
+        }
+        return a;
+    }
+
+    this.checkClass = checkClass;
+    this.union = union;
+    return this;
+}).call(jsGen);

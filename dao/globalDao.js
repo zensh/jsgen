@@ -36,7 +36,7 @@ var that = db.bind('global', {
                 keywords: '',
                 visit: 0,
                 users: 0,
-                topics: 0,
+                articles: 0,
                 comments: 0,
                 maxOnlineNum: 0,
                 maxOnlineTime: 0,
@@ -45,15 +45,17 @@ var that = db.bind('global', {
                 UserTagsMax: 0,
                 TitleMinLen: 0,
                 TitleMaxLen: 0,
-                SummaryMinLen: 0,
                 SummaryMaxLen: 0,
-                CommentMinLen: 0,
-                CommentMaxLen: 0,
                 ContentMinLen: 0,
                 ContentMaxLen: 0,
                 UserNameMinLen: 0,
                 UserNameMaxLen: 0,
-                register: true
+                CommentUp: 0,
+                RecommendUp: 0,
+                register: true,
+                UsersScore: [0, 0, 0, 0, 0, 0, 0],
+                ArticleStatus: [0, 0],
+                ArticleHots: [0, 0, 0, 0, 0]
             },
             newObj = union(defaultObj);
         var callback = callback || callbackFn;
@@ -67,6 +69,18 @@ var that = db.bind('global', {
         } else if(Obj.visit) {
             setObj.$inc = {
                 visit: 1
+            };
+        } else if(Obj.users) {
+            setObj.$inc = {
+                users: 1
+            };
+        } else if(Obj.articles) {
+            setObj.$inc = {
+                articles: 1
+            };
+        } else if(Obj.comments) {
+            setObj.$inc = {
+                comments: 1
             };
         } else setObj.$set = newObj;
         that.findAndModify({

@@ -1,22 +1,26 @@
 {
-  "author": {
-    "name": "zensh",
-    "email": "admin@zensh.com",
-    "url": "http://weibo.com/zensh"
-  },
-  "name": "jsGen",
-  "version": "0.0.1",
-  "url": "http://jsgen.org",
-  "homepage": "http://jsgen.com",
-  "main": "app.js",
-  "engines": {
-    "node": ">=0.6.6"
-  },
-  "dependencies": {
-    "rrestjs": ">=1.0.x",
-    "mongoskin": "0.5.X",
-    "validator": "0.4.x",
-    "marked": "0.2.x",
-    "nodemailer": "0.3.x"
-  }
+    "author": {
+        "name": "zensh",
+        "email": "admin@zensh.com",
+        "url": "http://weibo.com/zensh"
+    },
+    "name": "jsGen",
+    "version": "0.0.1",
+    "description": "",
+    "keywords": ["Node.js", "AngularJS", "mongoDB"],
+    "main": "app.js",
+    "engines": {
+        "node": ">=0.8.x"
+    },
+    "dependencies": {
+        "rrestjs": ">=1.x.x",
+        "mongoskin": ">=0.5.X",
+        "marked": ">=0.2.x",
+        "nodemailer": ">=0.3.x"
+    },
+    "scripts": {
+        "start": "node app.js",
+        "test": "",
+        "install": ""
+    }
 }

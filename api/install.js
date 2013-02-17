@@ -112,7 +112,7 @@ function getFn(req, res) {
         _id: userDao.convertID('Uadmin'),
         name: 'admin',
         email: 'admin@zensh.com',
-        passwd: SHA256('admin123'),
+        passwd: SHA256('admin@zensh.com'),
         role: 'admin',
         avatar: gravatar('admin@zensh.com'),
         desc: '梦造互联网 By ZENSH'

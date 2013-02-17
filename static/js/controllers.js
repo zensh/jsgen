@@ -1,54 +1,6 @@
 'use strict';
 
 /* Controllers */
-var jsGen = {
-    global: {}
-};
-
-(function() {
-    function checkClass(obj) {
-        if(obj === null) return 'Null';
-        if(obj === undefined) return 'Undefined';
-        return Object.prototype.toString.call(obj).slice(8, -1);
-    };
-
-    function union(a, b) {
-        if(a && b) {
-            for(var key in b) {
-                if(checkClass(b[key]) === 'Object') {
-                    a[key] = {};
-                    union(a[key], b[key]);
-                } else if(checkClass(b[key]) === 'Array') {
-                    a[key] = [];
-                    union(a[key], b[key]);
-                } else a[key] = b[key];
-            }
-        } else if(a && b === undefined) {
-            switch(checkClass(a)) {
-            case 'Object':
-                var s = {};
-                break;
-            case 'Array':
-                var s = [];
-                break;
-            default:
-                return a;
-            }
-            for(var key in a) {
-                if(typeof a[key] === 'object' && a[key] !== null) {
-                    s[key] = union(a[key]);
-                } else s[key] = a[key];
-            }
-            return s;
-        }
-        return a;
-    };
-
-    this.checkClass = checkClass;
-    this.union = union;
-    return this;
-}).call(jsGen);
-
 jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, rest, $location, cache) {
     if(!jsGen.cache) jsGen.cache = cache;
     if(!jsGen.global.date) jsGen.global = rest.global.get({}, function() {

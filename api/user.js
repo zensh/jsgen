@@ -118,6 +118,8 @@ function adduser(userObj, callback) {
     });
 };
 
+function resetAuth(Obj, callback) {};
+
 function logout(req, res) {
     req.delsession();
     res.sendjson({
@@ -430,6 +432,18 @@ function editUser(req, res) {
 
 function editUsers(req, res) {};
 
+function resetUser(req, res) {
+    var body = {};
+    try {
+        var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
+
+
+    } catch(err) {
+        console.log('Err:');
+        console.log(err);
+    }
+};
+
 function getFn(req, res) {
     switch(req.path[2]) {
     case undefined:
@@ -439,6 +453,8 @@ function getFn(req, res) {
         return logout(req, res);
     case 'admin':
         return getUsers(req, res);
+    case 'reset':
+        return resetUser(req, res);
     default:
         return getUser(req, res);
     }

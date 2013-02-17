@@ -50,7 +50,9 @@ module.exports.User = {
     date: 0,
     // Date，用户注册时间
     score: 0,
-    // Number，用户积分
+    // Number，用户积分，评论×1，文章×3，关注×5，粉丝×10，文章热度×0.5，
+    // 注册时长天数×1，登录次数×2（可全局设定UsersScore=[1, 3, 5, 10, 0.5, 1, 2]）
+    // 用户登录时更新
     readtimestamp: 0,
     // Date，用户已浏览文章的最新时间戳
     lastLoginDate: 0,
@@ -189,7 +191,7 @@ module.exports.Article = {
     // Number，状态，0:公开;1:朋友（相互关注的）可见;2:作者、管理员、编辑可见;3:作者、管理员、编辑可见，禁止编辑;-1:开放编辑，注册用户可编辑
     status: 0,
     // Number，是否推荐，0:正常文章;1:推荐文章;2:置顶文章;-1:正常评论，
-    // 当commentsList达到5时，自动提升为0:正常文章，达到10时，自动提升为1:推荐文章（可全局设定）
+    // 当commentsList达到3时，自动提升为0:正常文章，达到10时，自动提升为1:推荐文章（可全局设定ArticleStatus=[3, 10]）
     refer: '',
     // String，引用（关联）文章URL，绝对地址
     title: '',
@@ -205,7 +207,7 @@ module.exports.Article = {
     ],
     // 文章内容历史版本，未发表的版本，小于1024×20字节（6826汉字），第一作者、管理员或编辑选定其中一个版本公开发布
     hots: 0,
-    // Number，文章热度，访问+1，评论+2,支持+2,收藏+5,推荐+20
+    // Number，文章热度，访问+1，支持/反对±2，评论+3，收藏+5，置顶+20（可全局设定ArticleHots=[1, 2, 3, 5, 20]）
     visitors: 0,
     // Number 访问次数
     updateTime: 0,
@@ -321,7 +323,7 @@ module.exports.GlobalConfig = {
     //总访问次数
     users: 0,
     //总注册用户数量
-    topics: 0,
+    articles: 0,
     //总主题数量
     comments: 0,
     //总评论数量
@@ -353,6 +355,13 @@ module.exports.GlobalConfig = {
     //评论自动转为文章的评论数
     RecommendUp: 15,
     //文章自动推荐的评论数
-    register: true
+    register: true,
     //是否开放注册
+    UsersScore: [1, 3, 5, 10, 0.5, 1, 2],
+    // 用户积分系数，表示评论×1，文章×3，关注×5，粉丝×10，文章热度×0.5，注册时长天数×1，登录次数×2
+    ArticleStatus: [3, 10],
+    // 提升系数，表示当commentsList达到3时，自动提升为0:正常文章，达到10时，自动提升为1:推荐文章
+    ArticleHots: [1, 2, 3, 5, 20],
+    // 文章热度系数，表示访问+1，支持/反对±2，评论+3，收藏+5，置顶+20
+    info: {}
 };
