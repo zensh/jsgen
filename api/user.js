@@ -1,9 +1,4 @@
 var userDao = require('../dao/userDao.js'),
-    articleDao = require('../dao/articleDao.js'),
-    collectionDao = require('../dao/collectionDao.js'),
-    commentDao = require('../dao/commentDao.js'),
-    messageDao = require('../dao/messageDao.js'),
-    tagDao = require('../dao/tagDao.js'),
     db = require('../dao/mongoDao.js').db,
     globalConfig = require('../dao/json.js').GlobalConfig,
     UserPublicTpl = require('../dao/json.js').UserPublicTpl,
@@ -21,6 +16,8 @@ var userDao = require('../dao/userDao.js'),
     CacheFn = require('../lib/tools.js').CacheFn,
     callbackFn = require('../lib/tools.js').callbackFn,
     filterSummary = require('../lib/tools.js').filterSummary,
+    email = require('../lib/email.js'),
+    global = require('./index.js').global,
     filterTags = require('./tag.js').filterTags,
     setTag = require('./tag.js').setTag,
     Err = require('./errmsg.js');
@@ -31,7 +28,6 @@ userCache.getUser = function(userID, callback) {
     var that = this,
         callback = callback || callbackFn,
         doc = this.get(userID);
-        console.log(that.info());
 
     if(doc) return callback(null, doc);
     else userDao.getUserInfo(userDao.convertID(userID), function(err, doc) {
@@ -90,7 +86,7 @@ cache._remove = function(userID) {
 function setCache(obj) {
     cache._remove(obj._id);
     cache._update(obj);
-    userCache.put(obj._id, doc);
+    userCache.put(obj._id, obj);
 };
 
 function adduser(userObj, callback) {
@@ -122,11 +118,9 @@ function adduser(userObj, callback) {
             body.err = null;
             cache._update(body);
         }
-        return callback(body.err, body);
+        return callback(err, body);
     });
 };
-
-function resetAuth(Obj, callback) {};
 
 function logout(req, res) {
     req.delsession();
@@ -206,11 +200,28 @@ function login(req, res) {
 function register(req, res) {
     var data = req.apibody;
     adduser(data, function(err, doc) {
-        if(doc && !doc.err) {
+        if(doc) {
             req.session.Uid = doc._id;
             req.session.role = doc.role;
-        }
-        db.close();
+            var userObj = {};
+            userObj._id = userDao.convertID(doc._id);
+            userObj.resetDate = Date.now();
+            userObj.resetKey = SHA256(userObj.resetDate.toString());
+            var resetUrl = HmacSHA256(HmacSHA256(userObj.resetKey, 'role'), doc.email);
+            resetUrl = {
+                request: 'role',
+                email: doc.email,
+                resetKey: resetUrl
+            };
+            resetUrl = new Buffer(JSON.stringify(resetUrl)).toString('base64');
+            resetUrl = 'http://' + 'jsgen.org' + '/api/user/reset/' + resetUrl;
+            userDao.setUserInfo(userObj, function(err) {
+                db.close();
+                if(err) {
+                    errlog.error(err);
+                } else email.sendRole(global.title, doc.name, doc.email, resetUrl);
+            });
+        } else db.close();
         return res.sendjson(doc);
     });
 };
@@ -437,6 +448,8 @@ function editUser(req, res) {
 
 function editUsers(req, res) {};
 
+function getReset(req, res) {};
+
 function resetUser(req, res) {
     var body = {};
     var _id = null;
@@ -453,7 +466,7 @@ function resetUser(req, res) {
                     errlog.error(err);
                     throw new Error(Err.dbErr);
                 } else if(doc && (Date.now() - doc.resetDate) / 86400000 < 3) {
-                    if(HmacSHA256(HmacSHA256(doc.resetKey, reset[resetKey]), reset[email]) === reset[resetKey]) {
+                    if(HmacSHA256(HmacSHA256(doc.resetKey, reset[request]), reset[email]) === reset[resetKey]) {
                         switch(reset[request]) {
                         case 'locked':
                             userObj.locked = false;

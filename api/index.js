@@ -1,10 +1,4 @@
-var userDao = require('../dao/userDao.js'),
-    globalDao = require('../dao/globalDao.js'),
-    collectionDao = require('../dao/collectionDao.js'),
-    commentDao = require('../dao/commentDao.js'),
-    messageDao = require('../dao/messageDao.js'),
-    globalDao = require('../dao/globalDao.js'),
-    tagDao = require('../dao/tagDao.js'),
+var globalDao = require('../dao/globalDao.js'),
     db = require('../dao/mongoDao.js').db,
     errlog = require('rrestjs').restlog,
     platform = require('platform'),
@@ -19,8 +13,7 @@ var userDao = require('../dao/userDao.js'),
     Err = require('./errmsg.js');
 
 var cache = {
-    _initTime: 0,
-    data: {}
+    _initTime: 0
 };
 cache._init = function(callback) {
         var that = this;
@@ -32,7 +25,7 @@ cache._init = function(callback) {
         return this;
 };
 cache._update = function(obj) {
-    this.data = obj;
+    union(this, obj);
     this._initTime = Date.now();
 };
 
@@ -42,9 +35,9 @@ function setVisitHistory(req) {
         data: []
     };
     var info = platform.parse(req.useragent);
-    visit._id = cache._initTime ? cache.data.visitHistory[cache.data.visitHistory.length - 1] : 1;
+    visit._id = cache._initTime ? cache.visitHistory[cache.visitHistory.length - 1] : 1;
     visit.data[0] = Date.now();
-    visit.data[1] = req.session.Uid ? userDao.convertID(req.session.Uid) : 0;
+    visit.data[1] = req.session.Uid;
     visit.data[2] = req.ip || '0.0.0.0';
     visit.data[3] = req.referer || 'direct';
     visit.data[4] = info.name || 'unknow';
@@ -74,7 +67,7 @@ function getvisitHistory(req, res) {
         data: []
     };
     if(req.session.role === 'admin') {
-        globalDao.getVisitHistory(cache.data.visitHistory, function(err, doc) {
+        globalDao.getVisitHistory(cache.visitHistory, function(err, doc) {
             db.close();
             if(err) {
                 errlog.error(err);
@@ -97,9 +90,10 @@ function setGlobalConfig(obj, callback) {
 };
 
 function getFn(req, res) {
-    var body = union(cache.data);
+    var body = union(cache);
     delete body.visitHistory;
     delete body.email;
+    delete body.smtp;
     if(req.session.Uid) {
         body.user = {};
         body.user._id = req.session.Uid;
@@ -134,5 +128,7 @@ module.exports = {
     GET: getFn,
     POST: postFn,
     setVisitHistory: setVisitHistory,
-    cache: cache
+    setGlobalConfig: setGlobalConfig,
+    global: cache
 };
+console.log(cache);

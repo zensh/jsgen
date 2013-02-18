@@ -202,9 +202,11 @@ module.exports.Article = {
     //cover img
     content: '',
     // String，文章内容，小于1024×20字节（6826汉字）
-    draft: [
-    {author: 0, date: 0, content: ''}
-    ],
+    draft: [{
+        author: 0,
+        date: 0,
+        content: ''
+    }],
     // 文章内容历史版本，未发表的版本，小于1024×20字节（6826汉字），第一作者、管理员或编辑选定其中一个版本公开发布
     hots: 0,
     // Number，文章热度，访问+1，支持/反对±2，评论+3，收藏+5，置顶+20（可全局设定ArticleHots=[1, 2, 3, 5, 20]）
@@ -363,5 +365,19 @@ module.exports.GlobalConfig = {
     // 提升系数，表示当commentsList达到3时，自动提升为0:正常文章，达到10时，自动提升为1:推荐文章
     ArticleHots: [1, 2, 3, 5, 20],
     // 文章热度系数，表示访问+1，支持/反对±2，评论+3，收藏+5，置顶+20
+    smtp: {
+        host: '',
+        // hostname "smtp.gmail.com"
+        secureConnection: true,
+        // use SSL
+        port: 0,
+        // port for secure SMTP
+        auth: {
+            user: '',
+            pass: ''
+        },
+        senderName: '',
+        senderEmail: ''
+    },
     info: {}
 };

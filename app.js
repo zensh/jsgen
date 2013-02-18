@@ -17,16 +17,19 @@ jsGen.message = require('./api/message.js');
 jsGen.install = require('./api/install.js');
 jsGen.info = require('./api/install.js');
 
+jsGen.index.global._init();
+jsGen.user.cache._init();
+jsGen.tag.cache._init();
 fs.readFile('package.json', 'utf8', function(err, data) {
         if(err) restlog.error(err);
         if(data) {
             jsGen.info = JSON.parse(data);
-            console.log(jsGen.info);
+            jsGen.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
+                if(err) console.log(err);
+                else console.log(doc);
+            });
         }
 });
-jsGen.index.cache._init();
-jsGen.user.cache._init();
-jsGen.tag.cache._init();
 
 var server = http.createServer(function(req, res) {
     try {

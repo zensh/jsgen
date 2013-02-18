@@ -2,49 +2,49 @@
 
 // Declare app level module which depends on filters, and services
 angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives']).
-  config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.
-      when('/', {
+    when('/', {
         templateUrl: '/static/tpl/index.html',
         controller: jsGen.IndexCtrl
-      }).
-      when('/login', {
+    }).
+    when('/login', {
         templateUrl: 'static/tpl/login.html',
         controller: jsGen.UserLoginCtrl
-      }).
-      when('/register', {
+    }).
+    when('/register', {
         templateUrl: 'static/tpl/register.html',
         controller: jsGen.UserRegisterCtrl
-      }).
-      when('/home', {
+    }).
+    when('/home', {
         templateUrl: 'static/tpl/user.html',
         controller: jsGen.homeCtrl
-      }).
-      when('/admin', {
+    }).
+    when('/admin', {
         templateUrl: 'static/tpl/admin.html',
         controller: jsGen.adminCtrl
-      }).
-      when('/U:id', {
+    }).
+    when('/U:id', {
         templateUrl: 'static/tpl/user.html',
         controller: jsGen.UserViewCtrl
-      }).
-      when('/A:id', {
+    }).
+    when('/A:id', {
         templateUrl: 'static/tpl/article.html',
         controller: jsGen.ArticleCtrl
-      }).
-      when('/T:id', {
+    }).
+    when('/T:id', {
         templateUrl: 'static/tpl/tag.html',
         controller: jsGen.TagCtrl
-      }).
-      when('/O:id', {
+    }).
+    when('/O:id', {
         templateUrl: 'static/tpl/collection.html',
         controller: jsGen.CollectionCtrl
-      }).
-      otherwise({
+    }).
+    otherwise({
         redirectTo: '/'
-      });
+    });
     $locationProvider.html5Mode(true);
-  }]);
+}]);
 
 var jsGen = {
     global: {}
@@ -56,18 +56,22 @@ var jsGen = {
         if(obj === undefined) return 'Undefined';
         return Object.prototype.toString.call(obj).slice(8, -1);
     };
-
     function union(a, b) {
         if(checkClass(a) === checkClass(b)) {
             for(var key in b) {
                 if(!b.hasOwnProperty(key)) continue;
-                if(checkClass(b[key]) === 'Object') {
+                switch(checkClass(b[key])) {
+                case 'Object':
                     if(checkClass(a[key]) !== 'Object') a[key] = {};
                     union(a[key], b[key]);
-                } else if(checkClass(b[key]) === 'Array') {
+                    break;
+                case 'Array':
                     if(checkClass(a[key]) !== 'Array') a[key] = [];
                     union(a[key], b[key]);
-                } else a[key] = b[key];
+                    break;
+                default:
+                    a[key] = b[key];
+                }
             }
         } else if(b === undefined) {
             switch(checkClass(a)) {

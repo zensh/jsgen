@@ -17,7 +17,6 @@ var that = db.bind('global', {
                 _id: -1
             }
         }, function(err, doc) {
-            if(doc === null) doc = union(globalConfig);
             return callback(err, doc);
         });
     },
@@ -55,7 +54,19 @@ var that = db.bind('global', {
                 register: true,
                 UsersScore: [0, 0, 0, 0, 0, 0, 0],
                 ArticleStatus: [0, 0],
-                ArticleHots: [0, 0, 0, 0, 0]
+                ArticleHots: [0, 0, 0, 0, 0],
+                smtp: {
+                    host: '',
+                    secureConnection: true,
+                    port: 0,
+                    auth: {
+                        user: '',
+                        pass: ''
+                    },
+                    senderName: '',
+                    senderEmail: ''
+                },
+                info: {}
             },
             newObj = union(defaultObj);
         var callback = callback || callbackFn;
