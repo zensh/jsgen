@@ -31,6 +31,7 @@ userCache.getUser = function(userID, callback) {
     var that = this,
         callback = callback || callbackFn,
         doc = this.get(userID);
+        console.log(that.info());
 
     if(doc) return callback(null, doc);
     else userDao.getUserInfo(userDao.convertID(userID), function(err, doc) {
