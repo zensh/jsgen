@@ -10,7 +10,7 @@ jsGen.json =  require('./lib/json.js');
 jsGen.db = require('./dao/mongoDao.js').db;
 jsGen.tools = require('./lib/tools.js');
 jsGen.converter = require('./lib/nodeAnyBaseConverter.js');
-jsGen.sendMail = require('./lib/email.js'),
+jsGen.email = require('./lib/email.js'),
 jsGen.index = require('./api/index.js');
 jsGen.home = require('./api/home.js');
 jsGen.admin = require('./api/admin.js');
@@ -25,14 +25,14 @@ jsGen.install = require('./api/install.js');
 jsGen.index.cache._init();
 jsGen.user.cache._init();
 jsGen.tag.cache._init();
-jsGen.globalConfig = jsGen.index.cache;
+jsGen.config = jsGen.index.cache;
 fs.readFile('package.json', 'utf8', function(err, data) {
         if(err) restlog.error(err);
         if(data) {
             jsGen.info = JSON.parse(data);
             jsGen.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
                 if(err) console.log(err);
-                else console.log(jsGen.globalConfig);
+                else console.log(jsGen.config);
             });
         }
 });
