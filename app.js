@@ -1,9 +1,16 @@
 var conf = module.exports.conf = require('./config/config'),
     http = require('http'),
     rrest = require('rrestjs'),
-    fs = require('fs'),
-    jsGen = {};
+    fs = require('fs');
 
+global.jsGen = {};  // 注册全局变量jsGen
+jsGen.errlog = rrest.restlog,
+jsGen.Err = require('./lib/errmsg.js');
+jsGen.json =  require('./lib/json.js');
+jsGen.db = require('./dao/mongoDao.js').db;
+jsGen.tools = require('./lib/tools.js');
+jsGen.converter = require('./lib/nodeAnyBaseConverter.js');
+jsGen.sendMail = require('./lib/email.js'),
 jsGen.index = require('./api/index.js');
 jsGen.home = require('./api/home.js');
 jsGen.admin = require('./api/admin.js');
@@ -13,20 +20,19 @@ jsGen.tag = require('./api/tag.js');
 jsGen.collection = require('./api/collection.js');
 jsGen.comment = require('./api/comment.js');
 jsGen.message = require('./api/message.js');
-//jsGen.test = require('./api/test.js');
 jsGen.install = require('./api/install.js');
-jsGen.info = require('./api/install.js');
 
-jsGen.index.global._init();
+jsGen.index.cache._init();
 jsGen.user.cache._init();
 jsGen.tag.cache._init();
+jsGen.globalConfig = jsGen.index.cache;
 fs.readFile('package.json', 'utf8', function(err, data) {
         if(err) restlog.error(err);
         if(data) {
             jsGen.info = JSON.parse(data);
             jsGen.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
                 if(err) console.log(err);
-                else console.log(doc);
+                else console.log(jsGen.globalConfig);
             });
         }
 });

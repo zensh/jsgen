@@ -1,0 +1,44 @@
+<div class="grid">
+    <div class="row">
+        <div class="span4">
+                <div class="page-header">
+                    <div class="page-header-content">
+                        <h3 ng-hide="global.user.err">
+                            请登录
+                        </h3>
+                        <h3 class="fg-color-red" ng-show="global.user.err">
+                            {{global.user.err}}
+                        </h3>
+                    </div>
+                </div>
+                <div class="page-region">
+                    <div class="page-region-content">
+                        <form name="login">
+                            <div class="input-control text">
+                                <input type="text" placeholder="name or Email or Uid" name="name" ng-model="logname"
+                                required/>
+                                <span class="fg-color-red" ng-show="login.name.$error.required">
+                                    请输入用户名、Email或Uid!
+                                </span>
+                            </div>
+                            <div class="input-control password">
+                                <input type="password" placeholder="password" name="password" ng-model="logpwd"
+                                ng-minlength="6" ng-maxlength="20" required/>
+                                <span class="fg-color-red" ng-show="login.password.$error.required">
+                                    请输入密码!
+                                </span>
+                            </div>
+                            <button ng-click="submit()" class="bg-color-blue fg-color-white" ng-disabled="login.name.$error.required
+                                || login.password.$error.required">登  录</button>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        <div class="span8">
+                <div class="page-region">
+                    <div class="page-region-content">
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>

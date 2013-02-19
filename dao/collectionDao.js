@@ -12,24 +12,21 @@
     setNewCollection(collectionObj, callback);
     delCollection(_idArray, callback);
  */
-var db = require('./mongoDao.js').db,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    converter = require('../lib/nodeAnyBaseConverter.js'),
-    IDString = require('./json.js').IDString,
-    defautCollection = require('./json.js').Collection;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    IDString = jsGen.json.IDString,
+    defautCollection = jsGen.json.Collection;
 
-var that = db.bind('collections', {
+var that = jsGen.db.bind('collections', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -41,15 +38,14 @@ var that = db.bind('collections', {
     },
 
     getCollectionsNum: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.count({}, function(err, count) {
-            //db.close();
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -61,14 +57,13 @@ var that = db.bind('collections', {
                 _id: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getCollectionsIndex: function(date, limit, callback) {
         var query = {};
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -87,13 +82,12 @@ var that = db.bind('collections', {
                 updateTime: 1
             }
         }).toArray(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getCollectionsList: function(_idArray, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -111,13 +105,12 @@ var that = db.bind('collections', {
                 collectors: 1
             }
         }).toArray(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getCollection: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -138,13 +131,12 @@ var that = db.bind('collections', {
                 commentsList: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getCollectionInfo: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -166,7 +158,6 @@ var that = db.bind('collections', {
                 commentsList: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
@@ -186,7 +177,7 @@ var that = db.bind('collections', {
                 articles: 0,
                 comment: true
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         if(!Array.isArray(CollectionObjArray)) CollectionObjArray = [CollectionObjArray];
 
@@ -196,7 +187,6 @@ var that = db.bind('collections', {
                 collectionObj = CollectionObjArray.pop();
 
             if(!collectionObj) {
-                //db.close();
                 return callback(resulterr, result);
             }
 
@@ -209,7 +199,6 @@ var that = db.bind('collections', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    //db.close();
                     resulterr = err;
                     return callback(resulterr, result);
                 } else {
@@ -242,7 +231,6 @@ var that = db.bind('collections', {
         that.update({
             _id: collectionObj._id
         }, setObj);
-        //db.close();
     },
 
     setComments: function(collectionObj) {
@@ -272,13 +260,12 @@ var that = db.bind('collections', {
         that.update({
             _id: collectionObj._id
         }, setObj);
-        //db.close();
     },
 
     setNewCollection: function(collectionObj, callback) {
         var collection = union(defautCollection),
             newCollection = union(defautCollection);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = union(collection, newCollection);
@@ -286,7 +273,6 @@ var that = db.bind('collections', {
 
         that.getLatestId(function(err, doc) {
             if(err) {
-                //db.close();
                 return callback(err, null);
             }
             if(!doc) newCollection._id = 1;
@@ -295,20 +281,18 @@ var that = db.bind('collections', {
             newCollection, {
                 w: 1
             }, function(err, doc) {
-                //db.close();
                 return callback(err, doc);
             });
         });
     },
 
     delCollection: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     }

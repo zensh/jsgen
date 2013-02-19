@@ -24,25 +24,22 @@ setReceive(userObj); 增加或减少用户接收的消息;
 setSend(userObj); 增加或减少用户发送的消息;
 setNewUser(userObj, callback); 注册新用户;
 */
-var db = require('./mongoDao.js').db,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    converter = require('../lib/nodeAnyBaseConverter.js'),
-    UIDString = require('./json.js').UIDString,
-    defautUser = require('./json.js').User,
-    preAllocate = require('./json.js').UserPre;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    UIDString = jsGen.json.UIDString,
+    defautUser = jsGen.json.User,
+    preAllocate = jsGen.json.UserPre;
 
-var that = db.bind('users', {
+var that = jsGen.db.bind('users', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = converter(id, 26, UIDString);
+            id = jsGen.converter(id, 26, UIDString);
             return id;
         case 'number':
-            id = converter(id, 26, UIDString);
+            id = jsGen.converter(id, 26, UIDString);
             while(id.length < 5) {
                 id = 'a' + id;
             }
@@ -54,7 +51,7 @@ var that = db.bind('users', {
     },
 
     getUsersNum: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.count({}, function(err, count) {
 
             return callback(err, count);
@@ -62,7 +59,7 @@ var that = db.bind('users', {
     },
 
     getUsersIndex: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.find({}, {
             sort: {
                 _id: -1
@@ -83,7 +80,7 @@ var that = db.bind('users', {
     },
 
     getLatestId: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -101,7 +98,7 @@ var that = db.bind('users', {
     },
 
     getAuth: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -123,7 +120,7 @@ var that = db.bind('users', {
     },
 
     getSocial: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -139,7 +136,7 @@ var that = db.bind('users', {
     },
 
     getUserInfo: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -174,7 +171,7 @@ var that = db.bind('users', {
                 tagsList: [0]
             };
 
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         setObj.$set = newObj;
@@ -258,7 +255,7 @@ var that = db.bind('users', {
                     }
                 }
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.social.weibo) setObj.$set['social.weibo'] = newObj.social.weibo;
@@ -330,7 +327,7 @@ var that = db.bind('users', {
             newObj = {
                 followList: 0
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.followList < 0) {
@@ -365,7 +362,7 @@ var that = db.bind('users', {
             newObj = {
                 articlesList: 0
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.articlesList < 0) {
@@ -400,7 +397,7 @@ var that = db.bind('users', {
             newObj = {
                 collectionsList: 0
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.collectionsList < 0) {
@@ -435,7 +432,7 @@ var that = db.bind('users', {
             newObj = {
                 commentsList: 0
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.commentsList < 0) {
@@ -470,7 +467,7 @@ var that = db.bind('users', {
             newObj = {
                 collectList: 0
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.collectList < 0) {
@@ -526,7 +523,7 @@ var that = db.bind('users', {
                     receive: 0
                 }
             };
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if(newObj.messages.article === 0) setObj.$set['messages.article'] = [];
@@ -604,7 +601,7 @@ var that = db.bind('users', {
     setNewUser: function(userObj, callback) {
         var user = union(defautUser),
             newUser = union(defautUser);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newUser = intersect(newUser, userObj);
         newUser = union(user, newUser);

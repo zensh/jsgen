@@ -1,16 +1,11 @@
 var globalDao = require('../dao/globalDao.js'),
-    db = require('../dao/mongoDao.js').db,
-    errlog = require('rrestjs').restlog,
     platform = require('platform'),
-    callbackFn = require('../lib/tools.js').callbackFn,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    checkEmail = require('../lib/tools.js').checkEmail,
-    checkUserID = require('../lib/tools.js').checkUserID,
-    checkUserName = require('../lib/tools.js').checkUserName,
-    HmacSHA256 = require('../lib/tools.js').HmacSHA256,
-    cacheUser = require('./user.js').cache,
-    Err = require('./errmsg.js');
+    union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    checkEmail = jsGen.tools.checkEmail,
+    checkUserID = jsGen.tools.checkUserID,
+    checkUserName = jsGen.tools.checkUserName,
+    HmacSHA256 = jsGen.tools.HmacSHA256;
 
 var cache = {
     _initTime: 0
@@ -18,7 +13,7 @@ var cache = {
 cache._init = function(callback) {
         var that = this;
         globalDao.getGlobalConfig(function(err, doc) {
-            if(err) errlog.error(err);
+            if(err) jsGen.errlog.error(err);
             else that._update(doc);
             if(callback) callback(err, that.data);
         });
@@ -54,10 +49,10 @@ function setVisitHistory(req) {
                         });
                         globalDao.setVisitHistory(visit);
                     }
-                    db.close();
+                    jsGen.db.close();
                 });
             }
-            db.close();
+            jsGen.db.close();
         });
     });
 };
@@ -68,16 +63,16 @@ function getvisitHistory(req, res) {
     };
     if(req.session.role === 'admin') {
         globalDao.getVisitHistory(cache.visitHistory, function(err, doc) {
-            db.close();
+            jsGen.db.close();
             if(err) {
-                errlog.error(err);
-                body.err = Err.dbErr;
+                jsGen.errlog.error(err);
+                body.err = jsGen.Err.dbErr;
             }
             if(!doc) return res.sendjson(body);
             else body.data = body.data.concat(doc.data);
         });
     } else {
-        body.err = Err.userRoleErr;
+        body.err = jsGen.Err.userRoleErr;
         return res.sendjson(body);
     }
 };
@@ -98,9 +93,9 @@ function getFn(req, res) {
         body.user = {};
         body.user._id = req.session.Uid;
         body.user.role = req.session.role;
-        body.user.name = cacheUser[req.session.Uid].name;
-        body.user.email = cacheUser[req.session.Uid].email;
-        body.user.avatar = cacheUser[req.session.Uid].avatar;
+        body.user.name = jsGen.user.cache[req.session.Uid].name;
+        body.user.email = jsGen.user.cache[req.session.Uid].email;
+        body.user.avatar = jsGen.user.cache[req.session.Uid].avatar;
     } else body.user = null;
     return res.sendjson(body);
 };
@@ -111,15 +106,15 @@ function postFn(req, res) {
         newObj = req.apibody;
         setGlobalConfig(newObj, function(err, doc) {
             if(err) {
-                body.err = Err.db.Err;
-                errlog.error(err);
+                body.err = jsGen.Err.dbErr;
+                jsGen.errlog.error(err);
             } else {
                 body = doc;
             }
             return res.sendjson(body);
         });
     } else {
-        body.err = Err.userRoleErr;
+        body.err = jsGen.Err.userRoleErr;
         return res.sendjson(body);
     }
 };
@@ -129,6 +124,5 @@ module.exports = {
     POST: postFn,
     setVisitHistory: setVisitHistory,
     setGlobalConfig: setGlobalConfig,
-    global: cache
+    cache: cache
 };
-console.log(cache);

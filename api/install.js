@@ -1,20 +1,17 @@
 var userDao = require('../dao/userDao.js'),
     globalDao = require('../dao/globalDao.js'),
-    db = require('../dao/mongoDao.js').db,
-    errlog = require('rrestjs').restlog,
-    checkEmail = require('../lib/tools.js').checkEmail,
-    checkUserID = require('../lib/tools.js').checkUserID,
-    checkUserName = require('../lib/tools.js').checkUserName,
-    HmacSHA256 = require('../lib/tools.js').HmacSHA256,
-    SHA256 = require('../lib/tools.js').SHA256,
-    gravatar = require('../lib/tools.js').gravatar,
-    userErr = require('./errmsg.js').userErr;
+    checkEmail = jsGen.tools.checkEmail,
+    checkUserID = jsGen.tools.checkUserID,
+    checkUserName = jsGen.tools.checkUserName,
+    HmacSHA256 = jsGen.tools.HmacSHA256,
+    SHA256 = jsGen.tools.SHA256,
+    gravatar = jsGen.tools.gravatar;
 
 function getFn(req, res) {
-    db.createCollection("articles", {
+    jsGen.db.createCollection("articles", {
         w: 1
     }, function(err, collection) {
-        db.command({
+        jsGen.db.command({
             collMod: "articles",
             usePowerOf2Sizes: true
         });
@@ -26,10 +23,10 @@ function getFn(req, res) {
         });
     });
 
-    db.createCollection("collections", {
+    jsGen.db.createCollection("collections", {
         w: 1
     }, function(err, collection) {
-        db.command({
+        jsGen.db.command({
             collMod: "collections",
             usePowerOf2Sizes: true
         });
@@ -41,7 +38,7 @@ function getFn(req, res) {
         });
     });
 
-    // db.createCollection("comments", {
+    // jsGen.db.createCollection("comments", {
     //     w: 1
     // }, function(err, collection) {
     //     collection.ensureIndex({
@@ -52,7 +49,7 @@ function getFn(req, res) {
     //     });
     // });
 
-    db.createCollection("messages", {
+    jsGen.db.createCollection("messages", {
         w: 1
     }, function(err, collection) {
         collection.ensureIndex({
@@ -62,10 +59,10 @@ function getFn(req, res) {
         });
     });
 
-    db.createCollection("tags", {
+    jsGen.db.createCollection("tags", {
         w: 1
     }, function(err, collection) {
-        db.command({
+        jsGen.db.command({
             collMod: "tags",
             usePowerOf2Sizes: true
         });
@@ -77,10 +74,10 @@ function getFn(req, res) {
         });
     });
 
-    db.createCollection("global", {
+    jsGen.db.createCollection("global", {
         w: 1
     }, function(err, collection) {
-        db.command({
+        jsGen.db.command({
             collMod: "global",
             usePowerOf2Sizes: true
         });
@@ -93,10 +90,10 @@ function getFn(req, res) {
         globalDao.newVisitHistory();
     });
 
-    db.createCollection("users", {
+    jsGen.db.createCollection("users", {
         w: 1
     }, function(err, collection) {
-        db.command({
+        jsGen.db.command({
             collMod: "users",
             usePowerOf2Sizes: true
         });
@@ -117,7 +114,7 @@ function getFn(req, res) {
         avatar: gravatar('admin@zensh.com'),
         desc: '梦造互联网 By ZENSH'
     }, function(err, doc) {
-        db.close();
+        jsGen.db.close();
         res.sendjson(doc);
     });
 

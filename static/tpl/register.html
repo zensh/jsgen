@@ -1,0 +1,67 @@
+<div class="grid">
+    <div class="row">
+        <div class="span4">
+                <div class="page-header">
+                    <div class="page-header-content">
+                        <h3 class="fg-color-orangeDark" ng-hide="global.user.err">
+                            立即注册
+                        </h3>
+                        <h3 class="fg-color-red" ng-show="global.user.err">
+                            {{global.user.err}}
+                        </h3>
+                    </div>
+                </div>
+                <div class="page-region">
+                    <div class="page-region-content">
+                        <form name="register">
+                            <div class="input-control text">
+                                <input type="text" placeholder="name" name="name" ng-model="name" required/>
+                                <span class="fg-color-red" ng-show="register.name.$error.required">
+                                    请输入用户名!
+                                </span>
+                                <span class="fg-color-red" ng-show="!register.name.$error.required && (name | checkName)">
+                                    {{name | checkName}}
+                                </span>
+                            </div>
+                            <div class="input-control text">
+                                <input type="email" placeholder="email" name="email" ng-model="email"
+                                required/>
+                                <span class="fg-color-red" ng-show="register.email.$error.required">
+                                    请输入Email!
+                                </span>
+                                 <span class="fg-color-red" ng-show="register.email.$error.email">
+                                    无效的Email!
+                                </span>
+                            </div>
+                            <div class="input-control password">
+                                <input type="password" placeholder="password" name="password" ng-model="passwd"
+                                ng-minlength="6" ng-maxlength="20" required/>
+                                <span class="fg-color-red" ng-show="register.password.$error.required">
+                                    请输入密码!
+                                </span>
+                                <span class="fg-color-red" ng-show="register.password.$error.minlength">
+                                    密码太短!
+                                </span>
+                                <span class="fg-color-red" ng-show="register.password.$error.maxlength">
+                                    密码太长!
+                                </span>
+                            </div>
+                            <button ng-click="submit()" class="bg-color-orangeDark fg-color-white" ng-disabled="register.name.$error.required
+                                || register.email.$error.required
+                                || register.email.$error.email
+                                || register.password.$error.required
+                                || register.password.$error.minlength
+                                || register.password.$error.maxlength
+                                || (name | checkName)">注 册</button>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        <div class="span8">
+                <div class="page-region">
+                    <div class="page-region-content">
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="page-region-content" ng-controller="jsGen.UserAdminCtrl">
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Uid</th>
+                <th>用户名</th>
+                <th>Email</th>
+                <th>权限</th>
+                <th>积分</th>
+                <th>注册日期</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="user in data">
+                <td><a ng-href="/{{user._id}}">{{user._id}}</a></td>
+                <td>{{user.name}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.role}}</td>
+                <td>{{user.score}}</td>
+                <td>{{user.date | date:'yy-MM-dd HH:mm'}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+    <div class="pagination" ng-controller="jsGen.paginationCtrl">
+        <ul>
+            <li class="first">
+                <a ng-click="paginationTo('first')"></a>
+            </li>
+            <li class="prev">
+                <a ng-click="paginationTo('prev')"></a>
+            </li>
+            <li class="active">
+                <a>{{pagination.now}}</a>
+            </li>
+            <li class="next">
+                <a ng-click="paginationTo('next')"></a>
+            </li>
+            <li class="last">
+                <a ng-click="paginationTo('last')"></a>
+            </li>
+            <li class="spaces">
+            </li>
+            <li>
+                <a ng-click="setNum(20)" title="每页20">20</a>
+            </li>
+            <li>
+                <a ng-click="setNum(50)" title="每页50">50</a>
+            </li>
+            <li>
+                <a ng-click="setNum(100)" title="每页100">100</a>
+            </li>
+        </ul>
+    </div>
+</div>

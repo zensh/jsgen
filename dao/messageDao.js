@@ -8,24 +8,21 @@
     setNewMessage(messageObj, callback);
     delMessage(_idArray, callback);
  */
-var db = require('./mongoDao.js').db,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    converter = require('../lib/nodeAnyBaseConverter.js'),
-    IDString = require('./json.js').IDString,
-    defautMessage = require('./json.js').Message;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    IDString = jsGen.json.IDString,
+    defautMessage = jsGen.json.Message;
 
-var that = db.bind('messages', {
+var that = jsGen.db.bind('messages', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -37,15 +34,14 @@ var that = db.bind('messages', {
     },
 
     getMessagesNum: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.count({}, function(err, count) {
-            //db.close();
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -57,13 +53,12 @@ var that = db.bind('messages', {
                 _id: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getMessagesList: function(_idArray, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -77,13 +72,12 @@ var that = db.bind('messages', {
                 content: 1
             }
         }).toArray(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getMessage: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -98,7 +92,6 @@ var that = db.bind('messages', {
                 content: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
@@ -123,13 +116,12 @@ var that = db.bind('messages', {
                 'receiver.$.read': true
             }
         });
-        //db.close();
     },
 
     setNewMessage: function(messageObj, callback) {
         var message = union(defautMessage),
             newMessage = union(defautMessage);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newMessage = intersect(newMessage, messageObj);
         newMessage = union(message, newMessage);
@@ -137,7 +129,6 @@ var that = db.bind('messages', {
 
         that.getLatestId(function(err, doc) {
             if(err) {
-                //db.close();
                 return callback(err, null);
             }
             if (!doc) newMessage._id = 1;
@@ -146,20 +137,18 @@ var that = db.bind('messages', {
             newMessage, {
                 w: 1
             }, function(err, doc) {
-                //db.close();
                 return callback(err, doc);
             });
         });
     },
 
     delMessage: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },

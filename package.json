@@ -16,7 +16,9 @@
         "rrestjs": ">=1.x.x",
         "mongoskin": ">=0.5.X",
         "marked": ">=0.2.x",
-        "nodemailer": ">=0.3.x"
+        "nodemailer": ">=0.3.x",
+        "xss": ">=0.0.3",
+        "platform": ">=1.0.0"
     },
     "scripts": {
         "start": "node app.js",

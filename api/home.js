@@ -1,4 +1,3 @@
-var dao = require('../dao/json.js');
 
 function getFn(req, res) {};
 

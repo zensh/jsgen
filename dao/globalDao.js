@@ -1,15 +1,13 @@
 /*
  */
-var db = require('./mongoDao.js').db,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    globalConfig = require('./json.js').GlobalConfig;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    globalConfig = jsGen.json.GlobalConfig;
 
-var that = db.bind('global', {
+var that = jsGen.db.bind('global', {
 
     getGlobalConfig: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: globalConfig._id
         }, {
@@ -69,7 +67,7 @@ var that = db.bind('global', {
                 info: {}
             },
             newObj = union(defaultObj);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newObj = intersect(newObj, Obj);
         if(Obj.visitHistory) {
@@ -105,7 +103,7 @@ var that = db.bind('global', {
     },
 
     initGlobalConfig: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         globalConfig.date = Date.now();
         that.insert(
         globalConfig, {
@@ -116,7 +114,7 @@ var that = db.bind('global', {
     },
 
     getVisitHistory: function(_idArray, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {

@@ -8,24 +8,21 @@
     setNewTag(tagObj, callback);
     delTag(_idArray, callback);
  */
-var db = require('./mongoDao.js').db,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    converter = require('../lib/nodeAnyBaseConverter.js'),
-    IDString = require('./json.js').IDString,
-    defautTag = require('./json.js').Tag;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    IDString = jsGen.json.IDString,
+    defautTag = jsGen.json.Tag;
 
-var that = db.bind('tags', {
+var that = jsGen.db.bind('tags', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -37,15 +34,14 @@ var that = db.bind('tags', {
     },
 
     getTagsNum: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.count({}, function(err, count) {
-            // db.close();
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -57,13 +53,12 @@ var that = db.bind('tags', {
                 _id: 1
             }
         }, function(err, doc) {
-            // db.close();
             return callback(err, doc);
         });
     },
 
     getTagsIndex: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.find({}, {
             sort: {
                 _id: 1
@@ -78,13 +73,12 @@ var that = db.bind('tags', {
                 users: 1
             }
         }).each(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getTag: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -99,13 +93,12 @@ var that = db.bind('tags', {
                 usersList: 1
             }
         }, function(err, doc) {
-            // db.close();
             return callback(err, doc);
         });
     },
 
     setTag: function(tagObj, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         var setObj = {},
             newObj = {
                 tag: '',
@@ -165,14 +158,13 @@ var that = db.bind('tags', {
     setNewTag: function(tagObj, callback) {
         var tag = union(defautTag),
             newTag = union(defautTag);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         newTag = intersect(newTag, tagObj);
         newTag = union(tag, newTag);
 
         that.getLatestId(function(err, doc) {
             if(err) {
-                // db.close();
                 return callback(err, null);
             }
             if(!doc) newTag._id = 1;
@@ -184,20 +176,18 @@ var that = db.bind('tags', {
                 new: true,
                 upsert: true
             }, function(err, doc) {
-                //db.close();
                 return callback(err, doc);
             });
         });
     },
 
     delTag: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
         }, function(err, doc) {
-            // db.close();
             return callback(err, doc);
         });
     },

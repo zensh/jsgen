@@ -17,25 +17,22 @@
     setNewArticle(articleObj, callback);
     delArticle(_idArray, callback);
  */
-var db = require('./mongoDao.js').db,
-    union = require('../lib/tools.js').union,
-    intersect = require('../lib/tools.js').intersect,
-    callbackFn = require('../lib/tools.js').callbackFn,
-    converter = require('../lib/nodeAnyBaseConverter.js'),
-    IDString = require('./json.js').IDString,
-    defautArticle = require('./json.js').Article,
-    globalConfig = require('./json.js').GlobalConfig;
+var union = jsGen.tools.union,
+    intersect = jsGen.tools.intersect,
+    IDString = jsGen.json.IDString,
+    defautArticle = jsGen.json.Article,
+    globalConfig = jsGen.json.GlobalConfig;
 
-var that = db.bind('articles', {
+var that = jsGen.db.bind('articles', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = converter(id, 62, IDString);
+            id = jsGen.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -47,15 +44,14 @@ var that = db.bind('articles', {
     },
 
     getArticlesNum: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.count({}, function(err, count) {
-            //db.close();
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -67,14 +63,13 @@ var that = db.bind('articles', {
                 _id: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getArticlesIndex: function(date, limit, callback) {
         var query = {};
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -96,13 +91,12 @@ var that = db.bind('articles', {
                 hots: 1
             }
         }).toArray(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getArticlesList: function(_idArray, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -124,13 +118,12 @@ var that = db.bind('articles', {
                 tagsList: 1
             }
         }).toArray(function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getArticle: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -159,13 +152,12 @@ var that = db.bind('articles', {
                 commentsList: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
 
     getArticleInfo: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -199,7 +191,6 @@ var that = db.bind('articles', {
                 commentsList: 1
             }
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     },
@@ -220,7 +211,7 @@ var that = db.bind('articles', {
             };
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) defaultObj.tagsList[i] = 0;
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         if(!Array.isArray(ArticleObjArray)) ArticleObjArray = [ArticleObjArray];
 
@@ -230,7 +221,6 @@ var that = db.bind('articles', {
                 articleObj = ArticleObjArray.pop();
 
             if(!articleObj) {
-                //db.close();
                 return callback(resulterr, result);
             }
 
@@ -243,7 +233,6 @@ var that = db.bind('articles', {
                 w: 1
             }, function(err, doc) {
                 if(err) {
-                    //db.close();
                     resulterr = err;
                     return callback(resulterr, result);
                 } else {
@@ -268,7 +257,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setHots: function(articleObj) {
@@ -285,7 +273,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setUpdate: function(articleObj) {
@@ -308,7 +295,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setVisitors: function(articleObj) {
@@ -325,7 +311,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setFavors: function(articleObj) {
@@ -355,7 +340,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setCollectors: function(articleObj) {
@@ -385,7 +369,6 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setComments: function(articleObj) {
@@ -415,13 +398,12 @@ var that = db.bind('articles', {
         that.update({
             _id: articleObj._id
         }, setObj);
-        //db.close();
     },
 
     setNewArticle: function(articleObj, callback) {
         var article = union(defautArticle),
             newArticle = union(defautArticle);
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
@@ -430,7 +412,6 @@ var that = db.bind('articles', {
 
         that.getLatestId(function(err, doc) {
             if(err) {
-                //db.close();
                 return callback(err, null);
             }
             if (!doc) newArticle._id = 1;
@@ -439,20 +420,18 @@ var that = db.bind('articles', {
             newArticle, {
                 w: 1
             }, function(err, doc) {
-                //db.close();
                 return callback(err, doc);
             });
         });
     },
 
     delArticle: function(_id, callback) {
-        var callback = callback || callbackFn;
+        var callback = callback || jsGen.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
         }, function(err, doc) {
-            //db.close();
             return callback(err, doc);
         });
     }
