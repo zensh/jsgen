@@ -10,6 +10,7 @@ var userDao = require('../dao/userDao.js'),
     checkUrl = jsGen.tools.checkUrl,
     SHA256 = jsGen.tools.SHA256,
     HmacSHA256 = jsGen.tools.HmacSHA256,
+    HmacMD5 = jsGen.tools.HmacMD5,
     gravatar = jsGen.tools.gravatar,
     CacheFn = jsGen.tools.CacheFn,
     filterSummary = jsGen.tools.filterSummary;
@@ -199,14 +200,15 @@ function register(req, res) {
             userObj._id = userDao.convertID(doc._id);
             userObj.resetDate = Date.now();
             userObj.resetKey = SHA256(userObj.resetDate.toString());
-            var resetUrl = HmacSHA256(HmacSHA256(userObj.resetKey, 'role'), doc.email);
+            var resetUrl = HmacMD5(HmacMD5(userObj.resetKey, 'role'), doc.email, 'base64');
             resetUrl = {
                 request: 'role',
                 email: doc.email,
                 resetKey: resetUrl
             };
-            resetUrl = new Buffer(JSON.stringify(resetUrl), 'hex').toString('base64');
+            resetUrl = new Buffer(JSON.stringify(resetUrl)).toString('base64');
             resetUrl = 'http://' + jsGen.globalConfig.url + '/api/user/reset/' + resetUrl;
+            console.log(resetUrl);
             userDao.setUserInfo(userObj, function(err) {
                 jsGen.db.close();
                 if(err) {
@@ -447,9 +449,9 @@ function resetUser(req, res) {
     var _id = null;
     try {
         var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
-        if(reset[email] && reset[request] && reset[resetKey]) {
-            if(reset[Uid] && cache[reset[Uid]]) _id = userDao.convertID(cache[reset[Uid]]._id);
-            else if(cache[reset[email]]) _id = userDao.convertID(cache[reset[email]]._id);
+        if(reset.email && reset.request && reset.resetKey) {
+            if(reset.Uid && cache[reset.Uid]) _id = userDao.convertID(cache[reset.Uid]._id);
+            else if(cache[reset.email]) _id = userDao.convertID(cache[reset.email]._id);
             else throw new Error(jsGen.Err.resetInvalid);
             userDao.getAuth(_id, function(err, doc) {
                 var userObj = {};
@@ -457,24 +459,28 @@ function resetUser(req, res) {
                 if(err) {
                     jsGen.errlog.error(err);
                     throw new Error(jsGen.Err.dbErr);
-                } else if(doc && (Date.now() - doc.resetDate) / 86400000 < 3) {
-                    if(HmacSHA256(HmacSHA256(doc.resetKey, reset[request]), reset[email]) === reset[resetKey]) {
-                        switch(reset[request]) {
+                } else if(doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 3) {
+                    if(HmacMD5(HmacMD5(doc.resetKey, reset.request), reset.email, 'base64') === reset.resetKey) {
+                        switch(reset.request) {
                         case 'locked':
                             userObj.locked = false;
                             break;
                         case 'role':
-                            userObj.role = user;
+                            userObj.role = 'user';
                             break;
                         case 'email':
-                            userObj.email = reset[email];
+                            userObj.email = reset.email;
                             break;
                         case 'passwd':
-                            userObj.passwd = SHA256(reset[email]);
+                            userObj.passwd = SHA256(reset.email);
                             break;
                         default:
                             throw new Error(jsGen.Err.resetInvalid);
                         }
+                        userObj.resetDate = Date.now();
+                        userObj.resetKey = '';
+                        console.log(userObj);
+                        console.log('userObj');
                         userDao.setUserInfo(userObj, function(err, doc) {
                             if(err) {
                                 jsGen.errlog.error(err);
