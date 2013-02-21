@@ -1,18 +1,16 @@
-var globalDao = require('../dao/globalDao.js'),
-    platform = require('platform'),
-    union = jsGen.tools.union,
-    intersect = jsGen.tools.intersect,
-    checkEmail = jsGen.tools.checkEmail,
-    checkUserID = jsGen.tools.checkUserID,
-    checkUserName = jsGen.tools.checkUserName,
-    HmacSHA256 = jsGen.tools.HmacSHA256;
+var union = jsGen.lib.tools.union,
+    intersect = jsGen.lib.tools.intersect,
+    checkEmail = jsGen.lib.tools.checkEmail,
+    checkUserID = jsGen.lib.tools.checkUserID,
+    checkUserName = jsGen.lib.tools.checkUserName,
+    HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
 var cache = {
     _initTime: 0
 };
 cache._init = function(callback) {
         var that = this;
-        globalDao.getGlobalConfig(function(err, doc) {
+        jsGen.dao.index.getGlobalConfig(function(err, doc) {
             if(err) jsGen.errlog.error(err);
             else that._update(doc);
             if(callback) callback(err, that.data);
@@ -29,7 +27,7 @@ function setVisitHistory(req) {
         _id: 0,
         data: []
     };
-    var info = platform.parse(req.useragent);
+    var info = jsGen.module.platform.parse(req.useragent);
     visit._id = cache._initTime ? cache.visitHistory[cache.visitHistory.length - 1] : 1;
     visit.data[0] = Date.now();
     visit.data[1] = req.session.Uid;
@@ -39,20 +37,20 @@ function setVisitHistory(req) {
     visit.data[5] = info.os.toString() || 'unknow';
     process.nextTick(function() {
         setGlobalConfig({visit: 1});
-        globalDao.setVisitHistory(visit, function(err, doc) {
+        jsGen.dao.index.setVisitHistory(visit, function(err, doc) {
             if(err && err.code === 10131) {
                 visit._id += 1;
-                globalDao.newVisitHistory(visit, function(err, doc) {
+                jsGen.dao.index.newVisitHistory(visit, function(err, doc) {
                     if(!err) {
                         setGlobalConfig({
                             visitHistory: visit._id
                         });
-                        globalDao.setVisitHistory(visit);
+                        jsGen.dao.index.setVisitHistory(visit);
                     }
-                    jsGen.db.close();
+                    jsGen.dao.db.close();
                 });
             }
-            jsGen.db.close();
+            jsGen.dao.db.close();
         });
     });
 };
@@ -62,23 +60,23 @@ function getvisitHistory(req, res) {
         data: []
     };
     if(req.session.role === 'admin') {
-        globalDao.getVisitHistory(cache.visitHistory, function(err, doc) {
-            jsGen.db.close();
+        jsGen.dao.index.getVisitHistory(cache.visitHistory, function(err, doc) {
+            jsGen.dao.db.close();
             if(err) {
                 jsGen.errlog.error(err);
-                body.err = jsGen.Err.dbErr;
+                body.err = jsGen.lib.Err.dbErr;
             }
             if(!doc) return res.sendjson(body);
             else body.data = body.data.concat(doc.data);
         });
     } else {
-        body.err = jsGen.Err.userRoleErr;
+        body.err = jsGen.lib.Err.userRoleErr;
         return res.sendjson(body);
     }
 };
 
 function setGlobalConfig(obj, callback) {
-    globalDao.setGlobalConfig(obj, function(err, doc) {
+    jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
         if (doc) cache._update(doc);
         if (callback) return callback(err, doc);
     });
@@ -93,9 +91,9 @@ function getFn(req, res) {
         body.user = {};
         body.user._id = req.session.Uid;
         body.user.role = req.session.role;
-        body.user.name = jsGen.user.cache[req.session.Uid].name;
-        body.user.email = jsGen.user.cache[req.session.Uid].email;
-        body.user.avatar = jsGen.user.cache[req.session.Uid].avatar;
+        body.user.name = jsGen.api.user.cache[req.session.Uid].name;
+        body.user.email = jsGen.api.user.cache[req.session.Uid].email;
+        body.user.avatar = jsGen.api.user.cache[req.session.Uid].avatar;
     } else body.user = null;
     return res.sendjson(body);
 };
@@ -106,7 +104,7 @@ function postFn(req, res) {
         newObj = req.apibody;
         setGlobalConfig(newObj, function(err, doc) {
             if(err) {
-                body.err = jsGen.Err.dbErr;
+                body.err = jsGen.lib.Err.dbErr;
                 jsGen.errlog.error(err);
             } else {
                 body = doc;
@@ -114,7 +112,7 @@ function postFn(req, res) {
             return res.sendjson(body);
         });
     } else {
-        body.err = jsGen.Err.userRoleErr;
+        body.err = jsGen.lib.Err.userRoleErr;
         return res.sendjson(body);
     }
 };

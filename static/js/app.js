@@ -18,11 +18,11 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
     }).
     when('/home', {
         templateUrl: 'static/tpl/user.html',
-        controller: jsGen.homeCtrl
+        controller: jsGen.api.homeCtrl
     }).
     when('/admin', {
         templateUrl: 'static/tpl/admin.html',
-        controller: jsGen.adminCtrl
+        controller: jsGen.api.adminCtrl
     }).
     when('/U:id', {
         templateUrl: 'static/tpl/user.html',

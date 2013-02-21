@@ -1,20 +1,19 @@
-var tagDao = require('../dao/tagDao.js'),
-    union = jsGen.tools.union,
-    checkID = jsGen.tools.checkID,
-    checkTag = jsGen.tools.checkTag,
-    CacheFn = jsGen.tools.CacheFn;
+var union = jsGen.lib.tools.union,
+    checkID = jsGen.lib.tools.checkID,
+    checkTag = jsGen.lib.tools.checkTag,
+    CacheFn = jsGen.lib.tools.CacheFn;
 
 var tagCache = new CacheFn(50);
 tagCache.getTag = function(tagID, callback) {
     var that = this,
-        callback = callback || jsGen.tools.callbackFn,
+        callback = callback || jsGen.lib.tools.callbackFn,
         doc = this.get(tagID);
 
     if(doc) return callback(null, doc);
-    else tagDao.getTag(tagDao.convertID(tagID), function(err, doc) {
+    else jsGen.dao.tag.getTag(jsGen.dao.tag.convertID(tagID), function(err, doc) {
         if(err) jsGen.errlog.error(err);
         if(doc) {
-            doc._id = tagDao.convertID(doc._id);
+            doc._id = jsGen.dao.tag.convertID(doc._id);
             that.put(doc._id, doc);
         }
         return callback(err, doc);
@@ -27,12 +26,12 @@ var cache = {
 };
 cache._init = function(callback) {
     var that = this,
-        callback = callback || jsGen.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
-    tagDao.getTagsIndex(function(err, doc) {
+    jsGen.dao.tag.getTagsIndex(function(err, doc) {
         if(err) return jsGen.errlog.error(err);
         if(doc) {
-            doc._id = tagDao.convertID(doc._id);
+            doc._id = jsGen.dao.tag.convertID(doc._id);
             that._update(doc);
         }
         if(callback) callback(err, doc);
@@ -73,7 +72,7 @@ cache._remove = function(tagID) {
 function setTag(tagObj, callback) {
     var tagID = null,
         setKey = null,
-        callback = callback || jsGen.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
     function setCache(doc) {
         cache._remove(doc._id);
@@ -83,9 +82,9 @@ function setTag(tagObj, callback) {
 
     if(typeof tagObj._id === 'string') {
         tagID = tagObj._id;
-        tagObj._id = tagDao.convertID(tagObj._id);
+        tagObj._id = jsGen.dao.tag.convertID(tagObj._id);
     } else if(typeof tagObj._id === 'number') {
-        tagID = tagDao.convertID(tagObj._id);
+        tagID = jsGen.dao.tag.convertID(tagObj._id);
     }
 
     if(!cache[tagID]) return callback(null, null);
@@ -121,7 +120,7 @@ function setTag(tagObj, callback) {
                                 _id: toID,
                                 usersList: _id
                             }, function() {
-                                return tagDao.delTag(tagObj._id, function() {
+                                return jsGen.dao.tag.delTag(tagObj._id, function() {
                                     tagCache.remove(tagID);
                                     cache._remove(tagID);
                                     return tagCache.getTag(toID, function(err, doc) {
@@ -134,9 +133,9 @@ function setTag(tagObj, callback) {
                 });
             });
         } else {
-            tagDao.setTag(tagObj, function(err, doc) {
+            jsGen.dao.tag.setTag(tagObj, function(err, doc) {
                 if(doc) {
-                    doc._id = tagDao.convertID(doc._id);
+                    doc._id = jsGen.dao.tag.convertID(doc._id);
                     setCache(doc);
                 }
                 return callback(err, doc);
@@ -149,9 +148,9 @@ function setTag(tagObj, callback) {
             if(err) return callback(err, null);
             var exist = doc[setKey].indexOf(Math.abs(tagObj[setKey]));
             if((tagObj[setKey] < 0 && exist >= 0) || (tagObj[setKey] > 0 && exist < 0)) {
-                tagDao.setTag(tagObj, function(err, doc) {
+                jsGen.dao.tag.setTag(tagObj, function(err, doc) {
                     if(doc) {
-                        doc._id = tagDao.convertID(doc._id);
+                        doc._id = jsGen.dao.tag.convertID(doc._id);
                         setCache(doc);
                     }
                     return callback(err, doc);
@@ -167,7 +166,7 @@ function setTag(tagObj, callback) {
 function filterTags(tagArray, convert, callback) {
     var tags = [],
         type = null,
-        callback = callback || jsGen.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
     if(!Array.isArray(tagArray)) tagArray = [tagArray];
     if(tagArray.length === 0) return callback(null, tags);
@@ -183,18 +182,18 @@ function filterTags(tagArray, convert, callback) {
                 case 'string':
                     if(convert) {
                         if(cache[tag]) {
-                            tags.push(tagDao.convertID(cache[tag]._id));
+                            tags.push(jsGen.dao.tag.convertID(cache[tag]._id));
                         } else if(cache[tag.toLowerCase()]) {
-                            tags.push(tagDao.convertID(cache[tag.toLowerCase()]._id));
+                            tags.push(jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id));
                         } else {
                             asyn = true;
-                            tagDao.setNewTag({
+                            jsGen.dao.tag.setNewTag({
                                 tag: tag
                             }, function(err, doc) {
                                 if(err) jsGen.errlog.error(err);
                                 if(doc) {
                                     tags.push(doc._id);
-                                    doc._id = tagDao.convertID(doc._id);
+                                    doc._id = jsGen.dao.tag.convertID(doc._id);
                                     cache._update(doc);
                                 }
                                 filterTag();
@@ -209,7 +208,7 @@ function filterTags(tagArray, convert, callback) {
                     }
                 break;
                 case 'number':
-                    tag = tagDao.convertID(tag);
+                    tag = jsGen.dao.tag.convertID(tag);
                     if(cache[tag]) tags.push({_id: cache[tag]._id, tag: cache[tag].tag});
                 break;
             }
@@ -225,16 +224,16 @@ function getTag(req, res) {
         body = {};
 
     if(cache[tag]) {
-        _id = tagDao.convertID(cache[tag]._id);
+        _id = jsGen.dao.tag.convertID(cache[tag]._id);
     } else if(cache[tag.toLowerCase()]) {
-        _id = tagDao.convertID(cache[tag.toLowerCase()]._id);
+        _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
     } else {
-        body.err = jsGen.Err.tagNone;
+        body.err = jsGen.lib.Err.tagNone;
         return res.sendjson(body);
     }
     tagCache.getTag(_id, function(err, doc) {
-        jsGen.db.close();
-        if(err) body.err = jsGen.Err.dbErr;
+        jsGen.dao.db.close();
+        if(err) body.err = jsGen.lib.Err.dbErr;
         else body = doc;
         return res.sendjson(body);
     });
@@ -267,14 +266,14 @@ function editTags(req, res) {
                     if(err) body.err = err;
                     if(doc) body.data.push(doc);
                     if(body.err || i >= array.length - 1) {
-                        jsGen.db.close();
+                        jsGen.dao.db.close();
                         return res.sendjson(body);
                     }
                 });
             });
         }
     } else {
-        body.err = jsGen.Err.userRoleErr;
+        body.err = jsGen.lib.Err.userRoleErr;
         return res.sendjson(body);
     }
 };
@@ -286,21 +285,21 @@ function delTag(req, res) {
 
     if(req.session.role === 'admin') {
         if(cache[tag]) {
-            _id = tagDao.convertID(cache[tag]._id);
+            _id = jsGen.dao.tag.convertID(cache[tag]._id);
         } else if(cache[tag.toLowerCase()]) {
-            _id = tagDao.convertID(cache[tag.toLowerCase()]._id);
+            _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
         } else {
-            body.err = jsGen.Err.tagNone;
+            body.err = jsGen.lib.Err.tagNone;
             return res.sendjson(body);
         }
-        tagDao.delTag(_id, function(err, doc) {
-            jsGen.db.close();
-            if(err) body.err = jsGen.Err.dbErr;
+        jsGen.dao.tag.delTag(_id, function(err, doc) {
+            jsGen.dao.db.close();
+            if(err) body.err = jsGen.lib.Err.dbErr;
             else body = doc;
             return res.sendjson(body);
         });
     } else {
-        body.err = jsGen.Err.userRoleErr;
+        body.err = jsGen.lib.Err.userRoleErr;
         return res.sendjson(body);
     }
 };
@@ -313,29 +312,29 @@ function delTags(req, res) {
             req.apibody.forEach(function(tag, i) {
                 var _id = null;
                 if(cache[tag]) {
-                    _id = tagDao.convertID(cache[tag]._id);
+                    _id = jsGen.dao.tag.convertID(cache[tag]._id);
                 } else if(cache[tag.toLowerCase()]) {
-                    _id = tagDao.convertID(cache[tag.toLowerCase()]._id);
+                    _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
                 } else {
-                    body.err = jsGen.Err.tagNone;
+                    body.err = jsGen.lib.Err.tagNone;
                     return res.sendjson(body);
                 }
-                tagDao.delTag(_id, function(err, doc) {
+                jsGen.dao.tag.delTag(_id, function(err, doc) {
                     body.data = i + 1;
                     if(i = req.apibody.length - 1) {
-                        jsGen.db.close();
+                        jsGen.dao.db.close();
                         return res.sendjson(body);
                     }
                     if(err) {
-                        jsGen.db.close();
-                        body.err = jsGen.Err.dbErr;
+                        jsGen.dao.db.close();
+                        body.err = jsGen.lib.Err.dbErr;
                         return res.sendjson(body);
                     }
                 });
             });
         }
     } else {
-        body.err = jsGen.Err.userRoleErr;
+        body.err = jsGen.lib.Err.userRoleErr;
         return res.sendjson(body);
     }
 };

@@ -52,7 +52,7 @@ jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, 
     };
 }];
 
-jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.api.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!jsGen.global.user) $location.path('/');
     $scope.set = function(tpl) {
         $scope.url = '/static/tpl/' + tpl;
@@ -77,7 +77,7 @@ jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
         jsGen.cache.users.put($scope.user._id, $scope.user);
     });
 }];
-jsGen.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.api.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!(jsGen.global.user && jsGen.global.user.role === 'admin')) $location.path('/');
     $scope.set = function(tpl) {
         $scope.url = '/static/tpl/' + tpl;

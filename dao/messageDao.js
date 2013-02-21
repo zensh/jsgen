@@ -8,21 +8,21 @@
     setNewMessage(messageObj, callback);
     delMessage(_idArray, callback);
  */
-var union = jsGen.tools.union,
-    intersect = jsGen.tools.intersect,
-    IDString = jsGen.json.IDString,
-    defautMessage = jsGen.json.Message;
+var union = jsGen.lib.tools.union,
+    intersect = jsGen.lib.tools.intersect,
+    IDString = jsGen.lib.json.IDString,
+    defautMessage = jsGen.lib.json.Message;
 
-var that = jsGen.db.bind('messages', {
+var that = jsGen.dao.db.bind('messages', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -34,14 +34,14 @@ var that = jsGen.db.bind('messages', {
     },
 
     getMessagesNum: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.count({}, function(err, count) {
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -58,7 +58,7 @@ var that = jsGen.db.bind('messages', {
     },
 
     getMessagesList: function(_idArray, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -77,7 +77,7 @@ var that = jsGen.db.bind('messages', {
     },
 
     getMessage: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -121,7 +121,7 @@ var that = jsGen.db.bind('messages', {
     setNewMessage: function(messageObj, callback) {
         var message = union(defautMessage),
             newMessage = union(defautMessage);
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
 
         newMessage = intersect(newMessage, messageObj);
         newMessage = union(message, newMessage);
@@ -143,7 +143,7 @@ var that = jsGen.db.bind('messages', {
     },
 
     delMessage: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id
         }, {

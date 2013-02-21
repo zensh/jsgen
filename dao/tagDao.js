@@ -8,21 +8,21 @@
     setNewTag(tagObj, callback);
     delTag(_idArray, callback);
  */
-var union = jsGen.tools.union,
-    intersect = jsGen.tools.intersect,
-    IDString = jsGen.json.IDString,
-    defautTag = jsGen.json.Tag;
+var union = jsGen.lib.tools.union,
+    intersect = jsGen.lib.tools.intersect,
+    IDString = jsGen.lib.json.IDString,
+    defautTag = jsGen.lib.json.Tag;
 
-var that = jsGen.db.bind('tags', {
+var that = jsGen.dao.db.bind('tags', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -34,14 +34,14 @@ var that = jsGen.db.bind('tags', {
     },
 
     getTagsNum: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.count({}, function(err, count) {
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -58,7 +58,7 @@ var that = jsGen.db.bind('tags', {
     },
 
     getTagsIndex: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.find({}, {
             sort: {
                 _id: 1
@@ -78,7 +78,7 @@ var that = jsGen.db.bind('tags', {
     },
 
     getTag: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -98,7 +98,7 @@ var that = jsGen.db.bind('tags', {
     },
 
     setTag: function(tagObj, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         var setObj = {},
             newObj = {
                 tag: '',
@@ -158,7 +158,7 @@ var that = jsGen.db.bind('tags', {
     setNewTag: function(tagObj, callback) {
         var tag = union(defautTag),
             newTag = union(defautTag);
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
 
         newTag = intersect(newTag, tagObj);
         newTag = union(tag, newTag);
@@ -182,7 +182,7 @@ var that = jsGen.db.bind('tags', {
     },
 
     delTag: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id
         }, {

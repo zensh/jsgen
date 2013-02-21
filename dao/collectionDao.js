@@ -12,21 +12,21 @@
     setNewCollection(collectionObj, callback);
     delCollection(_idArray, callback);
  */
-var union = jsGen.tools.union,
-    intersect = jsGen.tools.intersect,
-    IDString = jsGen.json.IDString,
-    defautCollection = jsGen.json.Collection;
+var union = jsGen.lib.tools.union,
+    intersect = jsGen.lib.tools.intersect,
+    IDString = jsGen.lib.json.IDString,
+    defautCollection = jsGen.lib.json.Collection;
 
-var that = jsGen.db.bind('collections', {
+var that = jsGen.dao.db.bind('collections', {
 
     convertID: function(id) {
         switch(typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             return id;
         case 'number':
-            id = jsGen.converter(id, 62, IDString);
+            id = jsGen.lib.converter(id, 62, IDString);
             while(id.length < 3) {
                 id = '0' + id;
             }
@@ -38,14 +38,14 @@ var that = jsGen.db.bind('collections', {
     },
 
     getCollectionsNum: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.count({}, function(err, count) {
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -63,7 +63,7 @@ var that = jsGen.db.bind('collections', {
 
     getCollectionsIndex: function(date, limit, callback) {
         var query = {};
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -87,7 +87,7 @@ var that = jsGen.db.bind('collections', {
     },
 
     getCollectionsList: function(_idArray, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -110,7 +110,7 @@ var that = jsGen.db.bind('collections', {
     },
 
     getCollection: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -136,7 +136,7 @@ var that = jsGen.db.bind('collections', {
     },
 
     getCollectionInfo: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -177,7 +177,7 @@ var that = jsGen.db.bind('collections', {
                 articles: 0,
                 comment: true
             };
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
 
         if(!Array.isArray(CollectionObjArray)) CollectionObjArray = [CollectionObjArray];
 
@@ -265,7 +265,7 @@ var that = jsGen.db.bind('collections', {
     setNewCollection: function(collectionObj, callback) {
         var collection = union(defautCollection),
             newCollection = union(defautCollection);
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = union(collection, newCollection);
@@ -287,7 +287,7 @@ var that = jsGen.db.bind('collections', {
     },
 
     delCollection: function(_id, callback) {
-        var callback = callback || jsGen.tools.callbackFn;
+        var callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
