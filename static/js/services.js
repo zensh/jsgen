@@ -10,7 +10,7 @@
 angular.module('jsGen.services', ['ngResource']).
 factory('rest', ['$resource', function($resource) {
     return {
-        global: $resource('/api/index'),
+        index: $resource('/api/index'),
         login: $resource('/api/user/login'),
         logout: $resource('/api/user/logout'),
         register: $resource('/api/user/register'),

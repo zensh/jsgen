@@ -1,4 +1,4 @@
-<div class="page-region-content" ng-controller="jsGen.UserEditCtrl">
+<div class="page-region-content" ng-controller="jsGen.userEditCtrl">
     <div class="notices" ng-show="user.err">
         <div class="bg-color-red">
             <div class="notice-header fg-color-yellow">
@@ -42,10 +42,10 @@
         </div>
         <div class="input-control text">
             <span>用户标签：</span>
-            <span class="fg-color-red" ng-show="user.tagsList">
+            <span class="fg-color-red" ng-show="tagsList">
                                     {{tagsList}}
                                 </span>
-            <input type="text" name="tagsList" ng-model="tags" ng-change="convertTags()"
+            <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" ng-change="checkTags()"
             />
         </div>
         <div class="input-control password">
@@ -56,7 +56,7 @@
             <span class="fg-color-red" ng-show="userEdit.password.$error.maxlength">
                                     密码太长!
                                 </span>
-            <input type="password" name="password" ng-model="user.passwd" ng-minlength="6"
+            <input class="span3" type="password" name="password" ng-model="user.passwd" ng-minlength="6"
             ng-maxlength="20" />
         </div>
         <div class="input-control password">
@@ -64,7 +64,7 @@
             <span class="fg-color-red" ng-hide="checkResult">
                                     密码不一致！
                                 </span>
-            <input type="password" name="password2" ng-model="user.passwd2" ng-change="checkPwd()"
+            <input class="span3" type="password" name="password2" ng-model="user.passwd2" ng-change="checkPwd()"
             />
         </div>
         <button ng-click="submit()" class="bg-color-orangeDark fg-color-white"

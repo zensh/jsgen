@@ -5254,6 +5254,7 @@ th[class*="span"] {
 .input-control > input[type=url],
 .input-control > input[type=phone],
 .input-control > input[type=password],
+.input-control > input[type=number],
 .input-control > select,
 .input-control > textarea {
   border: 1px #bababa solid;

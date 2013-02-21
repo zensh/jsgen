@@ -3,7 +3,7 @@
 /* Controllers */
 jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, rest, $location, cache) {
     if(!jsGen.cache) jsGen.cache = cache;
-    if(!jsGen.global.date) jsGen.global = rest.global.get({}, function() {
+    if(!jsGen.global.date) jsGen.global = rest.index.get({}, function() {
         if(jsGen.global.user) {
             if(jsGen.global.user.role === 'admin') jsGen.global.user.adminUrl = '/admin';
             else jsGen.global.user.adminUrl = '/home';
@@ -22,11 +22,9 @@ jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, res
     };
 }];
 
-jsGen.IndexCtrl = ['$scope', 'rest', function($scope, rest) {
+jsGen.IndexCtrl = ['$scope', 'rest', function($scope, rest) {}];
 
-}];
-
-jsGen.UserLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.userLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
     $scope.submit = function() {
         data.logname = $scope.logname;
@@ -40,7 +38,7 @@ jsGen.UserLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
     };
 }];
 
-jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.userRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
     $scope.submit = function() {
         data.name = $scope.name;
@@ -52,7 +50,7 @@ jsGen.UserRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, 
     };
 }];
 
-jsGen.api.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!jsGen.global.user) $location.path('/');
     $scope.set = function(tpl) {
         $scope.url = '/static/tpl/' + tpl;
@@ -63,11 +61,11 @@ jsGen.api.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
     });
     $scope.$on('update', function(event, doc) {
         event.stopPropagation();
-        $scope.user = jsGen.union($scope.user, doc);
+        $scope.user = jsGen.lib.union($scope.user, doc);
     });
 }];
 
-jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
+jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
     $scope.user = jsGen.cache.users.get('U' + $routeParams.id);
     //$scope.test = $location.absUrl();
     if(!$scope.user) $scope.user = rest.userView.get({
@@ -77,14 +75,14 @@ jsGen.UserViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
         jsGen.cache.users.put($scope.user._id, $scope.user);
     });
 }];
-jsGen.api.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!(jsGen.global.user && jsGen.global.user.role === 'admin')) $location.path('/');
     $scope.set = function(tpl) {
         $scope.url = '/static/tpl/' + tpl;
     };
 }];
 
-jsGen.UserAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.userAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var result = {};
     $scope.pagination = {
         now: 1,
@@ -104,7 +102,7 @@ jsGen.UserAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
     });
 }];
 
-jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var result = {};
     var tagsArray = [];
     function initTags(tagsList) {
@@ -112,16 +110,16 @@ jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         for (var i = tagsList.length - 1; i >= 0; i--) {
             tagsArray[i] = tagsList[i].tag;
         };
-        $scope.tagsList = jsGen.union(tagsArray);
-        $scope.tags = $scope.tagsList.join(' ');
+        $scope.tagsList = jsGen.lib.union(tagsArray);
+        //$scope.tags = $scope.tagsList.join(' ');
     };
     $scope.sexArray = ['male', 'female'];
-    $scope.user = jsGen.union(jsGen.global.user);
+    $scope.user = jsGen.lib.union(jsGen.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = true;
     $scope.user.err = null;
-    $scope.convertTags = function() {
-        $scope.tagsList = $scope.tags.split(/[,，\s]/, (jsGen.global.UserTagsMax || 5));
+    $scope.checkTags = function() {
+        if($scope.tagsList.length > (jsGen.global.UserTagsMax || 5)) $scope.tagsList.length = (jsGen.global.UserTagsMax || 5);
     };
     $scope.checkPwd = function() {
         if($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = false;
@@ -140,6 +138,66 @@ jsGen.UserEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
             $scope.user = result;
             initTags($scope.user.tagsList);
             $scope.$emit('update', result);
+        });
+    };
+}];
+
+jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
+    var result = {};
+    var tagsArray = [];
+    var config = {
+        domain: '',
+        title: '',
+        url: '',
+        logo: '',
+        email: '',
+        description: '',
+        metatitle: '',
+        metadesc: '',
+        keywords: '',
+        ArticleTagsMax: 0,
+        UserTagsMax: 0,
+        TitleMinLen: 0,
+        TitleMaxLen: 0,
+        SummaryMaxLen: 0,
+        ContentMinLen: 0,
+        ContentMaxLen: 0,
+        UserNameMinLen: 0,
+        UserNameMaxLen: 0,
+        CommentUp: 0,
+        RecommendUp: 0,
+        UsersScore: [0, 0, 0, 0, 0, 0, 0],
+        ArticleStatus: [0, 0],
+        ArticleHots: [0, 0, 0, 0, 0],
+        smtp: {
+            host: '',
+            secureConnection: true,
+            port: 0,
+            auth: {
+                user: '',
+                pass: ''
+            },
+            senderName: '',
+            senderEmail: ''
+        },
+        register: true
+    };
+    $scope.global = jsGen.lib.union(config);
+    jsGen.lib.intersect($scope.global, jsGen.global);
+    $scope.checkResult = true;
+    $scope.global.err = null;
+    $scope.submit = function() {
+        if(!$scope.global.passwd) return;
+        var data = jsGen.lib.union(config);
+        jsGen.lib.intersect(data, $scope.global);
+        for(var key in data) {
+            if(angular.equals(data[key], jsGen.global[key])) delete data[key];
+        }
+        data.passwd = CryptoJS.SHA256($scope.global.passwd).toString();
+        data.passwd = CryptoJS.HmacSHA256(data.passwd, jsGen.global.user.name).toString();
+        result = rest.index.save({}, data, function() {
+            $scope.global = result;
+            jsGen.lib.union(jsGen.global, result);
         });
     };
 }];

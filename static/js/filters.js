@@ -25,6 +25,15 @@ angular.module('jsGen.filters', []).
       }
     };
   }).
+  filter('boolean', function() {
+    return function(text) {
+      switch (text) {
+        case true: return '开启';
+        case false: return '关闭';
+        default: return text;
+      }
+    };
+  }).
   filter('checkName', function() {
     return function(text) {
         if(text) {

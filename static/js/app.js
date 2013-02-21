@@ -6,39 +6,39 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
     $routeProvider.
     when('/', {
         templateUrl: '/static/tpl/index.html',
-        controller: jsGen.IndexCtrl
+        controller: jsGen.indexCtrl
     }).
     when('/login', {
         templateUrl: 'static/tpl/login.html',
-        controller: jsGen.UserLoginCtrl
+        controller: jsGen.userLoginCtrl
     }).
     when('/register', {
         templateUrl: 'static/tpl/register.html',
-        controller: jsGen.UserRegisterCtrl
+        controller: jsGen.userRegisterCtrl
     }).
     when('/home', {
         templateUrl: 'static/tpl/user.html',
-        controller: jsGen.api.homeCtrl
+        controller: jsGen.homeCtrl
     }).
     when('/admin', {
         templateUrl: 'static/tpl/admin.html',
-        controller: jsGen.api.adminCtrl
+        controller: jsGen.adminCtrl
     }).
     when('/U:id', {
         templateUrl: 'static/tpl/user.html',
-        controller: jsGen.UserViewCtrl
+        controller: jsGen.userViewCtrl
     }).
     when('/A:id', {
         templateUrl: 'static/tpl/article.html',
-        controller: jsGen.ArticleCtrl
+        controller: jsGen.articleCtrl
     }).
     when('/T:id', {
         templateUrl: 'static/tpl/tag.html',
-        controller: jsGen.TagCtrl
+        controller: jsGen.tagCtrl
     }).
     when('/O:id', {
         templateUrl: 'static/tpl/collection.html',
-        controller: jsGen.CollectionCtrl
+        controller: jsGen.collectionCtrl
     }).
     otherwise({
         redirectTo: '/'
@@ -47,7 +47,8 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
 }]);
 
 var jsGen = {
-    global: {}
+    global: {},
+    lib: {}
 };
 
 (function() {
@@ -56,6 +57,7 @@ var jsGen = {
         if(obj === undefined) return 'Undefined';
         return Object.prototype.toString.call(obj).slice(8, -1);
     };
+
     function union(a, b) {
         if(checkClass(a) === checkClass(b)) {
             for(var key in b) {
@@ -93,9 +95,41 @@ var jsGen = {
             return s;
         }
         return a;
-    }
+    };
 
-    this.checkClass = checkClass;
-    this.union = union;
+    function intersect(a, b) {
+        if(a && b) {
+            if(checkClass(a) === 'Array' && checkClass(b) === 'Array' && a.length <= 1) {
+                if(a.length === 0) union(a, b);
+                else {
+                    var o = union(a[0]);
+                    var subClass = checkClass(a[0]);
+                    for(var key in b) {
+                        if(checkClass(key) === subClass) {
+                            if(typeof b[key] === 'object' && b[key] !== null) {
+                                a[key] = union(o);
+                                intersect(a[key], b[key]);
+                            } else a[key] = b[key];
+                        }
+                    }
+                }
+            } else if(checkClass(a) === 'Object' && checkClass(b) === 'Object' && Object.keys(a).length === 0) {
+                union(a, b);
+            } else {
+                for(var key in a) {
+                    if(b.hasOwnProperty(key) && checkClass(a[key]) === checkClass(b[key])) {
+                        if(typeof b[key] === 'object' && b[key] !== null) {
+                            intersect(a[key], b[key]);
+                        } else a[key] = b[key];
+                    } else delete a[key];
+                }
+            }
+        }
+        return a;
+    };
+
+    this.lib.checkClass = checkClass;
+    this.lib.union = union;
+    this.lib.intersect = intersect;
     return this;
 }).call(jsGen);

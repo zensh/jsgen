@@ -48,7 +48,7 @@ fs.readFile('package.json', 'utf8', function(err, data) {
         if(err) restlog.error(err);
         if(data) {
             jsGen.info = JSON.parse(data);
-            jsGen.api.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
+            if(jsGen.info !== jsGen.config.info) jsGen.api.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
                 if(err) console.log(err);
                 else console.log(jsGen.config);
             });

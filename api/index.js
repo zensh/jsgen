@@ -1,7 +1,9 @@
-var union = jsGen.lib.tools.union,
+var url = require('url'),
+    union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUserID = jsGen.lib.tools.checkUserID,
+    checkUrl = jsGen.lib.tools.checkUrl,
     checkUserName = jsGen.lib.tools.checkUserName,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
@@ -9,17 +11,24 @@ var cache = {
     _initTime: 0
 };
 cache._init = function(callback) {
-        var that = this;
-        jsGen.dao.index.getGlobalConfig(function(err, doc) {
-            if(err) jsGen.errlog.error(err);
-            else that._update(doc);
-            if(callback) callback(err, that.data);
-        });
-        return this;
+    var that = this;
+    jsGen.dao.index.getGlobalConfig(function(err, doc) {
+        if(err) jsGen.errlog.error(err);
+        else that._update(doc);
+        if(callback) callback(err, that.data);
+    });
+    return this;
 };
 cache._update = function(obj) {
     union(this, obj);
     this._initTime = Date.now();
+};
+
+function setGlobalConfig(obj, callback) {
+    jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
+        if(doc) cache._update(doc);
+        if(callback) return callback(err, doc);
+    });
 };
 
 function setVisitHistory(req) {
@@ -36,7 +45,9 @@ function setVisitHistory(req) {
     visit.data[4] = info.name || 'unknow';
     visit.data[5] = info.os.toString() || 'unknow';
     process.nextTick(function() {
-        setGlobalConfig({visit: 1});
+        setGlobalConfig({
+            visit: 1
+        });
         jsGen.dao.index.setVisitHistory(visit, function(err, doc) {
             if(err && err.code === 10131) {
                 visit._id += 1;
@@ -75,13 +86,6 @@ function getvisitHistory(req, res) {
     }
 };
 
-function setGlobalConfig(obj, callback) {
-    jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
-        if (doc) cache._update(doc);
-        if (callback) return callback(err, doc);
-    });
-};
-
 function getFn(req, res) {
     var body = union(cache);
     delete body.visitHistory;
@@ -100,19 +104,68 @@ function getFn(req, res) {
 
 function postFn(req, res) {
     var body = {};
-    if(req.session.Uid === 'Uadmin') {
-        newObj = req.apibody;
+    var newObj = {
+        domain: '',
+        title: '',
+        url: '',
+        logo: '',
+        email: '',
+        description: '',
+        metatitle: '',
+        metadesc: '',
+        keywords: '',
+        ArticleTagsMax: 0,
+        UserTagsMax: 0,
+        TitleMinLen: 0,
+        TitleMaxLen: 0,
+        SummaryMaxLen: 0,
+        ContentMinLen: 0,
+        ContentMaxLen: 0,
+        UserNameMinLen: 0,
+        UserNameMaxLen: 0,
+        CommentUp: 0,
+        RecommendUp: 0,
+        UsersScore: [0, 0, 0, 0, 0, 0, 0],
+        ArticleStatus: [0, 0],
+        ArticleHots: [0, 0, 0, 0, 0],
+        smtp: {
+            host: '',
+            secureConnection: true,
+            port: 0,
+            auth: {
+                user: '',
+                pass: ''
+            },
+            senderName: '',
+            senderEmail: ''
+        },
+        register: true
+    };
+    console.log(req.apibody);
+    console.log(req.session);
+    try {
+        if(req.session.Uid !== 'Uadmin') throw new Error(jsGen.lib.Err.userRoleErr);
+        newObj = intersect(newObj, req.apibody);
+        if(newObj.domain && !checkUrl(newObj.domain)) throw new Error(jsGen.lib.Err.globalDomainErr);
+        if(newObj.url) {
+            if(!checkUrl(newObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
+            urlObj = url.parse(newObj.url);
+            if(newObj.domain && newObj.domain !== urlObj.hostname) throw new Error(jsGen.lib.Err.globalUrlErr);
+            else if(jsGen.config.domain !== urlObj.hostname) throw new Error(jsGen.lib.Err.globalUrlErr);
+        }
         setGlobalConfig(newObj, function(err, doc) {
             if(err) {
-                body.err = jsGen.lib.Err.dbErr;
                 jsGen.errlog.error(err);
+                throw new Error(jsGen.lib.Err.dbErr);
             } else {
                 body = doc;
+                jsGen.dao.db.close();
+                return res.sendjson(body);
             }
-            return res.sendjson(body);
         });
-    } else {
-        body.err = jsGen.lib.Err.userRoleErr;
+    } catch(err) {
+        jsGen.dao.db.close();
+        body.err = err.toString();
         return res.sendjson(body);
     }
 };
