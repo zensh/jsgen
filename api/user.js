@@ -190,6 +190,7 @@ function login(req, res) {
 
 function register(req, res) {
     var data = req.apibody;
+    if(!jsGen.config.register) return res.sendjson({err: jsGen.lib.Err.registerClose});
     adduser(data, function(err, doc) {
         if(doc) {
             req.session.Uid = doc._id;
@@ -231,11 +232,13 @@ function setReset(resetObj, callback) {
             jsGen.errlog.error(err);
             return callback(err, null);
         }
-        var email = resetObj.e || doc.email;
-        resetObj.k = HmacMD5(HmacMD5(userObj.resetKey, resetObj.r), email, 'base64');
-        var resetUrl = new Buffer(JSON.stringify(resetObj)).toString('base64');
-        resetUrl = 'http://' + jsGen.config.url + '/api/user/reset/' + resetUrl;
-        jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(callback);
+        if(doc) {
+            resetObj.k = HmacMD5(HmacMD5(userObj.resetKey, resetObj.r), resetObj.u, 'base64');
+            var resetUrl = new Buffer(JSON.stringify(resetObj)).toString('base64');
+            resetUrl = jsGen.config.url + '/api/user/reset/' + resetUrl;
+            var email = resetObj.e || doc.email;
+            jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(callback);
+        }
     });
 };
 
@@ -463,55 +466,53 @@ function resetUser(req, res) {
     var _id = null;
     try {
         var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
-        if(reset.e && reset.r && reset.k) {
-            if(reset.u && cache[reset.u]) _id = jsGen.dao.user.convertID(cache[reset.u]._id);
-            else if(cache[reset.e]) _id = jsGen.dao.user.convertID(cache[reset.e]._id);
-            else throw new Error(jsGen.lib.Err.resetInvalid);
-            jsGen.dao.user.getAuth(_id, function(err, doc) {
-                var userObj = {};
-                userObj._id = _id;
-                if(err) {
-                    jsGen.errlog.error(err);
-                    throw new Error(jsGen.lib.Err.dbErr);
-                } else if(doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 3) {
-                    if(HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.e, 'base64') === reset.k) {
-                        switch(reset.r) {
-                        case 'locked':
-                            userObj.locked = false;
-                            break;
-                        case 'role':
-                            userObj.role = 'user';
-                            break;
-                        case 'email':
-                            userObj.email = reset.e;
-                            break;
-                        case 'passwd':
-                            userObj.passwd = SHA256(reset.e);
-                            break;
-                        default:
-                            throw new Error(jsGen.lib.Err.resetInvalid);
+        if(!reset.u || !reset.r || !reset.k) throw new Error(jsGen.lib.Err.resetInvalid);
+        if(cache[reset.u]) _id = jsGen.dao.user.convertID(cache[reset.u]._id);
+        else throw new Error(jsGen.lib.Err.resetInvalid);
+        jsGen.dao.user.getAuth(_id, function(err, doc) {
+            var userObj = {};
+            userObj._id = _id;
+            if(err) {
+                jsGen.errlog.error(err);
+                throw new Error(jsGen.lib.Err.dbErr);
+            } else if(doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 3) {
+                if(HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.u, 'base64') === reset.k) {
+                    switch(reset.r) {
+                    case 'locked':
+                        userObj.locked = false;
+                        break;
+                    case 'role':
+                        userObj.role = 'user';
+                        break;
+                    case 'email':
+                        userObj.email = reset.e;
+                        break;
+                    case 'passwd':
+                        userObj.passwd = SHA256(reset.e);
+                        break;
+                    default:
+                        throw new Error(jsGen.lib.Err.resetInvalid);
+                    }
+                    userObj.resetDate = Date.now();
+                    userObj.resetKey = '';
+                    jsGen.dao.user.setUserInfo(userObj, function(err, doc) {
+                        if(err) {
+                            jsGen.errlog.error(err);
+                            throw new Error(jsGen.lib.Err.dbErr);
+                        } else if(doc) {
+                            doc._id = jsGen.dao.user.convertID(doc._id);
+                            body = union(UserPrivateTpl);
+                            body = intersect(body, doc);
+                            setCache(body);
+                            req.session.Uid = body._id;
+                            req.session.role = body.role;
+                            jsGen.dao.db.close();
+                            return res.sendjson(body);
                         }
-                        userObj.resetDate = Date.now();
-                        userObj.resetKey = '';
-                        jsGen.dao.user.setUserInfo(userObj, function(err, doc) {
-                            if(err) {
-                                jsGen.errlog.error(err);
-                                throw new Error(jsGen.lib.Err.dbErr);
-                            } else if(doc) {
-                                doc._id = jsGen.dao.user.convertID(doc._id);
-                                body = union(UserPrivateTpl);
-                                body = intersect(body, doc);
-                                setCache(body);
-                                req.session.Uid = body._id;
-                                req.session.role = body.role;
-                                jsGen.dao.db.close();
-                                return res.sendjson(body);
-                            }
-                        });
-                    } else throw new Error(jsGen.lib.Err.resetInvalid);
-                } else throw new Error(jsGen.lib.Err.resetOutdate);
-            });
-        } else throw new Error(jsGen.lib.Err.resetInvalid);
+                    });
+                } else throw new Error(jsGen.lib.Err.resetInvalid);
+            } else throw new Error(jsGen.lib.Err.resetOutdate);
+        });
     } catch(e) {
         jsGen.dao.db.close();
         body.err = e.toString();

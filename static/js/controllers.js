@@ -40,6 +40,11 @@ jsGen.userLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
 
 jsGen.userRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
+    $scope.checkResult = false;
+    $scope.checkPwd = function() {
+        if($scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
+        else $scope.checkResult = false;
+    };
     $scope.submit = function() {
         data.name = $scope.name;
         data.passwd = CryptoJS.SHA256($scope.passwd).toString();
@@ -116,14 +121,14 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
     $scope.sexArray = ['male', 'female'];
     $scope.user = jsGen.lib.union(jsGen.global.user);
     initTags($scope.user.tagsList);
-    $scope.checkResult = true;
+    $scope.checkResult = false;
     $scope.user.err = null;
     $scope.checkTags = function() {
         if($scope.tagsList.length > (jsGen.global.UserTagsMax || 5)) $scope.tagsList.length = (jsGen.global.UserTagsMax || 5);
     };
     $scope.checkPwd = function() {
-        if($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = false;
-        else $scope.checkResult = true;
+        if($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = true;
+        else $scope.checkResult = false;
     };
     $scope.submit = function() {
         var data = {};
@@ -143,61 +148,29 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
 }];
 
 jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
-    var result = {};
-    var tagsArray = [];
-    var config = {
-        domain: '',
-        title: '',
-        url: '',
-        logo: '',
-        email: '',
-        description: '',
-        metatitle: '',
-        metadesc: '',
-        keywords: '',
-        ArticleTagsMax: 0,
-        UserTagsMax: 0,
-        TitleMinLen: 0,
-        TitleMaxLen: 0,
-        SummaryMaxLen: 0,
-        ContentMinLen: 0,
-        ContentMaxLen: 0,
-        UserNameMinLen: 0,
-        UserNameMaxLen: 0,
-        CommentUp: 0,
-        RecommendUp: 0,
-        UsersScore: [0, 0, 0, 0, 0, 0, 0],
-        ArticleStatus: [0, 0],
-        ArticleHots: [0, 0, 0, 0, 0],
-        smtp: {
-            host: '',
-            secureConnection: true,
-            port: 0,
-            auth: {
-                user: '',
-                pass: ''
-            },
-            senderName: '',
-            senderEmail: ''
-        },
-        register: true
-    };
-    $scope.global = jsGen.lib.union(config);
-    jsGen.lib.intersect($scope.global, jsGen.global);
-    $scope.checkResult = true;
+    var originData = {};
+    $scope.global = rest.indexAdmin.get({}, function() {
+        originData = jsGen.lib.union($scope.global);
+    });
     $scope.global.err = null;
     $scope.submit = function() {
-        if(!$scope.global.passwd) return;
-        var data = jsGen.lib.union(config);
-        jsGen.lib.intersect(data, $scope.global);
+        var data = jsGen.lib.union($scope.global);
+        angular.forEach(data.UsersScore, function(value, key) {
+            data.UsersScore[key] = Number(value);
+        });
+        angular.forEach(data.ArticleStatus, function(value, key) {
+            data.ArticleStatus[key] = Number(value);
+        });
+        angular.forEach(data.ArticleHots, function(value, key) {
+            data.ArticleHots[key] = Number(value);
+        });
         for(var key in data) {
-            if(angular.equals(data[key], jsGen.global[key])) delete data[key];
+            if(angular.equals(data[key], originData[key])) delete data[key];
         }
-        data.passwd = CryptoJS.SHA256($scope.global.passwd).toString();
-        data.passwd = CryptoJS.HmacSHA256(data.passwd, jsGen.global.user.name).toString();
-        result = rest.index.save({}, data, function() {
-            $scope.global = result;
-            jsGen.lib.union(jsGen.global, result);
+        $scope.global = rest.indexAdmin.save({}, data, function() {
+            var clone = jsGen.lib.union(jsGen.global);
+            jsGen.lib.intersect(clone, $scope.global);
+            jsGen.lib.union(jsGen.global, clone);
         });
     };
 }];

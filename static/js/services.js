@@ -11,6 +11,7 @@ angular.module('jsGen.services', ['ngResource']).
 factory('rest', ['$resource', function($resource) {
     return {
         index: $resource('/api/index'),
+        indexAdmin: $resource('/api/index/admin'),
         login: $resource('/api/user/login'),
         logout: $resource('/api/user/logout'),
         register: $resource('/api/user/register'),

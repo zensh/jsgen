@@ -1,6 +1,7 @@
 var url = require('url'),
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
+    equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUserID = jsGen.lib.tools.checkUserID,
     checkUrl = jsGen.lib.tools.checkUrl,
@@ -86,12 +87,14 @@ function getvisitHistory(req, res) {
     }
 };
 
-function getFn(req, res) {
+function getGlobal(req, res) {
     var body = union(cache);
-    delete body.visitHistory;
-    delete body.email;
-    delete body.smtp;
-    if(req.session.Uid) {
+    if(req.session.Uid !== 'Uadmin' || req.path[2] !== 'admin') {
+        delete body.visitHistory;
+        delete body.email;
+        delete body.smtp;
+    }
+    if(req.session.Uid && req.path[2] !== 'admin') {
         body.user = {};
         body.user._id = req.session.Uid;
         body.user.role = req.session.role;
@@ -102,63 +105,67 @@ function getFn(req, res) {
     return res.sendjson(body);
 };
 
-function postFn(req, res) {
-    var body = {};
-    var newObj = {
-        domain: '',
-        title: '',
-        url: '',
-        logo: '',
-        email: '',
-        description: '',
-        metatitle: '',
-        metadesc: '',
-        keywords: '',
-        ArticleTagsMax: 0,
-        UserTagsMax: 0,
-        TitleMinLen: 0,
-        TitleMaxLen: 0,
-        SummaryMaxLen: 0,
-        ContentMinLen: 0,
-        ContentMaxLen: 0,
-        UserNameMinLen: 0,
-        UserNameMaxLen: 0,
-        CommentUp: 0,
-        RecommendUp: 0,
-        UsersScore: [0, 0, 0, 0, 0, 0, 0],
-        ArticleStatus: [0, 0],
-        ArticleHots: [0, 0, 0, 0, 0],
-        smtp: {
-            host: '',
-            secureConnection: true,
-            port: 0,
-            auth: {
-                user: '',
-                pass: ''
-            },
-            senderName: '',
-            senderEmail: ''
-        },
-        register: true
-    };
-    console.log(req.apibody);
-    console.log(req.session);
+function setGlobal(req, res) {
+    var body = {},
+        defaultObj = {
+            domain: '',
+            title: '',
+            url: '',
+            logo: '',
+            email: '',
+            description: '',
+            metatitle: '',
+            metadesc: '',
+            keywords: '',
+            ArticleTagsMax: 0,
+            UserTagsMax: 0,
+            TitleMinLen: 0,
+            TitleMaxLen: 0,
+            SummaryMaxLen: 0,
+            ContentMinLen: 0,
+            ContentMaxLen: 0,
+            UserNameMinLen: 0,
+            UserNameMaxLen: 0,
+            register: true,
+            UsersScore: [0, 0, 0, 0, 0, 0, 0],
+            ArticleStatus: [0, 0],
+            ArticleHots: [0, 0, 0, 0, 0],
+            smtp: {
+                host: '',
+                secureConnection: true,
+                port: 0,
+                auth: {
+                    user: '',
+                    pass: ''
+                },
+                senderName: '',
+                senderEmail: ''
+            }
+        };
+    function checkArray(key, i, array) {
+        if(typeof key !== 'number') key = Number(key);
+        if(key < 0) key = 0;
+        array[i] = key;
+    }
+    var setObj = union(defaultObj);
+    intersect(setObj, req.apibody);
     try {
         if(req.session.Uid !== 'Uadmin') throw new Error(jsGen.lib.Err.userRoleErr);
-        newObj = intersect(newObj, req.apibody);
-        if(newObj.domain && !checkUrl(newObj.domain)) throw new Error(jsGen.lib.Err.globalDomainErr);
-        if(newObj.url) {
-            if(!checkUrl(newObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
-            urlObj = url.parse(newObj.url);
-            if(newObj.domain && newObj.domain !== urlObj.hostname) throw new Error(jsGen.lib.Err.globalUrlErr);
-            else if(jsGen.config.domain !== urlObj.hostname) throw new Error(jsGen.lib.Err.globalUrlErr);
+        if(setObj.domain && !checkUrl(setObj.domain)) throw new Error(jsGen.lib.Err.globalDomainErr);
+        if(setObj.url && !checkUrl(setObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
+        if(setObj.email && !checkEmail(setObj.email)) throw new Error(jsGen.lib.Err.globalEmailErr);
+        if(setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
+        if(setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
+        if(setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
+        for(var key in setObj) {
+            if(equal(setObj[key], cache[key])) delete setObj[key];
         }
-        setGlobalConfig(newObj, function(err, doc) {
+        setGlobalConfig(setObj, function(err, doc) {
             if(err) {
                 jsGen.errlog.error(err);
                 throw new Error(jsGen.lib.Err.dbErr);
             } else {
-                body = doc;
+                body = intersect(defaultObj, doc);
                 jsGen.dao.db.close();
                 return res.sendjson(body);
             }
@@ -167,6 +174,24 @@ function postFn(req, res) {
         jsGen.dao.db.close();
         body.err = err.toString();
         return res.sendjson(body);
+    }
+};
+
+function getFn(req, res) {
+    switch(req.path[2]) {
+    case 'admin':
+        return getGlobal(req, res);
+    default:
+        return getGlobal(req, res);
+    }
+};
+
+function postFn(req, res) {
+    switch(req.path[2]) {
+    case 'admin':
+        return setGlobal(req, res);
+    default:
+        return res.r404();
     }
 };
 

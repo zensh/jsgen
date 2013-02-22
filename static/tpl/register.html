@@ -46,13 +46,22 @@
                                     密码太长!
                                 </span>
                             </div>
+                            <div class="input-control password">
+                                <input type="password" name="password2" ng-model="passwd2" ng-change="checkPwd()"
+                                />
+                                <span>再次输入密码</span>
+                                <span class="fg-color-red" ng-show="checkResult">
+                                    密码不一致！
+                                </span>
+                            </div>
                             <button ng-click="submit()" class="bg-color-orangeDark fg-color-white" ng-disabled="register.name.$error.required
                                 || register.email.$error.required
                                 || register.email.$error.email
                                 || register.password.$error.required
                                 || register.password.$error.minlength
                                 || register.password.$error.maxlength
-                                || (name | checkName)">注 册</button>
+                                || (name | checkName)
+                                || checkResult">注 册</button>
                         </form>
                     </div>
                 </div>
