@@ -1,87 +1,37 @@
-<div class="grid">
     <div class="row">
-        <div class="span8">
-            <div class="page-region" ng-include src="url">
-
-            </div>
+        <div class="span9" ng-include src="url">
         </div>
-        <div class="span4">
-            <div class="page-region">
-                <div class="page-region-content userinfo bg-color-blueLight fg-color-blueDark">
-                    <img class="border-color-blue width-middle" ng-src="{{user.avatar}}"/>
-                    <div ng-show="user.name == global.user.name">
-                            <a href="#" class="button bg-color-blue fg-color-white" ng-click="set('user-edit.html')">用户设置</a>
-                    </div>
-                    <div ng-show="user._id">
-                        <strong>Uid：</strong>
-                        {{user._id}}
-                    </div>
-                    <div ng-show="user.name">
-                        <strong>Name：</strong>
-                        {{user.name}}
-                    </div>
-                    <div ng-show="user.email">
-                        <strong>Email：</strong>
-                        {{user.email}}
-                    </div>
-                    <div ng-show="user.score">
-                        <strong>用户积分：</strong>
-                        {{user.score}}
-                    </div>
-                    <div ng-show="user.role">
-                        <strong>用户权限：</strong>
-                        {{user.role | role}}
-                    </div>
-                    <div ng-show="user.sex">
-                        <strong>用户性别：</strong>
-                        {{user.sex | sex}}
-                    </div>
-                    <div ng-show="user.desc">
-                        <strong>用户简介：</strong>
-                        {{user.desc}}
-                    </div>
-                    <div ng-show="user.tagsList">
-                        <strong>用户标签：</strong>
-                        <a class="mini button" ng-href="{{'/'+tag._id}}" ng-repeat="tag in user.tagsList">{{tag.tag}}</a>
-                    </div>
-                    <div ng-show="user.fans">
-                        <strong>用户粉丝：</strong>
-                        {{user.fans}}
-                    </div>
-                    <div ng-show="user.follow">
-                        <strong>用户关注：</strong>
-                        {{user.follow}}
-                    </div>
-                    <div ng-show="user.messages">
-                        <strong>用户消息：</strong>
-                        {{user.messages}}
-                    </div>
-                    <div ng-show="user.articles">
-                        <strong>用户文章：</strong>
-                        {{user.articles}}
-                    </div>
-                    <div ng-show="user.comments">
-                        <strong>用户评论：</strong>
-                        {{user.comments}}
-                    </div>
-                    <div ng-show="user.collections">
-                        <strong>用户合集：</strong>
-                        {{user.collections}}
-                    </div>
-                    <div ng-show="user.collect">
-                        <strong>用户收藏：</strong>
-                        {{user.collect}}
-                    </div>
-                    <div ng-show="user.date">
-                        <strong>注册时间：</strong>
-                        {{user.date | date:'yyyy-MM-dd HH:mm'}}
-                    </div>
-                    <div ng-show="user.lastLoginDate">
-                        <strong>登录时间：</strong>
-                        {{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}
-                    </div>
+        <div class="span3">
+               <div class="thumbnail">
+                  <img ng-src="{{user.avatar}}"/>
+                  <div class="caption">
+                    <h4 class="text-center">{{user.name}}<span class="muted">[Uid:{{user._id}}]</span></h4>
+                    <ul class="inline">
+                      <li ng-show="user.email">Email：{{user.email}}</li>
+                      <li>权限：{{user.role | role}}</li>
+                      <li>性别：{{user.sex | sex}}</li>
+                      <li>积分：{{user.score}}</li>
+                      <li>粉丝：{{user.fans}}</li>
+                      <li>关注：{{user.follow}}</li>
+                      <li>收藏：{{user.collect}}</li>
+                      <li>文章：{{user.articles}}</li>
+                      <li>评论：{{user.comments}}</li>
+                      <li>合集：{{user.collections}}</li>
+                    </ul>
+                    <dl>
+                      <dt> 用户简介：</dt>
+                      <dd>{{user.desc}}</dd>
+                      <dt> 用户标签：</dt>
+                      <dd><a class="btn btn-link" ng-href="{{'/'+tag._id}}" ng-repeat="tag in user.tagsList">{{tag.tag}}</a></dd>
+                      <dt>注册时间：</dt>
+                      <dd>{{user.date | date:'yyyy-MM-dd HH:mm'}}</dd>
+                      <dt>登录时间：</dt>
+                      <dd>{{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}</dd>
+                    </dl>
+                  </div>
+                  <p class="text-center">
+                    <button class="btn btn-large btn-block btn-primary" type="button" ng-click="set('user-edit.html')">用户设置</button>
+                    </p>
                 </div>
-            </div>
         </div>
     </div>
-</div>

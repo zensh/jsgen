@@ -3,11 +3,14 @@
 /* Controllers */
 jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, rest, $location, cache) {
     if(!jsGen.cache) jsGen.cache = cache;
+    $scope.isAdmin = false;
+    $scope.isLogin = false;
     if(!jsGen.global.date) jsGen.global = rest.index.get({}, function() {
         if(jsGen.global.user) {
-            if(jsGen.global.user.role === 'admin') jsGen.global.user.adminUrl = '/admin';
-            else jsGen.global.user.adminUrl = '/home';
-        }
+            $scope.isLogin = true;
+            if(jsGen.global.user.role === 'admin') $scope.isAdmin = true;
+            else $scope.isAdmin = false;
+        } else $scope.isLogin = false;
     });
     $scope.global = jsGen.global;
 
