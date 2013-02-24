@@ -1,60 +1,48 @@
-<div class="grid">
-    <div class="row">
-        <div class="span4">
-                <div class="page-header">
-                    <div class="page-header-content">
-                        <h3 class="fg-color-orangeDark" ng-hide="global.user.err">
-                            立即注册
-                        </h3>
-                        <h3 class="fg-color-red" ng-show="global.user.err">
-                            {{global.user.err}}
-                        </h3>
-                    </div>
-                </div>
-                <div class="page-region">
-                    <div class="page-region-content">
-                        <form name="register">
-                            <div class="input-control text">
-                                <input type="text" placeholder="name" name="name" ng-model="name" required/>
-                                <span class="fg-color-red" ng-show="register.name.$error.required">
-                                    请输入用户名!
-                                </span>
-                                <span class="fg-color-red" ng-show="!register.name.$error.required && (name | checkName)">
-                                    {{name | checkName}}
-                                </span>
-                            </div>
-                            <div class="input-control text">
-                                <input type="email" placeholder="email" name="email" ng-model="email"
-                                required/>
-                                <span class="fg-color-red" ng-show="register.email.$error.required">
-                                    请输入Email!
-                                </span>
-                                 <span class="fg-color-red" ng-show="register.email.$error.email">
-                                    无效的Email!
-                                </span>
-                            </div>
-                            <div class="input-control password">
-                                <input type="password" placeholder="password" name="password" ng-model="passwd"
-                                ng-minlength="6" ng-maxlength="20" required/>
-                                <span class="fg-color-red" ng-show="register.password.$error.required">
-                                    请输入密码!
-                                </span>
-                                <span class="fg-color-red" ng-show="register.password.$error.minlength">
-                                    密码太短!
-                                </span>
-                                <span class="fg-color-red" ng-show="register.password.$error.maxlength">
-                                    密码太长!
-                                </span>
-                            </div>
-                            <div class="input-control password">
-                                <input type="password" name="password2" ng-model="passwd2" ng-change="checkPwd()"
-                                />
-                                <span>再次输入密码</span>
-                                <span class="fg-color-red" ng-show="checkResult">
-                                    密码不一致！
-                                </span>
-                            </div>
-                            <button ng-click="submit()" class="bg-color-orangeDark fg-color-white" ng-disabled="register.name.$error.required
+<div class="row">
+    <div class="span4">
+        <div class="page-header">
+            <h3>用户注册</h3>
+        </div>
+        <div class="alert alert-error" ng-show="global.user.err">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{global.user.err.name}}</strong>
+            {{global.user.err.message}}
+        </div>
+        <form class="form-signin" name="register">
+            <span class="error" ng-show="register.name.$error.required">
+                请输入用户名!
+            </span>
+            <span class="error" ng-show="!register.name.$error.required && (name | checkName)">
+                {{name | checkName}}
+            </span>
+            <input class="input-block-level" type="text" placeholder="name" name="name"
+            ng-model="name" required/>
+            <span class="error" ng-show="register.email.$error.required">
+                请输入Email!
+            </span>
+            <span class="error" ng-show="register.email.$error.email">
+                无效的Email!
+            </span>
+            <input class="input-block-level" type="email" placeholder="email" name="email"
+            ng-model="email" required/>
+            <span class="error" ng-show="register.password.$error.required">
+                请输入密码!
+            </span>
+            <span class="error" ng-show="register.password.$error.minlength">
+                密码太短!
+            </span>
+            <span class="error" ng-show="register.password.$error.maxlength">
+                密码太长!
+            </span>
+            <input class="input-block-level" type="password" placeholder="password"
+            name="password" ng-model="passwd" ng-minlength="6" ng-maxlength="20" required/>
+            <span class="error" ng-show="register.password2.$error.required">再次输入密码</span>
+            <span class="error" ng-show="checkResult">
+                密码不一致！
+            </span>
+            <input class="input-block-level" type="password" name="password2" ng-model="passwd2" ng-change="checkPwd()"
+            required/>
+            <button ng-click="submit()" class="btn btn-large btn-primary" ng-disabled="register.name.$error.required
                                 || register.email.$error.required
                                 || register.email.$error.email
                                 || register.password.$error.required
@@ -62,15 +50,8 @@
                                 || register.password.$error.maxlength
                                 || (name | checkName)
                                 || checkResult">注 册</button>
-                        </form>
-                    </div>
-                </div>
-        </div>
-        <div class="span8">
-                <div class="page-region">
-                    <div class="page-region-content">
-                    </div>
-                </div>
-        </div>
+        </form>
+    </div>
+    <div class="span8">
     </div>
 </div>

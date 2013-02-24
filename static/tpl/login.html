@@ -19,10 +19,6 @@
             </span>
             <input class="input-block-level" type="password" placeholder="password"
             name="password" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
-            <label class="checkbox">
-                <input type="checkbox" value="记住我">
-                记住我
-            </label>
             <button ng-click="submit()" class="btn btn-large btn-primary" ng-disabled="login.name.$error.required
                                 || login.password.$error.required">登  录</button>
         </form>

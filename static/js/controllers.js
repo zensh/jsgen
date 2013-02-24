@@ -6,23 +6,27 @@ jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, res
     $scope.isAdmin = false;
     $scope.isLogin = false;
     if(!jsGen.global.date) jsGen.global = rest.index.get({}, function() {
-        if(jsGen.global.user) {
-            $scope.isLogin = true;
-            if(jsGen.global.user.role === 'admin') $scope.isAdmin = true;
-            else $scope.isAdmin = false;
-        } else $scope.isLogin = false;
+        $scope.checkUser();
     });
     $scope.global = jsGen.global;
 
     $scope.logout = function() {
         var doc = rest.logout.get({}, function() {
             if(doc.logout) delete jsGen.global.user;
+            $scope.checkUser();
             $location.path('/');
         });
     };
     $scope.clearUser = function() {
         delete jsGen.global.user;
     };
+    $scope.checkUser = function() {
+        if(jsGen.global.user && jsGen.global.user.role) {
+            $scope.isLogin = true;
+            if(jsGen.global.user.role === 'admin') $scope.isAdmin = true;
+            else $scope.isAdmin = false;
+        } else $scope.isLogin = false;
+    }
 }];
 
 jsGen.IndexCtrl = ['$scope', 'rest', function($scope, rest) {}];
@@ -34,8 +38,7 @@ jsGen.userLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
         jsGen.global.user = rest.login.save({}, data, function() {
-            if(jsGen.global.user.role === 'admin') jsGen.global.user.adminUrl = '/admin';
-            else jsGen.global.user.adminUrl = '/home';
+            $scope.checkUser();
             if(!jsGen.global.user.err) $location.path('/home');
         });
     };
