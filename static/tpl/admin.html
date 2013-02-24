@@ -1,47 +1,30 @@
-<div class="grid">
     <div class="row">
-        <div class="span9">
-            <div class="page-region" ng-include src="url">
-            </div>
+        <div class="span9" ng-include src="url">
         </div>
         <div class="span3">
-            <div class="page-region">
-                <div class="page-region-content">
-                    <ul class="side-menu unstyled">
-                        <li class="">
-                            <a href="#" ng-click="set('admin-user.html')"> 用户设置 </a>
-                            <ul class="unstyled">
-                                <li >
-                                    <a href="#" ng-click="switchTo()">用户信息</a>
-                                </li>
-                                <li >
-                                    <a href="#" ng-click="switchTo()">添加用户</a>
-                                </li>
-                                <li >
-                                    <a href="#" ng-click="switchTo()">修改用户</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" ng-click="set('admin-tag.html')"> 标签设置 </a>
-                            <ul class="unstyled">
-                                <li >
-                                    <a href="#" ng-click="switchTo()">用户信息</a>
-                                </li>
-                                <li >
-                                    <a href="#" ng-click="switchTo()">添加用户</a>
-                                </li>
-                                <li >
-                                    <a href="#" ng-click="switchTo()">修改用户</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" ng-click="set('admin-global.html')"> 网站设置 </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+              <ul class="nav nav-tabs nav-stacked text-center">
+                <li class="active">
+                    <a href="#" ng-click="set('admin-user.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-tag.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 标签管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-article.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 文章管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-article.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 评论管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-collection.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 合集管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-message.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 消息管理 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('admin-global.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 网站设置 </a>
+                </li>
+            </ul>
         </div>
     </div>
-</div>
+

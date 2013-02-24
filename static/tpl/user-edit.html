@@ -11,7 +11,7 @@
         <label>
             <strong>
             头像地址：</strong>
-            <span class="error" ng-show="userEdit.avatar.$error.url">无效的URL地址！</span>
+            <span class="text-error" ng-show="userEdit.avatar.$error.url">无效的URL地址！</span>
         </label>
         <input type="url" name="avatar" ng-model="user.avatar" class="input-block-level"
         />
@@ -19,13 +19,13 @@
         <label>
             <strong>
             用户名：</strong>
-            <span class="error" ng-show="(user.name | checkName)">{{user.name | checkName}}</span>
+            <span class="text-error" ng-show="(user.name | checkName)">{{user.name | checkName}}</span>
         </label>
         <input type="text" name="name" ng-model="user.name" />
         <label>
             <strong>
             Email：</strong>
-            <span class="error" ng-show="userEdit.email.$error.email">无效的Email!</span>
+            <span class="text-error" ng-show="userEdit.email.$error.email">无效的Email!</span>
         </label>
         <input type="email" name="email" ng-model="user.email" />
         <label>
@@ -40,7 +40,7 @@
         <label>
             <strong>
             用户标签：</strong>
-            <span class="info" ng-show="tagsList">{{tagsList}}</span>
+            <span class="text-info" ng-show="tagsList">{{tagsList}}</span>
         </label>
         <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/"
         ng-change="checkTags()" class="input-block-level" />
@@ -53,15 +53,15 @@
         <label>
             <strong>
             修改密码（不修改请留空）：</strong>
-            <span class="error" ng-show="userEdit.password.$error.minlength">密码太短!</span>
-            <span class="error" ng-show="userEdit.password.$error.maxlength">密码太长!</span>
+            <span class="text-error" ng-show="userEdit.password.$error.minlength">密码太短!</span>
+            <span class="text-error" ng-show="userEdit.password.$error.maxlength">密码太长!</span>
         </label>
         <input type="password" name="password" ng-model="user.passwd" ng-minlength="6"
         ng-maxlength="20" />
         <label>
             <strong>
             再次输入密码：</strong>
-            <span class="error" ng-show="checkResult">密码不一致！</span>
+            <span class="text-error" ng-show="checkResult">密码不一致！</span>
         </label>
         <input type="password" name="password2" ng-model="user.passwd2" ng-change="checkPwd()"
         />

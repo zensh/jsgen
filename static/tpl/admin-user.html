@@ -1,5 +1,13 @@
-<div class="page-region-content" ng-controller="jsGen.userAdminCtrl">
-    <table class="striped">
+<div class="" ng-controller="jsGen.userAdminCtrl">
+    <div class="page-header">
+            <h3>用户批量查询/设置</h3>
+    </div>
+    <div class="alert alert-error" ng-show="err">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>{{err.name}}</strong>
+        {{err.message}}
+    </div>
+    <table class="table table-condensed table-hover">
         <thead>
             <tr>
                 <th>Uid</th>
@@ -7,7 +15,10 @@
                 <th>Email</th>
                 <th>权限</th>
                 <th>积分</th>
+                <th>文章</th>
+                <th>粉丝</th>
                 <th>注册日期</th>
+                <th>登录时间</th>
             </tr>
         </thead>
         <tbody>
@@ -17,7 +28,10 @@
                 <td>{{user.email}}</td>
                 <td>{{user.role}}</td>
                 <td>{{user.score}}</td>
+                <td>{{user.articles}}</td>
+                <td>{{user.fans}}</td>
                 <td>{{user.date | date:'yy-MM-dd HH:mm'}}</td>
+                <td>{{user.lastLoginDate | date:'yy-MM-dd HH:mm'}}</td>
             </tr>
         </tbody>
         <tfoot>
@@ -25,22 +39,20 @@
     </table>
     <div class="pagination" ng-controller="jsGen.paginationCtrl">
         <ul>
-            <li class="first">
-                <a ng-click="paginationTo('first')"></a>
+            <li>
+                <a ng-click="paginationTo('first')"><i class="icon-step-backward"></i></a>
             </li>
-            <li class="prev">
-                <a ng-click="paginationTo('prev')"></a>
+            <li>
+                <a ng-click="paginationTo('prev')"><i class="icon-backward"></i></a>
             </li>
             <li class="active">
                 <a>{{pagination.now}}</a>
             </li>
-            <li class="next">
-                <a ng-click="paginationTo('next')"></a>
+            <li>
+                <a ng-click="paginationTo('next')"><i class="icon-forward"></i></a>
             </li>
-            <li class="last">
-                <a ng-click="paginationTo('last')"></a>
-            </li>
-            <li class="spaces">
+            <li>
+                <a ng-click="paginationTo('last')"><i class="icon-step-forward"></i></a>
             </li>
             <li>
                 <a ng-click="setNum(20)" title="每页20">20</a>

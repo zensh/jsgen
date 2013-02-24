@@ -1,37 +1,76 @@
-    <div class="row">
-        <div class="span9" ng-include src="url">
-        </div>
-        <div class="span3">
-               <div class="thumbnail">
-                  <img ng-src="{{user.avatar}}"/>
-                  <div class="caption">
-                    <h4 class="text-center">{{user.name}}<span class="muted">[Uid:{{user._id}}]</span></h4>
-                    <ul class="inline">
-                      <li ng-show="user.email">Email：{{user.email}}</li>
-                      <li>权限：{{user.role | role}}</li>
-                      <li>性别：{{user.sex | sex}}</li>
-                      <li>积分：{{user.score}}</li>
-                      <li>粉丝：{{user.fans}}</li>
-                      <li>关注：{{user.follow}}</li>
-                      <li>收藏：{{user.collect}}</li>
-                      <li>文章：{{user.articles}}</li>
-                      <li>评论：{{user.comments}}</li>
-                      <li>合集：{{user.collections}}</li>
-                    </ul>
-                    <dl>
+<div class="row">
+    <div class="span9" ng-include src="url">
+    </div>
+    <div class="span3">
+        <div class="thumbnail">
+            <img ng-src="{{user.avatar}}" />
+            <div class="caption">
+                <h4 class="text-center">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
+                <ul class="inline">
+                    <li ng-show="user.email">
+                        Email：{{user.email}}
+                    </li>
+                    <li>
+                        权限：{{user.role | role}}
+                    </li>
+                    <li>
+                        性别：{{user.sex | sex}}
+                    </li>
+                    <li>
+                        积分：{{user.score}}
+                    </li>
+                    <li>
+                        粉丝：{{user.fans}}
+                    </li>
+                    <li>
+                        关注：{{user.follow}}
+                    </li>
+                    <li>
+                        收藏：{{user.collect}}
+                    </li>
+                    <li>
+                        文章：{{user.articles}}
+                    </li>
+                    <li>
+                        评论：{{user.comments}}
+                    </li>
+                    <li>
+                        合集：{{user.collections}}
+                    </li>
+                </ul>
+                <dl>
                       <dt> 用户简介：</dt>
                       <dd>{{user.desc}}</dd>
                       <dt> 用户标签：</dt>
-                      <dd><a class="btn btn-link" ng-href="{{'/'+tag._id}}" ng-repeat="tag in user.tagsList">{{tag.tag}}</a></dd>
+                      <dd><ul class="inline"><li ng-repeat="tag in user.tagsList">
+                        <a ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
+                      </li></ul></dd>
                       <dt>注册时间：</dt>
                       <dd>{{user.date | date:'yyyy-MM-dd HH:mm'}}</dd>
                       <dt>登录时间：</dt>
                       <dd>{{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}</dd>
                     </dl>
-                  </div>
-                  <p class="text-center">
-                    <button class="btn btn-large btn-block btn-primary" type="button" ng-click="set('user-edit.html')">用户设置</button>
-                    </p>
-                </div>
+            </div>
+            <ul class="nav nav-tabs nav-stacked text-center">
+                <li class="active">
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户设置 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的收藏 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的文章 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的评论 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的合集 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的消息 </a>
+                </li>
+            </ul>
         </div>
     </div>
+</div>

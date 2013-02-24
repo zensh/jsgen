@@ -46,7 +46,7 @@ jsGen.userLoginCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
 
 jsGen.userRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var data = {};
-    $scope.checkResult = false;
+    $scope.checkResult = true;
     $scope.checkPwd = function() {
         if($scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
         else $scope.checkResult = false;
@@ -78,7 +78,6 @@ jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locatio
 
 jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
     $scope.user = jsGen.cache.users.get('U' + $routeParams.id);
-    //$scope.test = $location.absUrl();
     if(!$scope.user) $scope.user = rest.userView.get({
         Uid: 'U' + $routeParams.id
     }, function() {
@@ -122,12 +121,11 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
             tagsArray[i] = tagsList[i].tag;
         };
         $scope.tagsList = jsGen.lib.union(tagsArray);
-        //$scope.tags = $scope.tagsList.join(' ');
     };
     $scope.sexArray = ['male', 'female'];
     $scope.user = jsGen.lib.union(jsGen.global.user);
     initTags($scope.user.tagsList);
-    $scope.checkResult = false;
+    $scope.checkResult = true;
     $scope.user.err = null;
     $scope.checkTags = function() {
         if($scope.tagsList.length > (jsGen.global.UserTagsMax || 5)) $scope.tagsList.length = (jsGen.global.UserTagsMax || 5);
@@ -159,6 +157,10 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         originData = jsGen.lib.union($scope.global);
     });
     $scope.global.err = null;
+    $scope.tab = 'tab1';
+    $scope.setTab = function(tab) {
+        $scope.tab = tab;
+    }
     $scope.submit = function() {
         var data = jsGen.lib.union($scope.global);
         angular.forEach(data.UsersScore, function(value, key) {

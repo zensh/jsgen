@@ -1721,10 +1721,6 @@ select:focus:invalid:focus {
 .form-actions:after {
   clear: both;
 }
-.help-block,
-.help-inline {
-  color: #595959;
-}
 .help-block {
   display: block;
   margin-bottom: 10px;
@@ -2429,7 +2425,7 @@ input[type="submit"].btn.btn-mini {
   *margin-right: .3em;
   line-height: 14px;
   vertical-align: text-top;
-  background-image: url("../img/glyphicons-halflings.png");
+  background-image: url("./img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
   margin-top: 1px;
@@ -2440,6 +2436,8 @@ input[type="submit"].btn.btn-mini {
 .nav-pills > .active > a > [class*=" icon-"],
 .nav-list > .active > a > [class^="icon-"],
 .nav-list > .active > a > [class*=" icon-"],
+.nav-tabs > .active > a > [class^="icon-"],
+.nav-tabs > .active > a > [class*=" icon-"],
 .navbar-inverse .nav > .active > a > [class^="icon-"],
 .navbar-inverse .nav > .active > a > [class*=" icon-"],
 .dropdown-menu > li > a:hover > [class^="icon-"],
@@ -2452,7 +2450,7 @@ input[type="submit"].btn.btn-mini {
 .dropdown-submenu:focus > a > [class^="icon-"],
 .dropdown-submenu:hover > a > [class*=" icon-"],
 .dropdown-submenu:focus > a > [class*=" icon-"] {
-  background-image: url("../img/glyphicons-halflings-white.png");
+  background-image: url("./img/glyphicons-halflings-white.png");
 }
 .icon-glass {
   background-position: 0      0;
@@ -2690,9 +2688,11 @@ input[type="submit"].btn.btn-mini {
 }
 .icon-chevron-left {
   background-position: -432px -72px;
+  float: left;
 }
 .icon-chevron-right {
   background-position: -456px -72px;
+  float: right;
 }
 .icon-plus-sign {
   background-position: 0 -96px;
@@ -3208,8 +3208,8 @@ input[type="submit"].btn.btn-mini {
 .nav-tabs > .active > a,
 .nav-tabs > .active > a:hover,
 .nav-tabs > .active > a:focus {
-  color: #555555;
-  background-color: #ffffff;
+  color: #ffffff;
+  background-color: #0088cc;
   border: 1px solid #ddd;
   border-bottom-color: transparent;
   cursor: default;
@@ -6307,10 +6307,4 @@ button.close {
 }
 .navbar img {
     height: 40px;
-}
-.error {
-    color: #b94a48;
-}
-.info {
-    color: #3a87ad;;
 }

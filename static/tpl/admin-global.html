@@ -1,152 +1,314 @@
-<div class="page-region-content" ng-controller="jsGen.adminGlobalCtrl">
-    <div class="notices" ng-show="global.err">
-        <div class="bg-color-red">
-            <div class="notice-header fg-color-yellow">
-                {{global.err}}
-            </div>
+<div class="tabbable" ng-controller="jsGen.adminGlobalCtrl">
+
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a ng-click="setTab('tab1')" data-toggle="tab">网站设置</a>
+        </li>
+        <li>
+            <a ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
+        </li>
+        <li>
+            <a ng-click="setTab('tab3')" data-toggle="tab">SMTP设置</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" ng-switch on="tab">
+        <div class="alert alert-error" ng-show="global.err">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{global.err.name}}</strong>
+            {{global.err.message}}
+        </div>
+
+        <div class="active" ng-switch-when="tab1">
+            <form name="globalEdit" class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">
+                    网站域名：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="domain" ng-model="global.domain" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站网址[含http://]：
+                    </label>
+                    <div class="controls">
+                    <input type="url" name="url" ng-model="global.url" />
+                    <span class="text-error" ng-show="globalEdit.url.$error.url">
+                    无效的URL地址！
+                    </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站Logo：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="logo" ng-model="global.logo" />
+                    <img ng-src="{{global.logo}}" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    管理员Email[不公开]：
+                    </label>
+                    <div class="controls">
+                    <input type="email" name="email" ng-model="global.email" />
+                    <span class="text-error" ng-show="globalEdit.email.$error.email">无效的Email!</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站名称：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="title" ng-model="global.title" ng-maxlength="20"/>
+                    <span class="text-error" ng-show="globalEdit.title.$error.maxlength">
+                    网站名称不能超过20个字符!
+                    </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站副标题：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="description" ng-model="global.description" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站Meta标题[SEO]：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="metatitle" ng-model="global.metatitle" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站Meta描述[SEO]：
+                    </label>
+                    <div class="controls">
+                    <textarea ng-model="global.metadesc" class="input-block-level">
+                    </textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    网站Meta关键词[SEO]：
+                    </label>
+                    <div class="controls">
+                    <textarea ng-model="global.keywords" class="input-block-level">
+                    </textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    用户注册：
+                    </label>
+                    <div class="controls">
+                    <label class="radio inline">
+                    <input type="radio" ng-model="global.register" value="true">
+                    <span class="help-inline">开放</span>
+                    </label>
+                    <label class="radio inline">
+                    <input type="radio" ng-model="global.register" value="false">
+                    <span class="help-inline">关闭</span>
+                    </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" ng-click="submit()">保存</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="" ng-switch-when="tab2">
+            <form name="globalEdit" class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">
+                    文章允许最多标签数量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="ArticleTagsMax" ng-model="global.ArticleTagsMax"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    用户允许最多标签数量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="UserTagsMax" ng-model="global.UserTagsMax"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    标题最短字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="TitleMinLen" ng-model="global.TitleMinLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    标题最长字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="TitleMaxLen" ng-model="global.TitleMaxLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    摘要最长字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="SummaryMaxLen" ng-model="global.SummaryMaxLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    文章最短字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="ContentMinLen" ng-model="global.ContentMinLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    文章最长字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="ContentMaxLen" ng-model="global.ContentMaxLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    用户名最短字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="UserNameMinLen" ng-model="global.UserNameMinLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    用户名最长字节数：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="UserNameMaxLen" ng-model="global.UserNameMaxLen"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    用户积分系数：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="UsersScore" ng-model="global.UsersScore" ng-list="/[,，\s]/"/>
+                    <span class="text-info help-block">[评论×<strong>{{global.UsersScore[0]}}</strong>
+                    ，文章×<strong>{{global.UsersScore[1]}}</strong>，关注×<strong>{{global.UsersScore[2]}}</strong>
+                    ，粉丝×<strong>{{global.UsersScore[3]}}</strong>，文章热度×<strong>{{global.UsersScore[4]}}</strong>，
+                    注册时长天数×<strong>{{global.UsersScore[5]}}</strong>，登录次数×<strong>{{global.UsersScore[6]}}</strong>]</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    评论提升系数：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="ArticleStatus" ng-model="global.ArticleStatus" ng-list="/[,，\s]/" />
+                    <span class="text-info help-block">[评论的评论数达到<strong>{{global.ArticleStatus[0]}}</strong>时，自动提升正常文章，
+                    达到<strong>{{global.ArticleStatus[1]}}</strong>时，自动提升为推荐文章]</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    文章热度系数：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="ArticleHots" ng-model="global.ArticleHots" ng-list="/[,，\s]/"/>
+                    <span class="text-info help-block">[访问+<strong>{{global.ArticleHots[0]}}</strong>，支持/反对±<strong>
+                    {{global.ArticleHots[1]}}</strong>，评论+<strong>{{global.ArticleHots[2]}}</strong>，收藏+
+                    <strong>{{global.ArticleHots[3]}}</strong>，置顶+<strong>{{global.ArticleHots[4]}}</strong>]</span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" ng-click="submit()">保存</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="" ng-switch-when="tab3">
+            <form name="globalEdit" class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">
+                    服务器地址：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="smtpHost" ng-model="global.smtp.host" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    服务器端口：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="smtpPort" ng-model="global.smtp.port" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    SMTP用户名：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="smtpAuthUser" ng-model="global.smtp.auth.user"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    SMTP用户密码：
+                    </label>
+                    <div class="controls">
+                    <input type="password" name="smtpAuthPass" ng-model="global.smtp.auth.pass"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    发送人名称：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="smtpSenderName" ng-model="global.smtp.senderName"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    发送人Email：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="smtpSenderEmail" ng-model="global.smtp.senderEmail"/>
+                    <span class="text-info">
+                    部分SMTP服务器要求其与用户名一致
+                    </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    是否开启SSL：
+                    </label>
+                    <div class="controls">
+                    <label class="radio inline">
+                    <input type="radio" ng-model="global.smtp.secureConnection" value="true">
+                    <span class="help-inline">开启</span>
+                    </label>
+                    <label class="radio inline">
+                    <input type="radio" ng-model="global.smtp.secureConnection" value="false">
+                    <span class="help-inline">关闭</span>
+                    </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" ng-click="submit()">保存</button>
+                </div>
+            </form>
         </div>
     </div>
-    <form name="globalEdit">
-        <h3>网站设置</h3>
-        <div class="input-control text">
-            <span>网站域名：</span>
-            <input type="text" name="domain" ng-model="global.domain" />
-        </div>
-        <div class="input-control text">
-            <span>网站网址（含http://）：</span>
-            <span class="fg-color-red" ng-show="globalEdit.url.$error.url">
-                                    无效的URL地址！
-                                </span>
-            <input type="url" name="url" ng-model="global.url" />
-        </div>
-        <div class="input-control text">
-            <span>网站Logo：</span>
-            <img class="border-color-blue" ng-src="{{global.logo}}">
-            <input type="text" name="logo" ng-model="global.logo" />
-        </div>
-        <div class="input-control text">
-            <span>管理员Email（不公开）：</span>
-            <span class="fg-color-red" ng-show="globalEdit.email.$error.email">
-                                    无效的Email!
-                                </span>
-            <input type="email" name="email" ng-model="global.email" />
-        </div>
-        <div class="input-control text">
-            <span>网站名称：</span>
-            <span class="fg-color-red" ng-show="globalEdit.title.$error.maxlength">
-                                    网站名称不能超过20个字符!
-                                </span>
-            <input type="text" name="title" ng-model="global.title" ng-maxlength="20"/>
-        </div>
-        <div class="input-control text">
-            <span>网站副标题：</span>
-            <input type="text" name="description" ng-model="global.description" />
-        </div>
-        <div class="input-control text">
-            <span>网站Meta标题（SEO）：</span>
-            <input type="text" name="metatitle" ng-model="global.metatitle" />
-        </div>
-        <div class="input-control textarea">
-            <span>网站Meta描述（SEO）：</span>
-            <textarea ng-model="global.metadesc">
-            </textarea>
-        </div>
-        <div class="input-control textarea">
-            <span>网站Meta关键词（SEO）：</span>
-            <textarea ng-model="global.keywords" ng-change="convertKeywords()">
-            </textarea>
-        </div>
-        <label class="input-control switch">
-            <span>是否开放用户注册：</span>
-            <input type="checkbox" name="register" ng-model="global.register" />
-            <span class="helper fg-color-red">{{global.register | boolean}}</span>
-        </label>
-        <h3>参数设置</h3>
-        <div class="input-control text">
-            <span>文章允许最多标签数量：</span>
-            <input type="number" name="ArticleTagsMax" ng-model="global.ArticleTagsMax" />
-        </div>
-        <div class="input-control">
-            <span>用户允许最多标签数量：</span>
-            <input type="number" name="UserTagsMax" ng-model="global.UserTagsMax" />
-        </div>
-        <div class="input-control">
-            <span>标题最短字节数：</span>
-            <input type="number" name="TitleMinLen" ng-model="global.TitleMinLen" />
-        </div>
-        <div class="input-control">
-            <span>标题最长字节数：</span>
-            <input type="number" name="TitleMaxLen" ng-model="global.TitleMaxLen" />
-        </div>
-        <div class="input-control text">
-            <span>摘要最长字节数：</span>
-            <input type="number" name="SummaryMaxLen" ng-model="global.SummaryMaxLen" />
-        </div>
-        <div class="input-control text">
-            <span>文章最短字节数：</span>
-            <input type="number" name="ContentMinLen" ng-model="global.ContentMinLen" />
-        </div>
-        <div class="input-control text">
-            <span>文章最长字节数：</span>
-            <input type="number" name="ContentMaxLen" ng-model="global.ContentMaxLen" />
-        </div>
-        <div class="input-control text">
-            <span>用户名最短字节数：</span>
-            <input type="number" name="UserNameMinLen" ng-model="global.UserNameMinLen" />
-        </div>
-        <div class="input-control text">
-            <span>用户名最长字节数：</span>
-            <input type="number" name="UserNameMaxLen" ng-model="global.UserNameMaxLen" />
-        </div>
-        <div class="input-control text">
-            <span>用户积分系数[评论×<strong>{{global.UsersScore[0]}}</strong>
-                ，文章×<strong>{{global.UsersScore[1]}}</strong>，关注×<strong>{{global.UsersScore[2]}}</strong>
-                ，粉丝×<strong>{{global.UsersScore[3]}}</strong>，文章热度×<strong>{{global.UsersScore[4]}}</strong>，
-                注册时长天数×<strong>{{global.UsersScore[5]}}</strong>，登录次数×<strong>{{global.UsersScore[6]}}</strong>]：</span>
-            <input type="text" name="UsersScore" ng-model="global.UsersScore" ng-list="/[,，\s]/"/>
-        </div>
-        <div class="input-control text">
-            <span>评论提升系数[评论的评论数达到<strong>{{global.ArticleStatus[0]}}</strong>时，自动提升正常文章，
-                达到<strong>{{global.ArticleStatus[1]}}</strong>时，自动提升为推荐文章]：</span>
-            <input type="text" name="ArticleStatus" ng-model="global.ArticleStatus" ng-list="/[,，\s]/"/>
-        </div>
-        <div class="input-control text">
-            <span>文章热度系数[访问+<strong>{{global.ArticleHots[0]}}</strong>，支持/反对±<strong>
-                {{global.ArticleHots[1]}}</strong>，评论+<strong>{{global.ArticleHots[2]}}</strong>，收藏+
-                <strong>{{global.ArticleHots[3]}}</strong>，置顶+<strong>{{global.ArticleHots[4]}}</strong>]：</span>
-            <input type="text" name="ArticleHots" ng-model="global.ArticleHots" ng-list="/[,，\s]/"/>
-        </div>
-        <h3>SMTP设置</h3>
-        <label class="input-control switch">
-            <span>SMTP是否开启SSL：</span>
-            <input type="checkbox" name="smtpSecureConnection" ng-model="global.smtp.secureConnection" />
-            <span class="helper fg-color-red">{{global.smtp.secureConnection | boolean}}</span>
-        </label>
-        <div class="input-control text">
-            <span>SMTP服务器地址：</span>
-            <input type="text" name="smtpHost" ng-model="global.smtp.host" />
-        </div>
-        <div class="input-control text">
-            <span>SMTP服务器端口：</span>
-            <input type="number" name="smtpPort" ng-model="global.smtp.port" />
-        </div>
-        <div class="input-control text">
-            <span>SMTP用户名：</span>
-            <input type="text" name="smtpAuthUser" ng-model="global.smtp.auth.user" />
-        </div>
-        <div class="input-control text">
-            <span>SMTP用户密码：</span>
-            <input type="password" name="smtpAuthPass" ng-model="global.smtp.auth.pass" />
-        </div>
-        <div class="input-control text">
-            <span>发送人名称：</span>
-            <input type="text" name="smtpSenderName" ng-model="global.smtp.senderName" />
-        </div>
-        <div class="input-control text">
-            <span>发送人Email（部分SMTP服务器要求其与用户名一致）：</span>
-            <input type="text" name="smtpSenderEmail" ng-model="global.smtp.senderEmail" />
-        </div>
-        <button ng-click="submit()" class="bg-color-orangeDark fg-color-white"
-        ng-disabled="globalEdit.password.$error.required">保  存</button>
-    </form>
 </div>

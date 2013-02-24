@@ -9,12 +9,12 @@
             {{global.user.err.message}}
         </div>
         <form class="form-signin" name="login">
-            <span class="error" ng-show="login.name.$error.required">
+            <span class="text-error" ng-show="login.name.$error.required">
                 请输入用户名、Email或Uid!
             </span>
             <input class="input-block-level" type="text" placeholder="name or Email or Uid"
             name="name" ng-model="logname" required/>
-            <span class="error" ng-show="login.password.$error.required">
+            <span class="text-error" ng-show="login.password.$error.required">
                 请输入密码!
             </span>
             <input class="input-block-level" type="password" placeholder="password"
