@@ -25,6 +25,31 @@ cache._update = function(obj) {
     this._initTime = Date.now();
 };
 
+var onlineCache = {
+};
+function updateOnlineCache(req) {
+    var now = Date.now(),
+        users = 0,
+        online = 0;
+    if(req.session.Uid) {
+        delete onlineCache[req.session._id];
+        onlineCache[req.session.Uid] = now;
+    } else onlineCache[req.session._id] = now;
+    for(var key in onlineCache) {
+        if((now - onlineCache[key]) > 1000 * 60 * 20) delete  onlineCache[key];
+        else {
+            online += 1;
+            if(key[0] === 'U') users += 1;
+        }
+    }
+    cache.onlineNum = online;
+    cache.onlineUsers = users;
+    if(online > cache.maxOnlineNum) setGlobalConfig({
+        maxOnlineNum: online,
+        maxOnlineTime: now
+    });
+}
+
 function setGlobalConfig(obj, callback) {
     jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
         if(doc) cache._update(doc);
@@ -152,7 +177,10 @@ function setGlobal(req, res) {
     try {
         if(req.session.Uid !== 'Uadmin') throw new Error(jsGen.lib.Err.userRoleErr);
         if(setObj.domain && !checkUrl(setObj.domain)) throw new Error(jsGen.lib.Err.globalDomainErr);
-        if(setObj.url && !checkUrl(setObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
+        if(setObj.url) {
+            if(!checkUrl(setObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
+            else setObj.url = setObj.url.replace(/(\/)+$/, '');
+        }
         if(setObj.email && !checkEmail(setObj.email)) throw new Error(jsGen.lib.Err.globalEmailErr);
         if(setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
         if(setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
@@ -172,7 +200,7 @@ function setGlobal(req, res) {
         });
     } catch(err) {
         jsGen.dao.db.close();
-        body.err = err.toString();
+        body.err = err;
         return res.sendjson(body);
     }
 };
@@ -200,5 +228,6 @@ module.exports = {
     POST: postFn,
     setVisitHistory: setVisitHistory,
     setGlobalConfig: setGlobalConfig,
-    cache: cache
+    cache: cache,
+    updateOnlineCache: updateOnlineCache
 };

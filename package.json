@@ -8,6 +8,7 @@
     "version": "0.0.1",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB"],
+    "homepage": "https://github.com/zensh/jsgen",
     "main": "app.js",
     "engines": {
         "node": ">=0.8.x"

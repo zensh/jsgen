@@ -7,66 +7,84 @@
         <strong>{{user.err.name}}</strong>
         {{user.err.message}}
     </div>
-    <form name="userEdit">
-        <label>
-            <strong>
-            头像地址：</strong>
+    <form name="userEdit"  class="form-horizontal">
+    <div class="control-group">
+        <label class="control-label">
+        头像地址：
+        </label>
+        <div class="controls">
+            <input type="url" name="avatar" ng-model="user.avatar" class="input-block-level"/>
             <span class="text-error" ng-show="userEdit.avatar.$error.url">无效的URL地址！</span>
+            <img class="width-50" ng-src="{{user.avatar}}" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        用户名：
         </label>
-        <input type="url" name="avatar" ng-model="user.avatar" class="input-block-level"
-        />
-        <img class="width-50" ng-src="{{user.avatar}}" />
-        <label>
-            <strong>
-            用户名：</strong>
+        <div class="controls">
+            <input type="text" name="name" ng-model="user.name" />
             <span class="text-error" ng-show="(user.name | checkName)">{{user.name | checkName}}</span>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        Email：
         </label>
-        <input type="text" name="name" ng-model="user.name" />
-        <label>
-            <strong>
-            Email：</strong>
+        <div class="controls">
+            <input type="email" name="email" ng-model="user.email" />
             <span class="text-error" ng-show="userEdit.email.$error.email">无效的Email!</span>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        用户性别：
         </label>
-        <input type="email" name="email" ng-model="user.email" />
-        <label>
-            <strong>
-            用户性别：</strong>
+        <div class="controls">
+            <select ng-model="user.sex" ng-options="sex | sex for sex in sexArray">
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        用户标签：
         </label>
-        <select ng-model="user.sex" ng-options="sex | sex for sex in sexArray">
-            <option value="">
-                -- 性别 --
-            </option>
-        </select>
-        <label>
-            <strong>
-            用户标签：</strong>
+        <div class="controls">
+            <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" ng-change="checkTags()" class="input-block-level" />
             <span class="text-info" ng-show="tagsList">{{tagsList}}</span>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        个人简介：
         </label>
-        <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/"
-        ng-change="checkTags()" class="input-block-level" />
-        <label>
-            <strong>
-            个人简介：</strong>
+        <div class="controls">
+            <textarea ng-model="user.desc" class="input-block-level">
+            </textarea>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        修改密码（不改留空）：
         </label>
-        <textarea ng-model="user.desc" class="input-block-level">
-        </textarea>
-        <label>
-            <strong>
-            修改密码（不修改请留空）：</strong>
+        <div class="controls">
+            <input type="password" name="password" ng-model="user.passwd" ng-minlength="6" ng-maxlength="20" ng-change="checkPwd()"/>
             <span class="text-error" ng-show="userEdit.password.$error.minlength">密码太短!</span>
             <span class="text-error" ng-show="userEdit.password.$error.maxlength">密码太长!</span>
-        </label>
-        <input type="password" name="password" ng-model="user.passwd" ng-minlength="6"
-        ng-maxlength="20" />
-        <label>
-            <strong>
-            再次输入密码：</strong>
-            <span class="text-error" ng-show="checkResult">密码不一致！</span>
-        </label>
-        <input type="password" name="password2" ng-model="user.passwd2" ng-change="checkPwd()"
-        />
-        <div>
-            <button ng-click="submit()" class="btn btn-large btn-primary">保  存</button>
         </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">
+        再次输入密码：
+        </label>
+        <div class="controls">
+            <input type="password" name="password2" ng-model="user.passwd2" ng-change="checkPwd()"/>
+            <span class="text-error" ng-show="checkResult">密码不一致！</span>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-primary" ng-click="submit()">保存</button>
+        <span class="help-inline text-success" ng-show="saved">已保存！</span>
+    </div>
     </form>
 </div>

@@ -1,41 +1,47 @@
 <div class="row">
-    <div class="span9" ng-include src="url">
+    <div class="span9" ng-include src="getTpl">
     </div>
     <div class="span3">
         <div class="thumbnail">
             <img ng-src="{{user.avatar}}" />
             <div class="caption">
-                <h4 class="text-center">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
+                <h4 class="text-center" ng-show="isMe">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
                 <ul class="inline">
                     <li ng-show="user.email">
                         Email：{{user.email}}
                     </li>
-                    <li>
+                    <li ng-show="user.role">
                         权限：{{user.role | role}}
                     </li>
-                    <li>
+                    <li ng-show="user.sex">
                         性别：{{user.sex | sex}}
                     </li>
-                    <li>
+                    <li ng-show="user.score">
                         积分：{{user.score}}
                     </li>
-                    <li>
+                    <li ng-show="user.fans">
                         粉丝：{{user.fans}}
                     </li>
-                    <li>
+                    <li ng-show="user.follow">
                         关注：{{user.follow}}
                     </li>
-                    <li>
+                    <li ng-show="user.collect">
                         收藏：{{user.collect}}
                     </li>
-                    <li>
+                    <li ng-show="user.articles">
                         文章：{{user.articles}}
                     </li>
-                    <li>
+                    <li ng-show="user.comments">
                         评论：{{user.comments}}
                     </li>
-                    <li>
+                    <li ng-show="user.collections">
                         合集：{{user.collections}}
+                    </li>
+                    <li ng-show="user.date">
+                        {{user.date | date:'yyyy-MM-dd HH:mm'}}[注册]
+                    </li>
+                    <li ng-show="user.lastLoginDate">
+                        {{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}[最后登录]
                     </li>
                 </ul>
                 <dl>
@@ -45,30 +51,46 @@
                       <dd><ul class="inline"><li ng-repeat="tag in user.tagsList">
                         <a ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
                       </li></ul></dd>
-                      <dt>注册时间：</dt>
-                      <dd>{{user.date | date:'yyyy-MM-dd HH:mm'}}</dd>
-                      <dt>登录时间：</dt>
-                      <dd>{{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}</dd>
                     </dl>
             </div>
-            <ul class="nav nav-tabs nav-stacked text-center">
-                <li class="active">
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户设置 </a>
+            <ul class="sidebar nav nav-tabs nav-stacked text-center" ng-show="isMe">
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的收藏 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的收藏 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的关注 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的文章 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的评论 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的评论 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的合集 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="set('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的消息 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的消息 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的粉丝 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户设置 </a>
+                </li>
+            </ul>
+            <ul class="sidebar nav nav-tabs nav-stacked text-center" ng-hide="isMe">
+                <li>
+                    <a href="#" ng-click="followMe()" data-toggle="tab"> 关注 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的文章 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的合集 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的粉丝 </a>
                 </li>
             </ul>
         </div>

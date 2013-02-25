@@ -669,8 +669,8 @@ h4 small {
   font-size: 14px;
 }
 .page-header {
-  padding-bottom: 9px;
-  margin: 20px 0 30px;
+  /*padding-bottom: 9px;*/
+  margin: 20px 0 20px;
   border-bottom: 1px solid #eeeeee;
 }
 ul,
@@ -1708,7 +1708,7 @@ select:focus:invalid:focus {
   padding: 19px 20px 20px;
   margin-top: 20px;
   margin-bottom: 20px;
-  background-color: #f5f5f5;
+  /*background-color: #f5f5f5;*/
   border-top: 1px solid #e5e5e5;
   *zoom: 1;
 }
@@ -3208,11 +3208,11 @@ input[type="submit"].btn.btn-mini {
 .nav-tabs > .active > a,
 .nav-tabs > .active > a:hover,
 .nav-tabs > .active > a:focus {
-  color: #ffffff;
-  background-color: #0088cc;
+  color: #555555;
+  cursor: default;
+  background-color: #ffffff;
   border: 1px solid #ddd;
   border-bottom-color: transparent;
-  cursor: default;
 }
 .nav-pills > li > a {
   padding-top: 8px;
@@ -6307,4 +6307,29 @@ button.close {
 }
 .navbar img {
     height: 40px;
+}
+.sidebar.nav-tabs > .active > a,
+.sidebar.nav-tabs > .active > a:hover,
+.sidebar.nav-tabs > .active > a:focus {
+  color: #ffffff;
+  background-color: #0088cc;
+}
+.table select,
+.table textarea,
+.table input[type="text"],
+.table input[type="password"],
+.table input[type="datetime"],
+.table input[type="datetime-local"],
+.table input[type="date"],
+.table input[type="month"],
+.table input[type="time"],
+.table input[type="week"],
+.table input[type="number"],
+.table input[type="email"],
+.table input[type="url"],
+.table input[type="search"],
+.table input[type="tel"],
+.table input[type="color"],
+.table .uneditable-input {
+  margin-bottom: 0;
 }

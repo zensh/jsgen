@@ -1,8 +1,11 @@
 <div class="tabbable" ng-controller="jsGen.adminGlobalCtrl">
+    <div class="page-header">
+            <h3>网站设置</h3>
+    </div>
 
     <ul class="nav nav-tabs">
         <li class="active">
-            <a ng-click="setTab('tab1')" data-toggle="tab">网站设置</a>
+            <a ng-click="setTab('tab1')" data-toggle="tab">基本设置</a>
         </li>
         <li>
             <a ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
@@ -108,18 +111,13 @@
                     用户注册：
                     </label>
                     <div class="controls">
-                    <label class="radio inline">
-                    <input type="radio" ng-model="global.register" value="true">
-                    <span class="help-inline">开放</span>
-                    </label>
-                    <label class="radio inline">
-                    <input type="radio" ng-model="global.register" value="false">
-                    <span class="help-inline">关闭</span>
-                    </label>
+                    <button class="btn btn-small" ng-class="setClass(global.register)" ng-click="global.register=!global.register">{{!global.register | boolean}}</button>
+                    <span class="help-inline text-info">{{global.register | boolean}}了注册</span>
                     </div>
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
+                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
                 </div>
             </form>
         </div>
@@ -233,6 +231,7 @@
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
+                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
                 </div>
             </form>
         </div>
@@ -295,18 +294,13 @@
                     是否开启SSL：
                     </label>
                     <div class="controls">
-                    <label class="radio inline">
-                    <input type="radio" ng-model="global.smtp.secureConnection" value="true">
-                    <span class="help-inline">开启</span>
-                    </label>
-                    <label class="radio inline">
-                    <input type="radio" ng-model="global.smtp.secureConnection" value="false">
-                    <span class="help-inline">关闭</span>
-                    </label>
+                    <button class="btn btn-small" ng-class="setClass(global.smtp.secureConnection)" ng-click="global.smtp.secureConnection=!global.smtp.secureConnection">{{!global.smtp.secureConnection | boolean}}</button>
+                    <span class="help-inline text-info">{{global.smtp.secureConnection | boolean}}了SSL</span>
                     </div>
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
+                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
                 </div>
             </form>
         </div>

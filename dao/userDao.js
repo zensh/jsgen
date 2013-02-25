@@ -52,8 +52,7 @@ var that = jsGen.dao.db.bind('users', {
 
     getUsersNum: function(callback) {
         var callback = callback || jsGen.lib.tools.callbackFn;
-        that.count({}, function(err, count) {
-
+        that.count(function(err, count) {
             return callback(err, count);
         });
     },
@@ -145,7 +144,6 @@ var that = jsGen.dao.db.bind('users', {
                 resetKey: 0,
                 resetDate: 0,
                 loginAttempts: 0,
-                locked: 0,
                 login: 0
             }
         }, function(err, doc) {

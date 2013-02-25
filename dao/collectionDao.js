@@ -39,7 +39,7 @@ var that = jsGen.dao.db.bind('collections', {
 
     getCollectionsNum: function(callback) {
         var callback = callback || jsGen.lib.tools.callbackFn;
-        that.count({}, function(err, count) {
+        that.count(function(err, count) {
             return callback(err, count);
         });
     },

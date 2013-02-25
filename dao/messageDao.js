@@ -35,7 +35,7 @@ var that = jsGen.dao.db.bind('messages', {
 
     getMessagesNum: function(callback) {
         var callback = callback || jsGen.lib.tools.callbackFn;
-        that.count({}, function(err, count) {
+        that.count(function(err, count) {
             return callback(err, count);
         });
     },
