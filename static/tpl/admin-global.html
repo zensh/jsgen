@@ -115,9 +115,9 @@
                     <span class="help-inline text-info">{{global.register | boolean}}了注册</span>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions" ng-show="editSave">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
-                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
+                    <button class="btn btn-success" ng-click="reset()">重置</button>
                 </div>
             </form>
         </div>
@@ -229,9 +229,9 @@
                     <strong>{{global.ArticleHots[3]}}</strong>，置顶+<strong>{{global.ArticleHots[4]}}</strong>]</span>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions" ng-show="editSave">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
-                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
+                    <button class="btn btn-success" ng-click="reset()">重置</button>
                 </div>
             </form>
         </div>
@@ -298,9 +298,9 @@
                     <span class="help-inline text-info">{{global.smtp.secureConnection | boolean}}了SSL</span>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="form-actions" ng-show="editSave">
                     <button class="btn btn-primary" ng-click="submit()">保存</button>
-                    <span class="help-inline text-success" ng-show="saved">已保存！</span>
+                    <button class="btn btn-success" ng-click="reset()">重置</button>
                 </div>
             </form>
         </div>

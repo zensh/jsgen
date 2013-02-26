@@ -82,9 +82,9 @@
             <span class="text-error" ng-show="checkResult">密码不一致！</span>
         </div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" ng-show="editSave">
         <button class="btn btn-primary" ng-click="submit()">保存</button>
-        <span class="help-inline text-success" ng-show="saved">已保存！</span>
+        <button class="btn btn-success" ng-click="reset()">重置</button>
     </div>
     </form>
 </div>

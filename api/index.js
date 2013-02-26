@@ -92,27 +92,20 @@ function setVisitHistory(req) {
     });
 };
 
-function getvisitHistory(req, res) {
+function getvisitHistory(req, res, dm) {
     var body = {
         data: []
     };
-    if(req.session.role === 'admin') {
-        jsGen.dao.index.getVisitHistory(cache.visitHistory, function(err, doc) {
+    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
+    jsGen.dao.index.getVisitHistory(cache.visitHistory, dm.intercept(function(doc) {
+        if(!doc) {
             jsGen.dao.db.close();
-            if(err) {
-                jsGen.errlog.error(err);
-                body.err = jsGen.lib.Err.dbErr;
-            }
-            if(!doc) return res.sendjson(body);
-            else body.data = body.data.concat(doc.data);
-        });
-    } else {
-        body.err = jsGen.lib.Err.userRoleErr;
-        return res.sendjson(body);
-    }
+            return res.sendjson(body);
+        } else body.data = body.data.concat(doc.data);
+    }));
 };
 
-function getGlobal(req, res) {
+function getGlobal(req, res, dm) {
     var body = union(cache);
     if(req.session.Uid !== 'Uadmin' || req.path[2] !== 'admin') {
         delete body.visitHistory;
@@ -126,11 +119,11 @@ function getGlobal(req, res) {
         body.user.name = jsGen.api.user.cache[req.session.Uid].name;
         body.user.email = jsGen.api.user.cache[req.session.Uid].email;
         body.user.avatar = jsGen.api.user.cache[req.session.Uid].avatar;
-    } else body.user = null;
+    }
     return res.sendjson(body);
 };
 
-function setGlobal(req, res) {
+function setGlobal(req, res, dm) {
     var body = {},
         defaultObj = {
             domain: '',
@@ -174,52 +167,39 @@ function setGlobal(req, res) {
     }
     var setObj = union(defaultObj);
     intersect(setObj, req.apibody);
-    try {
-        if(req.session.Uid !== 'Uadmin') throw new Error(jsGen.lib.Err.userRoleErr);
-        if(setObj.domain && !checkUrl(setObj.domain)) throw new Error(jsGen.lib.Err.globalDomainErr);
-        if(setObj.url) {
-            if(!checkUrl(setObj.url)) throw new Error(jsGen.lib.Err.globalUrlErr);
-            else setObj.url = setObj.url.replace(/(\/)+$/, '');
-        }
-        if(setObj.email && !checkEmail(setObj.email)) throw new Error(jsGen.lib.Err.globalEmailErr);
-        if(setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
-        if(setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
-        if(setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
-        for(var key in setObj) {
-            if(equal(setObj[key], cache[key])) delete setObj[key];
-        }
-        setGlobalConfig(setObj, function(err, doc) {
-            if(err) {
-                jsGen.errlog.error(err);
-                throw new Error(jsGen.lib.Err.dbErr);
-            } else {
-                body = intersect(defaultObj, doc);
-                jsGen.dao.db.close();
-                return res.sendjson(body);
-            }
-        });
-    } catch(err) {
-        jsGen.dao.db.close();
-        body.err = err;
+
+    if(req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
+    if(setObj.domain && !checkUrl(setObj.domain)) throw jsGen.Err(jsGen.lib.Err.globalDomainErr);
+    if(setObj.url) {
+        if(!checkUrl(setObj.url)) throw jsGen.Err(jsGen.lib.Err.globalUrlErr);
+        else setObj.url = setObj.url.replace(/(\/)+$/, '');
+    }
+    if(setObj.email && !checkEmail(setObj.email)) throw jsGen.Err(jsGen.lib.Err.globalEmailErr);
+    if(setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
+    if(setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
+    if(setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
+    for(var key in setObj) {
+        if(equal(setObj[key], cache[key])) delete setObj[key];
+    }
+    setGlobalConfig(setObj, dm.intercept(function(doc) {
+        body = intersect(defaultObj, doc);
         return res.sendjson(body);
+    }));
+};
+
+function getFn(req, res, dm) {
+    switch(req.path[2]) {
+    case 'admin':
+        return getGlobal(req, res, dm);
+    default:
+        return getGlobal(req, res, dm);
     }
 };
 
-function getFn(req, res) {
+function postFn(req, res, dm) {
     switch(req.path[2]) {
     case 'admin':
-        return getGlobal(req, res);
-    default:
-        return getGlobal(req, res);
-    }
-};
-
-function postFn(req, res) {
-    switch(req.path[2]) {
-    case 'admin':
-        return setGlobal(req, res);
-    default:
-        return res.r404();
+        return setGlobal(req, res, dm);
     }
 };
 

@@ -56,20 +56,21 @@ jsGen.userRegisterCtrl = ['$scope', 'rest', '$location', function($scope, rest, 
         data.passwd = CryptoJS.SHA256($scope.passwd).toString();
         data.email = $scope.email;
         jsGen.global.user = rest.register.save({}, data, function() {
+            $scope.checkUser();
             if(jsGen.global.user._id) $location.path('/home');
         });
     };
 }];
 
 jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
-    if(!jsGen.global.user) $location.path('/');
+    if(!jsGen.global.user || !jsGen.global.user.name) $location.path('/');
     $scope.isMe = true;
     $scope.getTpl = '/static/tpl/user-index.html';
     $scope.setTpl = function(tpl) {
         $scope.getTpl = '/static/tpl/' + tpl;
     };
     $scope.user = jsGen.global.user;
-    if(!($scope.user && $scope.user.date)) jsGen.global.user = rest.home.get({}, function() {
+    if(!$scope.user || !$scope.user.date) jsGen.global.user = rest.home.get({}, function() {
         $scope.user = jsGen.global.user;
     });
     $scope.$on('update', function(event, doc) {
@@ -95,6 +96,8 @@ jsGen.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locati
         $scope.getTpl = '/static/tpl/' + tpl;
     };
 }];
+
+jsGen.userIndexCtrl = ['$scope', 'rest', function($scope, rest) {}];
 
 jsGen.userAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var result = {},
@@ -151,8 +154,8 @@ jsGen.userAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
         jsGen.lib.complement(data, originData, [{_id:''}]);
         result = rest.userAdmin.save({}, {data: data}, function() {
             if(!result.err) {
-                jsGen.lib.union($scope.data, result.data);
-                originData = jsGen.lib.union($scope.data);
+                $scope.data = jsGen.lib.union(result.data);
+                originData = jsGen.lib.union(result.data);
             } else $scope.err = result.err;
         });
     };
@@ -169,12 +172,16 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         });
         $scope.tagsList = jsGen.lib.union(tagsArray);
     };
+    $scope.editSave = false;
     $scope.sexArray = ['male', 'female'];
     $scope.user = jsGen.lib.union(jsGen.global.user);
-    originData = jsGen.lib.union($scope.user);
+    originData = jsGen.lib.union(jsGen.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
-    $scope.user.err = null;
+    $scope.$watch(function() {
+        if(angular.equals($scope.user, originData)) $scope.editSave = false;
+        else $scope.editSave = true;
+    });
     $scope.checkTags = function() {
         if($scope.tagsList.length > (jsGen.global.UserTagsMax || 5)) $scope.tagsList.length = (jsGen.global.UserTagsMax || 5);
     };
@@ -182,8 +189,13 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         if($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = true;
         else $scope.checkResult = false;
     };
+    $scope.reset = function() {
+        $scope.user = jsGen.lib.union(originData);
+        $scope.editSave = false;
+    };
     $scope.submit = function() {
         var data = jsGen.lib.union($scope.user);
+        $scope.editSave = false;
         angular.forEach(data, function(value, key) {
             if(angular.equals(value, originData[key])) delete data[key];
         });
@@ -191,11 +203,11 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         if(!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         $scope.user = rest.home.save({}, data, function() {
             if(!$scope.user.err) {
-                initTags($scope.user.tagsList);
                 originData = jsGen.lib.union($scope.user);
+                $scope.user = jsGen.lib.union($scope.user);
+                initTags($scope.user.tagsList);
                 $scope.$emit('update', $scope.user);
-                $scope.saved = true;
-            } else $scope.saved = false;
+            }
         });
     };
 }];
@@ -203,11 +215,15 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
 jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var originData = {};
     $scope.global = rest.indexAdmin.get({}, function() {
+        $scope.global = jsGen.lib.union($scope.global);
         originData = jsGen.lib.union($scope.global);
     });
-    $scope.global.err = null;
-    $scope.saved = false;
+    $scope.editSave = false;
     $scope.tab = 'tab1';
+    $scope.$watch(function() {
+        if(angular.equals($scope.global, originData)) $scope.editSave = false;
+        else $scope.editSave = true;
+    });
     $scope.setTab = function(tab) {
         $scope.tab = tab;
     }
@@ -215,8 +231,13 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         if(b) return 'btn-warning';
         else return 'btn-success';
     };
+    $scope.reset = function() {
+        $scope.global = jsGen.lib.union(originData);
+        $scope.editSave = false;
+    };
     $scope.submit = function() {
         var data = jsGen.lib.union($scope.global);
+        $scope.editSave = false;
         angular.forEach(data.UsersScore, function(value, key) {
             data.UsersScore[key] = Number(value);
         });
@@ -231,11 +252,12 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         });
         $scope.global = rest.indexAdmin.save({}, data, function() {
             if(!$scope.global.err) {
+                originData = jsGen.lib.union($scope.global);
+                $scope.global = jsGen.lib.union($scope.global);
                 var clone = jsGen.lib.union(jsGen.global);
                 jsGen.lib.intersect(clone, $scope.global);
                 jsGen.lib.union(jsGen.global, clone);
-                $scope.saved = true;
-            } else $scope.saved = false;
+            }
         });
     };
 }];

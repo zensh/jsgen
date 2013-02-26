@@ -1,5 +1,10 @@
 'use strict';
 
+// 注册全局变量jsGen
+var jsGen = {
+    global: {}
+};
+
 // Declare app level module which depends on filters, and services
 angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives']).
 config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
@@ -46,10 +51,7 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
     $locationProvider.html5Mode(true);
 }]);
 
-var jsGen = {
-    global: {}
-};
-
+//添加jsGen.lib系列工具函数
 (function() {
     function checkType(obj) {
         var type = typeof obj;

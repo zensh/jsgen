@@ -1,15 +1,15 @@
 var domain = require('domain'),
     http = require('http'),
     fs = require('fs');
-var serverDomain = domain.create();
+var serverDm = domain.create();
 
-// serverDomain.on('error', function(err) {
-//   console.error('Caught error!', err);
-//   console.log('END');
-// });
-// serverDomain.run(function() {
-    global.jsGen = {};  // 注册全局变量jsGen
-    jsGen.conf = module.exports.conf = require('./config/config');  // 注册rrestjs配置文件
+serverDm.on('error', function(err) {
+    var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+    jsGen.errlog.error(err);
+});
+serverDm.run(function() {
+    global.jsGen = {}; // 注册全局变量jsGen
+    jsGen.conf = module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
 
     jsGen.module = {};
     jsGen.module.rrestjs = require('rrestjs');
@@ -21,12 +21,13 @@ var serverDomain = domain.create();
     jsGen.module.xss = require('xss');
     jsGen.errlog = jsGen.module.rrestjs.restlog;
     jsGen.lib = {};
-    jsGen.lib.Err = require('./lib/errmsg.js');
-    jsGen.lib.json =  require('./lib/json.js');
     jsGen.lib.tools = require('./lib/tools.js');
+    jsGen.lib.Err = require('./lib/errmsg.js');
+    jsGen.lib.json = require('./lib/json.js');
     jsGen.lib.converter = require('./lib/nodeAnyBaseConverter.js');
     jsGen.lib.email = require('./lib/email.js');
-    jsGen.dao= {};
+    jsGen.Err = jsGen.lib.tools.Err;
+    jsGen.dao = {};
     jsGen.dao.db = require('./dao/mongoDao.js').db;
     jsGen.dao.article = require('./dao/articleDao.js');
     jsGen.dao.collection = require('./dao/collectionDao.js');
@@ -51,30 +52,53 @@ var serverDomain = domain.create();
     jsGen.api.tag.cache._init();
     jsGen.config = jsGen.api.index.cache;
 
-    fs.readFile('package.json', 'utf8', function(err, data) {
-            if(err) restlog.error(err);
-            if(data) {
-                jsGen.info = JSON.parse(data);
-                if(jsGen.info !== jsGen.config.info) jsGen.api.index.setGlobalConfig({info: jsGen.info}, function(err, doc) {
-                    if(err) console.log(err);
-                    else console.log(jsGen.config);
-                });
-            }
-    });
+    fs.readFile('package.json', 'utf8', serverDm.intercept(function(data) {
+        jsGen.info = JSON.parse(data);
+        if (jsGen.info !== jsGen.config.info) jsGen.api.index.setGlobalConfig({
+            info: jsGen.info
+        },
+        serverDm.intercept(function(doc) {
+            console.log(jsGen.config);
+        }));
+    }));
 
     var server = http.createServer(function(req, res) {
-        try {
+        var dm = domain.create();
+        dm.add(req);
+        dm.add(res);
+        dm.on('error', function(err) {
+            var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+            try {
+                res.on('close', function() {
+                    dm.dispose();
+                });
+                if(req.path[0] === 'api') {
+                    res.sendjson({err: err});
+                    if(err.name !== jsGen.lib.Err.err) jsGen.errlog.error(err);
+                    jsGen.dao.db.close();
+                } else {
+                    res.r404();
+                    jsGen.errlog.error(err);
+                }
+            } catch (err) {
+                var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+                jsGen.errlog.error(err);
+                dm.dispose();
+            }
+        });
+        res.on('close', function() {
+            jsGen.dao.db.close();
+            dm.dispose();
+        });
+        dm.run(function() {
             if(req.path[0] === 'api') {
-                jsGen.api[req.path[1]][req.method](req, res);
+                jsGen.api[req.path[1]][req.method](req, res, dm);
                 jsGen.api.index.updateOnlineCache(req);
                 console.log(req.method + ' : ' + req.path);
             } else {
                 res.file('/static/index.html');
                 jsGen.api.index.setVisitHistory(req);
             }
-        } catch(err) {
-            jsGen.errlog.error(err); //有error，info，等多种等级
-            res.r404();
-        }
+        });
     }).listen(jsGen.conf.listenPort);
-// });
+});

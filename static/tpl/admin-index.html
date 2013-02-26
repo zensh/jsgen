@@ -1,0 +1,48 @@
+<div ng-controller="jsGen.adminGlobalCtrl">
+    <div class="page-header">
+            <h3>网站信息</h3>
+    </div>
+    <div>
+        <dl class="dl-horizontal">
+          <dt>网站名称：</dt>
+          <dd>{{global.title}}</dd>
+          <dt>网站网址：</dt>
+          <dd>{{global.url}}</dd>
+          <dt>网站副标题：</dt>
+          <dd>{{global.description}}</dd>
+          <dt>网站Meta标题：</dt>
+          <dd>{{global.metatitle}}</dd>
+          <dt>网站Meta描述：</dt>
+          <dd>{{global.metadesc}}</dd>
+          <dt>网站Meta关键词：</dt>
+          <dd>{{global.keywords}}</dd>
+          <dt>上线时间：</dt>
+          <dd>{{global.date | date:'yy-MM-dd HH:mm'}}</dd>
+          <dt>总访问次数：</dt>
+          <dd>{{global.visit}}</dd>
+          <dt>总用户数量：</dt>
+          <dd>{{global.users}}</dd>
+          <dt>总文章数量：</dt>
+          <dd>{{global.articles}}</dd>
+          <dt>总评论数量：</dt>
+          <dd>{{global.comments}}</dd>
+          <dt>在线用户数量：</dt>
+          <dd>{{global.onlineNum}}</dd>
+          <dt>在线会员数量：</dt>
+          <dd>{{global.onlineUsers}}</dd>
+          <dt>最多在线用户记录：</dt>
+          <dd>{{global.maxOnlineNum}}</dd>
+          <dt>在线记录时间：</dt>
+          <dd>{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</dd>
+          <dt>系统信息：</dt>
+          <dd>
+            <address>
+              软件：<a ng-href="{{global.info.homepage}}"><strong>{{global.info.name}}</strong></a><br>
+              版本：{{global.info.version}}<br>
+              作者：<a ng-href="{{global.info.author.url}}">{{global.info.author.name}}</a><br>
+              邮箱：<a href="mailto:#">{{global.info.author.email}}</a>
+            </address>
+          </dd>
+        </dl>
+    </div>
+</div>
