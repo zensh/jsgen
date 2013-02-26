@@ -498,11 +498,12 @@ function editUsers(req, res) {
 
     try {
         if(req.session.Uid !== 'Uadmin') throw new Error(jsGen.lib.Err.userRoleErr);
-        if(!Array.isArray(req.apibody)) req.apibody = [req.apibody];
-        req.apibody.reverse();
+        if(!req.apibody.data) throw new Error(jsGen.lib.Err.requestDataErr);
+        if(!Array.isArray(req.apibody.data)) req.apibody.data = [req.apibody.data];
+        req.apibody.data.reverse();
 
         function editUserExec() {
-            var userObj = req.apibody.pop();
+            var userObj = req.apibody.data.pop();
             if(!userObj) {
                 jsGen.dao.db.close();
                 return res.sendjson(body);
@@ -530,7 +531,9 @@ function editUsers(req, res) {
                 } else {
                     doc._id = jsGen.dao.user.convertID(doc._id);
                     setCache(doc);
-                    body.data.push(doc._id);
+                    var data = intersect(union(UserPublicTpl), doc);
+                    data.email = doc.email;
+                    body.data.push(data);
                     editUserExec();
                 }
             });

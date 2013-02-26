@@ -111,9 +111,11 @@ jsGen.userAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
     $scope.$on('pagination', function(event, doc) {
         event.stopPropagation();
         result = rest.userAdmin.get(doc, function() {
-            $scope.data = result.data;
-            originData = jsGen.lib.union($scope.data);
-            $scope.pagination = result.pagination;
+            if(!result.err) {
+                $scope.data = result.data;
+                originData = jsGen.lib.union($scope.data);
+                $scope.pagination = result.pagination;
+            } else $scope.err = result.err;
         });
     });
     $scope.$emit('pagination', {
@@ -124,23 +126,34 @@ jsGen.userAdminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $lo
         if(angular.equals($scope.data, originData)) $scope.editSave = false;
         else $scope.editSave = true;
     });
-    //$scope.$digest();
+    $scope.reset = function() {
+        $scope.data = jsGen.lib.union(originData);
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
+    };
     $scope.submit = function() {
-        var defaultObj = {
+        var defaultObj = [{
             _id: '',
             email: '',
             locked: false,
             role: ''
-        };
+        }];
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
         var data = jsGen.lib.union($scope.data);
-        for(var key in data) {
-            if(angular.equals(data[key], originData[key])) delete data[key];
-        }
-        for(var key in data) {
-            data[key] = jsGen.lib.intersect(jsGen.lib.union(defaultObj), data[key]);
-        }
-        alert(JSON.stringify(data));
-        result = rest.userAdmin.save({}, data, function() {
+        originData = jsGen.lib.intersect(jsGen.lib.union(defaultObj), originData);
+        data = jsGen.lib.intersect(jsGen.lib.union(defaultObj), data);
+        angular.forEach(data, function(value, key) {
+            if(angular.equals(value, originData[key])) delete data[key];
+        });
+        jsGen.lib.complement(data, originData, [{_id:''}]);
+        result = rest.userAdmin.save({}, {data: data}, function() {
+            if(!result.err) {
+                jsGen.lib.union($scope.data, result.data);
+                originData = jsGen.lib.union($scope.data);
+            } else $scope.err = result.err;
         });
     };
 }];
@@ -151,9 +164,9 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
         tagsArray = [];
     function initTags(tagsList) {
         tagsArray = [];
-        for (var i = tagsList.length - 1; i >= 0; i--) {
-            tagsArray[i] = tagsList[i].tag;
-        };
+        angular.forEach(tagsList, function(value, key) {
+            tagsArray[key] = value.tag;
+        });
         $scope.tagsList = jsGen.lib.union(tagsArray);
     };
     $scope.sexArray = ['male', 'female'];
@@ -171,9 +184,9 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
     };
     $scope.submit = function() {
         var data = jsGen.lib.union($scope.user);
-        for(var key in data) {
-            if(angular.equals(data[key], originData[key])) delete data[key];
-        }
+        angular.forEach(data, function(value, key) {
+            if(angular.equals(value, originData[key])) delete data[key];
+        });
         if($scope.user.passwd && $scope.user.passwd2 === $scope.user.passwd) data.passwd = CryptoJS.SHA256($scope.user.passwd).toString();
         if(!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         $scope.user = rest.home.save({}, data, function() {
@@ -199,8 +212,8 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         $scope.tab = tab;
     }
     $scope.setClass = function(b) {
-        if(b) return 'btn-success';
-        else return 'btn-warning';
+        if(b) return 'btn-warning';
+        else return 'btn-success';
     };
     $scope.submit = function() {
         var data = jsGen.lib.union($scope.global);
@@ -213,9 +226,9 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         angular.forEach(data.ArticleHots, function(value, key) {
             data.ArticleHots[key] = Number(value);
         });
-        for(var key in data) {
-            if(angular.equals(data[key], originData[key])) delete data[key];
-        }
+        angular.forEach(data, function(value, key) {
+            if(angular.equals(value, originData[key])) delete data[key];
+        });
         $scope.global = rest.indexAdmin.save({}, data, function() {
             if(!$scope.global.err) {
                 var clone = jsGen.lib.union(jsGen.global);

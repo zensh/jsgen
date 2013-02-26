@@ -10,28 +10,28 @@
     <table class="table table-condensed table-hover">
         <thead>
             <tr>
-                <th>Uid</th>
-                <th>用户名</th>
-                <th>Email<a href="#" ng-click="editEmail=!editEmail">
+                <th><a href="#" ng-click="predicate='_id';reverse=!reverse">Uid</a></th>
+                <th><a href="#" ng-click="predicate='name';reverse=!reverse">用户名</a></th>
+                <th><a href="#" ng-click="predicate='email';reverse=!reverse">Email</a><a href="#" ng-click="editEmail=!editEmail">
                     <i class="icon-edit"></a></th>
-                <th>权限<a href="#" ng-click="editRole=!editRole">
+                <th><a href="#" ng-click="predicate='role';reverse=!reverse">权限</a><a href="#" ng-click="editRole=!editRole">
                     <i class="icon-edit"></a></th>
-                <th>积分</th>
-                <th>文章</th>
-                <th>粉丝</th>
-                <th>注册日期</th>
-                <th>登录时间</th>
+                <th><a href="#" ng-click="predicate='score';reverse=!reverse">积分</a></th>
+                <th><a href="#" ng-click="predicate='articles';reverse=!reverse">文章</a></th>
+                <th><a href="#" ng-click="predicate='fans';reverse=!reverse">粉丝</a></th>
+                <th><a href="#" ng-click="predicate='date';reverse=!reverse">注册日期</a></th>
+                <th><a href="#" ng-click="predicate='lastLoginDate';reverse=!reverse">登录时间</a></th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="user in data">
+            <tr ng-repeat="user in data | orderBy:predicate:reverse">
                 <td><a ng-href="/{{user._id}}">{{user._id}}</a></td>
                 <td>{{user.name}}<a href="#" ng-show="user.locked" title="该用户已被锁定，点击解锁" ng-click="user.locked=false">
                     <i class="icon-exclamation-sign"></a></td>
                 <td ng-hide="editEmail">{{user.email}}</td>
                 <td ng-show="editEmail"><input type="email" ng-model="user.email"/></td>
                 <td ng-hide="editRole">{{user.role | role}}</td>
-                <td ng-show="editRole"><select ng-model="user.role" ng-options="role | role for role in roleArray" class="span1">
+                <td ng-show="editRole"><select ng-model="user.role" ng-options="role | role for role in roleArray" class="span2">
                     </select></td>
                 <td>{{user.score}}</td>
                 <td>{{user.articles}}</td>
@@ -51,7 +51,7 @@
             <li>
                 <a ng-click="paginationTo('prev')"><i class="icon-backward"></i></a>
             </li>
-            <li class="active">
+            <li class="disabled">
                 <a>{{pagination.now}}</a>
             </li>
             <li>
@@ -61,17 +61,18 @@
                 <a ng-click="paginationTo('last')"><i class="icon-step-forward"></i></a>
             </li>
             <li>
-                <a ng-click="setNum(20)" title="每页20">20</a>
+                <a ng-click="setNum(20)" title="每页20" data-toggle="tab">20</a>
             </li>
             <li>
-                <a ng-click="setNum(50)" title="每页50">50</a>
+                <a ng-click="setNum(50)" title="每页50" data-toggle="tab">50</a>
             </li>
             <li>
-                <a ng-click="setNum(100)" title="每页100">100</a>
+                <a ng-click="setNum(100)" title="每页100" data-toggle="tab">100</a>
             </li>
         </ul>
         <div class="pull-right" ng-show="editSave">
             <button class="btn btn-primary" ng-click="submit()">保存</button>
+            <button class="btn btn-success" ng-click="reset()">重置</button>
         </div>
     </div>
 </div>
