@@ -309,7 +309,7 @@ function getUserInfo(req, res, dm) {
     if(!req.session.Uid) throw jsGen.Err(jsGen.lib.Err.userNeedLogin);
     userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
         body = doc;
-        jsGen.api.tag.filterTags(body.tagsList, false, dm.intercept(function(err, doc) {
+        jsGen.api.tag.filterTags(body.tagsList, false, dm.intercept(function(doc) {
             if(doc) body.tagsList = doc;
             return res.sendjson(body);
         }));
@@ -526,8 +526,6 @@ function postFn(req, res, dm) {
         return register(req, res, dm);
     case 'admin':
         return editUsers(req, res, dm);
-    default:
-        return res.r404();
     }
 };
 

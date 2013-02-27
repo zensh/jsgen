@@ -179,7 +179,7 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
     $scope.$watch(function() {
-        if(angular.equals($scope.user, originData)) $scope.editSave = false;
+        if(angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray)) $scope.editSave = false;
         else $scope.editSave = true;
     });
     $scope.checkTags = function() {
@@ -219,13 +219,13 @@ jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $
         originData = jsGen.lib.union($scope.global);
     });
     $scope.editSave = false;
-    $scope.tab = 'tab1';
+    $scope.switchTab = 'tab1';
     $scope.$watch(function() {
         if(angular.equals($scope.global, originData)) $scope.editSave = false;
         else $scope.editSave = true;
     });
     $scope.setTab = function(tab) {
-        $scope.tab = tab;
+        $scope.switchTab = tab;
     }
     $scope.setClass = function(b) {
         if(b) return 'btn-warning';

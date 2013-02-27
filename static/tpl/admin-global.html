@@ -5,17 +5,17 @@
 
     <ul class="nav nav-tabs">
         <li class="active">
-            <a ng-click="setTab('tab1')" data-toggle="tab">基本设置</a>
+            <a href="#" ng-click="setTab('tab1')" data-toggle="tab">基本设置</a>
         </li>
         <li>
-            <a ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
+            <a href="#" ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
         </li>
         <li>
-            <a ng-click="setTab('tab3')" data-toggle="tab">SMTP设置</a>
+            <a href="#" ng-click="setTab('tab3')" data-toggle="tab">SMTP设置</a>
         </li>
     </ul>
 
-    <div class="tab-content" ng-switch on="tab">
+    <div class="tab-content" ng-switch on="switchTab">
         <div class="alert alert-error" ng-show="global.err">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             <strong>{{global.err.name}}</strong>
