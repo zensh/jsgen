@@ -5,6 +5,7 @@ var serverDm = domain.create();
 
 serverDm.on('error', function(err) {
     var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+    console.log('SevERR:' + err);
     jsGen.errlog.error(err);
 });
 serverDm.run(function() {
@@ -22,7 +23,7 @@ serverDm.run(function() {
     jsGen.errlog = jsGen.module.rrestjs.restlog;
     jsGen.lib = {};
     jsGen.lib.tools = require('./lib/tools.js');
-    jsGen.lib.Err = require('./lib/errmsg.js');
+    jsGen.lib.msg = require('./lib/msg.js');
     jsGen.lib.json = require('./lib/json.js');
     jsGen.lib.converter = require('./lib/nodeAnyBaseConverter.js');
     jsGen.lib.email = require('./lib/email.js');
@@ -70,12 +71,13 @@ serverDm.run(function() {
             var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
             try {
                 res.on('close', function() {
+                    console.log('Send Ok2!');
+                    jsGen.dao.db.close();
                     dm.dispose();
                 });
                 if(req.path[0] === 'api') {
                     res.sendjson({err: err});
-                    if(err.name !== jsGen.lib.Err.err) jsGen.errlog.error(err);
-                    jsGen.dao.db.close();
+                    if(err.name !== jsGen.lib.msg.err) jsGen.errlog.error(err);
                 } else {
                     res.r404();
                     jsGen.errlog.error(err);
@@ -87,6 +89,7 @@ serverDm.run(function() {
             }
         });
         res.on('close', function() {
+            console.log('Send Ok!');
             jsGen.dao.db.close();
             dm.dispose();
         });

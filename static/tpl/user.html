@@ -5,7 +5,7 @@
         <div class="thumbnail">
             <img ng-src="{{user.avatar}}" />
             <div class="caption">
-                <h4 class="text-center" ng-show="isMe">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
+                <h4 class="text-center">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
                 <ul class="inline">
                     <li ng-show="user.email">
                         Email：{{user.email}}
@@ -79,10 +79,8 @@
                     <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
+            <button class="btn btn-block" type="button" ng-hide="isMe" ng-click="followMe()" ng-class="followClass">{{isFollow | follow}}</button>
             <ul class="sidebar nav nav-tabs nav-stacked text-center" ng-hide="isMe">
-                <li>
-                    <a href="#" ng-click="followMe()" data-toggle="tab"> 关注 </a>
-                </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的文章 </a>
                 </li>

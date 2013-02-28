@@ -36,7 +36,7 @@ function updateOnlineCache(req) {
         onlineCache[req.session.Uid] = now;
     } else onlineCache[req.session._id] = now;
     for(var key in onlineCache) {
-        if((now - onlineCache[key]) > 1000 * 60 * 20) delete  onlineCache[key];
+        if((now - onlineCache[key]) > 600000) delete  onlineCache[key];
         else {
             online += 1;
             if(key[0] === 'U') users += 1;
@@ -96,7 +96,7 @@ function getvisitHistory(req, res, dm) {
     var body = {
         data: []
     };
-    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
+    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     jsGen.dao.index.getVisitHistory(cache.visitHistory, dm.intercept(function(doc) {
         if(!doc) {
             jsGen.dao.db.close();
@@ -113,12 +113,10 @@ function getGlobal(req, res, dm) {
         delete body.smtp;
     }
     if(req.session.Uid && req.path[2] !== 'admin') {
-        body.user = {};
-        body.user._id = req.session.Uid;
-        body.user.role = req.session.role;
-        body.user.name = jsGen.api.user.cache[req.session.Uid].name;
-        body.user.email = jsGen.api.user.cache[req.session.Uid].email;
-        body.user.avatar = jsGen.api.user.cache[req.session.Uid].avatar;
+        jsGen.api.user.userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+            body.user = doc;
+            return res.sendjson(body);
+        }));
     }
     return res.sendjson(body);
 };
@@ -168,13 +166,13 @@ function setGlobal(req, res, dm) {
     var setObj = union(defaultObj);
     intersect(setObj, req.apibody);
 
-    if(req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
-    if(setObj.domain && !checkUrl(setObj.domain)) throw jsGen.Err(jsGen.lib.Err.globalDomainErr);
+    if(req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if(setObj.domain && !checkUrl(setObj.domain)) throw jsGen.Err(jsGen.lib.msg.globalDomainErr);
     if(setObj.url) {
-        if(!checkUrl(setObj.url)) throw jsGen.Err(jsGen.lib.Err.globalUrlErr);
+        if(!checkUrl(setObj.url)) throw jsGen.Err(jsGen.lib.msg.globalUrlErr);
         else setObj.url = setObj.url.replace(/(\/)+$/, '');
     }
-    if(setObj.email && !checkEmail(setObj.email)) throw jsGen.Err(jsGen.lib.Err.globalEmailErr);
+    if(setObj.email && !checkEmail(setObj.email)) throw jsGen.Err(jsGen.lib.msg.globalEmailErr);
     if(setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
     if(setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
     if(setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);

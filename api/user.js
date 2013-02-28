@@ -16,16 +16,27 @@ var globalConfig = jsGen.lib.json.GlobalConfig,
 
 var userCache = new CacheFn(100);
 var paginationCache = new CacheFn(5);
-userCache.getUser = function(Uid, callback) {
+userCache.getUser = function(Uid, callback, convert) {
     var that = this,
         callback = callback || jsGen.lib.tools.callbackFn,
+        convert = convert,
         doc = this.get(Uid);
 
-    if(doc) return callback(null, doc);
-    else jsGen.dao.user.getUserInfo(jsGen.dao.user.convertID(Uid), function(err, doc) {
+    if(convert === undefined) convert = true;
+    if(doc) {
+        if(convert) {
+            doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
+            doc.followList = jsGen.api.user.convertUsers(doc.followList);
+        }
+        return callback(null, doc);
+    } else jsGen.dao.user.getUserInfo(jsGen.dao.user.convertID(Uid), function(err, doc) {
         if(doc) {
             doc._id = Uid;
             that.put(Uid, doc);
+            if(convert) {
+                doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
+                doc.followList = jsGen.api.user.convertUsers(doc.followList);
+            }
         }
         return callback(err, doc);
     });
@@ -73,6 +84,17 @@ cache._remove = function(Uid) {
     return this;
 };
 
+function convertUsers(_idArray) {
+    var result = [];
+    if(!Array.isArray(_idArray)) _idArray = [_idArray];
+    if(typeof _idArray[0] !== 'number') return result;
+    _idArray.forEach(function(x, i) {
+        x = jsGen.dao.user.convertID(x);
+        if(cache[x]) result.push({_id: cache[x]._id, name: cache[x].name});
+    });
+    return result;
+};
+
 function setCache(obj) {
     cache._remove(obj._id);
     cache._update(obj);
@@ -83,14 +105,14 @@ function adduser(userObj, callback) {
     var body = {},
         callback = callback || jsGen.lib.tools.callbackFn;
     if(!checkEmail(userObj.email)) {
-        body.err = jsGen.lib.Err.userEmailErr;
+        body.err = jsGen.lib.msg.userEmailErr;
     } else if(cache[userObj.email]) {
-        body.err = jsGen.lib.Err.userEmailExist;
+        body.err = jsGen.lib.msg.userEmailExist;
     }
     if(!checkUserName(userObj.name)) {
-        body.err = jsGen.lib.Err.userNameErr;
+        body.err = jsGen.lib.msg.userNameErr;
     } else if(cache[userObj.name]) {
-        body.err = jsGen.lib.Err.userNameExist;
+        body.err = jsGen.lib.msg.userNameExist;
     }
     if(body.err) return callback(body.err, body);
     delete userObj._id;
@@ -120,19 +142,17 @@ function logout(req, res, dm) {
 
 function login(req, res, dm) {
     var data = req.apibody;
-    var _id = null,
-        body = {};
 
     if(!cache[data.logname]) {
-        if(checkEmail(data.logname)) throw jsGen.Err(jsGen.lib.Err.userEmailNone);
-        else if(checkUserID(data.logname)) throw jsGen.Err(jsGen.lib.Err.UidNone);
-        else if(checkUserName(data.logname)) throw jsGen.Err(jsGen.lib.Err.userNameNone);
-        else throw jsGen.Err(jsGen.lib.Err.logNameErr);
+        if(checkEmail(data.logname)) throw jsGen.Err(jsGen.lib.msg.userEmailNone);
+        else if(checkUserID(data.logname)) throw jsGen.Err(jsGen.lib.msg.UidNone);
+        else if(checkUserName(data.logname)) throw jsGen.Err(jsGen.lib.msg.userNameNone);
+        else throw jsGen.Err(jsGen.lib.msg.logNameErr);
     }
-    _id = jsGen.dao.user.convertID(cache[data.logname]._id);
+    var _id = jsGen.dao.user.convertID(cache[data.logname]._id);
     jsGen.dao.user.getAuth(_id, dm.intercept(function(doc) {
         if(doc.locked) {
-            throw jsGen.Err(jsGen.lib.Err.userLocked);
+            throw jsGen.Err(jsGen.lib.msg.userLocked);
         } else if(doc.loginAttempts >= 5) {
             jsGen.dao.user.setUserInfo({
                 _id: _id,
@@ -143,14 +163,12 @@ function login(req, res, dm) {
                     loginAttempts: 0
                 });
             }));
-            throw jsGen.Err(jsGen.lib.Err.loginAttempts);
+            throw jsGen.Err(jsGen.lib.msg.loginAttempts);
         }
         if(data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
             doc._id = jsGen.dao.user.convertID(doc._id);
-            body = union(UserPrivateTpl);
-            body = intersect(body, doc);
-            req.session.Uid = body._id;
-            req.session.role = body.role;
+            req.session.Uid = doc._id;
+            req.session.role = doc.role;
             if(doc.loginAttempts > 0) jsGen.dao.user.setLoginAttempt({
                 _id: _id,
                 loginAttempts: 0
@@ -164,21 +182,23 @@ function login(req, res, dm) {
                     ip: req.ip
                 }
             });
+            userCache.getUser(doc._id, dm.intercept(function(doc) {
+                return res.sendjson(doc);
+            }));
         } else {
             jsGen.dao.user.setLoginAttempt({
                 _id: _id,
                 loginAttempts: 1
             });
-            throw jsGen.Err(jsGen.lib.Err.userPasswd);
+            throw jsGen.Err(jsGen.lib.msg.userPasswd);
         }
-        return res.sendjson(body);
     }));
 };
 
 function register(req, res, dm) {
     var data = req.apibody;
 
-    if(!jsGen.config.register) throw jsGen.Err(jsGen.lib.Err.registerClose);
+    if(!jsGen.config.register) throw jsGen.Err(jsGen.lib.msg.registerClose);
     adduser(data, dm.intercept(function(doc) {
         if(doc) {
             req.session.Uid = doc._id;
@@ -187,7 +207,9 @@ function register(req, res, dm) {
                 u: doc._id,
                 r: 'role'
             }, dm.intercept(function() {
-                res.sendjson(doc);
+                userCache.getUser(doc._id, dm.intercept(function(doc) {
+                    return res.sendjson(doc);
+                }));
                 if(jsGen.config.email) {
                     var url = jsGen.config.url + '/' + doc._id;
                     jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
@@ -225,38 +247,61 @@ function setReset(resetObj, callback) {
 function addUsers(req, res, dm) {
     var body = [];
 
-    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
+    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     if(!Array.isArray(req.apibody)) req.apibody = [req.apibody];
     req.apibody.reverse();
+    next();
 
-    function addUserExec() {
+    function next() {
         var userObj = req.apibody.pop();
         if(!userObj) return res.sendjson(body);
         adduser(userObj, dm.intercept(function(doc) {
             body.push(doc);
-            addUserExec();
+            next();
         }));
     };
-    addUserExec();
 };
 
 function getUser(req, res, dm) {
     var user = req.path[2];
-    var Uid = null,
-        body = {};
-
-    if(checkUserID(user) && cache[user]) {
-        Uid = user;
-    } else if(checkUserName(user) && cache[user]) {
-        Uid = cache[user]._id;
-    } else throw jsGen.Err(jsGen.lib.Err.UidNone);
-    userCache.getUser(Uid, dm.intercept(function(doc) {
-        if(doc) {
-            body = union(UserPublicTpl);
-            body = intersect(body, doc);
-        }
-        return res.sendjson(body);
-    }));
+    var Uid = null;
+    if((checkUserID(user) || checkUserName(user)) && cache[user]) Uid = cache[user]._id;
+    else throw jsGen.Err(jsGen.lib.msg.UidNone);
+    var _id = jsGen.dao.user.convertID(Uid);
+    if(req.path[3] === 'follow') {
+        if(!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+        userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+            if(doc.followList.indexOf(_id) >= 0) throw jsGen.Err(jsGen.lib.msg.userFollowed);
+            _idReq = jsGen.dao.user.convertID(req.session.Uid);
+            jsGen.dao.user.setFollow({_id: _idReq, followList: _id}, dm.intercept(function(doc) {
+                jsGen.dao.user.setFans({_id: _id, fansList: _idReq});
+                userCache.remove(Uid);
+                userCache.remove(req.session.Uid);
+                userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+                    return res.sendjson({followList: doc.followList});
+                }));
+            }));
+        }), false);
+    } else if(req.path[3] === 'unfollow') {
+        if(!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+        userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+            if(doc.followList.indexOf(_id) < 0) throw jsGen.Err(jsGen.lib.msg.userUnfollowed);
+            _idReq = jsGen.dao.user.convertID(req.session.Uid);
+            jsGen.dao.user.setFollow({_id: _idReq, followList: -_id}, dm.intercept(function(doc) {
+                jsGen.dao.user.setFans({_id: _id, fansList: -_idReq});
+                userCache.remove(Uid);
+                userCache.remove(req.session.Uid);
+                userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+                    return res.sendjson({followList: doc.followList});
+                }));
+            }));
+        }), false);
+    } else {
+        userCache.getUser(Uid, dm.intercept(function(doc) {
+            doc = intersect(union(UserPublicTpl), doc);
+            return res.sendjson(doc);
+        }));
+    }
 };
 
 function getUsers(req, res, dm) {
@@ -267,7 +312,7 @@ function getUsers(req, res, dm) {
             data: []
         };
 
-    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
+    if(req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     if(!req.session.pagination) {
         req.session.pagination = {
             pagination: cache._initTime,
@@ -305,14 +350,9 @@ function getUsers(req, res, dm) {
 };
 
 function getUserInfo(req, res, dm) {
-    var body = {};
-    if(!req.session.Uid) throw jsGen.Err(jsGen.lib.Err.userNeedLogin);
+    if(!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
-        body = doc;
-        jsGen.api.tag.filterTags(body.tagsList, false, dm.intercept(function(doc) {
-            if(doc) body.tagsList = doc;
-            return res.sendjson(body);
-        }));
+        return res.sendjson(doc);
     }));
 };
 
@@ -327,29 +367,28 @@ function editUser(req, res, dm) {
         tagsList: ['']
     },
         body = {},
-        userObj = {},
-        setTagList = [];
+        userObj = {};
 
-    if(!req.session.Uid) throw jsGen.Err(jsGen.lib.Err.userNeedLogin);
+    if(!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     userObj = union(defaultObj);
     userObj = intersect(userObj, req.apibody);
     userObj._id = jsGen.dao.user.convertID(req.session.Uid);
     if(userObj.name) {
         if(!checkUserName(userObj.name)) {
-            throw jsGen.Err(jsGen.lib.Err.userNameErr);
+            throw jsGen.Err(jsGen.lib.msg.userNameErr);
         } else if(userObj.name === cache[req.session.Uid].name) {
             delete userObj.name;
         } else if(cache[userObj.name]) {
-            throw jsGen.Err(jsGen.lib.Err.userNameExist);
+            throw jsGen.Err(jsGen.lib.msg.userNameExist);
         }
     }
     if(userObj.email) {
         if(!checkEmail(userObj.email)) {
-            throw jsGen.Err(jsGen.lib.Err.userEmailErr);
+            throw jsGen.Err(jsGen.lib.msg.userEmailErr);
         } else if(userObj.email === cache[req.session.Uid].email) {
             delete userObj.email;
         } else if(cache[userObj.email]) {
-            throw jsGen.Err(jsGen.lib.Err.userEmailExist);
+            throw jsGen.Err(jsGen.lib.msg.userEmailExist);
         }
     }
     if(userObj.sex) {
@@ -360,10 +399,11 @@ function editUser(req, res, dm) {
     }
     if(userObj.desc) userObj.desc = filterSummary(userObj.desc);
     if(userObj.tagsList) {
-        jsGen.api.tag.filterTags(userObj.tagsList.slice(0, globalConfig.UserTagsMax), true, dm.intercept(function(doc) {
+        jsGen.api.tag.filterTags(userObj.tagsList.slice(0, globalConfig.UserTagsMax), dm.intercept(function(doc) {
             if(doc) userObj.tagsList = doc;
             userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
-                var tagList = {};
+                var tagList = {},
+                    setTagList = [];
                 if(doc) doc.tagsList.forEach(function(x) {
                     tagList[x] = -userObj._id;
                 });
@@ -375,8 +415,11 @@ function editUser(req, res, dm) {
                     _id: Number(key),
                     usersList: tagList[key]
                 });
+                setTagList.forEach(function(x) {
+                    jsGen.api.tag.setTag(x);
+                });
                 daoExec();
-            }));
+            }), false);
         }));
     } else daoExec();
 
@@ -387,14 +430,10 @@ function editUser(req, res, dm) {
                 body = union(UserPrivateTpl);
                 body = intersect(body, doc);
                 setCache(body);
-                if(setTagList.length > 0) setTagList.forEach(function(x) {
-                    jsGen.api.tag.setTag(x);
-                });
-                jsGen.api.tag.filterTags(body.tagsList, false, dm.intercept(function(doc) {
-                    body = intersect(defaultObj, body);
-                    if(doc) body.tagsList = doc;
-                    return res.sendjson(body);
-                }));
+                var tagsList = jsGen.api.tag.convertTags(body.tagsList);
+                body = intersect(defaultObj, body);
+                body.tagsList = tagsList;
+                return res.sendjson(body);
             }
         }));
     };
@@ -412,24 +451,25 @@ function editUsers(req, res, dm) {
             data: []
         };
 
-    if(req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.Err.userRoleErr);
-    if(!req.apibody.data) throw jsGen.Err(jsGen.lib.Err.requestDataErr);
+    if(req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if(!req.apibody.data) throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     if(!Array.isArray(req.apibody.data)) req.apibody.data = [req.apibody.data];
     req.apibody.data.reverse();
+    next();
 
-    function editUserExec() {
+    function next() {
         var userObj = req.apibody.data.pop();
         if(!userObj) return res.sendjson(body);
-        if(!userObj._id) throw jsGen.Err(jsGen.lib.Err.UidNone);
+        if(!userObj._id) throw jsGen.Err(jsGen.lib.msg.UidNone);
         userObj = intersect(union(defaultObj), userObj);
         userObj._id = jsGen.dao.user.convertID(userObj._id);
         if(userObj.email) {
             if(!checkEmail(userObj.email)) {
-                throw jsGen.Err(jsGen.lib.Err.userEmailErr);
+                throw jsGen.Err(jsGen.lib.msg.userEmailErr);
             } else if(userObj.email === cache[req.session.Uid].email) {
                 delete userObj.email;
             } else if(cache[userObj.email]) {
-                throw jsGen.Err(jsGen.lib.Err.userEmailExist);
+                throw jsGen.Err(jsGen.lib.msg.userEmailExist);
             }
         }
         if(userObj.role) {
@@ -444,10 +484,9 @@ function editUsers(req, res, dm) {
                 data.email = doc.email;
                 body.data.push(data);
             }
-            editUserExec();
+            next();
         }));
     };
-    editUserExec();
 };
 
 function getReset(req, res, dm) {};
@@ -457,9 +496,9 @@ function resetUser(req, res, dm) {
     var _id = null;
 
     var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
-    if(!reset.u || !reset.r || !reset.k) throw jsGen.Err(jsGen.lib.Err.resetInvalid);
+    if(!reset.u || !reset.r || !reset.k) throw jsGen.Err(jsGen.lib.msg.resetInvalid);
     if(cache[reset.u]) _id = jsGen.dao.user.convertID(cache[reset.u]._id);
-    else throw jsGen.Err(jsGen.lib.Err.resetInvalid);
+    else throw jsGen.Err(jsGen.lib.msg.resetInvalid);
     jsGen.dao.user.getAuth(_id, dm.intercept(function(doc) {
         var userObj = {};
         userObj._id = _id;
@@ -479,7 +518,7 @@ function resetUser(req, res, dm) {
                     userObj.passwd = SHA256(reset.e);
                     break;
                 default:
-                    throw jsGen.Err(jsGen.lib.Err.resetInvalid);
+                    throw jsGen.Err(jsGen.lib.msg.resetInvalid);
                 }
                 userObj.resetDate = Date.now();
                 userObj.resetKey = '';
@@ -494,8 +533,8 @@ function resetUser(req, res, dm) {
                     }
                     return res.sendjson(body);
                 }));
-            } else throw jsGen.Err(jsGen.lib.Err.resetInvalid);
-        } else throw jsGen.Err(jsGen.lib.Err.resetOutdate);
+            } else throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+        } else throw jsGen.Err(jsGen.lib.msg.resetOutdate);
     }));
 };
 
@@ -532,5 +571,7 @@ function postFn(req, res, dm) {
 module.exports = {
     GET: getFn,
     POST: postFn,
-    cache: cache
+    cache: cache,
+    userCache: userCache,
+    convertUsers: convertUsers
 };

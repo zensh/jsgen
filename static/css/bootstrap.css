@@ -128,7 +128,7 @@ input[type="submit"] {
   -webkit-appearance: button;
   cursor: pointer;
 }
-label,
+/*label,*/
 select,
 button,
 input[type="button"],
@@ -1553,6 +1553,9 @@ input[type="checkbox"][disabled],
 input[type="radio"][readonly],
 input[type="checkbox"][readonly] {
   background-color: transparent;
+}
+.control-group .control-label {
+  font-weight: bold;
 }
 .control-group.warning .control-label,
 .control-group.warning .help-block,
@@ -6332,4 +6335,14 @@ button.close {
 .table input[type="color"],
 .table .uneditable-input {
   margin-bottom: 0;
+}
+.follow {
+  background-color: #468847;
+}
+.unfollow {
+  background-color: #f89406;
+}
+.follow a,
+.unfollow a,{
+  color: #ffffff;
 }

@@ -75,19 +75,61 @@ jsGen.homeCtrl = ['$scope', 'rest', '$location', function($scope, rest, $locatio
     });
     $scope.$on('update', function(event, doc) {
         event.stopPropagation();
+        $scope.user.tagsList = [];
         $scope.user = jsGen.lib.union($scope.user, doc);
     });
 }];
 
 jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($scope, rest, $location, $routeParams) {
-    $scope.user = jsGen.cache.users.get('U' + $routeParams.id);
+    function getUser(callback) {
+        var user = jsGen.cache.users.get('U' + $routeParams.id);
+        if(user) return callback(user);
+        else {
+            user = rest.user.get({
+                Uid: 'U' + $routeParams.id
+            }, function() {
+                if(!user.err) jsGen.cache.users.put(user._id, user);
+                return callback(user)
+            });
+        }
+    };
     $scope.isMe = false;
-    if(!$scope.user) $scope.user = rest.userView.get({
-        Uid: 'U' + $routeParams.id
-    }, function() {
-        if($scope.user.err) $location.path('/');
-        jsGen.cache.users.put($scope.user._id, $scope.user);
+    $scope.isFollow = 'unfollow';
+    $scope.followClass = 'btn-warning'
+    getUser(function(user) {
+        if(user.err) return $location.path('/');
+        $scope.user = user;
+        if(jsGen.global.user && jsGen.global.user.followList.some(function(x) {
+            return x._id === user._id;
+        })) {
+            $scope.isFollow = 'follow';
+            $scope.followClass = 'btn-success';
+        }
     });
+    $scope.followMe = function() {
+        var result;
+        if($scope.isFollow === 'follow') {
+            result = rest.user.get({
+                Uid: 'U' + $routeParams.id,
+                Get: 'unfollow'
+            }, function() {
+                if(!result.err) {
+                    $scope.isFollow = 'unfollow';
+                    $scope.followClass = 'btn-warning'
+                }
+            });
+        } else if($scope.isFollow === 'unfollow') {
+            result = rest.user.get({
+                Uid: 'U' + $routeParams.id,
+                Get: 'follow'
+            }, function() {
+                if(!result.err) {
+                    $scope.isFollow = 'follow';
+                    $scope.followClass = 'btn-success';
+                }
+            });
+        }
+    };
 }];
 jsGen.adminCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     if(!(jsGen.global.user && jsGen.global.user.role === 'admin')) $location.path('/');

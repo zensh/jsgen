@@ -147,7 +147,6 @@ var that = jsGen.dao.db.bind('users', {
                 login: 0
             }
         }, function(err, doc) {
-
             return callback(err, doc);
         });
     },
@@ -331,14 +330,14 @@ var that = jsGen.dao.db.bind('users', {
         if(newObj.followList < 0) {
             newObj.followList = Math.abs(newObj.followList);
             setObj.$inc = {
-                fans: -1
+                follow: -1
             };
             setObj.$pull = {
                 followList: newObj.followList
             };
         } else {
             setObj.$inc = {
-                fans: 1
+                follow: 1
             };
             setObj.$push = {
                 followList: newObj.followList
@@ -350,7 +349,6 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj, {
             w: 1
         }, function(err, doc) {
-
             return callback(err, doc);
         });
     },
