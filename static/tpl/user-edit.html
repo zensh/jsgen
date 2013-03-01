@@ -2,10 +2,14 @@
     <div class="page-header">
         <h3>用户设置</h3>
     </div>
-    <div class="alert alert-error" ng-show="user.err">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong>{{user.err.name}}</strong>
-        {{user.err.message}}
+    <div class="alert alert-error" ng-show="err">
+        <button type="button" class="close" ng-click="err=null">&times;</button>
+        <strong>{{err.name}}：</strong>
+        {{err.message}}
+    </div>
+    <div class="alert alert-success" ng-show="request">
+            <button type="button" class="close" ng-click="request=null">&times;</button>
+            <strong>{{request}}</strong>
     </div>
     <form name="userEdit"  class="form-horizontal">
     <div class="control-group">
@@ -33,6 +37,7 @@
         </label>
         <div class="controls">
             <input type="email" name="email" ng-model="user.email" />
+            <span class="text-info" ng-hide="userEdit.email.$error.email">修改邮箱需通过邮箱验证后才保存修改</span>
             <span class="text-error" ng-show="userEdit.email.$error.email">无效的Email!</span>
         </div>
     </div>

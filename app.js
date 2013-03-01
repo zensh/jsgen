@@ -75,9 +75,8 @@ serverDm.run(function() {
                     jsGen.dao.db.close();
                     dm.dispose();
                 });
-                if(req.path[0] === 'api') {
+                if(err.hasOwnProperty('name')) {
                     res.sendjson({err: err});
-                    if(err.name !== jsGen.lib.msg.err) jsGen.errlog.error(err);
                 } else {
                     res.r404();
                     jsGen.errlog.error(err);

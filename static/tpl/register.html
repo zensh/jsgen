@@ -3,10 +3,10 @@
         <div class="page-header">
             <h3>用户注册</h3>
         </div>
-        <div class="alert alert-error" ng-show="global.user.err">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <strong>{{global.user.err.name}}</strong>
-            {{global.user.err.message}}
+        <div class="alert alert-error" ng-show="err">
+            <button type="button" class="close" ng-click="err=null">&times;</button>
+            <strong>{{err.name}}：</strong>
+            {{err.message}}
         </div>
         <form class="form-signin" name="register">
             <span class="text-error" ng-show="register.name.$error.required">
