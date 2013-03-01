@@ -209,7 +209,10 @@ body {
   font-size: 14px;
   line-height: 20px;
   color: #333333;
-  background-color: #ffffff;
+  background-color: #fff;
+  background-image: url("./img/body_bg.jpg");
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
 }
 a {
   color: #0088cc;
@@ -6335,14 +6338,4 @@ button.close {
 .table input[type="color"],
 .table .uneditable-input {
   margin-bottom: 0;
-}
-.follow {
-  background-color: #468847;
-}
-.unfollow {
-  background-color: #f89406;
-}
-.follow a,
-.unfollow a,{
-  color: #ffffff;
 }

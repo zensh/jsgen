@@ -27,7 +27,7 @@ jsGen.globalCtrl = ['$scope', 'rest', '$location', 'cache', function($scope, res
         } else $scope.isLogin = false;
     };
     angular.element('a').attr('target', function() {
-        if (this.host === $location.host) return this.target;
+        if (this.host === location.host) return this.target;
         else return '_blank';
     });
 }];

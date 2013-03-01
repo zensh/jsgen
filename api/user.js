@@ -26,7 +26,7 @@ userCache.getUser = function(Uid, callback, convert) {
     if(doc) {
         if(convert) {
             doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-            doc.followList = jsGen.api.user.convertUsers(doc.followList);
+            doc.followList = convertUsers(doc.followList);
         }
         return callback(null, doc);
     } else jsGen.dao.user.getUserInfo(jsGen.dao.user.convertID(Uid), function(err, doc) {
@@ -35,7 +35,7 @@ userCache.getUser = function(Uid, callback, convert) {
             that.put(Uid, doc);
             if(convert) {
                 doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-                doc.followList = jsGen.api.user.convertUsers(doc.followList);
+                doc.followList = convertUsers(doc.followList);
             }
         }
         return callback(err, doc);
