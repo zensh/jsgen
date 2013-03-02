@@ -11,12 +11,11 @@ var url = require('url'),
 var cache = {
     _initTime: 0
 };
-cache._init = function(callback) {
+cache._init = function() {
     var that = this;
     jsGen.dao.index.getGlobalConfig(function(err, doc) {
         if(err) jsGen.errlog.error(err);
         else that._update(doc);
-        if(callback) callback(err, that.data);
     });
     return this;
 };

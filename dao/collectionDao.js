@@ -39,9 +39,7 @@ var that = jsGen.dao.db.bind('collections', {
 
     getCollectionsNum: function(callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
-        that.count(function(err, count) {
-            return callback(err, count);
-        });
+        that.count(callback);
     },
 
     getLatestId: function(callback) {
@@ -56,9 +54,7 @@ var that = jsGen.dao.db.bind('collections', {
             fields: {
                 _id: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     getCollectionsIndex: function(date, limit, callback) {
@@ -81,9 +77,7 @@ var that = jsGen.dao.db.bind('collections', {
                 _id: 1,
                 updateTime: 1
             }
-        }).toArray(function(err, doc) {
-            return callback(err, doc);
-        });
+        }).toArray(callback);
     },
 
     getCollectionsList: function(_idArray, callback) {
@@ -104,9 +98,7 @@ var that = jsGen.dao.db.bind('collections', {
                 updateTime: 1,
                 collectors: 1
             }
-        }).toArray(function(err, doc) {
-            return callback(err, doc);
-        });
+        }).toArray(callback);
     },
 
     getCollection: function(_id, callback) {
@@ -130,9 +122,7 @@ var that = jsGen.dao.db.bind('collections', {
                 comments: 1,
                 commentsList: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     getCollectionInfo: function(_id, callback) {
@@ -157,9 +147,7 @@ var that = jsGen.dao.db.bind('collections', {
                 comments: 1,
                 commentsList: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     setCollectionInfo: function(CollectionObjArray, callback) {
@@ -280,9 +268,7 @@ var that = jsGen.dao.db.bind('collections', {
             that.insert(
             newCollection, {
                 w: 1
-            }, function(err, doc) {
-                return callback(err, doc);
-            });
+            }, callback);
         });
     },
 
@@ -292,9 +278,7 @@ var that = jsGen.dao.db.bind('collections', {
             _id: _id
         }, {
             w: 1
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     }
 });
 

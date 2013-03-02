@@ -45,15 +45,13 @@ var cache = {
     _initTime: 0,
     _index: []
 };
-cache._init = function(callback) {
-    var that = this,
-        callback = callback || jsGen.lib.tools.callbackFn;
+cache._init = function() {
+    var that = this;
     jsGen.dao.user.getUsersIndex(function(err, doc) {
         if(doc) {
             doc._id = jsGen.dao.user.convertID(doc._id);
             that._update(doc);
         }
-        if(callback) callback(err, doc);
     });
     return this;
 };

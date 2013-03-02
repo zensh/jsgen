@@ -35,9 +35,7 @@ var that = jsGen.dao.db.bind('tags', {
 
     getTagsNum: function(callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
-        that.count(function(err, count) {
-            return callback(err, count);
-        });
+        that.count(callback);
     },
 
     getLatestId: function(callback) {
@@ -52,9 +50,7 @@ var that = jsGen.dao.db.bind('tags', {
             fields: {
                 _id: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     getTagsIndex: function(callback) {
@@ -72,9 +68,7 @@ var that = jsGen.dao.db.bind('tags', {
                 articles: 1,
                 users: 1
             }
-        }).each(function(err, doc) {
-            return callback(err, doc);
-        });
+        }).each(callback);
     },
 
     getTag: function(_id, callback) {
@@ -92,9 +86,7 @@ var that = jsGen.dao.db.bind('tags', {
                 users: 1,
                 usersList: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     setTag: function(tagObj, callback) {
@@ -150,9 +142,7 @@ var that = jsGen.dao.db.bind('tags', {
         }, [], setObj, {
             w: 1,
             new: true
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     setNewTag: function(tagObj, callback) {
@@ -164,9 +154,7 @@ var that = jsGen.dao.db.bind('tags', {
         newTag = union(tag, newTag);
 
         that.getLatestId(function(err, doc) {
-            if(err) {
-                return callback(err, null);
-            }
+            if(err) return callback(err, null);
             if(!doc) newTag._id = 1;
             else newTag._id = doc._id + 1;
             that.findAndModify({
@@ -175,9 +163,7 @@ var that = jsGen.dao.db.bind('tags', {
                 w: 1,
                 new: true,
                 upsert: true
-            }, function(err, doc) {
-                return callback(err, doc);
-            });
+            }, callback);
         });
     },
 
@@ -187,9 +173,7 @@ var that = jsGen.dao.db.bind('tags', {
             _id: _id
         }, {
             w: 1
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 });
 

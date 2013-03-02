@@ -35,9 +35,7 @@ var that = jsGen.dao.db.bind('messages', {
 
     getMessagesNum: function(callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
-        that.count(function(err, count) {
-            return callback(err, count);
-        });
+        that.count(callback);
     },
 
     getLatestId: function(callback) {
@@ -52,9 +50,7 @@ var that = jsGen.dao.db.bind('messages', {
             fields: {
                 _id: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     getMessagesList: function(_idArray, callback) {
@@ -71,9 +67,7 @@ var that = jsGen.dao.db.bind('messages', {
                 title: 1,
                 content: 1
             }
-        }).toArray(function(err, doc) {
-            return callback(err, doc);
-        });
+        }).toArray(callback);
     },
 
     getMessage: function(_id, callback) {
@@ -91,9 +85,7 @@ var that = jsGen.dao.db.bind('messages', {
                 title: 1,
                 content: 1
             }
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 
     setMessage: function(messageObj) {
@@ -136,9 +128,7 @@ var that = jsGen.dao.db.bind('messages', {
             that.insert(
             newMessage, {
                 w: 1
-            }, function(err, doc) {
-                return callback(err, doc);
-            });
+            }, callback);
         });
     },
 
@@ -148,9 +138,7 @@ var that = jsGen.dao.db.bind('messages', {
             _id: _id
         }, {
             w: 1
-        }, function(err, doc) {
-            return callback(err, doc);
-        });
+        }, callback);
     },
 });
 

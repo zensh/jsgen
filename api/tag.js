@@ -30,9 +30,8 @@ var cache = {
     _initTime: 0,
     _index: []
 };
-cache._init = function(callback) {
-    var that = this,
-        callback = callback || jsGen.lib.tools.callbackFn;
+cache._init = function() {
+    var that = this;
 
     jsGen.dao.tag.getTagsIndex(function(err, doc) {
         if(err) return jsGen.errlog.error(err);
@@ -40,7 +39,6 @@ cache._init = function(callback) {
             doc._id = jsGen.dao.tag.convertID(doc._id);
             that._update(doc);
         }
-        if(callback) callback(err, doc);
     });
     return this;
 };
