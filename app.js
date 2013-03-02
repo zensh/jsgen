@@ -23,9 +23,10 @@ serverDm.run(function() {
     jsGen.errlog = jsGen.module.rrestjs.restlog;
     jsGen.lib = {};
     jsGen.lib.tools = require('./lib/tools.js');
+    jsGen.lib.CacheLRU = require('./lib/cacheLRU.js');
     jsGen.lib.msg = require('./lib/msg.js');
     jsGen.lib.json = require('./lib/json.js');
-    jsGen.lib.converter = require('./lib/nodeAnyBaseConverter.js');
+    jsGen.lib.converter = require('./lib/anyBaseConverter.js');
     jsGen.lib.email = require('./lib/email.js');
     jsGen.Err = jsGen.lib.tools.Err;
     jsGen.dao = {};

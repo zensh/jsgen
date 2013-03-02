@@ -11,17 +11,16 @@ var globalConfig = jsGen.lib.json.GlobalConfig,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256,
     HmacMD5 = jsGen.lib.tools.HmacMD5,
     gravatar = jsGen.lib.tools.gravatar,
-    CacheFn = jsGen.lib.tools.CacheFn,
+    CacheLRU = jsGen.lib.CacheLRU,
     filterSummary = jsGen.lib.tools.filterSummary;
 
-var userCache = new CacheFn(100);
-var paginationCache = new CacheFn(5);
+var userCache = new CacheLRU(100);
+var paginationCache = new CacheLRU(5);
 userCache.getUser = function(Uid, callback, convert) {
     var that = this,
-        callback = callback || jsGen.lib.tools.callbackFn,
-        convert = convert,
         doc = this.get(Uid);
 
+    callback = callback || jsGen.lib.tools.callbackFn;
     if(convert === undefined) convert = true;
     if(doc) {
         if(convert) {

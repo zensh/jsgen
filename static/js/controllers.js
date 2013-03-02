@@ -83,14 +83,15 @@ jsGen.userLoginCtrl = ['$scope', 'rest', '$location', '$timeout', function($scop
             email: $scope.email,
             request: request
         }, function() {
-            if (!result.err) {
-                $scope.request = result.request;
-                $scope.timeout = 5;
-                return function locationTo() {
+            function locationTo() {
                     $scope.timeout -= 1;
                     if($scope.timeout < 0) return $location.path('/');
                     else return $timeout(locationTo, 1000);
-                }();
+            };
+            if (!result.err) {
+                $scope.request = result.request;
+                $scope.timeout = 5;
+                return locationTo();
             } else {
                 $scope.err = result.err;
                 $scope.isSubmit = false;

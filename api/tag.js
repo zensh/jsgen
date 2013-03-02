@@ -1,15 +1,13 @@
 var union = jsGen.lib.tools.union,
     checkID = jsGen.lib.tools.checkID,
     checkTag = jsGen.lib.tools.checkTag,
-    CacheFn = jsGen.lib.tools.CacheFn;
+    CacheLRU = jsGen.lib.CacheLRU;
 
-var tagCache = new CacheFn(50);
+var tagCache = new CacheLRU(50);
 tagCache.getTag = function(tagID, callback, convert) {
     var that = this,
-        callback = callback || jsGen.lib.tools.callbackFn,
-        convert = convert,
         doc = this.get(tagID);
-
+    callback = callback || jsGen.lib.tools.callbackFn;
     if(convert === undefined) convert = true;
     if(doc) {
         if(convert) {

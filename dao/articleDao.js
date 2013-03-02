@@ -44,14 +44,14 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticlesNum: function(callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         that.count(function(err, count) {
             return callback(err, count);
         });
     },
 
     getLatestId: function(callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -69,7 +69,7 @@ var that = jsGen.dao.db.bind('articles', {
 
     getArticlesIndex: function(date, limit, callback) {
         var query = {};
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         if(date > 0) query = {
             date: {
                 $gt: date
@@ -96,7 +96,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticlesList: function(_idArray, callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         if(!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
             _id: {
@@ -123,7 +123,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticle: function(_id, callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -157,7 +157,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticleInfo: function(_id, callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -211,7 +211,7 @@ var that = jsGen.dao.db.bind('articles', {
             };
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) defaultObj.tagsList[i] = 0;
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
         if(!Array.isArray(ArticleObjArray)) ArticleObjArray = [ArticleObjArray];
 
@@ -403,7 +403,7 @@ var that = jsGen.dao.db.bind('articles', {
     setNewArticle: function(articleObj, callback) {
         var article = union(defautArticle),
             newArticle = union(defautArticle);
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
         for (var i = globalConfig.ArticleTagsMax - 1; i >= 0; i--) newArticle.tagsList[i] = 0;
         newArticle = intersect(newArticle, articleObj);
@@ -426,7 +426,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     delArticle: function(_id, callback) {
-        var callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id
         }, {
