@@ -1,5 +1,4 @@
-var globalConfig = jsGen.lib.json.GlobalConfig,
-    UserPublicTpl = jsGen.lib.json.UserPublicTpl,
+var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     UserPrivateTpl = jsGen.lib.json.UserPrivateTpl,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
@@ -386,7 +385,7 @@ function editUser(req, res, dm) {
     }
     if(userObj.desc) userObj.desc = filterSummary(userObj.desc);
     if(userObj.tagsList) {
-        jsGen.api.tag.filterTags(userObj.tagsList.slice(0, globalConfig.UserTagsMax), dm.intercept(function(doc) {
+        jsGen.api.tag.filterTags(userObj.tagsList.slice(0, jsGen.config.UserTagsMax), dm.intercept(function(doc) {
             if(doc) userObj.tagsList = doc;
             userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
                 var tagList = {},
