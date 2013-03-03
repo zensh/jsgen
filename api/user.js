@@ -331,7 +331,7 @@ function getUsers(req, res, dm) {
     if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     if (!req.session.pagination) {
         req.session.pagination = {
-            pagID: 'user' + cache._initTime,
+            pagID: 'u' + cache._initTime,
             total: cache._index.length,
             num: 20,
             now: 1
@@ -343,8 +343,8 @@ function getUsers(req, res, dm) {
     p = req.session.pagination.now;
     n = req.session.pagination.num;
     array = jsGen.cache.pagination.get(req.session.pagination.pagID);
-    if (!array || (p === 1 && req.session.pagination.pagID !== 'user' + cache._initTime)) {
-        req.session.pagination.pagID = 'user' + cache._initTime;
+    if (!array || (p === 1 && req.session.pagination.pagID !== 'u' + cache._initTime)) {
+        req.session.pagination.pagID = 'u' + cache._initTime;
         req.session.pagination.total = cache._index.length;
         jsGen.cache.pagination.put(req.session.pagination.pagID, cache._index);
         array = cache._index;

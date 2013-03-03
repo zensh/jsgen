@@ -10,7 +10,6 @@ var url = require('url'),
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
 var onlineCache = {};
-
 function updateOnlineCache(req) {
     var now = Date.now(),
         users = 0,

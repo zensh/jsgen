@@ -107,13 +107,17 @@ cache._update = function(obj) {
     if (!this[obj._id]) {
         this[obj._id] = {};
         this._index.push(obj._id);
+        this._initTime = Date.now();
     }
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
     this[obj._id].updateTime = obj.updateTime;
     this[obj._id].hots = obj.hots;
     this[obj._id].visitors = obj.visitors;
-    this._initTime = Date.now();
+    if (obj.display === 2) {
+        this._index.splice(this._index.lastIndexOf(obj._id), 1);
+        this._index.push(obj._id);
+    }
     return this;
 };
 cache._remove = function(ID) {
@@ -155,6 +159,69 @@ function convertArticles(_idArray, callback, mode) {
             next();
         });
     }
+};
+
+function getArticle(req, res, dm) {
+    var ID = req.path[2];
+    if (!checkID(ID) || !cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    if (cache[ID].display > 0 && !req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    articleCache.getArticle(ID, dm.intercept(function(doc) {
+        if (req.session.Uid === doc.author._id) return res.sendjson(doc);
+        if (cache[ID].display === 1) {
+            jsGen.cache.user.getUser(doc.author._id, dm.intercept(function(user) {
+                if (user.fansList.indexOf(jsGen.dao.user.convertID(req.session.Uid)) >= 0) return res.sendjson(doc);
+                else throw jsGen.Err(jsGen.lib.msg.articleDisplay1);
+            }), false);
+        } else if (cache[ID].display === 2) {
+            if (req.session.role === 'admin' || req.session.role === 'editor') return res.sendjson(doc);
+            else throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
+        } else return res.sendjson(doc);
+    }));
+};
+
+function getLatest(req, res, dm) {
+    var array = [],
+        p = req.getparam.p || req.getparam.page,
+        n = req.getparam.n || req.getparam.num,
+        body = {
+            pagination: {},
+            data: []
+        };
+
+    if (!req.session.pagination) {
+        req.session.pagination = {
+            pagID: 'a' + cache._initTime,
+            total: cache._index.length,
+            num: 20,
+            now: 1
+        };
+        jsGen.cache.pagination.put(req.session.pagination.pagID, cache._index);
+    }
+    if (n && n >= 1 && n <= 100) req.session.pagination.num = Math.floor(n);
+    if (p && p >= 1) req.session.pagination.now = Math.floor(p);
+    p = req.session.pagination.now;
+    n = req.session.pagination.num;
+    array = jsGen.cache.pagination.get(req.session.pagination.pagID);
+    if (!array || (p === 1 && req.session.pagination.pagID !== 'a' + cache._initTime)) {
+        req.session.pagination.pagID = 'a' + cache._initTime;
+        req.session.pagination.total = cache._index.length;
+        jsGen.cache.pagination.put(req.session.pagination.pagID, cache._index);
+        array = cache._index;
+    }
+    array = array.slice((p - 1) * n, p * n);
+    body.pagination.total = req.session.pagination.total;
+    body.pagination.now = p;
+    body.pagination.num = n;
+    next();
+
+    function next() {
+        var ID = array.pop();
+        if (!ID) return res.sendjson(body);
+        listCache.getArticle(ID, dm.intercept(function(doc) {
+            if (doc) body.data.push(doc);
+            next();
+        }));
+    };
 };
 
 function getFn(req, res, dm) {
