@@ -1,4 +1,5 @@
 var url = require('url'),
+    os = require('os'),
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
@@ -8,23 +9,8 @@ var url = require('url'),
     checkUserName = jsGen.lib.tools.checkUserName,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
-var cache = {
-    _initTime: 0
-};
-cache._init = function() {
-    var that = this;
-    jsGen.dao.index.getGlobalConfig(function(err, doc) {
-        if (err) jsGen.errlog.error(err);
-        else that._update(doc);
-    });
-    return this;
-};
-cache._update = function(obj) {
-    union(this, obj);
-    this._initTime = Date.now();
-};
-
 var onlineCache = {};
+
 function updateOnlineCache(req) {
     var now = Date.now(),
         users = 0,
@@ -40,28 +26,24 @@ function updateOnlineCache(req) {
             if (key[0] === 'U') users += 1;
         }
     });
-    cache.onlineNum = online;
-    cache.onlineUsers = users;
-    if (online > cache.maxOnlineNum) setGlobalConfig({
+    jsGen.config.onlineNum = online;
+    jsGen.config.onlineUsers = users;
+    if (online > jsGen.config.maxOnlineNum) setGlobalConfig({
         maxOnlineNum: online,
         maxOnlineTime: now
     });
 }
-var timeIntervalCache = {};
-function checkTimeInterval(req, add) {
-    var now = Date.now();
-    Object.keys(timeIntervalCache).forEach(function(key) {
-        if((now - timeIntervalCache[key]) > jsGen.config.TimeInterval * 1000) delete timeIntervalCache[key];
-    });
-    if(!req.session._id) return false;
-    if (add) timeIntervalCache[req.session._id] = now;
-    else if (timeIntervalCache[req.session._id]) return false;
+
+function checkTimeInterval(req, type, add) {
+    if (!req.session._id) return false;
+    if (add) jsGen.cache.timeInterval.put(req.session._id + type);
+    else if (jsGen.cache.timeInterval.get(req.session._id + type)) return false;
     return true;
 };
 
 function setGlobalConfig(obj, callback) {
     jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
-        if (doc) cache._update(doc);
+        if (doc) jsGen.config._update(doc);
         if (callback) return callback(err, doc);
     });
 };
@@ -72,7 +54,7 @@ function setVisitHistory(req) {
         data: []
     };
     var info = jsGen.module.platform.parse(req.useragent);
-    visit._id = cache._initTime ? cache.visitHistory[cache.visitHistory.length - 1] : 1;
+    visit._id = jsGen.config._initTime ? jsGen.config.visitHistory[jsGen.config.visitHistory.length - 1] : 1;
     visit.data[0] = Date.now();
     visit.data[1] = req.session.Uid;
     visit.data[2] = req.ip || '0.0.0.0';
@@ -104,7 +86,7 @@ function getvisitHistory(req, res, dm) {
         data: []
     };
     if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    jsGen.dao.index.getVisitHistory(cache.visitHistory, dm.intercept(function(doc) {
+    jsGen.dao.index.getVisitHistory(jsGen.config.visitHistory, dm.intercept(function(doc) {
         if (!doc) {
             jsGen.dao.db.close();
             return res.sendjson(body);
@@ -112,19 +94,42 @@ function getvisitHistory(req, res, dm) {
     }));
 };
 
-function getGlobal(req, res, dm) {
-    var body = union(cache);
-    if (req.session.Uid !== 'Uadmin' || req.path[2] !== 'admin') {
-        delete body.visitHistory;
-        delete body.email;
-        delete body.smtp;
-    }
-    if (req.session.Uid && req.path[2] !== 'admin') {
+function getIndex(req, res, dm) {
+    var body = union(jsGen.config);
+
+    delete body.visitHistory;
+    delete body.email;
+    delete body.smtp;
+    if (req.session.Uid) {
         jsGen.api.user.userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
             body.user = doc;
             return res.sendjson(body);
         }));
-    }
+    } else return res.sendjson(body);
+};
+
+function getGlobal(req, res, dm) {
+    var body = union(jsGen.config);
+    if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    body.sys = {
+        uptime: process.uptime(),
+        cpus: os.cpus(),
+        platform: process.platform,
+        node: process.versions,
+        memory: process.memoryUsage(),
+        pagination: jsGen.cache.pagination.info(),
+        user: jsGen.cache.user.info(),
+        article: jsGen.cache.article.info(),
+        comment: jsGen.cache.comment.info(),
+        list: jsGen.cache.list.info(),
+        tag: jsGen.cache.tag.info(),
+    };
+    body.sys.uptime = jsGen.lib.tools.formatTime(Math.round(body.sys.uptime));
+    body.sys.memory.rss = jsGen.lib.tools.formatBytes(body.sys.memory.rss);
+    body.sys.memory.heapTotal = jsGen.lib.tools.formatBytes(body.sys.memory.heapTotal);
+    body.sys.memory.heapUsed = jsGen.lib.tools.formatBytes(body.sys.memory.heapUsed);
+    body.sys.memory.total = jsGen.lib.tools.formatBytes(os.totalmem());
+    body.sys.memory.free = jsGen.lib.tools.formatBytes(os.freemem());
     return res.sendjson(body);
 };
 
@@ -187,7 +192,7 @@ function setGlobal(req, res, dm) {
     if (setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
     if (setObj.TimeInterval && setObj.TimeInterval < 5) setObj.TimeInterval = 5;
     Object.keys(setObj).forEach(function(key) {
-        if (equal(setObj[key], cache[key])) delete setObj[key];
+        if (equal(setObj[key], jsGen.config[key])) delete setObj[key];
     });
     setGlobalConfig(setObj, dm.intercept(function(doc) {
         body = intersect(defaultObj, doc);
@@ -200,7 +205,7 @@ function getFn(req, res, dm) {
         case 'admin':
             return getGlobal(req, res, dm);
         default:
-            return getGlobal(req, res, dm);
+            return getIndex(req, res, dm);
     }
 };
 
@@ -216,7 +221,6 @@ module.exports = {
     POST: postFn,
     setVisitHistory: setVisitHistory,
     setGlobalConfig: setGlobalConfig,
-    cache: cache,
     updateOnlineCache: updateOnlineCache,
     checkTimeInterval: checkTimeInterval
 };

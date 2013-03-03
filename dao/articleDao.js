@@ -60,7 +60,7 @@ var that = jsGen.dao.db.bind('articles', {
 
     getArticlesIndex: function(date, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
-        that.find(query, {
+        that.find({}, {
             sort: {
                 _id: 1
             },

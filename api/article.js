@@ -4,13 +4,10 @@ var listArticle = jsGen.lib.json.ListArticle,
     intersect = jsGen.lib.tools.intersect,
     checkID = jsGen.lib.tools.checkID,
     checkUrl = jsGen.lib.tools.checkUrl,
-    CacheLRU = jsGen.lib.CacheLRU,
+    articleCache = jsGen.cache.article,
+    commentCache = jsGen.cache.comment,
+    listCache = jsGen.cache.list,
     filterSummary = jsGen.lib.tools.filterSummary;
-
-var articleCache = new CacheLRU(100),
-    commentCache = new CacheLRU(400),
-    listCache = new CacheLRU(400),
-    paginationCache = new CacheLRU(10);
 
 articleCache.getArticle = function(ID, callback, convert) {
     var that = this,
@@ -106,16 +103,6 @@ var cache = {
     _initTime: 0,
     _index: []
 };
-cache._init = function() {
-    var that = this;
-    jsGen.dao.article.getArticlesIndex(function(err, doc) {
-        if (doc) {
-            doc._id = jsGen.dao.article.convertID(doc._id);
-            that._update(doc);
-        }
-    });
-    return this;
-};
 cache._update = function(obj) {
     if (!this[obj._id]) {
         this[obj._id] = {};
@@ -135,6 +122,16 @@ cache._remove = function(ID) {
     this._initTime = Date.now();
     return this;
 };
+(function() {
+    var that = this;
+    jsGen.dao.article.getArticlesIndex(function(err, doc) {
+        if (err) throw err;
+        if (doc) {
+            doc._id = jsGen.dao.article.convertID(doc._id);
+            that._update(doc);
+        }
+    });
+}).call(cache);
 
 function convertArticles(_idArray, callback, mode) {
     var result = [];
@@ -164,7 +161,11 @@ function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
-            return getArticleList(req, res, dm);
+            return getLatest(req, res, dm);
+        case 'hot':
+            return getHot(req, res, dm);
+        case 'update':
+            return getUpdate(req, res, dm);
         default:
             return getArticle(req, res, dm);
     }
@@ -184,8 +185,5 @@ module.exports = {
     GET: getFn,
     POST: postFn,
     DELETE: deleteFn,
-    cache: cache,
-    articleCache: articleCache,
-    commentCache: commentCache,
     convertArticles: convertArticles
 };

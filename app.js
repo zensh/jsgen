@@ -4,7 +4,10 @@ var domain = require('domain'),
 var serverDm = domain.create();
 
 serverDm.on('error', function(err) {
-    var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+    var err = jsGen.lib.tools.intersect({
+        name: '',
+        message: ''
+    }, err);
     console.log('SevERR:' + err);
     jsGen.errlog.error(err);
 });
@@ -24,6 +27,7 @@ serverDm.run(function() {
     jsGen.lib = {};
     jsGen.lib.tools = require('./lib/tools.js');
     jsGen.lib.CacheLRU = require('./lib/cacheLRU.js');
+    jsGen.lib.CacheTL = require('./lib/cacheTL.js');
     jsGen.lib.msg = require('./lib/msg.js');
     jsGen.lib.json = require('./lib/json.js');
     jsGen.lib.converter = require('./lib/anyBaseConverter.js');
@@ -37,53 +41,76 @@ serverDm.run(function() {
     jsGen.dao.message = require('./dao/messageDao.js');
     jsGen.dao.tag = require('./dao/tagDao.js');
     jsGen.dao.user = require('./dao/userDao.js');
-    jsGen.api = {};
-    jsGen.api.index = require('./api/index.js');
-    jsGen.api.home = require('./api/home.js');
-    jsGen.api.admin = require('./api/admin.js');
-    jsGen.api.user = require('./api/user.js');
-    jsGen.api.article = require('./api/article.js');
-    jsGen.api.tag = require('./api/tag.js');
-    jsGen.api.collection = require('./api/collection.js');
-    jsGen.api.comment = require('./api/comment.js');
-    jsGen.api.message = require('./api/message.js');
-    jsGen.api.install = require('./api/install.js');
+    jsGen.config = {};
+    (function() {
+        var that = this;
+        this._update = function(obj) {
+            jsGen.lib.tools.union(this, obj);
+            this._initTime = Date.now();
+        };
+        jsGen.dao.index.getGlobalConfig(serverDm.intercept(function(doc) {
+            that._update(doc);
+            jsGen.cache = {};
+            jsGen.cache.pagination = new jsGen.lib.CacheTL(30 * 60 * 1000);
+            jsGen.cache.timeInterval = new jsGen.lib.CacheTL(that.TimeInterval * 1000, true);
+            jsGen.cache.user = new jsGen.lib.CacheLRU(100);
+            jsGen.cache.article = new jsGen.lib.CacheLRU(100);
+            jsGen.cache.comment = new jsGen.lib.CacheLRU(500);
+            jsGen.cache.list = new jsGen.lib.CacheLRU(500);
+            jsGen.cache.tag = new jsGen.lib.CacheLRU(100);
+            jsGen.api = {};
+            jsGen.api.index = require('./api/index.js');
+            jsGen.api.home = require('./api/home.js');
+            jsGen.api.admin = require('./api/admin.js');
+            jsGen.api.user = require('./api/user.js');
+            jsGen.api.article = require('./api/article.js');
+            jsGen.api.tag = require('./api/tag.js');
+            jsGen.api.collection = require('./api/collection.js');
+            jsGen.api.comment = require('./api/comment.js');
+            jsGen.api.message = require('./api/message.js');
+            jsGen.api.install = require('./api/install.js');
 
-    jsGen.api.index.cache._init();
-    jsGen.api.user.cache._init();
-    jsGen.api.tag.cache._init();
-    jsGen.config = jsGen.api.index.cache;
-
-    fs.readFile('package.json', 'utf8', serverDm.intercept(function(data) {
-        jsGen.info = JSON.parse(data);
-        if (jsGen.info !== jsGen.config.info) jsGen.api.index.setGlobalConfig({
-            info: jsGen.info
-        },
-        serverDm.intercept(function(doc) {
-            console.log(jsGen.config);
+            fs.readFile('package.json', 'utf8', serverDm.intercept(function(data) {
+                jsGen.info = JSON.parse(data);
+                if (!jsGen.lib.tools.equal(jsGen.info, that.info)) jsGen.api.index.setGlobalConfig({
+                    info: jsGen.info
+                },
+                serverDm.intercept(function(doc) {
+                    that._update(doc);
+                    console.log(doc);
+                }));
+            }));
         }));
-    }));
+    }).call(jsGen.config);
 
     var server = http.createServer(function(req, res) {
         var dm = domain.create();
         dm.add(req);
         dm.add(res);
         dm.on('error', function(err) {
-            var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+            var err = jsGen.lib.tools.intersect({
+                name: '',
+                message: ''
+            }, err);
             try {
                 res.on('close', function() {
                     console.log('Send Ok2!');
                     jsGen.dao.db.close();
                     dm.dispose();
                 });
-                if(err.hasOwnProperty('name')) {
-                    res.sendjson({err: err});
+                if (err.hasOwnProperty('name')) {
+                    res.sendjson({
+                        err: err
+                    });
                 } else {
                     res.r404();
                     jsGen.errlog.error(err);
                 }
             } catch (err) {
-                var err = jsGen.lib.tools.intersect({name: '', message: ''}, err);
+                var err = jsGen.lib.tools.intersect({
+                    name: '',
+                    message: ''
+                }, err);
                 jsGen.errlog.error(err);
                 dm.dispose();
             }
@@ -94,9 +121,11 @@ serverDm.run(function() {
             dm.dispose();
         });
         dm.run(function() {
-            if(req.path[0] === 'api') {
+            if (req.path[0] === 'api') {
                 jsGen.api[req.path[1]][req.method](req, res, dm);
-                jsGen.api.index.updateOnlineCache(req);
+                process.nextTick(function() {
+                    jsGen.api.index.updateOnlineCache(req);
+                });
                 console.log(req.method + ' : ' + req.path);
             } else {
                 res.file('/static/index.html');
