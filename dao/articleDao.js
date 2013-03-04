@@ -237,7 +237,6 @@ var that = jsGen.dao.db.bind('articles', {
 
         intersect(article, articleObj);
         union(newArticle, article);
-        newArticle.date = Date.now();
 
         that.getLatestId(function(err, doc) {
             if (err) return callback(err, null);

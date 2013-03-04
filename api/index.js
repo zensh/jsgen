@@ -18,13 +18,13 @@ function updateOnlineCache(req) {
         delete onlineCache[req.session._id];
         onlineCache[req.session.Uid] = now;
     } else onlineCache[req.session._id] = now;
-    Object.keys(onlineCache).forEach(function(key) {
+    for (var key in onlineCache) {
         if ((now - onlineCache[key]) > 600000) delete onlineCache[key];
         else {
             online += 1;
             if (key[0] === 'U') users += 1;
         }
-    });
+    }
     jsGen.config.onlineNum = online;
     jsGen.config.onlineUsers = users;
     if (online > jsGen.config.maxOnlineNum) setGlobalConfig({

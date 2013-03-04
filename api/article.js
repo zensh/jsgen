@@ -7,7 +7,9 @@ var listArticle = jsGen.lib.json.ListArticle,
     articleCache = jsGen.cache.article,
     commentCache = jsGen.cache.comment,
     listCache = jsGen.cache.list,
-    filterSummary = jsGen.lib.tools.filterSummary;
+    filterTitle = jsGen.lib.tools.filterTitle,
+    filterSummary = jsGen.lib.tools.filterSummary,
+    filterContent = jsGen.lib.tools.filterContent;
 
 articleCache.getArticle = function(ID, callback, convert) {
     var that = this,
@@ -90,7 +92,7 @@ listCache.getArticle = function(ID, callback, convert) {
     } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function(err, doc) {
         if (doc) {
             doc._id = ID;
-            doc.content = filterSummary(doc.content);
+            doc.content = filterSummary(jsGen.module.marked(doc.content));
             doc = intersect(union(listArticle), doc);
             that.put(ID, doc);
             if (convert) getConvert(doc);
@@ -106,7 +108,7 @@ var cache = {
 cache._update = function(obj) {
     if (!this[obj._id]) {
         this[obj._id] = {};
-        this._index.push(obj._id);
+        if (obj.status > -1) this._index.push(obj._id);
         this._initTime = Date.now();
     }
     this[obj._id].display = obj.display;
@@ -114,9 +116,12 @@ cache._update = function(obj) {
     this[obj._id].updateTime = obj.updateTime;
     this[obj._id].hots = obj.hots;
     this[obj._id].visitors = obj.visitors;
-    if (obj.display === 2) {
+    if (obj.status === 2) {
         this._index.splice(this._index.lastIndexOf(obj._id), 1);
         this._index.push(obj._id);
+    }
+    if (obj.display === 2) {
+        this._index.splice(this._index.lastIndexOf(obj._id), 1);
     }
     return this;
 };
@@ -224,6 +229,156 @@ function getLatest(req, res, dm) {
     };
 };
 
+function checkArticle(articleObj, callback) {
+    var newObj = {
+        _id: 0,
+        date: 0,
+        display: 0,
+        status: 0,
+        refer: '',
+        title: '',
+        cover: '',
+        content: '',
+        updateTime: 0,
+        tagsList: [''],
+        comment: true
+    };
+    callback = callback || jsGen.lib.tools.callbackFn;
+    intersect(newObj, req.apibody);
+    newObj.title = filterTitle(newObj.title);
+    if (!newObj.title) return callback(jsGen.lib.msg.titleMinErr, null);
+    newObj.content = filterContent(newObj.content);
+    if (!newObj.content) return callback(jsGen.lib.msg.articleMinErr, null);
+    if (newObj.cover && !checkUrl(newObj.cover)) return callback(jsGen.lib.msg.coverErr, null);
+    if (newObj.refer && (!checkID('/A', newObj.refer) || !checkUrl(newObj.refer))) delete newObj.refer;
+    if (newObj.tagsList) {
+        jsGen.api.tag.filterTags(newObj.tagsList.slice(0, jsGen.config.ArticleTagsMax), function(err, doc) {
+            if (err) return callback(err, null);
+            if (doc) newObj.tagsList = doc;
+            if (!newObj._id) return callback(null, newObj);
+            articleCache.getArticle(newObj._id, function(err, doc) {
+                if (err) return callback(err, null);
+                var tagList = {},
+                setTagList = [];
+                if (doc) doc.tagsList.forEach(function(x) {
+                    tagList[x] = -newObj._id;
+                });
+                newObj.tagsList.forEach(function(x) {
+                    if (tagList[x]) delete tagList[x];
+                    else tagList[x] = newObj._id;
+                });
+                for (var key in tagList) setTagList.push({
+                    _id: Number(key),
+                    articlesList: tagList[key]
+                });
+                setTagList.forEach(function(x) {
+                    jsGen.api.tag.setTag(x);
+                });
+                return callback(null, newObj);
+            }, false);
+        });
+    } else return callback(null, newObj);
+};
+
+function addArticle(req, res, dm) {
+    var newObj = {
+        date: 0,
+        display: 0,
+        status: 0,
+        refer: '',
+        title: '',
+        cover: '',
+        content: '',
+        updateTime: 0,
+        tagsList: [''],
+        comment: true
+    };
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    intersect(newObj, req.apibody);
+    newObj.date = Date.now();
+    newObj.updateTime = newObj.date;
+    if (newObj.display !== 1) newObj.display = 0;
+    newObj.status = 0;
+    newObj.author = jsGen.dao.user.convertID(req.session.Uid);
+    newObj.title = filterTitle(newObj.title);
+    if (!newObj.title) throw jsGen.Err(jsGen.lib.msg.titleMinErr);
+    newObj.content = filterContent(newObj.content);
+    if (!newObj.content) throw jsGen.Err(jsGen.lib.msg.articleMinErr);
+    if (newObj.cover && !checkUrl(newObj.cover)) throw jsGen.Err(jsGen.lib.msg.coverErr);
+    if (newObj.refer && (!checkID('/A', newObj.refer) || !checkUrl(newObj.refer))) delete newObj.refer;
+
+    if (newObj.tagsList) {
+        jsGen.api.tag.filterTags(newObj.tagsList.slice(0, jsGen.config.ArticleTagsMax), dm.intercept(function(doc) {
+            if (doc) userObj.tagsList = doc;
+            userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+                var tagList = {},
+                setTagList = [];
+                if (doc) doc.tagsList.forEach(function(x) {
+                    tagList[x] = -userObj._id;
+                });
+                userObj.tagsList.forEach(function(x) {
+                    if (tagList[x]) delete tagList[x];
+                    else tagList[x] = userObj._id;
+                });
+                for (var key in tagList) setTagList.push({
+                    _id: Number(key),
+                    usersList: tagList[key]
+                });
+                setTagList.forEach(function(x) {
+                    jsGen.api.tag.setTag(x);
+                });
+                daoExec();
+            }), false);
+        }));
+    } else daoExec();
+
+    function daoExec() {
+        jsGen.dao.user.setUserInfo(userObj, dm.intercept(function(doc) {
+            if (doc) {
+                doc._id = req.session.Uid;
+                body = union(UserPrivateTpl);
+                body = intersect(body, doc);
+                setCache(body);
+                var tagsList = jsGen.api.tag.convertTags(body.tagsList);
+                body = intersect(defaultObj, body);
+                body.tagsList = tagsList;
+                return res.sendjson(body);
+            }
+        }));
+    };
+
+
+};
+
+function setArticle(req, res, dm) {
+    var newObj = {
+        date: 0,
+        display: 0,
+        status: 0,
+        refer: '',
+        title: '',
+        cover: '',
+        content: '',
+        updateTime: 0,
+        comment: true
+    };
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    intersect(newObj, req.apibody);
+    newObj.date = Date.now();
+    newObj.updateTime = newObj.date;
+    newObj.content = filterContent(newObj.content);
+    if (!newObj.content) throw jsGen.Err(jsGen.lib.msg.articleMinErr);
+    if (checkID('/A', newObj.refer)) {
+        var ID = newObj.refer.slice(1);
+        if (!cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    } else {
+
+    }
+
+};
+
 function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
@@ -242,7 +397,9 @@ function postFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
-            return editArticle(req, res, dm);
+            return addArticle(req, res, dm);
+        default:
+            return setArticle(req, res, dm);
     }
 };
 
