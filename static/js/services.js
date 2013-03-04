@@ -17,9 +17,8 @@ factory('rest', ['$resource', function($resource) {
         reset: $resource('/api/user/reset'),
         register: $resource('/api/user/register'),
         home: $resource('/api/user/index'),
-        user: $resource('/api/user/:Uid/:Get', {
-            Uid: 'index',
-            Get: 'index'
+        user: $resource('/api/user/:Uid', {
+            Uid: 'index'
         }),
         userAdmin: $resource('/api/user/admin')
     }

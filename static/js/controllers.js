@@ -169,21 +169,23 @@ jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
     $scope.followMe = function() {
         var result;
         if ($scope.isFollow === 'follow') {
-            result = rest.user.get({
-                Uid: 'U' + $routeParams.id,
-                Get: 'unfollow'
-            }, function() {
+            result = rest.user.save({
+                Uid: 'U' + $routeParams.id
+            }, {follow: false}, function() {
                 if (!result.err) {
+                    jsGen.lib.union(jsGen.global.user.followList, result.followList);
+                    $scope.user.fans -= 1;
                     $scope.isFollow = 'unfollow';
-                    $scope.followClass = 'btn-warning'
+                    $scope.followClass = 'btn-warning';
                 }
             });
         } else if ($scope.isFollow === 'unfollow') {
-            result = rest.user.get({
-                Uid: 'U' + $routeParams.id,
-                Get: 'follow'
-            }, function() {
+            result = rest.user.save({
+                Uid: 'U' + $routeParams.id
+            }, {follow: true}, function() {
                 if (!result.err) {
+                    jsGen.lib.union(jsGen.global.user.followList, result.followList);
+                    $scope.user.fans += 1;
                     $scope.isFollow = 'follow';
                     $scope.followClass = 'btn-success';
                 }

@@ -262,16 +262,28 @@ function addUsers(req, res, dm) {
 };
 
 function getUser(req, res, dm) {
-    var user = req.path[2];
     var Uid = null;
-    if ((checkUserID(user) || checkUserName(user)) && cache[user]) Uid = cache[user]._id;
+    if (cache[req.path[2]]) Uid = cache[req.path[2]]._id;
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
+    userCache.getUser(Uid, dm.intercept(function(doc) {
+        doc = intersect(union(UserPublicTpl), doc);
+        return res.sendjson(doc);
+    }));
+};
+
+function setUser(req, res, dm) {
+    var Uid = null;
+
+    if (cache[req.path[2]]) Uid = cache[req.path[2]]._id;
+    else throw jsGen.Err(jsGen.lib.msg.UidNone);
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    else if(req.session.Uid === Uid || !req.apibody) throw jsGen.Err(jsGen.lib.msg.requestDataErr);
+
     var _id = jsGen.dao.user.convertID(Uid);
-    if (req.path[3] === 'follow') {
-        if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    var _idReq = jsGen.dao.user.convertID(req.session.Uid);
+    if (req.apibody.follow === true) {
         userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
             if (doc.followList.indexOf(_id) >= 0) throw jsGen.Err(jsGen.lib.msg.userFollowed);
-            _idReq = jsGen.dao.user.convertID(req.session.Uid);
             jsGen.dao.user.setFollow({
                 _id: _idReq,
                 followList: _id
@@ -289,11 +301,9 @@ function getUser(req, res, dm) {
                 }));
             }));
         }), false);
-    } else if (req.path[3] === 'unfollow') {
-        if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    } else if (req.apibody.follow === false) {
         userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
             if (doc.followList.indexOf(_id) < 0) throw jsGen.Err(jsGen.lib.msg.userUnfollowed);
-            _idReq = jsGen.dao.user.convertID(req.session.Uid);
             jsGen.dao.user.setFollow({
                 _id: _idReq,
                 followList: -_id
@@ -311,12 +321,7 @@ function getUser(req, res, dm) {
                 }));
             }));
         }), false);
-    } else {
-        userCache.getUser(Uid, dm.intercept(function(doc) {
-            doc = intersect(union(UserPublicTpl), doc);
-            return res.sendjson(doc);
-        }));
-    }
+    } else throw jsGen.Err(jsGen.lib.msg.requestDataErr);
 };
 
 function getUsers(req, res, dm) {
@@ -602,6 +607,8 @@ function postFn(req, res, dm) {
             return editUsers(req, res, dm);
         case 'reset':
             return getReset(req, res, dm);
+        default:
+            return setUser(req, res, dm);
     }
 };
 
