@@ -17,9 +17,9 @@
                 <th><a href="#" ng-click="predicate='_id';reverse=!reverse">Uid</a></th>
                 <th><a href="#" ng-click="predicate='name';reverse=!reverse">用户名</a></th>
                 <th><a href="#" ng-click="predicate='email';reverse=!reverse">Email</a><a href="#" ng-click="editEmail=!editEmail">
-                    <i class="icon-edit"></a></th>
+                    <i class="glyphicon glyphicon-edit"></a></th>
                 <th><a href="#" ng-click="predicate='role';reverse=!reverse">权限</a><a href="#" ng-click="editRole=!editRole">
-                    <i class="icon-edit"></a></th>
+                    <i class="glyphicon glyphicon-edit"></a></th>
                 <th><a href="#" ng-click="predicate='score';reverse=!reverse">积分</a></th>
                 <th><a href="#" ng-click="predicate='articles';reverse=!reverse">文章</a></th>
                 <th><a href="#" ng-click="predicate='fans';reverse=!reverse">粉丝</a></th>
@@ -31,7 +31,7 @@
             <tr ng-repeat="user in data | orderBy:predicate:reverse">
                 <td><a ng-href="/{{user._id}}">{{user._id}}</a></td>
                 <td>{{user.name}}<a href="#" ng-show="user.locked" title="该用户已被锁定，点击解锁" ng-click="user.locked=false">
-                    <i class="icon-exclamation-sign"></a></td>
+                    <i class="glyphicon glyphicon-exclamation-sign"></a></td>
                 <td ng-hide="editEmail">{{user.email}}</td>
                 <td ng-show="editEmail"><input type="email" ng-model="user.email"/></td>
                 <td ng-hide="editRole">{{user.role | role}}</td>
@@ -47,22 +47,22 @@
         <tfoot>
         </tfoot>
     </table>
-    <div class="pagination" ng-controller="jsGen.paginationCtrl">
-        <ul>
+    <div ng-controller="jsGen.paginationCtrl">
+        <ul class="pagination">
             <li>
-                <a ng-click="paginationTo('first')"><i class="icon-step-backward"></i></a>
+                <a ng-click="paginationTo('first')"><i class=" glyphicon glyphicon-step-backward"></i></a>
             </li>
             <li>
-                <a ng-click="paginationTo('prev')"><i class="icon-backward"></i></a>
+                <a ng-click="paginationTo('prev')"><i class="glyphicon glyphicon-backward"></i></a>
             </li>
             <li class="disabled">
                 <a>{{pagination.now}}</a>
             </li>
             <li>
-                <a ng-click="paginationTo('next')"><i class="icon-forward"></i></a>
+                <a ng-click="paginationTo('next')"><i class="glyphicon glyphicon-forward"></i></a>
             </li>
             <li>
-                <a ng-click="paginationTo('last')"><i class="icon-step-forward"></i></a>
+                <a ng-click="paginationTo('last')"><i class="glyphicon glyphicon-step-forward"></i></a>
             </li>
             <li>
                 <a ng-click="setNum(20)" title="每页20">20</a>

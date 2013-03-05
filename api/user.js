@@ -81,9 +81,11 @@ cache._remove = function(Uid) {
 function convertUsers(_idArray) {
     var result = [];
     if (!Array.isArray(_idArray)) _idArray = [_idArray];
-    if (typeof _idArray[0] !== 'number') return result;
+    if (typeof _idArray[0] === 'number') _idArray = _idArray.map(function(x) {
+        return jsGen.dao.user.convertID(x);
+    });
+    if (typeof _idArray[0] !== 'string') return result;
     _idArray.forEach(function(x, i) {
-        x = jsGen.dao.user.convertID(x);
         if (cache[x]) result.push({
             _id: cache[x]._id,
             name: cache[x].name

@@ -32,58 +32,56 @@
     </head>
     <body class="ng-cloak" ng-cloak>
         <header>
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="navbar-inner">
-                    <div class="container">
-                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </a>
-                        <div class="nav"><img class="place-left" ng-src="{{global.logo}}" /></div>
-                        <div class="nav"><a class="brand" href="/">{{global.title}}</a></div>
-                        <div class="nav-collapse collapse navbar-inverse-collapse">
-                            <ul class="nav">
-                                <li class="divider-vertical"></li>
-                                <li class="active"><a href="/">首页</a></li>
-                                <li><a href="#">热点</a></li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#">Tutorial</a></li>
-                                        <li><a href="#">Developer Guide</a></li>
-                                        <li><a href="#">API Reference</a></li>
-                                        <li class="divider"></li>
-                                        <li class="nav-header">Download</li>
-                                        <li><a href="#">GitHub</a></li>
-                                        <li><a href="#">直接下载</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="https://github.com/zensh/jsgen">jsGen</a></li>
-                            </ul>
-                            <ul class="nav pull-right">
-                                <li ng-hide="isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
-                                <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
-                                <li ng-show="isLogin"><img ng-src="{{global.user.avatar}}" /></li>
-                                <li class="dropdown" ng-show="isLogin">
-                                    <a ng-href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
-                                    {{global.user.name}}[{{global.user.role | role}}] <b class="caret"></b>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
-                                        <li class="divider"></li>
-                                        <li ng-show="isAdmin"><a ng-href="/admin">网站管理</a></li>
-                                        <li><a ng-href="/" ng-click="logout()">退出</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div><!-- /.nav-collapse -->
-                    </div>
-                </div><!-- /navbar-inner -->
+            <nav class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <img class="pull-left" ng-src="{{global.logo}}" />
+                    <a class="navbar-brand" href="/">{{global.title}}</a>
+                    <div class="nav-collapse collapse navbar-responsive-collapse">
+                        <ul class="nav">
+                            <li class="divider-vertical"></li>
+                            <li class="active"><a href="/">首页</a></li>
+                            <li><a href="#">热点</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">Tutorial</a></li>
+                                    <li><a href="#">Developer Guide</a></li>
+                                    <li><a href="#">API Reference</a></li>
+                                    <li class="divider"></li>
+                                    <li class="nav-header">Download</li>
+                                    <li><a href="#">GitHub</a></li>
+                                    <li><a href="#">直接下载</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="https://github.com/zensh/jsgen">jsGen</a></li>
+                        </ul>
+                        <ul class="nav pull-right">
+                            <li ng-hide="isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
+                            <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
+                            <li ng-show="isLogin"><img ng-src="{{global.user.avatar}}" /></li>
+                            <li class="dropdown" ng-show="isLogin">
+                                <a ng-href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
+                                {{global.user.name}}[{{global.user.role | role}}] <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
+                                    <li class="divider"></li>
+                                    <li ng-show="isAdmin"><a ng-href="/admin">网站管理</a></li>
+                                    <li><a ng-href="/" ng-click="logout()">退出</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div><!-- /.nav-collapse -->
+                </div>
             </nav>
         </header>
         <div class="container" ng-view=""></div>
-        <footer>
+        <footer class="footer">
             <div class="container">
                 <p class="navbar-text">
                     <a ng-href="{{global.url}}">{{global.title}}</a> ©2013 <span class="divider-vertical"></span> Powered by
@@ -93,7 +91,7 @@
         </footer>
         <script src="/static/?parse=/js/lib/jquery.min.js|/js/lib/hmac-sha256.min.js|/js/lib/utf8.min.js|/js/prettify/prettify.js">
         </script>
-        <script src="/static/js/bootstrap.min.js">
+        <script src="/static/js/bootstrap.js">
         </script>
     </body>
 </html>

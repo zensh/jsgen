@@ -155,7 +155,6 @@ jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
     };
     $scope.isMe = false;
     $scope.isFollow = 'unfollow';
-    $scope.followClass = 'btn-warning'
     getUser(function(user) {
         if (user.err) return $location.path('/');
         $scope.user = user;
@@ -163,7 +162,6 @@ jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
             return x._id === user._id;
         })) {
             $scope.isFollow = 'follow';
-            $scope.followClass = 'btn-success';
         }
     });
     $scope.followMe = function() {
@@ -176,7 +174,6 @@ jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
                     jsGen.lib.union(jsGen.global.user.followList, result.followList);
                     $scope.user.fans -= 1;
                     $scope.isFollow = 'unfollow';
-                    $scope.followClass = 'btn-warning';
                 }
             });
         } else if ($scope.isFollow === 'unfollow') {
@@ -187,7 +184,6 @@ jsGen.userViewCtrl = ['$scope', 'rest', '$location', '$routeParams', function($s
                     jsGen.lib.union(jsGen.global.user.followList, result.followList);
                     $scope.user.fans += 1;
                     $scope.isFollow = 'follow';
-                    $scope.followClass = 'btn-success';
                 }
             });
         }

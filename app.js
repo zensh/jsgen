@@ -126,7 +126,7 @@ serverDm.run(function() {
                 process.nextTick(function() {
                     jsGen.api.index.updateOnlineCache(req);
                 });
-                console.log(req.method + ' : ' + req.path);
+                console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             } else {
                 res.file('/static/index.html');
                 jsGen.api.index.setVisitHistory(req);

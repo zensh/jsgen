@@ -161,8 +161,8 @@ var that = jsGen.dao.db.bind('tags', {
                 _id: newTag._id
             }, [], newTag, {
                 w: 1,
-                new: true,
-                upsert: true
+                upsert: true,
+                new: true
             }, callback);
         });
     },

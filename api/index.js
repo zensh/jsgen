@@ -99,6 +99,7 @@ function getIndex(req, res, dm) {
     delete body.visitHistory;
     delete body.email;
     delete body.smtp;
+    body.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
         jsGen.api.user.userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
             body.user = doc;

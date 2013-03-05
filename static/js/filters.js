@@ -37,8 +37,8 @@ angular.module('jsGen.filters', []).
   filter('follow', function() {
     return function(text) {
       switch (text) {
-        case 'follow': return '取消关注';
-        case 'unfollow': return '关注';
+        case 'follow': return '[取消]';
+        case 'unfollow': return '[关注]';
         default: return text;
       }
     };

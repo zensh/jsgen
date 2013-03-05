@@ -5,8 +5,12 @@
         <div class="thumbnail">
             <img ng-src="{{user.avatar}}" />
             <div class="caption">
-                <h4 class="text-center">{{user.name}}<small class="muted">[Uid:{{user._id}}]</small></h4>
-                <ul class="inline">
+                <h5 class="text-center" ng-show="isMe" ><i class="glyphicon glyphicon-user"></i> {{user.name}}</h5>
+                <h5 class="text-center" ng-hide="isMe" >
+                    <a href="#" ng-click="followMe()">{{user.name}}<small class="text-warning">{{isFollow | follow}}</small></a>
+                </h5>
+                <ul class="list-inline">
+                    <li >Uid：{{user._id}}</li>
                     <li ng-show="user.email">
                         Email：{{user.email}}
                     </li>
@@ -48,47 +52,46 @@
                       <dt> 用户简介：</dt>
                       <dd>{{user.desc}}</dd>
                       <dt> 用户标签：</dt>
-                      <dd><ul class="inline"><li ng-repeat="tag in user.tagsList">
+                      <dd><ul class="list-inline"><li ng-repeat="tag in user.tagsList">
                         <a ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
                       </li></ul></dd>
                     </dl>
             </div>
-            <ul class="sidebar nav nav-tabs nav-stacked text-center" ng-show="isMe">
+            <ul class="sidebar nav nav-list text-center" ng-show="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的收藏 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的收藏 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的关注 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的文章 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的评论 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的合集 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的消息 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 我的粉丝 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 用户设置 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
-            <button class="btn btn-block" type="button" ng-hide="isMe" ng-click="followMe()" ng-class="followClass">{{isFollow | follow}}</button>
-            <ul class="sidebar nav nav-tabs nav-stacked text-center" ng-hide="isMe">
+            <ul class="sidebar nav nav-list text-center" ng-hide="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的文章 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的合集 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="icon-chevron-left"></i> 他的粉丝 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的粉丝 </a>
                 </li>
             </ul>
         </div>

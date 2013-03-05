@@ -130,14 +130,14 @@ var that = jsGen.dao.db.bind('articles', {
 
         callback = callback || jsGen.lib.tools.callbackFn;
         intersect(newObj, articleObj);
-        if (newObj.visit) {
+        if (newObj.visitors) {
             setObj.$inc = {
                 visitors: 1
             };
         } else setObj.$set = newObj;
 
         that.findAndModify({
-            _id: userObj._id
+            _id: articleObj._id
         }, [], setObj, {
             w: 1,
             new: true
