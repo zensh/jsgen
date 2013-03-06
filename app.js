@@ -51,8 +51,8 @@ serverDm.run(function() {
         jsGen.dao.index.getGlobalConfig(serverDm.intercept(function(doc) {
             that._update(doc);
             jsGen.cache = {};
-            jsGen.cache.pagination = new jsGen.lib.CacheTL(30 * 60 * 1000);
-            jsGen.cache.timeInterval = new jsGen.lib.CacheTL(that.TimeInterval * 1000, true);
+            jsGen.cache.pagination = new jsGen.lib.CacheTL(20 * 60 * 1000, 10000);
+            jsGen.cache.timeInterval = new jsGen.lib.CacheTL(that.TimeInterval * 1000, 0, true);
             jsGen.cache.user = new jsGen.lib.CacheLRU(100);
             jsGen.cache.article = new jsGen.lib.CacheLRU(100);
             jsGen.cache.comment = new jsGen.lib.CacheLRU(500);
