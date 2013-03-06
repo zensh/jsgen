@@ -337,6 +337,16 @@ jsGen.userEditCtrl = ['$scope', 'rest', '$location', function($scope, rest, $loc
     };
 }];
 
+jsGen.addArticleCtrl = ['$scope', 'rest', '$location', '$filter', function($scope, rest, $location, $filter) {
+    $scope.titleBytes = 0;
+    $scope.contentBytes = 0;
+    $scope.markdownHelp = false;
+    $scope.checkTitle = function() {
+        $scope.titleBytes = $filter('length')($scope.title);
+        //$scope.filterTitle = $sanitize($scope.title);
+    };
+}];
+
 jsGen.adminGlobalCtrl = ['$scope', 'rest', '$location', function($scope, rest, $location) {
     var originData = {};
     $scope.global = rest.indexAdmin.get({}, function() {

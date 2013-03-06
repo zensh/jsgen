@@ -20,7 +20,10 @@ factory('rest', ['$resource', function($resource) {
         user: $resource('/api/user/:Uid', {
             Uid: 'index'
         }),
-        userAdmin: $resource('/api/user/admin')
+        userAdmin: $resource('/api/user/admin'),
+        article: $resource('/api/article/:ID', {
+            ID: 'index'
+        }),
     }
 }]).
 factory('cache', ['$cacheFactory', function($cacheFactory) {

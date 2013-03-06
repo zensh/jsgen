@@ -242,9 +242,13 @@ var that = jsGen.dao.db.bind('articles', {
             if (err) return callback(err, null);
             if (!doc) newArticle._id = 1;
             else newArticle._id = doc._id + 1;
-            that.insert(
-            newArticle, {
-                w: 1
+
+            that.findAndModify({
+                _id: newArticle._id
+            }, [], newArticle, {
+                w: 1,
+                upsert: true,
+                new: true
             }, callback);
         });
     },

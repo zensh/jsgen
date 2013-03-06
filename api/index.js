@@ -9,7 +9,7 @@ var url = require('url'),
     checkUserName = jsGen.lib.tools.checkUserName,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
-var onlineCache = {};
+var onlineCache = {}, onlineArray = [];
 function updateOnlineCache(req) {
     var now = Date.now(),
         users = 0,

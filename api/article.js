@@ -14,6 +14,7 @@ var listArticle = jsGen.lib.json.ListArticle,
 articleCache.getArticle = function(ID, callback, convert) {
     var that = this,
         doc = this.get(ID);
+        _id = jsGen.dao.article.convertID(ID);
 
     function getConvert(doc) {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
@@ -29,18 +30,20 @@ articleCache.getArticle = function(ID, callback, convert) {
         doc.visitors = cache[ID].visitors;
         if (convert) {
             getConvert(doc);
+            jsGen.dao.article.setArticle({_id: _id, visitors: 1});
             convertArticles(doc.commentsList, callback, 'comment');
         } else return callback(null, doc);
-    } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function(err, doc) {
+    } else jsGen.dao.article.getArticle(_id, function(err, doc) {
+        if (err) return callback(err, null);
         if (doc) {
             doc._id = ID;
             that.put(ID, doc);
             if (convert) {
                 getConvert(doc);
+                jsGen.dao.article.setArticle({_id: _id, visitors: 1});
                 convertArticles(doc.commentsList, callback, 'comment');
-            }
+            } else return callback(null, doc);
         }
-        return callback(err, doc);
     });
 };
 
@@ -229,7 +232,7 @@ function getLatest(req, res, dm) {
     };
 };
 
-function checkArticle(articleObj, callback) {
+function filterArticle(articleObj, callback) {
     var newObj = {
         _id: 0,
         date: 0,
@@ -301,54 +304,17 @@ function addArticle(req, res, dm) {
     if (newObj.display !== 1) newObj.display = 0;
     newObj.status = 0;
     newObj.author = jsGen.dao.user.convertID(req.session.Uid);
-    newObj.title = filterTitle(newObj.title);
-    if (!newObj.title) throw jsGen.Err(jsGen.lib.msg.titleMinErr);
-    newObj.content = filterContent(newObj.content);
-    if (!newObj.content) throw jsGen.Err(jsGen.lib.msg.articleMinErr);
-    if (newObj.cover && !checkUrl(newObj.cover)) throw jsGen.Err(jsGen.lib.msg.coverErr);
-    if (newObj.refer && (!checkID('/A', newObj.refer) || !checkUrl(newObj.refer))) delete newObj.refer;
-
-    if (newObj.tagsList) {
-        jsGen.api.tag.filterTags(newObj.tagsList.slice(0, jsGen.config.ArticleTagsMax), dm.intercept(function(doc) {
-            if (doc) userObj.tagsList = doc;
-            userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
-                var tagList = {},
-                setTagList = [];
-                if (doc) doc.tagsList.forEach(function(x) {
-                    tagList[x] = -userObj._id;
-                });
-                userObj.tagsList.forEach(function(x) {
-                    if (tagList[x]) delete tagList[x];
-                    else tagList[x] = userObj._id;
-                });
-                for (var key in tagList) setTagList.push({
-                    _id: Number(key),
-                    usersList: tagList[key]
-                });
-                setTagList.forEach(function(x) {
-                    jsGen.api.tag.setTag(x);
-                });
-                daoExec();
-            }), false);
-        }));
-    } else daoExec();
-
-    function daoExec() {
-        jsGen.dao.user.setUserInfo(userObj, dm.intercept(function(doc) {
+    filterArticle(newObj, dm.intercept(function(article) {
+        jsGen.dao.article.setNewArticle(article, dm.intercept(function(doc) {
             if (doc) {
-                doc._id = req.session.Uid;
-                body = union(UserPrivateTpl);
-                body = intersect(body, doc);
-                setCache(body);
-                var tagsList = jsGen.api.tag.convertTags(body.tagsList);
-                body = intersect(defaultObj, body);
-                body.tagsList = tagsList;
-                return res.sendjson(body);
+                doc._id = jsGen.dao.article.convertID(doc._id);
+                cache._update(doc);
+                articleCache.put(doc);
+                doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
             }
+            return res.sendjson(doc);
         }));
-    };
-
-
+    }));
 };
 
 function setArticle(req, res, dm) {

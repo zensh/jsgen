@@ -24,6 +24,10 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
         templateUrl: 'static/tpl/admin.html',
         controller: jsGen.adminCtrl
     }).
+    when('/add', {
+        templateUrl: 'static/tpl/article-add.html',
+        controller: jsGen.addArticleCtrl
+    }).
     when('/U:id', {
         templateUrl: 'static/tpl/user.html',
         controller: jsGen.userViewCtrl
