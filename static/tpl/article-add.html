@@ -1,16 +1,15 @@
 <div class="row">
-    <div class="page-header">
-      <h4>添加文章</h4>
-    </div>
     <div class="span6">
-        <h3 ng-hide="markdownHelp">{{filterTitle}}</h3>
-        <div id="wmd-preview" class="wmd-preview" ng-hide="markdownHelp">
+        <div class="page-header">
+          <h4 id="wmd-title"></h4>
         </div>
-        <div ng-show="markdownHelp">
-            {{markdownHelp}}
+        <div id="wmd-preview" class="well wmd-preview">
         </div>
     </div>
     <div class="span6">
+        <div class="page-header">
+          <h4>添加文章</h4>
+        </div>
         <div class="alert alert-error" ng-show="err">
             <button type="button" class="close" ng-click="err=null">&times;</button>
             <strong>{{err.name}}：</strong>
@@ -60,18 +59,9 @@
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-success" ng-click="wmdHelp('preview')">文章预览</button>
-                    <button type="button" class="btn btn-success" ng-click="wmdHelp('help')">markdown语法</button>
+                    <button type="button" class="btn btn-success" ng-click="wmdHelp('help')">Markdown语法</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-<script src="/static/?parse=/js/pagedown/Markdown.Converter.js|/js/pagedown/Markdown.Editor.js|/js/pagedown/Markdown.Sanitizer.js">
-</script>
-<script type="text/javascript">
-    (function() {
-        var converter = Markdown.getSanitizingConverter();
-        var editor = new Markdown.Editor(converter);
-        editor.run();
-    })();
-</script>

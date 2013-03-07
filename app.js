@@ -72,6 +72,7 @@ serverDm.run(function() {
 
             fs.readFile('package.json', 'utf8', serverDm.intercept(function(data) {
                 jsGen.info = JSON.parse(data);
+                jsGen.info.nodejs = process.versions.node;
                 if (!jsGen.lib.tools.equal(jsGen.info, that.info)) jsGen.api.index.setGlobalConfig({
                     info: jsGen.info
                 },
@@ -126,11 +127,11 @@ serverDm.run(function() {
                 process.nextTick(function() {
                     jsGen.api.index.updateOnlineCache(req);
                 });
-                console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             } else {
                 res.file('/static/index.html');
                 jsGen.api.index.setVisitHistory(req);
             }
+            console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
         });
     }).listen(jsGen.conf.listenPort);
 });

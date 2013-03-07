@@ -11,7 +11,7 @@ module.exports = {
 	//baseDir: path.join(__dirname, '/..'), //绝对目录地址，下面的目录配置都是根据这个目录的相对地址，这里是根据config文件进行配置地址
     baseDir:processPath,//这里是根据启动nodejs的命令目录来设置baseDir
     autoCreateFolders:false,//如果想要以node_modules加载rrestjs,则此项最好选择true,rrestjs会根据config自动创建静态文件目录和缓存目录等目录
-	favicon:'/static/favicon.ico',  //favicon存放地址
+	favicon:'/favicon.ico',  //favicon存放地址
 	charset: 'utf-8',
 	autoStatic:'/static',  //自动响应静态文件的uri，比如 http://rrestjs.com/static/rrest.jpg 将会自动响应给客户端，为了加速这里只能设置一级目录
 	staticFolder:'/static',  //自动响应静态文件的根目录，比如  http://rrestjs.com/static/rrest.jpg 将返回 baseDir+'/static/rrest.jpg'

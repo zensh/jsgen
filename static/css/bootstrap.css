@@ -465,6 +465,7 @@ h3 {
 h4 {
   font-size: 17.5px;
   font-size: 2rem;
+  line-height: 2rem; /*jsGen*/
 }
 
 h5 {
@@ -4956,6 +4957,7 @@ padding-top: 50px;
     font-weight: bold;
 }
 .wmd-preview {
-    background-color: #f5f5f5;
+    background-color: #ffffff;
     padding: 10px;
+    min-height: 100px;
 }
