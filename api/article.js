@@ -247,7 +247,7 @@ function filterArticle(articleObj, callback) {
         comment: true
     };
     callback = callback || jsGen.lib.tools.callbackFn;
-    intersect(newObj, req.apibody);
+    intersect(newObj, articleObj);
     newObj.title = filterTitle(newObj.title);
     if (!newObj.title) return callback(jsGen.lib.msg.titleMinErr, null);
     newObj.content = filterContent(newObj.content);
@@ -298,13 +298,16 @@ function addArticle(req, res, dm) {
     };
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    console.log(req.apibody);
     intersect(newObj, req.apibody);
+    console.log(newObj);
     newObj.date = Date.now();
     newObj.updateTime = newObj.date;
     if (newObj.display !== 1) newObj.display = 0;
     newObj.status = 0;
     newObj.author = jsGen.dao.user.convertID(req.session.Uid);
     filterArticle(newObj, dm.intercept(function(article) {
+        console.log(article);
         jsGen.dao.article.setNewArticle(article, dm.intercept(function(doc) {
             if (doc) {
                 doc._id = jsGen.dao.article.convertID(doc._id);
@@ -312,6 +315,7 @@ function addArticle(req, res, dm) {
                 articleCache.put(doc);
                 doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
             }
+            console.log(doc);
             return res.sendjson(doc);
         }));
     }));

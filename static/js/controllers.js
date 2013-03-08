@@ -18,6 +18,15 @@ jsGen.globalCtrl = ['$scope', '$http', '$location', '$timeout', '$filter', 'cach
     if (!jsGen.global.date) jsGen.global = jsGen.rest.index.get({}, function() {
         $scope.checkUser();
         jsGen.global.info.angularjs = angular.version.full;
+        jsGen.global.ArticleTagsMax = jsGen.global.ArticleTagsMax || 5;
+        jsGen.global.UserTagsMax = jsGen.global.UserTagsMax || 5;
+        jsGen.global.TitleMinLen = jsGen.global.TitleMinLen || 9;
+        jsGen.global.TitleMaxLen = jsGen.global.TitleMaxLen || 180;
+        jsGen.global.SummaryMaxLen = jsGen.global.SummaryMaxLen || 480;
+        jsGen.global.ContentMinLen = jsGen.global.ContentMinLen || 18;
+        jsGen.global.ContentMaxLen = jsGen.global.ContentMaxLen || 50000;
+        jsGen.global.UserNameMinLen = jsGen.global.UserNameMinLen || 5;
+        jsGen.global.UserNameMaxLen = jsGen.global.UserNameMaxLen || 20;
     });
     $scope.global = jsGen.global;
     $scope.logout = function() {
@@ -298,16 +307,28 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
     originData = jsGen.union(jsGen.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
+    var sanitize = new Sanitize(Sanitize.Config.BASIC);
+
+    function sanitizeHTML(html, sanitize) {
+        var dom = document.createElement('div');
+        var dom2 = document.createElement('div');
+        dom.innerHTML = html;
+        dom2.appendChild(sanitize.clean_node(dom));
+        return dom2.innerHTML;
+    };
     $scope.$watch(function() {
         if (angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray)) $scope.editSave = false;
         else $scope.editSave = true;
     });
     $scope.checkTags = function() {
-        if ($scope.tagsList.length > (jsGen.global.UserTagsMax || 5)) $scope.tagsList.length = (jsGen.global.UserTagsMax || 5);
+        if ($scope.tagsList.length > jsGen.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, jsGen.global.UserTagsMax);
     };
     $scope.checkPwd = function() {
         if ($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = true;
         else $scope.checkResult = false;
+    };
+    $scope.checkDesc = function() {
+        $scope.descBytes = jsGen.filter('length')($scope.desc);
     };
     $scope.reset = function() {
         $scope.user = jsGen.union(originData);
@@ -320,6 +341,7 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
         angular.forEach(data, function(value, key) {
             if (angular.equals(value, originData[key])) delete data[key];
         });
+        if ($scope.user.desc) $scope.user.desc = sanitizeHTML(marked($scope.user.desc), sanitize)
         if ($scope.user.passwd && $scope.user.passwd2 === $scope.user.passwd) data.passwd = CryptoJS.SHA256($scope.user.passwd).toString();
         if (!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         if (data.email) {
@@ -350,11 +372,21 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
     };
 }];
 
+jsGen.articleCtrl = ['$scope', function($scope) {
+
+}];
+
 jsGen.addArticleCtrl = ['$scope', function($scope) {
+    if (!$scope.isLogin) jsGen.location.path('/');
     $scope.previewTitle = '文章预览';
     $scope.markdownHelp = null;
     $scope.titleBytes = 0;
     $scope.contentBytes = 0;
+    $scope.title = '';
+    $scope.content = '';
+    $scope.tagsList = [];
+    $scope.editSave = false;
+
     function getMD() {
         jsGen.http.get('/static/md/markdown.md', {
             cache: true
@@ -363,36 +395,87 @@ jsGen.addArticleCtrl = ['$scope', function($scope) {
                 $scope.previewTitle = 'Markdown简明语法';
                 $scope.markdownHelp = marked(data);
                 angular.element('#wmd-title').html($scope.previewTitle);
-                angular.element('#wmd-preview').html($scope.markdownHelp);
+                angular.element('#wmd-help').html($scope.markdownHelp);
+                angular.element('#wmd-help > pre').addClass('prettyprint linenums');
+                angular.element('#wmd-help > code').addClass('prettyprint');
+                prettyPrint();
             } else $scope.err = data.err;
         });
     };
+    var sanitize0 = new Sanitize(Sanitize.Config.RESTRICTED);
     var sanitize = new Sanitize(Sanitize.Config.RELAXED);
-    var sanitize0 = new Sanitize({});
-    var MdEditor = new Markdown.Editor({makeHtml: function(text) {
-        var dom = document.createDocumentFragment();
-        dom.innerHTML = marked(text);
-        return sanitize.clean_node(dom);
-    }});
+
+    function sanitizeHTML(html, sanitize) {
+        var dom = document.createElement('div');
+        var dom2 = document.createElement('div');
+        dom.innerHTML = html;
+        dom2.appendChild(sanitize.clean_node(dom));
+        return dom2.innerHTML;
+    };
+    var MdEditor = new Markdown.Editor({
+        makeHtml: function(text) {
+            return sanitizeHTML(marked(text), sanitize);
+        }
+    });
+    MdEditor.hooks.chain("onPreviewRefresh", function() {
+        angular.element('#wmd-preview > pre').addClass('prettyprint linenums');
+        angular.element('#wmd-preview > code').addClass('prettyprint');
+        prettyPrint();
+    });
     MdEditor.run();
     getMD();
-    $scope.checkTitle = function() {
+    $scope.$watch('title', function() {
+        if (typeof $scope.title !== 'string') $scope.title = '';
+        $scope.title = $scope.title.trim();
+        $scope.title = sanitizeHTML(marked($scope.title), sanitize0);
         $scope.titleBytes = jsGen.filter('length')($scope.title);
-        if (!$scope.markdownHelp) {
-            $scope.previewTitle = marked($scope.title);
-            angular.element('#wmd-title').html(sanitize0.clean_node(angular.element($scope.previewTitle)[0]));
+        while ($scope.titleBytes > $scope.global.TitleMaxLen) {
+            $scope.title = $scope.title.slice(0, -1);
+            $scope.titleBytes = jsGen.filter('length')($scope.title);
         }
-    };
-    $scope.checkContent = function() {
+        if ($scope.titleBytes >= jsGen.global.TitleMinLen && $scope.titleBytes <= jsGen.global.TitleMaxLen &&
+        $scope.contentBytes >= jsGen.global.ContentMinLen && $scope.contentBytes <= jsGen.global.ContentMaxLen) $scope.editSave = true;
+        else $scope.editSave = false;
+        if (!$scope.markdownHelp) {
+            $scope.previewTitle = $scope.title;
+            angular.element('#wmd-title').html($scope.title);
+        }
+    });
+    $scope.$watch('content', function() {
+        if (typeof $scope.content !== 'string') $scope.content = '';
         $scope.contentBytes = jsGen.filter('length')($scope.content);
-    };
+         if ($scope.titleBytes >= jsGen.global.TitleMinLen && $scope.titleBytes <= jsGen.global.TitleMaxLen &&
+        $scope.contentBytes >= jsGen.global.ContentMinLen && $scope.contentBytes <= jsGen.global.ContentMaxLen) $scope.editSave = true;
+         else $scope.editSave = false;
+    });
     $scope.wmdHelp = function(s) {
         if (s === 'preview') {
             $scope.markdownHelp = null;
-            $scope.previewTitle = marked($scope.title || '文章预览');
-            angular.element('#wmd-title').html(sanitize0.clean_node(angular.element($scope.previewTitle)[0]));
+            $scope.previewTitle = sanitizeHTML(marked($scope.title || '文章预览'), sanitize0);
+            angular.element('#wmd-title').html($scope.previewTitle);
             MdEditor.refreshPreview();
         } else getMD();
+    };
+    $scope.getTag = function(n) {
+        var tag = $scope.global.tagsList[n].tag;
+        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < jsGen.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+    };
+    $scope.checkTags = function() {
+        if ($scope.tagsList.length > jsGen.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.slice(0, jsGen.global.ArticleTagsMax);
+    };
+    $scope.submit = function() {
+        if (!$scope.editSave) return;
+        var data = {};
+        data.content = sanitizeHTML($scope.content, sanitize);
+        data.title = $scope.title;
+        data.tagsList = $scope.tagsList;
+        data.refer = $scope.refer;
+        var result = jsGen.rest.article.save({}, data, function() {
+            if (!result.err) {
+                jsGen.cache.articles.put(result._id, result);
+                jsGen.location.path('/' + result._id);
+            } else $scope.err = result.err;
+        });
     };
 }];
 

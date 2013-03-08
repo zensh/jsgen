@@ -63,7 +63,7 @@
               <dd>
                 <span ng-repeat="(key, value) in global.sys.node"><strong>{{key}}：</strong>{{value}} | </span>
               </dd>
-              <dt>CPUs：</dt>
+              <dt>CPUs[{{global.sys.cpus.length}}]：</dt>
               <dd ng-repeat="data in global.sys.cpus">
                 <span ng-repeat="(key, value) in data"><strong>{{key}}：</strong>{{value}} | </span>
               </dd>

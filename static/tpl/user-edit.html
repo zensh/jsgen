@@ -63,8 +63,11 @@
         个人简介：
         </label>
         <div class="controls">
-            <textarea ng-model="user.desc" class="input-block-level">
+            <textarea ng-model="user.desc" class="input-block-level" ng-change="checkDesc()">
             </textarea>
+            <span class="text-warning">
+                [ {{global.SummaryMaxLen}} 字节以内，当前 {{descBytes}} 字节]
+            </span>
         </div>
     </div>
     <div class="control-group">
