@@ -1,60 +1,10 @@
 'use strict';
-// 注册全局变量jsGen
-var jsGen = {
-    global: {}
-};
 
 /* Controllers */
-jsGen.globalCtrl = ['$scope', '$http', '$location', '$timeout', '$filter', 'cache', 'rest', function($scope, $http, $location, $timeout, $filter, cache, rest) {
-    jsGen.http = jsGen.http || $http;
-    jsGen.location = jsGen.location || $location;
-    jsGen.timeout = jsGen.timeout || $timeout;
-    jsGen.filter = jsGen.filter || $filter;
-    jsGen.cache = jsGen.cache || cache;
-    jsGen.rest = jsGen.rest || rest;
-
-    $scope.isAdmin = false;
-    $scope.isLogin = false;
-    if (!jsGen.global.date) jsGen.global = jsGen.rest.index.get({}, function() {
-        $scope.checkUser();
-        jsGen.global.info.angularjs = angular.version.full;
-        jsGen.global.ArticleTagsMax = jsGen.global.ArticleTagsMax || 5;
-        jsGen.global.UserTagsMax = jsGen.global.UserTagsMax || 5;
-        jsGen.global.TitleMinLen = jsGen.global.TitleMinLen || 9;
-        jsGen.global.TitleMaxLen = jsGen.global.TitleMaxLen || 180;
-        jsGen.global.SummaryMaxLen = jsGen.global.SummaryMaxLen || 480;
-        jsGen.global.ContentMinLen = jsGen.global.ContentMinLen || 18;
-        jsGen.global.ContentMaxLen = jsGen.global.ContentMaxLen || 50000;
-        jsGen.global.UserNameMinLen = jsGen.global.UserNameMinLen || 5;
-        jsGen.global.UserNameMaxLen = jsGen.global.UserNameMaxLen || 20;
-    });
-    $scope.global = jsGen.global;
-    $scope.logout = function() {
-        var doc = jsGen.rest.logout.get({}, function() {
-            if (doc.logout) delete jsGen.global.user;
-            $scope.checkUser();
-            jsGen.location.path('/');
-        });
-    };
-    $scope.clearUser = function() {
-        delete jsGen.global.user;
-    };
-    $scope.checkUser = function() {
-        if (jsGen.global.user && jsGen.global.user.role) {
-            $scope.isLogin = true;
-            if (jsGen.global.user.role === 'admin') $scope.isAdmin = true;
-            else $scope.isAdmin = false;
-        } else $scope.isLogin = false;
-    };
-    angular.element('a').attr('target', function() {
-        if (this.host === location.host) return this.target;
-        else return '_blank';
-    });
-}];
-
-jsGen.IndexCtrl = ['$scope', function($scope) {}];
-
-jsGen.userLoginCtrl = ['$scope', function($scope) {
+angular.module('jsGen.controllers', []).
+controller('indexCtrl', ['$scope', function($scope) {
+}]).
+controller('userLoginCtrl', ['$scope', function($scope) {
     var request;
     $scope.header = '用户登录';
     $scope.request = undefined;
@@ -79,7 +29,7 @@ jsGen.userLoginCtrl = ['$scope', function($scope) {
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
         result = jsGen.rest.login.save({}, data, function() {
             if (!result.err) {
-                jsGen.global.user = jsGen.union(result);
+                $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
                 jsGen.location.path('/home');
             } else {
@@ -118,9 +68,8 @@ jsGen.userLoginCtrl = ['$scope', function($scope) {
             }
         });
     };
-}];
-
-jsGen.userRegisterCtrl = ['$scope', function($scope) {
+}]).
+controller('userRegisterCtrl', ['$scope', function($scope) {
     $scope.checkResult = true;
     $scope.checkPwd = function() {
         if ($scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
@@ -134,33 +83,31 @@ jsGen.userRegisterCtrl = ['$scope', function($scope) {
         data.email = $scope.email;
         result = jsGen.rest.register.save({}, data, function() {
             if (!result.err) {
-                jsGen.global.user = jsGen.union(result);
+                $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
                 jsGen.location.path('/home');
             } else $scope.err = result.err;
         });
     };
-}];
-
-jsGen.homeCtrl = ['$scope', function($scope) {
-    if (!jsGen.global.user || !jsGen.global.user.name) jsGen.location.path('/');
+}]).
+controller('homeCtrl', ['$scope', function($scope) {
+    if (!$scope.global.user || !$scope.global.user.name) jsGen.location.path('/');
     $scope.isMe = true;
     $scope.getTpl = '/static/tpl/user-index.html';
     $scope.setTpl = function(tpl) {
         $scope.getTpl = '/static/tpl/' + tpl;
     };
-    $scope.user = jsGen.global.user;
-    if (!$scope.user || !$scope.user.date) jsGen.global.user = jsGen.rest.home.get({}, function() {
-        $scope.user = jsGen.global.user;
+    $scope.user = $scope.global.user;
+    if (!$scope.user || !$scope.user.date) $scope.global.user = jsGen.rest.home.get({}, function() {
+        $scope.user = $scope.global.user;
     });
     $scope.$on('update', function(event, doc) {
         event.stopPropagation();
         $scope.user.tagsList = [];
         jsGen.union($scope.user, doc);
     });
-}];
-
-jsGen.userCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
+}]).
+controller('userCtrl', ['$scope', '$routeParams', function($scope, $routeParams) {
     function getUser(callback) {
         var user = jsGen.cache.user.get('U' + $routeParams.ID);
         if (user) return callback(user);
@@ -178,8 +125,8 @@ jsGen.userCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
     getUser(function(user) {
         if (user.err) return jsGen.location.path('/');
         $scope.user = user;
-        if (jsGen.global.user) {
-            $scope.isFollow = jsGen.global.user.followList.some(function(x) {
+        if ($scope.global.user) {
+            $scope.isFollow = $scope.global.user.followList.some(function(x) {
                 return x._id === user._id;
             });
         }
@@ -193,7 +140,7 @@ jsGen.userCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
                 follow: false
             }, function() {
                 if (!result.err) {
-                    jsGen.union(jsGen.global.user.followList, result.followList);
+                    jsGen.union($scope.global.user.followList, result.followList);
                     $scope.user.fans -= 1;
                     $scope.isFollow = false;
                 }
@@ -205,25 +152,24 @@ jsGen.userCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
                 follow: true
             }, function() {
                 if (!result.err) {
-                    jsGen.union(jsGen.global.user.followList, result.followList);
+                    jsGen.union($scope.global.user.followList, result.followList);
                     $scope.user.fans += 1;
                     $scope.isFollow = true;
                 }
             });
         }
     };
-}];
-jsGen.adminCtrl = ['$scope', function($scope) {
-    if (!(jsGen.global.user && jsGen.global.user.role === 'admin')) jsGen.location.path('/');
+}]).
+controller('adminCtrl', ['$scope', function($scope) {
+    if (!($scope.global.user && $scope.global.user.role === 'admin')) jsGen.location.path('/');
     $scope.getTpl = '/static/tpl/admin-index.html';
     $scope.setTpl = function(tpl) {
         $scope.getTpl = '/static/tpl/' + tpl;
     };
-}];
-
-jsGen.userIndexCtrl = ['$scope', function($scope) {}];
-
-jsGen.userAdminCtrl = ['$scope', function($scope) {
+}]).
+controller('userIndexCtrl', ['$scope', function($scope) {
+}]).
+controller('userAdminCtrl', ['$scope', function($scope) {
     var result = {},
     originData = {};
     $scope.roleArray = ['admin', 'editor', 'author', 'user', 'guest', 'forbid'];
@@ -288,9 +234,8 @@ jsGen.userAdminCtrl = ['$scope', function($scope) {
             } else $scope.err = result.err;
         });
     };
-}];
-
-jsGen.userEditCtrl = ['$scope', function($scope) {
+}]).
+controller('userEditCtrl', ['$scope', function($scope) {
     var originData = {},
     tagsArray = [];
 
@@ -303,8 +248,8 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
     };
     $scope.editSave = false;
     $scope.sexArray = ['male', 'female'];
-    $scope.user = jsGen.union(jsGen.global.user);
-    originData = jsGen.union(jsGen.global.user);
+    $scope.user = jsGen.union($scope.global.user);
+    originData = jsGen.union($scope.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
     var sanitize = new Sanitize(Sanitize.Config.BASIC);
@@ -321,7 +266,7 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
         else $scope.editSave = true;
     });
     $scope.checkTags = function() {
-        if ($scope.tagsList.length > jsGen.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, jsGen.global.UserTagsMax);
+        if ($scope.tagsList.length > $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.UserTagsMax);
     };
     $scope.checkPwd = function() {
         if ($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = true;
@@ -370,9 +315,8 @@ jsGen.userEditCtrl = ['$scope', function($scope) {
             });
         }
     };
-}];
-
-jsGen.articleCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
+}]).
+controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routeParams) {
     function getArticle(callback) {
         var article = jsGen.cache.article.get('A' + $routeParams.ID);
         if (article) return callback(article);
@@ -397,21 +341,20 @@ jsGen.articleCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
     getArticle(function(article) {
         if (article.err) return ($scope.err = article.err);
         $scope.article = article;
-        if (jsGen.global.user) {
-            $scope.isFollow = jsGen.global.user.followList.some(function(x) {
-                return x._id === jsGen.global.user._id;
+        if ($scope.global.user) {
+            $scope.isFollow = $scope.global.user.followList.some(function(x) {
+                return x._id === $scope.global.user._id;
             });
-            $scope.isCollector = jsGen.global.user.collectList.some(function(x) {
+            $scope.isCollector = $scope.global.user.collectList.some(function(x) {
                 return x._id === article._id;
             });
         }
         if (!$scope.isOppose && article.favorList) $scope.isFavor = article.favorList.some(function(x) {
-            return x._id === jsGen.global.user._id;
+            return x._id === $scope.global.user._id;
         });
         if (!$scope.isFavor && article.opposeList) $scope.isOppose = article.opposeList.some(function(x) {
-            return x._id === jsGen.global.user._id;
+            return x._id === $scope.global.user._id;
         });
-        $scope.$apply();
         parseDOM(article.content, '#' + article._id + ' > .media-content');
         for (var i = 0, len = article.commentsList.length - 1; i <= len; i++) {
             parseDOM(article.commentsList[i].content, '#' + article.commentsList[i]._id + ' > .media-content');
@@ -427,7 +370,7 @@ jsGen.articleCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
                 follow: false
             }, function() {
                 if (!result.err) {
-                    jsGen.union(jsGen.global.user.followList, result.followList);
+                    jsGen.union($scope.global.user.followList, result.followList);
                     $scope.user.fans -= 1;
                     $scope.isFollow = false;
                 }
@@ -439,17 +382,15 @@ jsGen.articleCtrl = ['$scope', '$routeParams', function($scope, $routeParams) {
                 follow: true
             }, function() {
                 if (!result.err) {
-                    jsGen.union(jsGen.global.user.followList, result.followList);
+                    jsGen.union($scope.global.user.followList, result.followList);
                     $scope.user.fans += 1;
                     $scope.isFollow = true;
                 }
             });
         }
     };
-
-}];
-
-jsGen.addArticleCtrl = ['$scope', function($scope) {
+}]).
+controller('addArticleCtrl', ['$scope', function($scope) {
     if (!$scope.isLogin) jsGen.location.path('/');
     $scope.previewTitle = '文章预览';
     $scope.markdownHelp = null;
@@ -504,8 +445,8 @@ jsGen.addArticleCtrl = ['$scope', function($scope) {
             $scope.title = $scope.title.slice(0, -1);
             $scope.titleBytes = jsGen.filter('length')($scope.title);
         }
-        if ($scope.titleBytes >= jsGen.global.TitleMinLen && $scope.titleBytes <= jsGen.global.TitleMaxLen &&
-        $scope.contentBytes >= jsGen.global.ContentMinLen && $scope.contentBytes <= jsGen.global.ContentMaxLen) $scope.editSave = true;
+        if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen &&
+        $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
         else $scope.editSave = false;
         if (!$scope.markdownHelp) {
             $scope.previewTitle = $scope.title;
@@ -515,8 +456,8 @@ jsGen.addArticleCtrl = ['$scope', function($scope) {
     $scope.$watch('content', function() {
         if (typeof $scope.content !== 'string') $scope.content = '';
         $scope.contentBytes = jsGen.filter('length')($scope.content);
-         if ($scope.titleBytes >= jsGen.global.TitleMinLen && $scope.titleBytes <= jsGen.global.TitleMaxLen &&
-        $scope.contentBytes >= jsGen.global.ContentMinLen && $scope.contentBytes <= jsGen.global.ContentMaxLen) $scope.editSave = true;
+         if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen &&
+        $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
          else $scope.editSave = false;
     });
     $scope.wmdHelp = function(s) {
@@ -529,10 +470,10 @@ jsGen.addArticleCtrl = ['$scope', function($scope) {
     };
     $scope.getTag = function(n) {
         var tag = $scope.global.tagsList[n].tag;
-        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < jsGen.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
     };
     $scope.checkTags = function() {
-        if ($scope.tagsList.length > jsGen.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.slice(0, jsGen.global.ArticleTagsMax);
+        if ($scope.tagsList.length > $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.ArticleTagsMax);
     };
     $scope.submit = function() {
         if (!$scope.editSave) return;
@@ -548,9 +489,8 @@ jsGen.addArticleCtrl = ['$scope', function($scope) {
             } else $scope.err = result.err;
         });
     };
-}];
-
-jsGen.adminGlobalCtrl = ['$scope', function($scope) {
+}]).
+controller('adminGlobalCtrl', ['$scope', function($scope) {
     var originData = {};
     $scope.global = jsGen.rest.indexAdmin.get({}, function() {
         $scope.global = jsGen.union($scope.global);
@@ -594,16 +534,15 @@ jsGen.adminGlobalCtrl = ['$scope', function($scope) {
             if (!result.err) {
                 $scope.global = jsGen.union(result);
                 originData = jsGen.union(result);
-                var clone = jsGen.union(jsGen.global);
+                var clone = jsGen.union($scope.global);
                 jsGen.intersect(clone, $scope.global);
-                jsGen.union(jsGen.global, clone);
+                jsGen.union($scope.global, clone);
                 $scope.request = '修改成功！';
             } else $scope.err = result.err;
         });
     };
-}];
-
-jsGen.paginationCtrl = ['$scope', function($scope) {
+}]).
+controller('paginationCtrl', ['$scope', function($scope) {
     $scope.paginationTo = function(to) {
         var p = 1;
         var params = {};
@@ -636,182 +575,4 @@ jsGen.paginationCtrl = ['$scope', function($scope) {
             p: 1
         });
     };
-}];
-
-//添加jsGen系列工具函数
-(function() {
-    function checkType(obj) {
-        var type = typeof obj;
-        if (obj === null) return 'null';
-        if (type !== 'object') return type;
-        if (Array.isArray(obj)) return 'array';
-        return type;
-    };
-
-    function equal(a, b) {
-        return JSON.stringify(a) === JSON.stringify(b);
-    };
-
-    //深度并集复制，用于数据对象复制、数据对象更新，若同时提供参数 a 对象和 b 对象，则将 b 对象所有属性（原始类型，忽略函数）复制给 a对象（同名则覆盖），
-    //返回值为深度复制了 b 后的 a，注意 a 和 b 必须同类型;
-    //若只提供参数 a，则 union 函数返回 a 的克隆，与JSON.parse(JSON.stringify(a))相比，克隆效率略高。
-
-    function union(a, b) {
-        if (b === undefined) {
-            var s, type = checkType(a);
-            if (type === 'object') s = {};
-            else if (type === 'array') s = [];
-            else if (type === 'function') return undefined;
-            else return a;
-            for (var key in a) {
-                if (!a.hasOwnProperty(key)) continue;
-                if (typeof a[key] === 'object' && a[key] !== null) {
-                    s[key] = union(a[key]);
-                } else s[key] = a[key];
-            }
-            return s;
-        }
-        if (checkType(a) !== checkType(b)) return a;
-        for (var key in b) {
-            if (!b.hasOwnProperty(key)) continue;
-            var typeBkey = checkType(b[key]);
-            if (typeBkey === 'object') {
-                if (checkType(a[key]) !== 'object') a[key] = {};
-                union(a[key], b[key]);
-            } else if (typeBkey === 'array') {
-                if (checkType(a[key]) !== 'array') a[key] = [];
-                union(a[key], b[key]);
-            } else if (typeBkey !== 'function') a[key] = b[key];
-        }
-        return a;
-    };
-
-    //深度交集复制，用于数据对象校验，即以 a 为模板，当a 和 b 共有属性且属性值类型一致时，将 b 的属性值复制给 a，对于 a 有 b 没有或 b 有 a 没有的属性，均删除，返回相交复制后的 a;
-    // var a = {q:0,w:'',e:{a:0,b:[0,0,0]}}, b = {r:10,w:'hello',e:{a:99,b:[1,2,3,4,5]}};
-    // intersect(a, b);  // a 变成{w:'hello',e:{a:99,b:[1,2,3]}}
-    //如果 a 的某属性是数组，且只有一个值，则以它为模板，将 b 对应的该属性的数组的值校检比复制
-    // var a = {q:0,w:'',e:{a:0,b:[0]}}, b = {r:10,w:'hello',e:{a:99,b:[1,2,3,4,5]}};
-    // intersect(a, b);  // a 变成{w:'hello',e:{a:99,b:[1,2,3,4,5]}} 注意a.e.b与上面的区别
-
-    function intersect(a, b) {
-        if (a && b) {
-            var typeA = checkType(a),
-                typeB = checkType(b);
-            if (typeA === 'array' && typeB === 'array' && a.length <= 1) {
-                if (a.length === 0) union(a, b);
-                else {
-                    var o = union(a[0]);
-                    var typeAkey = checkType(a[0]);
-                    if (typeAkey !== 'function') {
-                        for (var i = b.length - 1; i >= 0; i--) {
-                            typeBkey = checkType(b[i]);
-                            if (typeBkey === typeAkey) {
-                                if (typeBkey === 'object' || typeBkey === 'array') {
-                                    a[i] = union(o);
-                                    intersect(a[i], b[i]);
-                                } else a[i] = b[i];
-                            }
-                        }
-                    }
-                }
-            } else if (typeA === 'object' && typeB === 'object' && Object.keys(a).length === 0) {
-                union(a, b);
-            } else {
-                for (var key in a) {
-                    var typeBkey = checkType(b[key]);
-                    if (b.hasOwnProperty(key) && checkType(a[key]) === typeBkey && typeBkey !== 'function') {
-                        if (typeBkey === 'object' || typeBkey === 'array') {
-                            intersect(a[key], b[key]);
-                        } else a[key] = b[key];
-                    } else delete a[key];
-                }
-            }
-            digestArray(a);
-        }
-        return a;
-    };
-
-    //深度补集运算，用于获取对象修改后的值。a为目标对象，b为对比对象。
-    //a的某属性值与b的对应属性值全等时，删除a的该属性，运算直接修改a，返回值也是a。
-    //ignore，不参与对比的属性模板;
-    //keyMode为true时，对属性进行补集元算，即a的属性名在b中也存在时，则删除a中该属性。
-    function complement(a, b, ignore, keyMode) {
-        if (a && b) {
-            var typeA = checkType(a),
-                typeB = checkType(b),
-                ignore = ignore || undefined;
-            keyMode = keyMode || undefined;
-            if (typeA !== typeB || (typeA !== 'object' && typeA !== 'array')) return a;
-            if (ignore) {
-                if (typeof ignore === 'object') {
-                    return complement(a, complement(b, ignore, true), keyMode);
-                } else {
-                    if (!keyMode) keyMode = true;
-                }
-            }
-            if (!keyMode) {
-                if (typeB === 'array' && b.length === 1) {
-                    var o = union(b[0]);
-                    for (var i = a.length - 1; i >= 0; i--) {
-                        if (a[i] === o) delete a[i];
-                        else if (o && typeof o === 'object') complement(a[i], o);
-                    }
-                } else {
-                    for (var key in a) {
-                        if (a[key] === b[key]) delete a[key];
-                        else if (b[key] && typeof b[key] === 'object') complement(a[key], b[key]);
-                    }
-                }
-            } else {
-                if (typeB === 'array' && b.length === 1) {
-                    var o = union(b[0]);
-                    for (var i = a.length - 1; i >= 0; i--) {
-                        if (o && typeof o === 'object') complement(a[i], o, true);
-                        else if (typeof a[i] === typeof o) delete a[i];
-                    }
-                } else {
-                    for (var key in a) {
-                        if (b[key] && typeof b[key] === 'object') complement(a[key], b[key], true);
-                        else if (typeof a[key] === typeof b[key]) delete a[key];
-                    }
-                }
-            }
-            digestArray(a);
-        }
-        return a;
-    };
-    //数组去重，返回新数组，新数组中没有重复值。
-
-    function uniqueArray(a) {
-        if (!Array.isArray(a)) return a;
-
-        var o = {},
-        re = [];
-        for (var i = a.length - 1; i >= 0; i--) {
-            if (o[typeof a[i] + a[i]] !== 1) {
-                o[typeof a[i] + a[i]] = 1;
-                re.push(a[i]);
-            }
-        };
-
-        return re.reverse();
-    };
-    //数组去undefined，修改原数组，去除undefined值的元素。
-
-    function digestArray(a) {
-        if (!Array.isArray(a)) return a;
-        for (var i = a.length - 1; i >= 0; i--) {
-            if (a[i] === undefined) a.splice(i, 1);
-        };
-        return a;
-    };
-
-    this.checkType = this.checkType || checkType;
-    this.equal = this.equal || equal;
-    this.union = this.union || union;
-    this.intersect = this.intersect || intersect;
-    this.complement = this.complement || complement;
-    this.uniqueArray = this.uniqueArray || uniqueArray;
-    this.digestArray = this.digestArray || digestArray;
-    return this;
-}).call(jsGen);
+}]);
