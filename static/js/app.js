@@ -28,19 +28,19 @@ config(['$routeProvider', '$locationProvider', function($routeProvider, $locatio
         templateUrl: 'static/tpl/article-add.html',
         controller: jsGen.addArticleCtrl
     }).
-    when('/U:id', {
+    when('/U:ID', {
         templateUrl: 'static/tpl/user.html',
-        controller: jsGen.userViewCtrl
+        controller: jsGen.userCtrl
     }).
-    when('/A:id', {
+    when('/A:ID', {
         templateUrl: 'static/tpl/article.html',
         controller: jsGen.articleCtrl
     }).
-    when('/T:id', {
+    when('/T:ID', {
         templateUrl: 'static/tpl/tag.html',
         controller: jsGen.tagCtrl
     }).
-    when('/O:id', {
+    when('/O:ID', {
         templateUrl: 'static/tpl/collection.html',
         controller: jsGen.collectionCtrl
     }).

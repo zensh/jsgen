@@ -3,7 +3,7 @@ var union = jsGen.lib.tools.union,
     checkTag = jsGen.lib.tools.checkTag,
     tagCache = jsGen.cache.tag;
 
-tagCache.getTag = function(tagID, callback, convert) {
+tagCache.getP = function(tagID, callback, convert) {
     var that = this,
         doc = this.get(tagID);
     callback = callback || jsGen.lib.tools.callbackFn;
@@ -113,7 +113,7 @@ function setTag(tagObj, callback) {
         if (tagObj.tag === cache[tagID].tag) return callback(null, null);
         if (cache[tagObj.tag.toLowerCase()] && cache[tagObj.tag.toLowerCase()]._id !== tagID) {
             toID = cache[tagObj.tag.toLowerCase()]._id;
-            tagCache.getTag(tagID, function(err, doc) {
+            tagCache.getP(tagID, function(err, doc) {
                 if (err) return callback(err, null);
                 doc.articlesList.reverse();
                 doc.usersList.reverse();
@@ -143,7 +143,7 @@ function setTag(tagObj, callback) {
                     jsGen.dao.tag.delTag(tagObj._id, function() {
                         tagCache.remove(tagID);
                         cache._remove(tagID);
-                        tagCache.getTag(toID, function(err, doc) {
+                        tagCache.getP(toID, function(err, doc) {
                             return callback(err, doc);
                         });
                     });
@@ -159,7 +159,7 @@ function setTag(tagObj, callback) {
             });
         }
     } else if (setKey === 'articlesList' || setKey === 'usersList') {
-        tagCache.getTag(tagID, function(err, doc) {
+        tagCache.getP(tagID, function(err, doc) {
             if (err) return callback(err, null);
             var exist = doc[setKey].indexOf(Math.abs(tagObj[setKey]));
             if ((tagObj[setKey] < 0 && exist >= 0) || (tagObj[setKey] > 0 && exist < 0)) {
@@ -221,7 +221,7 @@ function getTag(req, res) {
         body.err = jsGen.lib.msg.tagNone;
         return res.sendjson(body);
     }
-    tagCache.getTag(_id, function(err, doc) {
+    tagCache.getP(_id, function(err, doc) {
         jsGen.dao.db.close();
         if (err) body.err = jsGen.lib.msg.dbErr;
         else body = doc;

@@ -11,7 +11,7 @@ var listArticle = jsGen.lib.json.ListArticle,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent;
 
-articleCache.getArticle = function(ID, callback, convert) {
+articleCache.getP = function(ID, callback, convert) {
     var that = this,
         doc = this.get(ID);
         _id = jsGen.dao.article.convertID(ID);
@@ -31,7 +31,10 @@ articleCache.getArticle = function(ID, callback, convert) {
         if (convert) {
             getConvert(doc);
             jsGen.dao.article.setArticle({_id: _id, visitors: 1});
-            convertArticles(doc.commentsList, callback, 'comment');
+            convertArticles(doc.commentsList, function(err, commentsList) {
+                if (commentsList) doc.commentsList = commentsList;
+                callback(err, doc);
+            }, 'comment');
         } else return callback(null, doc);
     } else jsGen.dao.article.getArticle(_id, function(err, doc) {
         if (err) return callback(err, null);
@@ -41,13 +44,16 @@ articleCache.getArticle = function(ID, callback, convert) {
             if (convert) {
                 getConvert(doc);
                 jsGen.dao.article.setArticle({_id: _id, visitors: 1});
-                convertArticles(doc.commentsList, callback, 'comment');
+                convertArticles(doc.commentsList, function(err, commentsList) {
+                if (commentsList) doc.commentsList = commentsList;
+                    callback(err, doc);
+                }, 'comment');
             } else return callback(null, doc);
         }
     });
 };
 
-commentCache.getArticle = function(ID, callback, convert) {
+commentCache.getP = function(ID, callback, convert) {
     var that = this,
         doc = this.get(ID);
 
@@ -61,7 +67,10 @@ commentCache.getArticle = function(ID, callback, convert) {
     if (doc) {
         if (convert) {
             getConvert(doc);
-            convertArticles(doc.commentsList, callback, 'comment');
+            convertArticles(doc.commentsList, function(err, commentsList) {
+                if (commentsList) doc.commentsList = commentsList;
+                callback(err, doc);
+            }, 'comment');
         } else return callback(null, doc);
     } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function(err, doc) {
         if (doc) {
@@ -70,14 +79,17 @@ commentCache.getArticle = function(ID, callback, convert) {
             that.put(ID, doc);
             if (convert) {
                 getConvert(doc);
-                convertArticles(doc.commentsList, callback, 'comment');
+                convertArticles(doc.commentsList, function(err, commentsList) {
+                    if (commentsList) doc.commentsList = commentsList;
+                    callback(err, doc);
+                }, 'comment');
             }
         }
         return callback(err, doc);
     });
 };
 
-listCache.getArticle = function(ID, callback, convert) {
+listCache.getP = function(ID, callback, convert) {
     var that = this,
         doc = this.get(ID);
 
@@ -156,12 +168,12 @@ function convertArticles(_idArray, callback, mode) {
         var ID = _idArray.pop();
         if (!ID) return callback(null, tags);
         if (mode === 'comment') {
-            commentCache.getArticle(ID, function(err, doc) {
+            commentCache.getP(ID, function(err, doc) {
                 if (err) return callback(err, result);
                 if (doc) result.push(doc);
                 next();
             });
-        } else listCache.getArticle(ID, function(err, doc) {
+        } else listCache.getP(ID, function(err, doc) {
             if (err) return callback(err, result);
             if (doc) result.push(doc);
             next();
@@ -171,9 +183,11 @@ function convertArticles(_idArray, callback, mode) {
 
 function getArticle(req, res, dm) {
     var ID = req.path[2];
-    if (!checkID(ID) || !cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    console.log(ID);
+    console.log(cache);
+    if (!cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
     if (cache[ID].display > 0 && !req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
-    articleCache.getArticle(ID, dm.intercept(function(doc) {
+    articleCache.getP(ID, dm.intercept(function(doc) {
         if (req.session.Uid === doc.author._id) return res.sendjson(doc);
         if (cache[ID].display === 1) {
             jsGen.cache.user.getUser(doc.author._id, dm.intercept(function(user) {
@@ -225,7 +239,7 @@ function getLatest(req, res, dm) {
     function next() {
         var ID = array.pop();
         if (!ID) return res.sendjson(body);
-        listCache.getArticle(ID, dm.intercept(function(doc) {
+        listCache.getP(ID, dm.intercept(function(doc) {
             if (doc) body.data.push(doc);
             next();
         }));
@@ -234,17 +248,13 @@ function getLatest(req, res, dm) {
 
 function filterArticle(articleObj, callback) {
     var newObj = {
-        _id: 0,
-        date: 0,
         display: 0,
-        status: 0,
         refer: '',
         title: '',
         cover: '',
         content: '',
-        updateTime: 0,
         tagsList: [''],
-        comment: true
+        comment: true,
     };
     callback = callback || jsGen.lib.tools.callbackFn;
     intersect(newObj, articleObj);
@@ -253,22 +263,23 @@ function filterArticle(articleObj, callback) {
     newObj.content = filterContent(newObj.content);
     if (!newObj.content) return callback(jsGen.lib.msg.articleMinErr, null);
     if (newObj.cover && !checkUrl(newObj.cover)) return callback(jsGen.lib.msg.coverErr, null);
-    if (newObj.refer && (!checkID('/A', newObj.refer) || !checkUrl(newObj.refer))) delete newObj.refer;
-    if (newObj.tagsList) {
-        jsGen.api.tag.filterTags(newObj.tagsList.slice(0, jsGen.config.ArticleTagsMax), function(err, doc) {
+    if (newObj.refer && !checkUrl(newObj.refer) && !cache[newObj.refer]) delete newObj.refer;
+    if (newObj.tagsList.length > 0) {
+        jsGen.api.tag.filterTags(newObj.tagsList.slice(0, jsGen.config.ArticleTagsMax), function(err, tagsList) {
             if (err) return callback(err, null);
-            if (doc) newObj.tagsList = doc;
-            if (!newObj._id) return callback(null, newObj);
-            articleCache.getArticle(newObj._id, function(err, doc) {
+            if (tagsList) newObj.tagsList = tagsList;
+            if (!articleObj._id) return callback(null, newObj);
+            articleCache.getP(articleObj._id, function(err, doc) {
+                articleObj._id = jsGen.dao.article.convertID(articleObj._id);
                 if (err) return callback(err, null);
                 var tagList = {},
                 setTagList = [];
                 if (doc) doc.tagsList.forEach(function(x) {
-                    tagList[x] = -newObj._id;
+                    tagList[x] = -articleObj._id;
                 });
                 newObj.tagsList.forEach(function(x) {
                     if (tagList[x]) delete tagList[x];
-                    else tagList[x] = newObj._id;
+                    else tagList[x] = articleObj._id;
                 });
                 for (var key in tagList) setTagList.push({
                     _id: Number(key),
@@ -284,38 +295,23 @@ function filterArticle(articleObj, callback) {
 };
 
 function addArticle(req, res, dm) {
-    var newObj = {
-        date: 0,
-        display: 0,
-        status: 0,
-        refer: '',
-        title: '',
-        cover: '',
-        content: '',
-        updateTime: 0,
-        tagsList: [''],
-        comment: true
-    };
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    console.log(req.apibody);
-    intersect(newObj, req.apibody);
-    console.log(newObj);
-    newObj.date = Date.now();
-    newObj.updateTime = newObj.date;
-    if (newObj.display !== 1) newObj.display = 0;
-    newObj.status = 0;
-    newObj.author = jsGen.dao.user.convertID(req.session.Uid);
-    filterArticle(newObj, dm.intercept(function(article) {
-        console.log(article);
+    filterArticle(req.apibody, dm.intercept(function(article) {
+        article.date = Date.now();
+        article.updateTime = article.date;
+        if (article.display !== 1) article.display = 0;
+        article.status = 0;
+        article.author = jsGen.dao.user.convertID(req.session.Uid);
+        delete article._id;
         jsGen.dao.article.setNewArticle(article, dm.intercept(function(doc) {
             if (doc) {
                 doc._id = jsGen.dao.article.convertID(doc._id);
                 cache._update(doc);
-                articleCache.put(doc);
+                articleCache.put(doc._id, doc);
                 doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
+                doc.author = jsGen.api.user.convertUsers(doc.author);
             }
-            console.log(doc);
             return res.sendjson(doc);
         }));
     }));

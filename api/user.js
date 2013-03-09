@@ -13,7 +13,7 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     userCache = jsGen.cache.user;
     filterSummary = jsGen.lib.tools.filterSummary;
 
-userCache.getUser = function(Uid, callback, convert) {
+userCache.getP = function(Uid, callback, convert) {
     var that = this,
         doc = this.get(Uid);
 
@@ -88,7 +88,8 @@ function convertUsers(_idArray) {
     _idArray.forEach(function(x, i) {
         if (cache[x]) result.push({
             _id: cache[x]._id,
-            name: cache[x].name
+            name: cache[x].name,
+            avatar: cache[x].avatar
         });
     });
     return result;
@@ -183,7 +184,7 @@ function login(req, res, dm) {
                     ip: req.ip
                 }
             });
-            userCache.getUser(doc._id, dm.intercept(function(doc) {
+            userCache.getP(doc._id, dm.intercept(function(doc) {
                 return res.sendjson(doc);
             }));
         } else {
@@ -208,7 +209,7 @@ function register(req, res, dm) {
                 u: doc._id,
                 r: 'role'
             }, dm.intercept(function() {
-                userCache.getUser(doc._id, dm.intercept(function(doc) {
+                userCache.getP(doc._id, dm.intercept(function(doc) {
                     return res.sendjson(doc);
                 }));
                 if (jsGen.config.email) {
@@ -267,7 +268,7 @@ function getUser(req, res, dm) {
     var Uid = null;
     if (cache[req.path[2]]) Uid = cache[req.path[2]]._id;
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
-    userCache.getUser(Uid, dm.intercept(function(doc) {
+    userCache.getP(Uid, dm.intercept(function(doc) {
         doc = intersect(union(UserPublicTpl), doc);
         return res.sendjson(doc);
     }));
@@ -284,7 +285,7 @@ function setUser(req, res, dm) {
     var _id = jsGen.dao.user.convertID(Uid);
     var _idReq = jsGen.dao.user.convertID(req.session.Uid);
     if (req.apibody.follow === true) {
-        userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+        userCache.getP(req.session.Uid, dm.intercept(function(doc) {
             if (doc.followList.indexOf(_id) >= 0) throw jsGen.Err(jsGen.lib.msg.userFollowed);
             jsGen.dao.user.setFollow({
                 _id: _idReq,
@@ -296,7 +297,7 @@ function setUser(req, res, dm) {
                 });
                 userCache.remove(Uid);
                 userCache.remove(req.session.Uid);
-                userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+                userCache.getP(req.session.Uid, dm.intercept(function(doc) {
                     return res.sendjson({
                         followList: doc.followList
                     });
@@ -304,7 +305,7 @@ function setUser(req, res, dm) {
             }));
         }), false);
     } else if (req.apibody.follow === false) {
-        userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+        userCache.getP(req.session.Uid, dm.intercept(function(doc) {
             if (doc.followList.indexOf(_id) < 0) throw jsGen.Err(jsGen.lib.msg.userUnfollowed);
             jsGen.dao.user.setFollow({
                 _id: _idReq,
@@ -316,7 +317,7 @@ function setUser(req, res, dm) {
                 });
                 userCache.remove(Uid);
                 userCache.remove(req.session.Uid);
-                userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+                userCache.getP(req.session.Uid, dm.intercept(function(doc) {
                     return res.sendjson({
                         followList: doc.followList
                     });
@@ -366,7 +367,7 @@ function getUsers(req, res, dm) {
     function next() {
         var Uid = array.pop();
         if (!Uid) return res.sendjson(body);
-        userCache.getUser(Uid, dm.intercept(function(doc) {
+        userCache.getP(Uid, dm.intercept(function(doc) {
             var data = {};
             if (doc) {
                 data = union(UserPublicTpl);
@@ -381,7 +382,7 @@ function getUsers(req, res, dm) {
 
 function getUserInfo(req, res, dm) {
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
-    userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+    userCache.getP(req.session.Uid, dm.intercept(function(doc) {
         return res.sendjson(doc);
     }));
 };
@@ -421,7 +422,7 @@ function editUser(req, res, dm) {
     if (userObj.tagsList) {
         jsGen.api.tag.filterTags(userObj.tagsList.slice(0, jsGen.config.UserTagsMax), dm.intercept(function(doc) {
             if (doc) userObj.tagsList = doc;
-            userCache.getUser(req.session.Uid, dm.intercept(function(doc) {
+            userCache.getP(req.session.Uid, dm.intercept(function(doc) {
                 var tagList = {},
                 setTagList = [];
                 if (doc) doc.tagsList.forEach(function(x) {

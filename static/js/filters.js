@@ -27,20 +27,32 @@ angular.module('jsGen.filters', []).
   }).
   filter('boolean', function() {
     return function(text) {
-      switch (text) {
-        case true: return '开启';
-        case false: return '关闭';
-        default: return text;
-      }
+      if (text) return '开启';
+      return '关闭';
     };
   }).
   filter('follow', function() {
     return function(text) {
-      switch (text) {
-        case 'follow': return '[取消]';
-        case 'unfollow': return '[关注]';
-        default: return text;
-      }
+      if (text) return '取消关注';
+      return '关注我！';
+    };
+  }).
+  filter('favor', function() {
+    return function(text) {
+      if (text) return '已支持';
+      return '支持';
+    };
+  }).
+  filter('collector', function() {
+    return function(text) {
+      if (text) return '已收藏';
+      return '收藏';
+    };
+  }).
+  filter('oppose', function() {
+    return function(text) {
+      if (text) return '已反对';
+      return '反对';
     };
   }).
   filter('checkName', function() {
@@ -55,9 +67,18 @@ angular.module('jsGen.filters', []).
     };
   }).
   filter('length', function() {
-    return function(text, min, max) {
-        if(text) {
-            return utf8.stringToBytes(text).length;
-        }
+    return function(text) {
+        if(text) return utf8.stringToBytes(text).length;
+        return 0;
     };
-  });
+  }).
+  filter('formatDate', ['$filter', function($filter) {
+    return function(date) {
+        var o = Date.now() - date;
+        if (o > 259200000) return $filter('date')(date, 'yyyy-MM-dd HH:mm'); // 三天前直接显示标准日期格式
+        if (o > 86400000) return Math.floor(o / 86400000) + '天前';
+        if (o > 3600000) return Math.floor(o / 3600000) + '小时前';
+        if (o > 60000) return Math.floor(o / 60000) + '分钟前';
+        return "刚刚";
+    };
+  }]);

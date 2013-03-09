@@ -28,11 +28,11 @@ factory('rest', ['$resource', function($resource) {
 }]).
 factory('cache', ['$cacheFactory', function($cacheFactory) {
     return {
-        users: $cacheFactory('users', {
+        user: $cacheFactory('user', {
             capacity: 10
         }),
-        articles: $cacheFactory('articles', {
-            capacity: 20
+        article: $cacheFactory('article', {
+            capacity: 100
         })
     }
 }]);

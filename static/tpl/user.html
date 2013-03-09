@@ -5,9 +5,8 @@
         <div class="thumbnail">
             <img ng-src="{{user.avatar}}" />
             <div class="caption">
-                <h5 class="text-center" ng-show="isMe" ><i class="glyphicon glyphicon-user"></i> {{user.name}}</h5>
-                <h5 class="text-center" ng-hide="isMe" >
-                    <a href="#" ng-click="followMe()">{{user.name}}<small class="text-warning">{{isFollow | follow}}</small></a>
+                <h5 class="text-center">{{user.name}}&nbsp;
+                    <a href="#" ng-show="!isMe" ng-click="followMe(user._id)" class="btn btn-mini btn-success">{{isFollow | follow}}</a>
                 </h5>
                 <ul class="list-inline">
                     <li >Uid：{{user._id}}</li>
@@ -42,10 +41,10 @@
                         合集：{{user.collections}}
                     </li>
                     <li ng-show="user.date">
-                        {{user.date | date:'yyyy-MM-dd HH:mm'}}[注册]
+                        {{user.date | formatDate}}注册
                     </li>
                     <li ng-show="user.lastLoginDate">
-                        {{user.lastLoginDate | date:'yyyy-MM-dd HH:mm'}}[最后登录]
+                        {{user.lastLoginDate | formatDate}}最后登录
                     </li>
                 </ul>
                 <dl>

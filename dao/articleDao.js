@@ -58,7 +58,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, callback);
     },
 
-    getArticlesIndex: function(date, callback) {
+    getArticlesIndex: function(callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.find({}, {
             sort: {
@@ -234,11 +234,8 @@ var that = jsGen.dao.db.bind('articles', {
         var article = union(defautArticle),
             newArticle = union(defautArticle);
         callback = callback || jsGen.lib.tools.callbackFn;
-
         intersect(article, articleObj);
         union(newArticle, article);
-        console.log('111111111111111111');
-        console.log(newArticle);
 
         that.getLatestId(function(err, doc) {
             if (err) return callback(err, null);
@@ -276,6 +273,6 @@ module.exports = {
     setOpposes: that.setOpposes,
     setCollectors: that.setCollectors,
     setComments: that.setComments,
-    setNewArticle: that.setComments,
+    setNewArticle: that.setNewArticle,
     delArticle: that.delArticle
 };
