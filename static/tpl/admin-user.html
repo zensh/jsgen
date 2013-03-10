@@ -35,7 +35,7 @@
                 <td ng-hide="editEmail">{{user.email}}</td>
                 <td ng-show="editEmail"><input type="email" ng-model="user.email"/></td>
                 <td ng-hide="editRole">{{user.role | role}}</td>
-                <td ng-show="editRole"><select ng-model="user.role" ng-options="role | role for role in roleArray" class="span2">
+                <td ng-show="editRole"><select ng-model="user.role" ng-options="role | role for role in roleArray">
                     </select></td>
                 <td>{{user.score}}</td>
                 <td>{{user.articles}}</td>
@@ -47,36 +47,9 @@
         <tfoot>
         </tfoot>
     </table>
-    <div ng-controller="jsGen.paginationCtrl">
-        <ul class="pagination">
-            <li>
-                <a ng-click="paginationTo('first')"><i class=" glyphicon glyphicon-step-backward"></i></a>
-            </li>
-            <li>
-                <a ng-click="paginationTo('prev')"><i class="glyphicon glyphicon-backward"></i></a>
-            </li>
-            <li class="disabled">
-                <a>{{pagination.now}}</a>
-            </li>
-            <li>
-                <a ng-click="paginationTo('next')"><i class="glyphicon glyphicon-forward"></i></a>
-            </li>
-            <li>
-                <a ng-click="paginationTo('last')"><i class="glyphicon glyphicon-step-forward"></i></a>
-            </li>
-            <li>
-                <a ng-click="setNum(20)" title="每页20">20</a>
-            </li>
-            <li>
-                <a ng-click="setNum(50)" title="每页50">50</a>
-            </li>
-            <li>
-                <a ng-click="setNum(100)" title="每页100">100</a>
-            </li>
-        </ul>
-        <div class="pull-right" ng-show="editSave">
-            <button class="btn btn-primary" ng-click="submit()">保存</button>
-            <button class="btn btn-success" ng-click="reset()">重置</button>
-        </div>
+    <div ng-pagination="pagination"></div>
+    <div class="pull-right" ng-show="editSave">
+        <button class="btn btn-primary" ng-click="submit()">保存</button>
+        <button class="btn btn-success" ng-click="reset()">重置</button>
     </div>
 </div>

@@ -35,4 +35,45 @@ factory('cache', ['$cacheFactory', function($cacheFactory) {
             capacity: 100
         })
     }
+}]).
+factory('MdParse', function() {
+    return function(html) {
+        if (typeof html !== 'string') return;
+        return marked(html);
+    };
+}).
+factory('sanitize', function() {
+    var sanitize0 = new Sanitize({});
+    var sanitize1 = new Sanitize(Sanitize.Config.RESTRICTED);
+    var sanitize2 = new Sanitize(Sanitize.Config.BASIC);
+    var sanitize3 = new Sanitize(Sanitize.Config.RELAXED);
+    return function(html, level) {
+        switch (level) {
+            case 0: var san = sanitize0; break;
+            case 1: var san = sanitize1; break;
+            case 2: var san = sanitize2; break;
+            case 3: var san = sanitize3; break;
+            default: var san = sanitize3;
+        }
+        var innerDOM = document.createElement('div');
+        var outerDOM = document.createElement('div');
+        innerDOM.innerHTML = html;
+        outerDOM.appendChild(san.clean_node(innerDOM));
+        return outerDOM.innerHTML;
+    };
+}).
+factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
+    return function(idPostfix, level) {
+        var editor = new Markdown.Editor({
+            makeHtml: function(text) {
+                return sanitize(MdParse(text), level);
+            }
+        }, idPostfix);
+        editor.hooks.chain("onPreviewRefresh", function() {
+            angular.element('#wmd-preview' + idPostfix + '>pre').addClass('prettyprint linenums');
+            angular.element('#wmd-preview' + idPostfix + '>code').addClass('prettyprint');
+            prettyPrint();
+        });
+        return editor;
+    };
 }]);

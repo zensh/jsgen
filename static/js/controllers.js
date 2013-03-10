@@ -178,8 +178,9 @@ controller('userAdminCtrl', ['$scope', function($scope) {
     $scope.editSave = false;
     $scope.pagination = {
         now: 1,
-        total: 0,
-        num: 20
+        total: 1,
+        num: 20,
+        nums: [20, 50, 100]
     };
     $scope.$on('pagination', function(event, doc) {
         event.stopPropagation();
@@ -187,7 +188,7 @@ controller('userAdminCtrl', ['$scope', function($scope) {
             if (!result.err) {
                 $scope.data = result.data;
                 originData = jsGen.union($scope.data);
-                $scope.pagination = result.pagination;
+                jsGen.union($scope.pagination, result.pagination);
             } else $scope.err = result.err;
         });
     });
@@ -252,19 +253,6 @@ controller('userEditCtrl', ['$scope', function($scope) {
     originData = jsGen.union($scope.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
-    var sanitize = new Sanitize(Sanitize.Config.BASIC);
-
-    function sanitizeHTML(html, sanitize) {
-        var dom = document.createElement('div');
-        var dom2 = document.createElement('div');
-        dom.innerHTML = html;
-        dom2.appendChild(sanitize.clean_node(dom));
-        return dom2.innerHTML;
-    };
-    $scope.$watch(function() {
-        if (angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray)) $scope.editSave = false;
-        else $scope.editSave = true;
-    });
     $scope.checkTags = function() {
         if ($scope.tagsList.length > $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.UserTagsMax);
     };
@@ -286,7 +274,7 @@ controller('userEditCtrl', ['$scope', function($scope) {
         angular.forEach(data, function(value, key) {
             if (angular.equals(value, originData[key])) delete data[key];
         });
-        if ($scope.user.desc) $scope.user.desc = sanitizeHTML(marked($scope.user.desc), sanitize)
+        if ($scope.user.desc) $scope.user.desc = jsGen.sanitize(jsGen.MdParse($scope.user.desc), 1);
         if ($scope.user.passwd && $scope.user.passwd2 === $scope.user.passwd) data.passwd = CryptoJS.SHA256($scope.user.passwd).toString();
         if (!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         if (data.email) {
@@ -329,11 +317,6 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
             });
         }
     };
-    function parseDOM(html, element) {
-        angular.element(element).html(marked(html));
-        angular.element(element + ' > pre').addClass('prettyprint linenums');
-        angular.element(element + ' > code').addClass('prettyprint');
-    };
     $scope.isFollow = false;
     $scope.isFavor = false;
     $scope.isOppose = false;
@@ -355,11 +338,6 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
         if (!$scope.isFavor && article.opposeList) $scope.isOppose = article.opposeList.some(function(x) {
             return x._id === $scope.global.user._id;
         });
-        parseDOM(article.content, '#' + article._id + ' > .media-content');
-        for (var i = 0, len = article.commentsList.length - 1; i <= len; i++) {
-            parseDOM(article.commentsList[i].content, '#' + article.commentsList[i]._id + ' > .media-content');
-        }
-        prettyPrint();
     });
     $scope.followMe = function(id) {
         var result;
@@ -401,85 +379,66 @@ controller('addArticleCtrl', ['$scope', function($scope) {
     $scope.tagsList = [];
     $scope.editSave = false;
 
-    function getMD() {
+    function getMarkdown() {
         jsGen.http.get('/static/md/markdown.md', {
             cache: true
         }).success(function(data, status) {
             if (!data.err) {
                 $scope.previewTitle = 'Markdown简明语法';
-                $scope.markdownHelp = marked(data);
-                angular.element('#wmd-title').html($scope.previewTitle);
-                angular.element('#wmd-help').html($scope.markdownHelp);
-                angular.element('#wmd-help > pre').addClass('prettyprint linenums');
-                angular.element('#wmd-help > code').addClass('prettyprint');
-                prettyPrint();
+                $scope.markdownHelp = data;
             } else $scope.err = data.err;
         });
     };
-    var sanitize0 = new Sanitize({});
-    var sanitize = new Sanitize(Sanitize.Config.RELAXED);
-
-    function sanitizeHTML(html, sanitize) {
-        var dom = document.createElement('div');
-        var dom2 = document.createElement('div');
-        dom.innerHTML = html;
-        dom2.appendChild(sanitize.clean_node(dom));
-        return dom2.innerHTML;
-    };
-    var MdEditor = new Markdown.Editor({
-        makeHtml: function(text) {
-            return sanitizeHTML(marked(text), sanitize);
-        }
-    });
-    MdEditor.hooks.chain("onPreviewRefresh", function() {
-        angular.element('#wmd-preview > pre').addClass('prettyprint linenums');
-        angular.element('#wmd-preview > code').addClass('prettyprint');
-        prettyPrint();
-    });
+    var MdEditor = jsGen.MdEditor();
     MdEditor.run();
-    getMD();
-    $scope.$watch('title', function() {
-        if (typeof $scope.title !== 'string') $scope.title = '';
-        $scope.titleBytes = jsGen.filter('length')($scope.title);
-        while ($scope.titleBytes > $scope.global.TitleMaxLen) {
-            $scope.title = $scope.title.slice(0, -1);
-            $scope.titleBytes = jsGen.filter('length')($scope.title);
+    $scope.$watch('title', function(title) {
+        if (typeof title !== 'string') {
+            $scope.titleBytes = 0;
+            return;
         }
+        $scope.titleBytes = jsGen.filter('length')(title);
+        while ($scope.titleBytes > $scope.global.TitleMaxLen) {
+            title = title.slice(0, -1);
+            $scope.titleBytes = jsGen.filter('length')(title);
+        }
+        $scope.title = title;
         if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen &&
         $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
         else $scope.editSave = false;
         if (!$scope.markdownHelp) {
-            $scope.previewTitle = $scope.title;
-            angular.element('#wmd-title').html($scope.previewTitle);
+            $scope.previewTitle = $scope.title || '文章预览';
         }
     });
-    $scope.$watch('content', function() {
-        if (typeof $scope.content !== 'string') $scope.content = '';
-        $scope.contentBytes = jsGen.filter('length')($scope.content);
+    $scope.$watch('content', function(content) {
+        if (typeof content !== 'string') {
+            $scope.contentBytes = 0;
+            return;
+        }
+        $scope.contentBytes = jsGen.filter('length')(content);
          if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen &&
         $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
          else $scope.editSave = false;
     });
+    $scope.$watch('tagsList', function(tagsList) {
+        if (tagsList.length > $scope.global.ArticleTagsMax)
+        $scope.tagsList = tagsList.slice(0, $scope.global.ArticleTagsMax);
+    });
     $scope.wmdHelp = function(s) {
         if (s === 'preview') {
             $scope.markdownHelp = null;
-            $scope.previewTitle = sanitizeHTML(($scope.title || '文章预览'), sanitize0);
-            angular.element('#wmd-title').html($scope.previewTitle);
+            $scope.previewTitle = $scope.title || '文章预览';
             MdEditor.refreshPreview();
-        } else getMD();
+        } else getMarkdown();
     };
     $scope.getTag = function(n) {
         var tag = $scope.global.tagsList[n].tag;
         if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
     };
-    $scope.checkTags = function() {
-        if ($scope.tagsList.length > $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.ArticleTagsMax);
-    };
     $scope.submit = function() {
         if (!$scope.editSave) return;
         var data = {};
-        data.content = sanitizeHTML($scope.content, sanitize);
-        data.title = sanitizeHTML($scope.title.trim(), sanitize0);
+        data.content = jsGen.sanitize($scope.content);
+        data.title = jsGen.sanitize($scope.title.trim(), 0);
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;
         var result = jsGen.rest.article.save({}, data, function() {
@@ -539,40 +498,6 @@ controller('adminGlobalCtrl', ['$scope', function($scope) {
                 jsGen.union($scope.global, clone);
                 $scope.request = '修改成功！';
             } else $scope.err = result.err;
-        });
-    };
-}]).
-controller('paginationCtrl', ['$scope', function($scope) {
-    $scope.paginationTo = function(to) {
-        var p = 1;
-        var params = {};
-        var last = Math.ceil($scope.pagination.total / $scope.pagination.num);
-        switch (to) {
-            case 'first':
-                p = 1;
-                break;
-            case 'prev':
-                p = $scope.pagination.now - 1;
-                if (p < 1) p = 1;
-                break;
-            case 'next':
-                p = $scope.pagination.now + 1;
-                if (p > last) p = last;
-                break;
-            case 'last':
-                p = last;
-                break;
-        }
-        params = {
-            n: $scope.pagination.num,
-            p: p
-        };
-        $scope.$emit('pagination', params);
-    };
-    $scope.setNum = function(num) {
-        $scope.$emit('pagination', {
-            n: num,
-            p: 1
         });
     };
 }]);

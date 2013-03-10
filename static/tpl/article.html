@@ -1,58 +1,58 @@
 <div class="row">
     <div class="span9">
-        <div class="panel" id="{{_id}}">
+        <div class="panel" id="{{article._id}}">
             <header class="page-header">
-                <h4>{{title}}</h4>
+                <h4>{{article.title}}</h4>
                 <ul class="list-inline">
-                    <li ng-show="refer">原文：<a ng-href="{{refer}}">{{refer}}</a></li>
-                    <li>时间：{{date | formatDate}}</li>
-                    <li>更新：{{date | formatDate}}</li>
-                    <li>访问：{{visitors}}次</li>
-                    <li>热度：{{hots}}</li>
-                    <li><a class="btn btn-mini" href="#" ng-click="reply(_id)">{{comment.commentsList.length}}评论</a></li>
+                    <li ng-show="article.refer">原文：<a ng-href="{{article.refer._id}}">{{article.refer.title}}</a></li>
+                    <li>时间：{{article.date | formatDate}}</li>
+                    <li>更新：{{article.date | formatDate}}</li>
+                    <li>访问：{{article.visitors}}次</li>
+                    <li>热度：{{article.hots}}</li>
+                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article._id)">{{article.comment.commentsList.length}}评论</a></li>
                 </ul>
                 <ul class="list-inline">
                     <li>标签：</li>
-                    <li ng-repeat="tag in user.tagsList">
+                    <li ng-repeat="tag in article.tagsList">
                         <a ng-href="{{'/'+tag._id}}" class="btn btn-small">{{tag.tag}}</a>
                     </li>
                 </ul>
             </header>
-            <div class="content">
+            <div class="content" ng-parse-markdown="article.content">
             </div>
             <footer>
-                <div ng-show="collection">所属合集：<a ng-href="{{'/'+collection._id}}">{{collection.title}}</a><div>
+                <div ng-show="article.collection">所属合集：<a ng-href="{{'/'+article.collection._id}}">{{article.collection.title}}</a><div>
                 <div class="btn-group btn-group-justified">
-                    <a type="button" class="btn btn-success" ng-click="setFavor(_id)">{{favorsList.length}} | {{isFavor}}</a>
-                    <a type="button" class="btn btn-warning" ng-click="setCollector(_id)">{{collectorsList.length}} | {{isCollector}}</a>
-                    <a type="button" class="btn btn-primary" ng-click="setOppose(_id)">{{opposesList.length}} | {{isOppose}}</a>
+                    <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}} | {{isFavor | favor}}</a>
+                    <a type="button" class="btn btn-warning" ng-click="setCollector(article._id)">{{article.collectorsList.length}} | {{isCollector | collector}}</a>
+                    <a type="button" class="btn btn-primary" ng-click="setOppose(article._id)">{{article.opposesList.length}} | {{isOppose | oppose}}</a>
                 </div>
-                <ul class="list-inline" ng-show="favorsList">
+                <ul class="list-inline" ng-show="article.favorsList">
                     <li>支持：</li>
-                    <li ng-repeat="user in favorsList">
+                    <li ng-repeat="user in article.favorsList">
                         <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     </li>
                 </ul>
-                <ul class="list-inline" ng-show="opposesList">
+                <ul class="list-inline" ng-show="article.opposesList">
                     <li>反对：</li>
-                    <li ng-repeat="user in opposesList">
+                    <li ng-repeat="user in article.opposesList">
                         <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     </li>
                 </ul>
-                <ul class="list-inline" ng-show="collectorsList">
+                <ul class="list-inline" ng-show="article.collectorsList">
                     <li>收藏：</li>
-                    <li ng-repeat="user in collectorsList">
+                    <li ng-repeat="user in article.collectorsList">
                         <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     </li>
                 </ul>
             </footer>
         </div>
         <div class="panel">
-            <div class="media" ng-repeat="comment in commentsList" id="{{comment._id}}">
+            <div class="media" ng-repeat="comment in article.commentsList">
               <a class="pull-left" ng-href="{{'/'+comment.author._id}}">
                 <img class="media-object" ng-src="{{comment.author.avatar}}">
               </a>
-              <div class="media-body">
+              <div class="media-body" id="{{comment._id}}">
                 <div class="media-heading">
                     <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
                         发表于{{comment.date | formatDate}}</span>
@@ -65,7 +65,7 @@
                         <a ng-href="{{'/'+comment.refer.author._id}}">{{comment.refer.author.name}}</a>
                     </h5>
                 </div>
-                <div class="media-content"></div>
+                <div class="media-content" ng-parse-markdown="comment.content"></div>
               </div>
             </div>
         </div>
@@ -73,12 +73,12 @@
     <div class="span3">
         <div class="panel">
             <div class="media">
-              <a class="pull-left" ng-href="{{'/'+author._id}}">
-                <img class="media-object" ng-src="{{author.avatar}}">
+              <a class="pull-left" ng-href="{{'/'+article.author._id}}">
+                <img class="media-object" ng-src="{{article.author.avatar}}">
               </a>
               <div class="media-body">
-                <h5 class="media-heading"><a ng-href="{{'/'+author._id}}">{{author.name}}</a></h5>
-                <a type="button" class="btn btn-success" href="#" ng-click="followMe(author._id)" ng-hide="isMe">{{isFollow | follow}}</a>
+                <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
+                <a type="button" class="btn btn-success" href="#" ng-click="followMe(article.author._id)" ng-hide="isMe">{{isFollow | follow}}</a>
               </div>
             </div>
         </div>

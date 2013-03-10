@@ -1,11 +1,11 @@
 <div class="row">
     <div class="span6">
         <div class="page-header">
-          <h4 id="wmd-title"></h4>
+          <h4>{{previewTitle}}</h4>
         </div>
         <div id="wmd-preview" class="well wmd-preview" ng-hide="markdownHelp">
         </div>
-        <div id="wmd-help" class="well wmd-preview" ng-show="markdownHelp">
+        <div class="well wmd-preview" ng-show="markdownHelp" ng-parse-markdown="markdownHelp">
         </div>
     </div>
     <div class="span6">
@@ -47,8 +47,7 @@
                 文章标签
             </label>
             <span class="text-warning">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
-            <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/"
-            ng-change="checkTags()" class="input-block-level" />
+            <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" class="input-block-level" />
             <div class="well well-small">
                 <ul class="list-inline">
                     <span>热门标签：</span>

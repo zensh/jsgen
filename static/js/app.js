@@ -50,8 +50,8 @@ function($routeProvider, $locationProvider) {
     });
     $locationProvider.html5Mode(true);
 }]).
-run(['$rootScope', '$http', '$location', '$timeout', '$filter', 'cache', 'rest',
-function($rootScope, $http, $location, $timeout, $filter, cache, rest) {
+run(['$rootScope', '$http', '$location', '$timeout', '$filter', 'cache', 'rest', 'sanitize', 'MdParse', 'MdEditor',
+function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize, MdParse, MdEditor) {
     // 注册全局变量jsGen
     window.jsGen = {
         global: {}
@@ -235,12 +235,15 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest) {
         return this;
     }).call(jsGen);
 
-    jsGen.http = jsGen.http || $http;
-    jsGen.location = jsGen.location || $location;
-    jsGen.timeout = jsGen.timeout || $timeout;
-    jsGen.filter = jsGen.filter || $filter;
-    jsGen.cache = jsGen.cache || cache;
-    jsGen.rest = jsGen.rest || rest;
+    jsGen.http = $http;
+    jsGen.location = $location;
+    jsGen.timeout = $timeout;
+    jsGen.filter = $filter;
+    jsGen.cache = cache;
+    jsGen.rest = rest;
+    jsGen.sanitize = sanitize;
+    jsGen.MdParse = MdParse;
+    jsGen.MdEditor = MdEditor;
 
     $rootScope.isAdmin = false;
     $rootScope.isLogin = false;
@@ -273,10 +276,5 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest) {
         $rootScope.global.UserNameMinLen = $rootScope.global.UserNameMinLen || 5;
         $rootScope.global.UserNameMaxLen = $rootScope.global.UserNameMaxLen || 20;
         $rootScope.global.info.angularjs = angular.version.full;
-    });
-
-    angular.element('a').attr('target', function() {
-        if (this.host === location.host) return '_self';
-        else return '_blank';
     });
 }]);
