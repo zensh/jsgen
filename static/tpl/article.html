@@ -4,28 +4,26 @@
             <header class="page-header">
                 <h4>{{article.title}}</h4>
                 <ul class="list-inline">
-                    <li ng-show="article.refer">原文：<a ng-href="{{article.refer._id}}">{{article.refer.title}}</a></li>
-                    <li>时间：{{article.date | formatDate}}</li>
-                    <li>更新：{{article.date | formatDate}}</li>
-                    <li>访问：{{article.visitors}}次</li>
-                    <li>热度：{{article.hots}}</li>
-                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article._id)">{{article.comment.commentsList.length}}评论</a></li>
+                    <li ng-show="article.refer">引文:<a ng-href="article.refer.url">{{article.refer.title}}</a></li>
+                    <li>时间:{{article.date | formatDate}}</li>
+                    <li>更新:{{article.date | formatDate}}</li>
+                    <li>访问:{{article.visitors}}次</li>
+                    <li>热度:{{article.hots}}</li>
+                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article._id)">{{article.commentsList.length}}条评论</a></li>
                 </ul>
                 <ul class="list-inline">
-                    <li>标签：</li>
                     <li ng-repeat="tag in article.tagsList">
-                        <a ng-href="{{'/'+tag._id}}" class="btn btn-small">{{tag.tag}}</a>
+                        <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
                     </li>
                 </ul>
             </header>
             <div class="content" ng-parse-markdown="article.content">
             </div>
-            <footer>
-                <div ng-show="article.collection">所属合集：<a ng-href="{{'/'+article.collection._id}}">{{article.collection.title}}</a><div>
-                <div class="btn-group btn-group-justified">
-                    <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}} | {{isFavor | favor}}</a>
-                    <a type="button" class="btn btn-warning" ng-click="setCollector(article._id)">{{article.collectorsList.length}} | {{isCollector | collector}}</a>
-                    <a type="button" class="btn btn-primary" ng-click="setOppose(article._id)">{{article.opposesList.length}} | {{isOppose | oppose}}</a>
+            <footer class="clearfix">
+                <div class="btn-group pull-right">
+                    <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}}{{isFavor | favor}}</a>
+                    <a type="button" class="btn btn-primary" ng-click="setCollector(article._id)">{{article.collectorsList.length}}{{isCollector | collector}}</a>
+                    <a type="button" class="btn btn-warning" ng-click="setOppose(article._id)">{{article.opposesList.length}}{{isOppose | oppose}}</a>
                 </div>
                 <ul class="list-inline" ng-show="article.favorsList">
                     <li>支持：</li>
@@ -45,6 +43,8 @@
                         <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     </li>
                 </ul>
+                <div ng-show="article.collection">所属合集：<a ng-href="{{'/'+article.collection._id}}">{{article.collection.title}}</a>
+                </div>
             </footer>
         </div>
         <div class="panel">

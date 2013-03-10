@@ -48,20 +48,19 @@ controller('userLoginCtrl', ['$scope', function($scope) {
     };
     $scope.resetMe = function() {
         $scope.isSubmit = true;
+        $scope.timeout = 0;
         var result = jsGen.rest.reset.save({}, {
             name: $scope.name,
             email: $scope.email,
             request: request
         }, function() {
-            function locationTo() {
-                $scope.timeout -= 1;
-                if ($scope.timeout < 0) return jsGen.location.path('/');
-                else return jsGen.timeout(locationTo, 1000);
-            };
             if (!result.err) {
                 $scope.request = result.request;
                 $scope.timeout = 5;
-                return locationTo();
+                $scope.$on('timeout', function(event) {
+                    event.stopPropagation();
+                    jsGen.location.path('/');
+                });
             } else {
                 $scope.err = result.err;
                 $scope.isSubmit = false;
@@ -124,6 +123,7 @@ controller('userCtrl', ['$scope', '$routeParams', function($scope, $routeParams)
     $scope.isFollow = false;
     getUser(function(user) {
         if (user.err) return jsGen.location.path('/');
+        if ($scope.global.user && $scope.global.user._id === user._id) jsGen.location.path('/home');
         $scope.user = user;
         if ($scope.global.user) {
             $scope.isFollow = $scope.global.user.followList.some(function(x) {
@@ -317,6 +317,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
             });
         }
     };
+    $scope.isMe = false;
     $scope.isFollow = false;
     $scope.isFavor = false;
     $scope.isOppose = false;
@@ -500,4 +501,11 @@ controller('adminGlobalCtrl', ['$scope', function($scope) {
             } else $scope.err = result.err;
         });
     };
+}]).
+controller('errCtrl', ['$scope', function($scope) {
+    $scope.timeout = 5;
+    $scope.$on('timeout', function(event) {
+        event.stopPropagation();
+        jsGen.location.path('/');
+    });
 }]);

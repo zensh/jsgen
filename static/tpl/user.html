@@ -1,53 +1,58 @@
 <div class="row">
-    <div class="span9" ng-include src="getTpl">
+    <div class="span9">
+        <div class="panel" ng-include src="getTpl">
+        </div>
     </div>
     <div class="span3">
-        <div class="thumbnail">
-            <img ng-src="{{user.avatar}}" />
-            <div class="caption">
-                <h5 class="text-center">{{user.name}}&nbsp;
+        <div class="panel">
+            <div class="thumbnail">
+                <img ng-src="{{user.avatar}}" />
+                <div class="caption">
+                    <h5 class="text-center">{{user.name}}&nbsp;
                     <a href="#" ng-show="!isMe" ng-click="followMe(user._id)" class="btn btn-mini btn-success">{{isFollow | follow}}</a>
                 </h5>
-                <ul class="list-inline">
-                    <li >Uid：{{user._id}}</li>
-                    <li ng-show="user.email">
-                        Email：{{user.email}}
-                    </li>
-                    <li ng-show="user.role">
-                        权限：{{user.role | role}}
-                    </li>
-                    <li ng-show="user.sex">
-                        性别：{{user.sex | sex}}
-                    </li>
-                    <li ng-show="user.score">
-                        积分：{{user.score}}
-                    </li>
-                    <li ng-show="user.fans">
-                        粉丝：{{user.fans}}
-                    </li>
-                    <li ng-show="user.follow">
-                        关注：{{user.follow}}
-                    </li>
-                    <li ng-show="user.collect">
-                        收藏：{{user.collect}}
-                    </li>
-                    <li ng-show="user.articles">
-                        文章：{{user.articles}}
-                    </li>
-                    <li ng-show="user.comments">
-                        评论：{{user.comments}}
-                    </li>
-                    <li ng-show="user.collections">
-                        合集：{{user.collections}}
-                    </li>
-                    <li ng-show="user.date">
-                        {{user.date | formatDate}}注册
-                    </li>
-                    <li ng-show="user.lastLoginDate">
-                        {{user.lastLoginDate | formatDate}}最后登录
-                    </li>
-                </ul>
-                <dl>
+                    <ul class="list-inline">
+                        <li>
+                            Uid：{{user._id}}
+                        </li>
+                        <li ng-show="user.email">
+                            Email：{{user.email}}
+                        </li>
+                        <li ng-show="user.role">
+                            权限：{{user.role | role}}
+                        </li>
+                        <li ng-show="user.sex">
+                            性别：{{user.sex | sex}}
+                        </li>
+                        <li ng-show="user.score">
+                            积分：{{user.score}}
+                        </li>
+                        <li ng-show="user.fans">
+                            粉丝：{{user.fans}}
+                        </li>
+                        <li ng-show="user.follow">
+                            关注：{{user.follow}}
+                        </li>
+                        <li ng-show="user.collect">
+                            收藏：{{user.collect}}
+                        </li>
+                        <li ng-show="user.articles">
+                            文章：{{user.articles}}
+                        </li>
+                        <li ng-show="user.comments">
+                            评论：{{user.comments}}
+                        </li>
+                        <li ng-show="user.collections">
+                            合集：{{user.collections}}
+                        </li>
+                        <li ng-show="user.date">
+                            {{user.date | formatDate}}注册
+                        </li>
+                        <li ng-show="user.lastLoginDate">
+                            {{user.lastLoginDate | formatDate}}最后登录
+                        </li>
+                    </ul>
+                    <dl>
                       <dt> 用户简介：</dt>
                       <dd>{{user.desc}}</dd>
                       <dt> 用户标签：</dt>
@@ -55,7 +60,10 @@
                         <a ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
                       </li></ul></dd>
                     </dl>
+                </div>
             </div>
+        </div>
+        <div class="panel">
             <ul class="sidebar nav nav-list text-center" ng-show="isMe">
                 <li>
                     <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的收藏 </a>

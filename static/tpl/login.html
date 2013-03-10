@@ -12,7 +12,7 @@
         <div class="alert alert-success" ng-show="request">
             <button type="button" class="close" ng-click="request=null">&times;</button>
             <strong>{{request}}</strong>
-            <p>[{{timeout}}秒后返回首页]</p>
+            <p>[<span ng-timing="timeout"></span>秒后返回首页]</p>
         </div>
         <form class="form-horizontal form-min" name="login" ng-hide="isReset">
             <div class="control-group">

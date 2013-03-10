@@ -1,46 +1,47 @@
 <div class="row">
     <div class="span9">
-    <ul class="nav nav-tabs">
-        <li class="active">
-            <a href="#" ng-click="getList('latest')" data-toggle="tab">最新文章</a>
-        </li>
-        <li>
-            <a href="#" ng-click="getList('hot')" data-toggle="tab">热门文章</a>
-        </li>
-        <li>
-            <a href="#" ng-click="getList('update')" data-toggle="tab">最近更新</a>
-        </li>
-        <a href="/add" class="btn btn-success pull-right" ng-show="isLogin">发表文章</a>
-    </ul>
-    <div class="tab-content">
-        <div class="alert alert-error" ng-show="err">
-            <button type="button" class="close" ng-click="err=null">&times;</button>
-            <strong>{{err.name}}：</strong>
-            {{err.message}}
-        </div>
-        <ul class="list-inline">
-            <li ng-repeat="tag in global.tagsList"><a ng-href="/{{tag._id}}" class="btn btn-small btn-info" >{{tag.tag}}</a></li>
-        </ul>
-        <ul class="media-list">
-          <li class="media" ng-repeat="article in data">
-            <a class="pull-left" href="#">
+        <div class="panel">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#" ng-click="getList('latest')" data-toggle="tab">最新文章</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="getList('hot')" data-toggle="tab">热门文章</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="getList('update')" data-toggle="tab">最近更新</a>
+                </li>
+                <a href="/add" class="btn btn-success pull-right" ng-show="isLogin">发表文章</a>
+            </ul>
+            <div class="tab-content">
+                <div class="alert alert-error" ng-show="err">
+                    <button type="button" class="close" ng-click="err=null">&times;</button>
+                    <strong>{{err.name}}：</strong>
+                    {{err.message}}
+                </div>
+                <ul class="list-inline">
+                    <li ng-repeat="tag in global.tagsList">
+                        <a ng-href="/{{tag._id}}" class="btn btn-small btn-info">{{tag.tag}}</a>
+                    </li>
+                </ul>
+                <ul class="media-list">
+                    <li class="media" ng-repeat="article in data">
+                        <a class="pull-left" href="#">
               <img class="media-object" ng-src="{{article.author.avatar}}">
             </a>
-            <div class="media-body">
-              <h5 class="media-heading">Media heading</h5>
-              <div class="media">
-                ...
-             </div>
+                        <div class="media-body">
+                            <h5 class="media-heading">Media heading</h5>
+                            <div class="media">
+                                ...
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
-          </li>
-        </ul>
-    </div>
-
-
-
+        </div>
     </div>
     <div class="span3">
-        <div class="well well-small">
+        <div class="panel">
         </div>
     </div>
 </div>

@@ -18,10 +18,11 @@ articleCache.getP = function(ID, callback, convert) {
 
     function getConvert(doc) {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-        doc.author = jsGen.api.user.convertUsers(doc.author);
+        doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.favorsList = jsGen.api.user.convertUsers(doc.favorsList);
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
         doc.collectorsList = jsGen.api.user.convertUsers(doc.collectorsList);
+        doc.refer = convertRefer(doc.refer);
     };
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
@@ -58,9 +59,10 @@ commentCache.getP = function(ID, callback, convert) {
         doc = this.get(ID);
 
     function getConvert(doc) {
-        doc.author = jsGen.api.user.convertUsers(doc.author);
+        doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.favorsList = jsGen.api.user.convertUsers(doc.favorsList);
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
+        doc.refer = convertRefer(doc.refer);
     };
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
@@ -95,7 +97,8 @@ listCache.getP = function(ID, callback, convert) {
 
     function getConvert() {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-        doc.author = jsGen.api.user.convertUsers(doc.author);
+        doc.author = jsGen.api.user.convertUsers(doc.author)[0];
+        doc.refer = convertRefer(doc.refer);
     };
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
@@ -178,6 +181,27 @@ function convertArticles(_idArray, callback, mode) {
             if (doc) result.push(doc);
             next();
         });
+    }
+};
+
+function convertRefer(refer) {
+    if (!refer) return;
+    if (checkID('A', refer) && cache[refer]) {
+        listCache.getP(refer, function(err, article) {
+            article = article || {};
+            article.author = jsGen.api.user.convertUsers(article.author)[0];
+            return {
+                _id: refer,
+                url: '/' + refer,
+                title: article.title || filterTitle(article.content),
+                author: article.author
+            };
+        }, false);
+    } else return {
+        _id: null,
+        url: refer,
+        title: refer,
+        author: {}
     }
 };
 

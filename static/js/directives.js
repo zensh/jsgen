@@ -13,13 +13,36 @@ directive('ngParseMarkdown', ['MdParse', function(MdParse) {
             element.html(value || '');
             element.children('pre').addClass('prettyprint linenums');
             element.children('code').addClass('prettyprint');
-            element.children('a').attr('target', function() {
+            element.find('a').attr('target', function() {
                 if (this.host !== location.host) return '_blank';
             });
             prettyPrint();
         });
     };
 }]).
+directive('ngTiming', function() {
+    return {
+        transclude: true,
+        scope: true,
+        template: '<i>{{timing}}</i>',
+        link: function(scope, element, attr) {
+            element.addClass('ng-binding').data('$binding', attr.ngTiming);
+            scope.$watch(attr.ngTiming, function ngTimingWatchAction(value) {
+                var time = Number(value) || 0;
+                scope.timing = time;
+                if (time <= 0) return;
+                var key = setInterval(function() {
+                    scope.timing = --time;
+                    scope.$digest();
+                    if (time <= 0) {
+                        clearInterval(key);
+                        scope.$emit('timeout');
+                    }
+                }, 1000);
+            });
+        }
+    };
+ }).
 directive('ngPagination', function() {
     // <div ng-pagination="pagination"></div>
     // 基于Bootstrap框架
@@ -32,7 +55,6 @@ directive('ngPagination', function() {
     // }
     // 翻页事件发生时触发pagination事件
     return {
-        replace: true,
         transclude: true,
         scope: true,
         template: '<ul class="pagination">' +

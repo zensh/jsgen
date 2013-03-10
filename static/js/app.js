@@ -9,6 +9,10 @@ function($routeProvider, $locationProvider) {
         templateUrl: '/static/tpl/index.html',
         controller: 'indexCtrl'
     }).
+    when('/err', {
+        templateUrl: 'static/tpl/err.html',
+        controller: 'errCtrl'
+    }).
     when('/login', {
         templateUrl: 'static/tpl/login.html',
         controller: 'userLoginCtrl'

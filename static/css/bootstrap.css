@@ -4958,3 +4958,11 @@ a.badge:focus {
     padding: 10px;
     min-height: 100px;
 }
+.panel {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #ffffff;
+}
+body {
+    background:url('./img/bg.png') repeat fixed;
+}

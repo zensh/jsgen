@@ -1,9 +1,11 @@
-    <div class="row">
-        <div class="span9" ng-include src="getTpl">
-
+<div class="row">
+    <div class="span9">
+        <div class="panel" ng-include src="getTpl">
         </div>
-        <div class="span3">
-              <ul class="sidebar nav nav-list text-center">
+    </div>
+    <div class="span3">
+        <div class="panel">
+            <ul class="sidebar nav nav-list text-center">
                 <li class="active">
                     <a href="#" ng-click="setTpl('admin-index.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 网站信息 </a>
                 </li>
@@ -31,4 +33,4 @@
             </ul>
         </div>
     </div>
-
+</div>
