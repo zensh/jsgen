@@ -57,7 +57,7 @@
                       <dd>{{user.desc}}</dd>
                       <dt> 用户标签：</dt>
                       <dd><ul class="list-inline"><li ng-repeat="tag in user.tagsList">
-                        <a ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
+                        <a ng-href="{{'/'+tag._id}}" class="btn btn-small">{{tag.tag}}</a>
                       </li></ul></dd>
                     </dl>
                 </div>

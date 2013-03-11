@@ -69,9 +69,9 @@ factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
                 return sanitize(MdParse(text), level);
             }
         }, idPostfix);
+        var selector = '#wmd-preview' + idPostfix + '>pre, #wmd-preview' + idPostfix + '>code';
         editor.hooks.chain("onPreviewRefresh", function() {
-            angular.element('#wmd-preview' + idPostfix + '>pre').addClass('prettyprint linenums');
-            angular.element('#wmd-preview' + idPostfix + '>code').addClass('prettyprint');
+            angular.element(selector).addClass('prettyprint'); // linenums have bug!
             prettyPrint();
         });
         return editor;

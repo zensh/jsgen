@@ -11,7 +11,7 @@ directive('ngParseMarkdown', ['MdParse', function(MdParse) {
         scope.$watch(attr.ngParseMarkdown, function ngParseMarkdownWatchAction(value) {
             value = MdParse(value);
             element.html(value || '');
-            element.children('pre').addClass('prettyprint linenums');
+            element.children('pre').addClass('prettyprint');  // linenums have bug!
             element.children('code').addClass('prettyprint');
             element.find('a').attr('target', function() {
                 if (this.host !== location.host) return '_blank';
@@ -20,7 +20,7 @@ directive('ngParseMarkdown', ['MdParse', function(MdParse) {
         });
     };
 }]).
-directive('ngTiming', function() {
+directive('ngTiming', ['$timeout', function($timeout) {
     return {
         transclude: true,
         scope: true,
@@ -29,20 +29,17 @@ directive('ngTiming', function() {
             element.addClass('ng-binding').data('$binding', attr.ngTiming);
             scope.$watch(attr.ngTiming, function ngTimingWatchAction(value) {
                 var time = Number(value) || 0;
-                scope.timing = time;
                 if (time <= 0) return;
-                var key = setInterval(function() {
-                    scope.timing = --time;
-                    scope.$digest();
-                    if (time <= 0) {
-                        clearInterval(key);
-                        scope.$emit('timeout');
-                    }
-                }, 1000);
+                (function timing() {
+                    scope.timing = time;
+                    time -= 1;
+                    if (time >= 0) $timeout(timing, 1000);
+                    else scope.$emit('timeout');
+                })();
             });
         }
     };
- }).
+}]).
 directive('ngPagination', function() {
     // <div ng-pagination="pagination"></div>
     // 基于Bootstrap框架
@@ -57,14 +54,7 @@ directive('ngPagination', function() {
     return {
         transclude: true,
         scope: true,
-        template: '<ul class="pagination">' +
-                            '<li><a href="#" ng-click="paginationTo(\'first\')"><i class=" glyphicon glyphicon-step-backward"></i></a></li>' +
-                            '<li><a href="#" ng-click="paginationTo(\'prev\')"><i class="glyphicon glyphicon-backward"></i></a></li>' +
-                            '<li class="disabled"><a>{{now}}</a></li>' +
-                            '<li><a href="#" ng-click="paginationTo(\'next\')"><i class="glyphicon glyphicon-forward"></i></a></li>' +
-                            '<li><a href="#" ng-click="paginationTo(\'last\')"><i class="glyphicon glyphicon-step-forward"></i></a></li>' +
-                            '<li ng-repeat="n in nums"><a href="#" ng-click="setNum(n)" title="每页{{n}}">{{n}}</a></li>' +
-                         '</ul>',
+        template: '<ul class="pagination">' + '<li><a href="#" ng-click="paginationTo(\'first\')"><i class=" glyphicon glyphicon-step-backward"></i></a></li>' + '<li><a href="#" ng-click="paginationTo(\'prev\')"><i class="glyphicon glyphicon-backward"></i></a></li>' + '<li class="disabled"><a>{{now}}</a></li>' + '<li><a href="#" ng-click="paginationTo(\'next\')"><i class="glyphicon glyphicon-forward"></i></a></li>' + '<li><a href="#" ng-click="paginationTo(\'last\')"><i class="glyphicon glyphicon-step-forward"></i></a></li>' + '<li ng-repeat="n in nums"><a href="#" ng-click="setNum(n)" title="每页{{n}}">{{n}}</a></li>' + '</ul>',
         link: function(scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngPagination);
             scope.$watch(attr.ngPagination, function ngPaginationWatchAction(value) {

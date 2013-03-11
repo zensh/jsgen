@@ -1,6 +1,11 @@
 <div class="row">
     <div class="span9">
-        <div class="panel" id="{{article._id}}">
+        <article class="panel" id="{{article._id}}">
+            <div class="alert alert-error" ng-show="err">
+                <button type="button" class="close" ng-click="err=null">&times;</button>
+                <strong>{{err.name}}：</strong>
+                {{err.message}}
+            </div>
             <header class="page-header">
                 <h4>{{article.title}}</h4>
                 <ul class="list-inline">
@@ -9,7 +14,7 @@
                     <li>更新:{{article.date | formatDate}}</li>
                     <li>访问:{{article.visitors}}次</li>
                     <li>热度:{{article.hots}}</li>
-                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article._id)">{{article.commentsList.length}}条评论</a></li>
+                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article)">{{article.commentsList.length}}条评论</a></li>
                 </ul>
                 <ul class="list-inline">
                     <li ng-repeat="tag in article.tagsList">
@@ -17,13 +22,18 @@
                     </li>
                 </ul>
             </header>
-            <div class="content" ng-parse-markdown="article.content">
+            <div class="main" ng-parse-markdown="article.content">
             </div>
             <footer class="clearfix">
-                <div class="btn-group pull-right">
-                    <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}}{{isFavor | favor}}</a>
-                    <a type="button" class="btn btn-primary" ng-click="setCollector(article._id)">{{article.collectorsList.length}}{{isCollector | collector}}</a>
-                    <a type="button" class="btn btn-warning" ng-click="setOppose(article._id)">{{article.opposesList.length}}{{isOppose | oppose}}</a>
+                <div class="btn-toolbar well well-small pull-right">
+                    <div class="btn-group">
+                        <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}}{{isFavor | favor}}</a>
+                        <a type="button" class="btn btn-primary" ng-click="setCollector(article._id)">{{article.collectorsList.length}}{{isCollector | collector}}</a>
+                        <a type="button" class="btn btn-warning" ng-click="setOppose(article._id)">{{article.opposesList.length}}{{isOppose | oppose}}</a>
+                    </div>
+                    <div class="btn-group">
+                            <button type="button" ng-click="reply(article._id)" class="btn btn-primary">发表评论</button>
+                    </div>
                 </div>
                 <ul class="list-inline" ng-show="article.favorsList">
                     <li>支持：</li>
@@ -46,8 +56,39 @@
                 <div ng-show="article.collection">所属合集：<a ng-href="{{'/'+article.collection._id}}">{{article.collection.title}}</a>
                 </div>
             </footer>
-        </div>
-        <div class="panel">
+        </article>
+        <a href="#comments" name="comments"></a>
+        <aside class="panel" id="comments">
+            <div id="reply" class="clearfix">
+                <h5>{{title}}</h5>
+                <div id="wmd-preview" class="well wmd-preview" ng-show="wmdShow=='preview'">
+                </div>
+                <div class="well wmd-preview" ng-show="wmdShow=='help'" ng-parse-markdown="markdownHelp">
+                </div>
+                <form name="addArticle" ng-show="wmdShow=='edit'">
+                    <div id="wmd-button-bar">
+                    </div>
+                    <span class="text-warning">
+                    [markdown语法，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong>{{contentBytes}}</strong>字节]
+                    </span>
+                    <textarea class="wmd-input" id="wmd-input" ng-model="content" rows="6"
+                    required>
+                    </textarea>
+                </form>
+                <div class="btn-toolbar well well-small pull-right">
+                    <div class="btn-group">
+                        <button type="button" ng-click="submit()" class="btn btn-primary" ng-disabled="!editSave">提    交</button>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" ng-click="reply(article)" class="btn btn-primary" ng-show="replyToComment">取消</button>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" ng-click="wmdHelp('preview')">文章预览</button>
+                        <button type="button" class="btn btn-success" ng-click="wmdHelp('edit')" ng-hide="wmdShow=='edit'">编辑文章</button>
+                        <button type="button" class="btn btn-success" ng-click="wmdHelp('help')">Markdown语法</button>
+                    </div>
+                </div>
+            </div>
             <div class="media" ng-repeat="comment in article.commentsList">
               <a class="pull-left" ng-href="{{'/'+comment.author._id}}">
                 <img class="media-object" ng-src="{{comment.author.avatar}}">
@@ -59,7 +100,7 @@
                     <ul class="list-inline pull-right" ng-show="isLogin">
                         <li><a class="btn btn-mini" href="#" ng-click="setFavor(comment._id)">{{comment.favorsList.length}}支持</a></li>
                         <li><a class="btn btn-mini" href="#" ng-click="setOppose(comment._id)">{{comment.opposesList.length}}反对</a></li>
-                        <li><a class="btn btn-mini" href="#" ng-click="reply(comment._id)">{{comment.commentsList.length}}回复</a></li>
+                        <li><a class="btn btn-mini" href="#" ng-click="reply(comment)">{{comment.commentsList.length}}回复</a></li>
                     </ul>
                     <h5>回复：<a href="#" ng-click="getComment(comment.refer._id)">{{comment.refer.title}}</a>&nbsp;
                         <a ng-href="{{'/'+comment.refer.author._id}}">{{comment.refer.author.name}}</a>
@@ -68,7 +109,7 @@
                 <div class="media-content" ng-parse-markdown="comment.content"></div>
               </div>
             </div>
-        </div>
+        </aside>
     </div>
     <div class="span3">
         <div class="panel">

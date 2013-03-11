@@ -253,16 +253,18 @@ controller('userEditCtrl', ['$scope', function($scope) {
     originData = jsGen.union($scope.global.user);
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
-    $scope.checkTags = function() {
+    $scope.$watch('tagsList', function() {
         if ($scope.tagsList.length > $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.UserTagsMax);
-    };
-    $scope.checkPwd = function() {
-        if ($scope.user.passwd2 !== $scope.user.passwd) $scope.checkResult = true;
+    });
+    $scope.$watch('user.desc', function() {
+        $scope.descBytes = jsGen.filter('length')($scope.user.desc);
+    });
+    $scope.$watch(function() {
+        if (angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray) && !$scope.passwd) $scope.editSave = false;
+        else $scope.editSave = true;
+        if ($scope.passwd && $scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
         else $scope.checkResult = false;
-    };
-    $scope.checkDesc = function() {
-        $scope.descBytes = jsGen.filter('length')($scope.desc);
-    };
+    });
     $scope.reset = function() {
         $scope.user = jsGen.union(originData);
         $scope.editSave = false;
@@ -275,7 +277,7 @@ controller('userEditCtrl', ['$scope', function($scope) {
             if (angular.equals(value, originData[key])) delete data[key];
         });
         if ($scope.user.desc) $scope.user.desc = jsGen.sanitize(jsGen.MdParse($scope.user.desc), 1);
-        if ($scope.user.passwd && $scope.user.passwd2 === $scope.user.passwd) data.passwd = CryptoJS.SHA256($scope.user.passwd).toString();
+        if ($scope.passwd && $scope.passwd2 === $scope.passwd) data.passwd = CryptoJS.SHA256($scope.passwd).toString();
         if (!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
         if (data.email) {
             changeEmail = jsGen.rest.reset.save({}, {
@@ -305,6 +307,19 @@ controller('userEditCtrl', ['$scope', function($scope) {
     };
 }]).
 controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routeParams) {
+    $scope.isMe = false;
+    $scope.isFollow = false;
+    $scope.isFavor = false;
+    $scope.isOppose = false;
+    $scope.isCollector = false;
+    $scope.editSave = false;
+    $scope.wmdShow = 'edit';
+    $scope.title = '回复：' ;
+    $scope.content = '';
+    $scope.contentBytes = 0;
+    $scope.refer = '';
+    $scope.replyTitle = '';
+    $scope.replyToComment = false;
     function getArticle(callback) {
         var article = jsGen.cache.article.get('A' + $routeParams.ID);
         if (article) return callback(article);
@@ -317,15 +332,26 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
             });
         }
     };
-    $scope.isMe = false;
-    $scope.isFollow = false;
-    $scope.isFavor = false;
-    $scope.isOppose = false;
-    $scope.isCollector = false;
+    function getMarkdown() {
+        jsGen.http.get('/static/md/markdown.md', {
+            cache: true
+        }).success(function(data, status) {
+            if (!data.err) {
+                $scope.title = 'Markdown简明语法';
+                $scope.markdownHelp = data;
+            } else $scope.err = data.err;
+        });
+    };
+    var MdEditor = jsGen.MdEditor();
+    MdEditor.run();
     getArticle(function(article) {
         if (article.err) return ($scope.err = article.err);
         $scope.article = article;
+        $scope.title = '回复：' + article.title;
+        $scope.refer = article._id;
         if ($scope.global.user) {
+            if ($scope.global.user._id === $scope.article.author._id) $scope.isMe = true;
+            else $scope.isMe = false;
             $scope.isFollow = $scope.global.user.followList.some(function(x) {
                 return x._id === $scope.global.user._id;
             });
@@ -368,6 +394,34 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
             });
         }
     };
+    $scope.wmdHelp = function(s) {
+        if (s == 'preview') {
+            $scope.wmdShow = 'preview';
+            $scope.title = '文章预览';
+            MdEditor.refreshPreview();
+        } else if (s == 'help') {
+            $scope.wmdShow = 'help';
+            getMarkdown();
+        } else {
+            $scope.wmdShow = 'edit';
+            $scope.title = '回复：' + $scope.replyTitle;
+        }
+    };
+    $scope.reply = function(article) {
+        var dom = angular.element('#' + article._id);
+        if (dom.length === 0) return;
+        $scope.refer = article._id;
+        $scope.wmdShow = 'edit';
+        $scope.replyTitle = article.title;
+        $scope.title = '回复：' + $scope.replyTitle;
+        if (article._id === $scope.article._id) {
+            $scope.replyToComment = false;
+            angular.element('#comments').prepend(angular.element('#reply'));
+        } else {
+            $scope.replyToComment = true;
+            dom.append(angular.element('#reply'));
+        }
+    }
 }]).
 controller('addArticleCtrl', ['$scope', function($scope) {
     if (!$scope.isLogin) jsGen.location.path('/');
@@ -431,8 +485,8 @@ controller('addArticleCtrl', ['$scope', function($scope) {
             MdEditor.refreshPreview();
         } else getMarkdown();
     };
-    $scope.getTag = function(n) {
-        var tag = $scope.global.tagsList[n].tag;
+    $scope.getTag = function(t) {
+        var tag = t.tag;
         if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
     };
     $scope.submit = function() {

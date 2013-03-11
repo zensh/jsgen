@@ -281,4 +281,8 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
         $rootScope.global.UserNameMaxLen = $rootScope.global.UserNameMaxLen || 20;
         $rootScope.global.info.angularjs = angular.version.full;
     });
+    $rootScope.$watch(function() {return $location.path();}, function(path) {
+        if (path === '/add') angular.element('#main').addClass('container-large');
+        else angular.element('#main').removeClass('container-large');
+    })
 }]);

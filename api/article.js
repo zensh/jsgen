@@ -207,8 +207,6 @@ function convertRefer(refer) {
 
 function getArticle(req, res, dm) {
     var ID = req.path[2];
-    console.log(ID);
-    console.log(cache);
     if (!cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
     if (cache[ID].display > 0 && !req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     articleCache.getP(ID, dm.intercept(function(doc) {

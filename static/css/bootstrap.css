@@ -526,10 +526,9 @@ li {
   margin: 0;
 }
 
-.list-inline > li {
+.list-inline > li { /*jsGen*/
   display: inline-block;
-  padding-right: 5px;
-  padding-left: 5px;
+  padding: 2px;
 }
 
 dl {
@@ -826,18 +825,18 @@ pre code {
   }
 }
 
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 1200px) { /*jsGen*/
   .container {
-    max-width: 1170px;
+    max-width: 1180px;
   }
-  .row {
+/*  .row {
     margin-right: -15px;
     margin-left: -15px;
   }
   [class^="span"] {
     padding-right: 15px;
     padding-left: 15px;
-  }
+  }*/
 }
 
 [class*="span"].pull-right {
@@ -4958,11 +4957,28 @@ a.badge:focus {
     padding: 10px;
     min-height: 100px;
 }
-.panel {
-    margin-top: 10px;
+.panel,
+.panel-transparent {
+    margin-top: 15px;
     padding: 10px;
+}
+.panel {
     background-color: #ffffff;
 }
 body {
     background:url('./img/bg.png') repeat fixed;
+}
+article.panel,
+aside.panel {
+    padding: 15px 25px;
+}
+.container-large {
+    width: 100%;
+    max-width: 1600px;
+}
+.container-large .row {
+    width: 100%;
+    max-width: 1600px;
+    margin-right: auto;
+    margin-left: auto;
 }
