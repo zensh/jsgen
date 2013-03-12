@@ -17,12 +17,14 @@ factory('rest', ['$resource', function($resource) {
         reset: $resource('/api/user/reset'),
         register: $resource('/api/user/register'),
         home: $resource('/api/user/index'),
-        user: $resource('/api/user/:Uid', {
-            Uid: 'index'
+        user: $resource('/api/user/:Uid/:OP', {
+            Uid: 'index',
+            OP: 'index'
         }),
         userAdmin: $resource('/api/user/admin'),
-        article: $resource('/api/article/:ID', {
-            ID: 'index'
+        article: $resource('/api/article/:ID/:OP', {
+            ID: 'index',
+            OP: 'index'
         }),
     }
 }]).
@@ -32,7 +34,7 @@ factory('cache', ['$cacheFactory', function($cacheFactory) {
             capacity: 10
         }),
         article: $cacheFactory('article', {
-            capacity: 100
+            capacity: 20
         })
     }
 }]).
@@ -69,9 +71,10 @@ factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
                 return sanitize(MdParse(text), level);
             }
         }, idPostfix);
-        var selector = '#wmd-preview' + idPostfix + '>pre, #wmd-preview' + idPostfix + '>code';
+        var element = angular.element(document.getElementById('#wmd-preview' + idPostfix));
         editor.hooks.chain("onPreviewRefresh", function() {
-            angular.element(selector).addClass('prettyprint'); // linenums have bug!
+            element.children('pre').addClass('prettyprint'); // linenums have bug!
+            element.children('code').addClass('prettyprint');
             prettyPrint();
         });
         return editor;

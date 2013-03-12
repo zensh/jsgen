@@ -4,11 +4,12 @@ var domain = require('domain'),
 var serverDm = domain.create();
 
 serverDm.on('error', function(err) {
-    var err = jsGen.lib.tools.intersect({
-        name: '',
-        message: ''
-    }, err);
-    console.log('SevERR:' + err);
+    // var err = jsGen.lib.tools.intersect({
+    //     name: '',
+    //     message: ''
+    // }, err);
+    console.log('SevERR:******************');
+    console.log(err);
     jsGen.errlog.error(err);
 });
 serverDm.run(function() {
@@ -89,6 +90,8 @@ serverDm.run(function() {
         dm.add(req);
         dm.add(res);
         dm.on('error', function(err) {
+            console.log('reqErr:**************');
+                console.log(err);
             var err = jsGen.lib.tools.intersect({
                 name: '',
                 message: ''
@@ -97,7 +100,7 @@ serverDm.run(function() {
                 res.on('close', function() {
                     console.log('Send Ok2!');
                     jsGen.dao.db.close();
-                    dm.dispose();
+                    //dm.dispose();
                 });
                 if (err.hasOwnProperty('name')) {
                     res.sendjson({
@@ -108,16 +111,19 @@ serverDm.run(function() {
                     jsGen.errlog.error(err);
                 }
             } catch (err) {
-                var err = jsGen.lib.tools.intersect({
-                    name: '',
-                    message: ''
-                }, err);
+                // var err = jsGen.lib.tools.intersect({
+                //     name: '',
+                //     message: ''
+                // }, err);
+                console.log('catchErr:**************');
+                console.log(err);
                 jsGen.errlog.error(err);
                 dm.dispose();
             }
         });
         res.on('close', function() {
             console.log('Send Ok!');
+            res.end();
             jsGen.dao.db.close();
             dm.dispose();
         });

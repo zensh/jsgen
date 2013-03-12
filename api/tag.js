@@ -208,11 +208,12 @@ function filterTags(tagArray, callback) {
     };
 };
 
-function getTag(req, res) {
+function getTag(req, res, dm) {
     var tag = req.path[2];
     var _id = null,
         body = {};
 
+    if (!checkID(tag, 'T')) throw jsGen.Err(jsGen.lib.msg.tagNone);
     if (cache[tag]) {
         _id = jsGen.dao.tag.convertID(cache[tag]._id);
     } else if (cache[tag.toLowerCase()]) {
@@ -229,7 +230,7 @@ function getTag(req, res) {
     });
 };
 
-function getTags(req, res) {
+function getTags(req, res, dm) {
     var idArray = [],
         body = {};
     if (req.apibody && req.apibody.idArray && req.apibody.idArray.length >= 1) {
@@ -246,7 +247,7 @@ function getTags(req, res) {
     return res.sendjson(cache);
 };
 
-function editTags(req, res) {
+function editTags(req, res, dm) {
     var body = {};
     body.data = [];
     if (req.session.role === 'admin') {
@@ -268,7 +269,7 @@ function editTags(req, res) {
     }
 };
 
-function delTag(req, res) {
+function delTag(req, res, dm) {
     var tag = req.path[2];
     var _id = null,
         body = {};
@@ -294,7 +295,7 @@ function delTag(req, res) {
     }
 };
 
-function delTags(req, res) {
+function delTags(req, res, dm) {
     var body = {};
 
     if (req.session.role === 'admin') {
@@ -329,36 +330,36 @@ function delTags(req, res) {
     }
 };
 
-function getFn(req, res) {
+function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
-            return getTags(req, res);
+            return getTags(req, res, dm);
         default:
-            return getTag(req, res);
+            return getTag(req, res, dm);
     }
 };
 
-function postFn(req, res) {
+function postFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
-            return getTags(req, res);
+            return getTags(req, res, dm);
         case 'admin':
-            return editTags(req, res);
+            return editTags(req, res, dm);
         default:
             return res.r404();
     }
 };
 
-function deleteFn(req, res) {
+function deleteFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
         case 'admin':
-            return delTags(req, res);
+            return delTags(req, res, dm);
         default:
-            return delTag(req, res);
+            return delTag(req, res, dm);
     }
 };
 

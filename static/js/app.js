@@ -248,6 +248,7 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
     jsGen.sanitize = sanitize;
     jsGen.MdParse = MdParse;
     jsGen.MdEditor = MdEditor;
+    jsGen.err = null;
 
     $rootScope.isAdmin = false;
     $rootScope.isLogin = false;
@@ -260,13 +261,17 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
     };
     $rootScope.clearUser = function() {
         delete $rootScope.global.user;
+        $rootScope.checkUser();
     };
     $rootScope.checkUser = function() {
         if ($rootScope.global.user && $rootScope.global.user.role) {
             $rootScope.isLogin = true;
             if ($rootScope.global.user.role === 'admin') $rootScope.isAdmin = true;
             else $rootScope.isAdmin = false;
-        } else $rootScope.isLogin = false;
+        } else {
+            $rootScope.isLogin = false;
+            $rootScope.isAdmin = false;
+        }
     };
     $rootScope.global = jsGen.rest.index.get({}, function() {
         $rootScope.checkUser();
@@ -281,8 +286,10 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
         $rootScope.global.UserNameMaxLen = $rootScope.global.UserNameMaxLen || 20;
         $rootScope.global.info.angularjs = angular.version.full;
     });
-    $rootScope.$watch(function() {return $location.path();}, function(path) {
-        if (path === '/add') angular.element('#main').addClass('container-large');
-        else angular.element('#main').removeClass('container-large');
+    $rootScope.$watch(function() {return $location.path();}, function(path, previous) {
+        jsGen.previous = previous;
+        var element = angular.element(document.getElementById('#main'));
+        if (path === '/add') element.addClass('container-large');
+        else element.removeClass('container-large');
     })
 }]);

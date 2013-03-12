@@ -125,11 +125,7 @@ function adduser(userObj, callback) {
             body = intersect(body, doc);
             body.err = null;
             cache._update(body);
-            jsGen.dao.user.getUsersNum(function(err, num) {
-                if (num) jsGen.api.index.setGlobalConfig({
-                    users: num
-                });
-            });
+            jsGen.config.users = cache._index.length;
         }
         return callback(err, body);
     });
@@ -185,6 +181,7 @@ function login(req, res, dm) {
                 }
             });
             userCache.getP(doc._id, dm.intercept(function(doc) {
+                console.log(doc);
                 return res.sendjson(doc);
             }));
         } else {
@@ -545,7 +542,7 @@ function resetUser(req, res, dm) {
     jsGen.dao.user.getAuth(_id, dm.intercept(function(doc) {
         var userObj = {};
         userObj._id = _id;
-        if (doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 3) {
+        if (doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 1) {
             if (HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.u, 'base64') === reset.k) {
                 switch (reset.r) {
                     case 'locked':

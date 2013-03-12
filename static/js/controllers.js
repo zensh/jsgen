@@ -314,12 +314,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
     $scope.isCollector = false;
     $scope.editSave = false;
     $scope.wmdShow = 'edit';
-    $scope.title = '回复：' ;
+    $scope.title = '' ;
     $scope.content = '';
     $scope.contentBytes = 0;
     $scope.refer = '';
     $scope.replyTitle = '';
     $scope.replyToComment = false;
+    var Errmsg = {name:'错误提示', message:'您需要先登录！'};
     function getArticle(callback) {
         var article = jsGen.cache.article.get('A' + $routeParams.ID);
         if (article) return callback(article);
@@ -336,18 +337,20 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
         jsGen.http.get('/static/md/markdown.md', {
             cache: true
         }).success(function(data, status) {
-            if (!data.err) {
-                $scope.title = 'Markdown简明语法';
-                $scope.markdownHelp = data;
-            } else $scope.err = data.err;
+            if (!data.err) $scope.markdownHelp = data;
+            else $scope.err = data.err;
         });
     };
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
     getArticle(function(article) {
-        if (article.err) return ($scope.err = article.err);
+        if (article.err) {
+            jsGen.err = article.err;
+            jsGen.location.path('/err');
+        }
         $scope.article = article;
-        $scope.title = '回复：' + article.title;
+        $scope.title = '评论：' + article.title;
+        $scope.replyTitle = $scope.title;
         $scope.refer = article._id;
         if ($scope.global.user) {
             if ($scope.global.user._id === $scope.article.author._id) $scope.isMe = true;
@@ -397,31 +400,63 @@ controller('articleCtrl', ['$scope', '$routeParams', function($scope, $routePara
     $scope.wmdHelp = function(s) {
         if (s == 'preview') {
             $scope.wmdShow = 'preview';
-            $scope.title = '文章预览';
+            $scope.replyTitle = '文章预览';
             MdEditor.refreshPreview();
         } else if (s == 'help') {
             $scope.wmdShow = 'help';
+            $scope.replyTitle = 'Markdown简明语法';
             getMarkdown();
         } else {
             $scope.wmdShow = 'edit';
-            $scope.title = '回复：' + $scope.replyTitle;
+            $scope.replyTitle = $scope.title;
         }
     };
     $scope.reply = function(article) {
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
         var dom = angular.element('#' + article._id);
         if (dom.length === 0) return;
         $scope.refer = article._id;
         $scope.wmdShow = 'edit';
-        $scope.replyTitle = article.title;
-        $scope.title = '回复：' + $scope.replyTitle;
         if (article._id === $scope.article._id) {
             $scope.replyToComment = false;
+            $scope.title = '评论：' + jsGen.filter('cutText')(article.title, $scope.global.TitleMaxLen - 9);
             angular.element('#comments').prepend(angular.element('#reply'));
         } else {
             $scope.replyToComment = true;
+            $scope.title = '评论：' + jsGen.filter('cutText')(jsGen.sanitize(jsGen.MdParse(article.content.trim()), 0), $scope.global.TitleMaxLen - 9);
             dom.append(angular.element('#reply'));
         }
-    }
+        $scope.replyTitle = $scope.title;
+    };
+    $scope.$watch('content', function(content) {
+        if (typeof content !== 'string') {
+            $scope.contentBytes = 0;
+            return;
+        }
+        $scope.contentBytes = jsGen.filter('length')(content);
+         if ($scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
+         else $scope.editSave = false;
+    });
+    $scope.submit = function() {
+        if (!$scope.editSave) return;
+        var data = {};
+        data.content = jsGen.sanitize($scope.content);
+        data.title = $scope.title;
+        data.refer = $scope.refer;
+        var result = jsGen.rest.article.save({ID: $scope.article._id, OP: 'comment'}, data, function() {
+            if (!result.err) {
+                $scope.replyToComment = false;
+                $scope.title = '评论：' + jsGen.filter('cutText')($scope.article.title, $scope.global.TitleMaxLen - 9);
+                $scope.content = '';
+                angular.element('#comments').prepend(angular.element('#reply'));
+                $scope.article.commentsList.unshift(result);
+                jsGen.cache.article.put($scope.article._id, $scope.article);
+            } else $scope.err = result.err;
+        });
+    };
 }]).
 controller('addArticleCtrl', ['$scope', function($scope) {
     if (!$scope.isLogin) jsGen.location.path('/');
@@ -557,9 +592,6 @@ controller('adminGlobalCtrl', ['$scope', function($scope) {
     };
 }]).
 controller('errCtrl', ['$scope', function($scope) {
-    $scope.timeout = 5;
-    $scope.$on('timeout', function(event) {
-        event.stopPropagation();
-        jsGen.location.path('/');
-    });
+    $scope.err = jeGen.union(jsGen.err);
+    jsGen.err = null;
 }]);

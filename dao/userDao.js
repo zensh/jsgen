@@ -15,7 +15,6 @@ setFans(userObj); 增加或减少用户粉丝;
 setFollow(userObj, callback); 增加或减少用户关注对象;
 setArticle(userObj, callback); 增加或减少用户主题;
 setCollection(userObj, callback); 增加或减少用户合集;
-setComment(userObj, callback); 增加或减少用户评论;
 setCollect(userObj, callback); 增加或减少用户收藏;
 setMessages(userObj); 增加或重置用户未读信息;
 setReceive(userObj); 增加或减少用户接收的消息;
@@ -374,191 +373,159 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setComment: function(userObj, callback) {
+    setCollect: function(userObj, callback) {
         var setObj = {},
         newObj = {
-            commentsList: 0
+            collectList: 0
         };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
-        if (newObj.commentsList < 0) {
-            newObj.commentsList = -newObj.commentsList;
-        setObj.$inc = {
-            comments: -1
-        };
-        setObj.$pull = {
-            commentsList: newObj.commentsList
-        };
-    } else {
-        setObj.$inc = {
-            comments: 1
-        };
-        setObj.$push = {
-            commentsList: newObj.commentsList
-        };
-    }
-
-    that.update({
-        _id: userObj._id
-    }, setObj, {
-        w: 1
-    }, callback);
-},
-
-setCollect: function(userObj, callback) {
-    var setObj = {},
-    newObj = {
-        collectList: 0
-    };
-    callback = callback || jsGen.lib.tools.callbackFn;
-
-    newObj = intersect(newObj, userObj);
-    if (newObj.collectList < 0) {
-        newObj.collectList = -newObj.collectList;
-        setObj.$pull = {
+        if (newObj.collectList < 0) {
+            newObj.collectList = -newObj.collectList;
+            setObj.$pull = {
+                collectList: newObj.collectList
+            };
+        } else setObj.$push = {
             collectList: newObj.collectList
         };
-    } else setObj.$push = {
-        collectList: newObj.collectList
-    };
 
-    that.update({
-        _id: userObj._id
-    }, setObj, {
-        w: 1
-    }, callback);
-},
-
-setMessages: function(userObj) {
-    var setObj = {
-        $set: {
-            'messages.article': 0,
-            'messages.collection': 0,
-            'messages.comment': 0,
-            'messages.fan': 0,
-            'messages.receive': 0
-        },
-        $push: {
-            'messages.article': 0,
-            'messages.collection': 0,
-            'messages.comment': 0,
-            'messages.fan': 0,
-            'messages.receive': 0
-        }
-    },
-    newObj = {
-        messages: {
-            article: 0,
-            collection: 0,
-            comment: 0,
-            fan: 0,
-            receive: 0
-        }
-    };
-    callback = callback || jsGen.lib.tools.callbackFn;
-
-    newObj = intersect(newObj, userObj);
-    if (newObj.messages.article === 0) setObj.$set['messages.article'] = [];
-    else delete setObj.$set['messages.article'];
-    if (newObj.messages.article > 0) setObj.$push['messages.article'] = newObj.messages.article;
-    else delete setObj.$push['messages.article'];
-    if (newObj.messages.collection === 0) setObj.$set['messages.collection'] = [];
-    else delete setObj.$set['messages.collection'];
-    if (newObj.messages.collection > 0) setObj.$push['messages.collection'] = newObj.messages.collection;
-    else delete setObj.$push['messages.collection'];
-    if (newObj.messages.comment === 0) setObj.$set['messages.comment'] = [];
-    else delete setObj.$set['messages.comment'];
-    if (newObj.messages.comment > 0) setObj.$push['messages.comment'] = newObj.messages.comment;
-    else delete setObj.$push['messages.comment'];
-    if (newObj.messages.fan === 0) setObj.$set['messages.fan'] = [];
-    else delete setObj.$set['messages.fan'];
-    if (newObj.messages.fan > 0) setObj.$push['messages.fan'] = newObj.messages.fan;
-    else delete setObj.$push['messages.fan'];
-    if (newObj.messages.receive === 0) setObj.$set['messages.receive'] = [];
-    else delete setObj.$set['messages.receive'];
-    if (newObj.messages.receive > 0) setObj.$push['messages.receive'] = newObj.messages.receive;
-    else delete setObj.$push['messages.receive'];
-
-    that.update({
-        _id: userObj._id
-    }, setObj);
-},
-
-setReceive: function(userObj) {
-    var setObj = {},
-    newObj = {
-        receiveList: 0
-    };
-
-    newObj = intersect(newObj, userObj);
-    if (newObj.receiveList < 0) {
-        newObj.receiveList = -newObj.receiveList;
-        setObj.$pull = {
-            receiveList: newObj.receiveList
-        };
-    } else {
-        setObj.$push = {
-            receiveList: newObj.receiveList
-        };
-    }
-
-    that.update({
-        _id: userObj._id
-    }, setObj);
-},
-
-setSend: function(userObj) {
-    var setObj = {},
-    newObj = {
-        sendList: 0
-    };
-
-    newObj = intersect(newObj, userObj);
-    if (newObj.sendList < 0) {
-        newObj.sendList = -newObj.sendList;
-        setObj.$pull = {
-            sendList: newObj.sendList
-        };
-    } else {
-        setObj.$push = {
-            sendList: newObj.sendList
-        };
-    }
-
-    that.update({
-        _id: userObj._id
-    }, setObj);
-},
-
-setNewUser: function(userObj, callback) {
-    var user = union(defautUser),
-        newUser = union(defautUser);
-    callback = callback || jsGen.lib.tools.callbackFn;
-
-    newUser = intersect(newUser, userObj);
-    newUser = union(user, newUser);
-    newUser.date = Date.now();
-
-    that.getLatestId(function(err, doc) {
-        if (err) return callback(err, null);
-        if (!doc) preAllocate._id = newUser._id || 1;
-        else preAllocate._id = doc._id + 1;
-        delete newUser._id;
-        that.insert(
-        preAllocate, {
+        that.update({
+            _id: userObj._id
+        }, setObj, {
             w: 1
-        }, function(err, doc) {
-            if (err) return callback(err, doc);
-            that.findAndModify({
-                _id: preAllocate._id
-            }, [], newUser, {
-                w: 1,
-                new: true
-            }, callback);
+        }, callback);
+    },
+
+    setMessages: function(userObj) {
+        var setObj = {
+            $set: {
+                'messages.article': 0,
+                'messages.collection': 0,
+                'messages.comment': 0,
+                'messages.fan': 0,
+                'messages.receive': 0
+            },
+            $push: {
+                'messages.article': 0,
+                'messages.collection': 0,
+                'messages.comment': 0,
+                'messages.fan': 0,
+                'messages.receive': 0
+            }
+        },
+        newObj = {
+            messages: {
+                article: 0,
+                collection: 0,
+                comment: 0,
+                fan: 0,
+                receive: 0
+            }
+        };
+        callback = callback || jsGen.lib.tools.callbackFn;
+
+        newObj = intersect(newObj, userObj);
+        if (newObj.messages.article === 0) setObj.$set['messages.article'] = [];
+        else delete setObj.$set['messages.article'];
+        if (newObj.messages.article > 0) setObj.$push['messages.article'] = newObj.messages.article;
+        else delete setObj.$push['messages.article'];
+        if (newObj.messages.collection === 0) setObj.$set['messages.collection'] = [];
+        else delete setObj.$set['messages.collection'];
+        if (newObj.messages.collection > 0) setObj.$push['messages.collection'] = newObj.messages.collection;
+        else delete setObj.$push['messages.collection'];
+        if (newObj.messages.comment === 0) setObj.$set['messages.comment'] = [];
+        else delete setObj.$set['messages.comment'];
+        if (newObj.messages.comment > 0) setObj.$push['messages.comment'] = newObj.messages.comment;
+        else delete setObj.$push['messages.comment'];
+        if (newObj.messages.fan === 0) setObj.$set['messages.fan'] = [];
+        else delete setObj.$set['messages.fan'];
+        if (newObj.messages.fan > 0) setObj.$push['messages.fan'] = newObj.messages.fan;
+        else delete setObj.$push['messages.fan'];
+        if (newObj.messages.receive === 0) setObj.$set['messages.receive'] = [];
+        else delete setObj.$set['messages.receive'];
+        if (newObj.messages.receive > 0) setObj.$push['messages.receive'] = newObj.messages.receive;
+        else delete setObj.$push['messages.receive'];
+
+        that.update({
+            _id: userObj._id
+        }, setObj);
+    },
+
+    setReceive: function(userObj) {
+        var setObj = {},
+        newObj = {
+            receiveList: 0
+        };
+
+        newObj = intersect(newObj, userObj);
+        if (newObj.receiveList < 0) {
+            newObj.receiveList = -newObj.receiveList;
+            setObj.$pull = {
+                receiveList: newObj.receiveList
+            };
+        } else {
+            setObj.$push = {
+                receiveList: newObj.receiveList
+            };
+        }
+
+        that.update({
+            _id: userObj._id
+        }, setObj);
+    },
+
+    setSend: function(userObj) {
+        var setObj = {},
+        newObj = {
+            sendList: 0
+        };
+
+        newObj = intersect(newObj, userObj);
+        if (newObj.sendList < 0) {
+            newObj.sendList = -newObj.sendList;
+            setObj.$pull = {
+                sendList: newObj.sendList
+            };
+        } else {
+            setObj.$push = {
+                sendList: newObj.sendList
+            };
+        }
+
+        that.update({
+            _id: userObj._id
+        }, setObj);
+    },
+
+    setNewUser: function(userObj, callback) {
+        var user = union(defautUser),
+            newUser = union(defautUser);
+        callback = callback || jsGen.lib.tools.callbackFn;
+
+        newUser = intersect(newUser, userObj);
+        newUser = union(user, newUser);
+        newUser.date = Date.now();
+
+        that.getLatestId(function(err, doc) {
+            if (err) return callback(err, null);
+            if (!doc) preAllocate._id = newUser._id || 1;
+            else preAllocate._id = doc._id + 1;
+            delete newUser._id;
+            that.insert(
+            preAllocate, {
+                w: 1
+            }, function(err, doc) {
+                if (err) return callback(err, doc);
+                that.findAndModify({
+                    _id: preAllocate._id
+                }, [], newUser, {
+                    w: 1,
+                    new: true
+                }, callback);
+            });
         });
-    });
-}
+    }
 });
 
 module.exports = {
@@ -577,7 +544,6 @@ module.exports = {
     setFollow: that.setFollow,
     setArticle: that.setArticle,
     setCollection: that.setCollection,
-    setComment: that.setComment,
     setCollect: that.setCollect,
     setMessages: that.setMessages,
     setReceive: that.setReceive,

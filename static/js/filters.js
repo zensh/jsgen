@@ -72,6 +72,18 @@ angular.module('jsGen.filters', []).
         return 0;
     };
   }).
+  filter('cutText', function() {
+    return function(text, len) {
+        var bytes = utf8.stringToBytes(text);
+        len = len || 0;
+        if (bytes.length > len) {
+            bytes.length = len;
+            text = utf8.bytesToString(bytes);
+            text = text.slice(0, -1) + '…';
+        }
+        return text;
+    };
+  }).
   filter('formatDate', ['$filter', function($filter) {
     return function(date) {
         var o = Date.now() - date;

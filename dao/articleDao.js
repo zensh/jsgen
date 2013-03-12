@@ -1,14 +1,13 @@
 /*
     convertID(id);
-    getArticlesNum(callback);
     getArticlesIndex(date, limit, callback);
     getLatestId(callback);
     getArticle(_id, callback);
     setArticle(articleObj, callback);
-    setFavors(articleObj);
-    setOpposes(articleObj);
-    setCollectors(articleObj);
-    setComments(articleObj, callback);
+    setFavor(articleObj);
+    setOppose(articleObj);
+    setCollector(articleObj);
+    setComment(articleObj, callback);
     setNewArticle(articleObj, callback);
     delArticle(_idArray, callback);
  */
@@ -36,11 +35,6 @@ var that = jsGen.dao.db.bind('articles', {
             default:
                 return null;
         }
-    },
-
-    getArticlesNum: function(callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
-        that.count(callback);
     },
 
     getLatestId: function(callback) {
@@ -144,7 +138,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, callback);
     },
 
-    setFavors: function(articleObj) {
+    setFavor: function(articleObj) {
         var setObj = {},
         newObj = {
             favorsList: 0
@@ -165,7 +159,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, setObj);
     },
 
-    setOpposes: function(articleObj) {
+    setOppose: function(articleObj) {
         var setObj = {},
         newObj = {
             opposesList: 0
@@ -186,7 +180,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, setObj);
     },
 
-    setCollectors: function(articleObj) {
+    setCollector: function(articleObj) {
         var setObj = {},
         newObj = {
             collectorsList: 0
@@ -207,7 +201,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, setObj);
     },
 
-    setComments: function(articleObj, callback) {
+    setComment: function(articleObj, callback) {
         var setObj = {},
         newObj = {
             commentsList: 0
@@ -264,15 +258,14 @@ var that = jsGen.dao.db.bind('articles', {
 
 module.exports = {
     convertID: that.convertID,
-    getArticlesNum: that.getArticlesNum,
     getArticlesIndex: that.getArticlesIndex,
     getLatestId: that.getLatestId,
     getArticle: that.getArticle,
     setArticle: that.setArticle,
-    setFavors: that.setFavors,
-    setOpposes: that.setOpposes,
-    setCollectors: that.setCollectors,
-    setComments: that.setComments,
+    setFavor: that.setFavor,
+    setOppose: that.setOppose,
+    setCollector: that.setCollector,
+    setComment: that.setComment,
     setNewArticle: that.setNewArticle,
     delArticle: that.delArticle
 };

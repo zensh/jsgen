@@ -4982,3 +4982,7 @@ aside.panel {
     margin-right: auto;
     margin-left: auto;
 }
+.media-list > li {
+    border-top: 1px solid #eeeeee;
+    padding-top: 5px;
+}
