@@ -1,6 +1,6 @@
-<div class="" ng-controller="userAdminCtrl">
+<div class="clearfix" ng-controller="userAdminCtrl">
     <div class="page-header">
-            <h4>用户批量查询/设置</h4>
+        <h4>用户批量查询/设置</h4>
     </div>
     <div class="alert alert-error" ng-show="err">
         <button type="button" class="close" ng-click="err=null">&times;</button>
@@ -8,18 +8,18 @@
         {{err.message}}
     </div>
     <div class="alert alert-success" ng-show="request">
-            <button type="button" class="close" ng-click="request=null">&times;</button>
-            <strong>{{request}}</strong>
-        </div>
+        <button type="button" class="close" ng-click="request=null">&times;</button>
+        <strong>{{request}}</strong>
+    </div>
     <table class="table table-condensed table-hover">
         <thead>
             <tr>
                 <th><a href="#" ng-click="predicate='_id';reverse=!reverse">Uid</a></th>
                 <th><a href="#" ng-click="predicate='name';reverse=!reverse">用户名</a></th>
                 <th><a href="#" ng-click="predicate='email';reverse=!reverse">Email</a><a href="#" ng-click="editEmail=!editEmail">
-                    <i class="glyphicon glyphicon-edit"></a></th>
+                    &nbsp;<i class="glyphicon glyphicon-edit"></i>&nbsp;</a></th>
                 <th><a href="#" ng-click="predicate='role';reverse=!reverse">权限</a><a href="#" ng-click="editRole=!editRole">
-                    <i class="glyphicon glyphicon-edit"></a></th>
+                    &nbsp;<i class="glyphicon glyphicon-edit"></i>&nbsp;</a></th>
                 <th><a href="#" ng-click="predicate='score';reverse=!reverse">积分</a></th>
                 <th><a href="#" ng-click="predicate='articles';reverse=!reverse">文章</a></th>
                 <th><a href="#" ng-click="predicate='fans';reverse=!reverse">粉丝</a></th>
@@ -47,7 +47,8 @@
         <tfoot>
         </tfoot>
     </table>
-    <div class="pull-left" ng-pagination="pagination"></div>
+    <div class="pull-left" ng-pagination="pagination">
+    </div>
     <div class="pull-right" ng-show="editSave">
         <button class="btn btn-primary" ng-click="submit()">保存</button>
         <button class="btn btn-success" ng-click="reset()">重置</button>

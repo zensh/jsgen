@@ -9,7 +9,7 @@
                     <li>更新:{{article.date | formatDate}}</li>
                     <li>访问:{{article.visitors}}次</li>
                     <li>热度:{{article.hots}}</li>
-                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article)">{{article.commentsList.length}}条评论</a></li>
+                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article)">{{article.comments}}条评论</a></li>
                 </ul>
                 <ul class="list-inline">
                     <li ng-repeat="tag in article.tagsList">
@@ -20,14 +20,14 @@
             <div class="main" ng-parse-markdown="article.content">
             </div>
             <footer class="clearfix">
-                <div class="btn-toolbar well well-small pull-right">
+                <div class="btn-toolbar pull-right">
                     <div class="btn-group">
                         <a type="button" class="btn btn-success" ng-click="setFavor(article._id)">{{article.favorsList.length}}{{isFavor | favor}}</a>
                         <a type="button" class="btn btn-primary" ng-click="setCollector(article._id)">{{article.collectorsList.length}}{{isCollector | collector}}</a>
                         <a type="button" class="btn btn-warning" ng-click="setOppose(article._id)">{{article.opposesList.length}}{{isOppose | oppose}}</a>
                     </div>
                     <div class="btn-group">
-                            <button type="button" ng-click="reply(article._id)" class="btn btn-primary">发表评论</button>
+                            <a type="button" ng-click="reply(article._id)" class="btn btn-primary">发表评论</a>
                     </div>
                 </div>
                 <ul class="list-inline" ng-show="article.favorsList">
@@ -53,7 +53,7 @@
             </footer>
         </article>
         <a href="#comments" name="comments"></a>
-        <aside class="panel" id="comments">
+        <aside class="panel clearfix" id="comments">
             <div id="reply" class="clearfix">
                 <div class="alert alert-error" ng-show="err">
                     <button type="button" class="close" ng-click="err=null">&times;</button>
@@ -77,15 +77,15 @@
                 </form>
                 <div class="btn-toolbar well well-small pull-right">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" ng-click="wmdHelp('preview')">文章预览</button>
-                        <button type="button" class="btn btn-success" ng-click="wmdHelp('edit')" ng-hide="wmdShow=='edit'">编辑文章</button>
-                        <button type="button" class="btn btn-success" ng-click="wmdHelp('help')">Markdown语法</button>
+                        <a type="button" class="btn btn-success" ng-click="wmdHelp('preview')">文章预览</a>
+                        <a type="button" class="btn btn-success" ng-click="wmdHelp('edit')" ng-hide="wmdShow=='edit'">编辑文章</a>
+                        <a type="button" class="btn btn-success" ng-click="wmdHelp('help')">Markdown语法</a>
                     </div>
                     <div class="btn-group">
-                        <button type="button" ng-click="reply(article)" class="btn btn-primary" ng-show="replyToComment">取消</button>
+                        <a type="button" ng-click="reply(article)" class="btn btn-primary" ng-show="replyToComment">取消</a>
                     </div>
                     <div class="btn-group">
-                        <button type="button" ng-click="submit()" class="btn btn-primary" ng-disabled="!editSave">提    交</button>
+                        <a type="button" ng-click="submit()" class="btn btn-primary" ng-disabled="!editSave">提    交</a>
                     </div>
                 </div>
             </div>
@@ -102,15 +102,21 @@
                     <footer>
                         <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
                             发表于{{comment.date | formatDate}}</span>
-                        <ul class="list-inline pull-right" ng-show="isLogin">
-                            <li><a class="btn btn-mini" href="#" ng-click="setFavor(comment._id)">{{comment.favorsList.length}}支持</a></li>
-                            <li><a class="btn btn-mini" href="#" ng-click="setOppose(comment._id)">{{comment.opposesList.length}}反对</a></li>
-                            <li><a class="btn btn-mini" href="#" ng-click="reply(comment)">{{comment.commentsList.length}}回复</a></li>
-                        </ul>
+                        <div class="btn-toolbar pull-right">
+                            <div class="btn-group">
+                                <a type="button" class="btn btn-mini" ng-click="setFavor(comment._id)">{{comment.favorsList.length}}{{isFavor | favor}}</a>
+                                <a type="button" class="btn btn-mini" ng-click="getComment(comment.commentsList)">{{comment.commentsList.length}}条评论</a>
+                                <a type="button" class="btn btn-mini" ng-click="setOppose(comment._id)">{{comment.opposesList.length}}{{isOppose | oppose}}</a>
+                            </div>
+                            <div class="btn-group">
+                                    <a type="button" class="btn btn-mini" ng-click="reply(comment)" class="btn btn-primary">回复</a>
+                            </div>
+                        </div>
                     </footer>
                   </div>
                 </li>
             </ul>
+            <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
         </aside>
     </div>
     <div class="span3">

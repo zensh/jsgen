@@ -288,7 +288,7 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
     });
     $rootScope.$watch(function() {return $location.path();}, function(path, previous) {
         jsGen.previous = previous;
-        var element = angular.element(document.getElementById('#main'));
+        var element = angular.element(document.getElementById('main'));
         if (path === '/add') element.addClass('container-large');
         else element.removeClass('container-large');
     })

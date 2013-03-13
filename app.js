@@ -3,16 +3,12 @@ var domain = require('domain'),
     fs = require('fs');
 var serverDm = domain.create();
 
-serverDm.on('error', function(err) {
-    // var err = jsGen.lib.tools.intersect({
-    //     name: '',
-    //     message: ''
-    // }, err);
+serverDm.on('error', function (err) {
+    delete err.domain;
     console.log('SevERR:******************');
-    console.log(err);
     jsGen.errlog.error(err);
 });
-serverDm.run(function() {
+serverDm.run(function () {
     global.jsGen = {}; // 注册全局变量jsGen
     jsGen.conf = module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
 
@@ -43,13 +39,13 @@ serverDm.run(function() {
     jsGen.dao.tag = require('./dao/tagDao.js');
     jsGen.dao.user = require('./dao/userDao.js');
     jsGen.config = {};
-    (function() {
+    (function () {
         var that = this;
-        this._update = function(obj) {
+        this._update = function (obj) {
             jsGen.lib.tools.union(this, obj);
             this._initTime = Date.now();
         };
-        jsGen.dao.index.getGlobalConfig(serverDm.intercept(function(doc) {
+        jsGen.dao.index.getGlobalConfig(serverDm.intercept(function (doc) {
             that._update(doc);
             jsGen.cache = {};
             jsGen.cache.pagination = new jsGen.lib.CacheTL(20 * 60 * 1000, 10000);
@@ -71,13 +67,13 @@ serverDm.run(function() {
             jsGen.api.message = require('./api/message.js');
             jsGen.api.install = require('./api/install.js');
 
-            fs.readFile('package.json', 'utf8', serverDm.intercept(function(data) {
+            fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
                 jsGen.info = JSON.parse(data);
                 jsGen.info.nodejs = process.versions.node;
                 if (!jsGen.lib.tools.equal(jsGen.info, that.info)) jsGen.api.index.setGlobalConfig({
                     info: jsGen.info
                 },
-                serverDm.intercept(function(doc) {
+                serverDm.intercept(function (doc) {
                     that._update(doc);
                     console.log(doc);
                 }));
@@ -85,22 +81,24 @@ serverDm.run(function() {
         }));
     }).call(jsGen.config);
 
-    var server = http.createServer(function(req, res) {
+    var server = http.createServer(function (req, res) {
         var dm = domain.create();
+        res.on('finish', function () {
+            //jsGen.dao.db.close();
+            process.nextTick(function () {
+                dm.dispose();
+            });
+        });
         dm.add(req);
         dm.add(res);
-        dm.on('error', function(err) {
-            console.log('reqErr:**************');
-                console.log(err);
-            var err = jsGen.lib.tools.intersect({
-                name: '',
-                message: ''
-            }, err);
+        dm.on('error', function (err) {
+            delete err.domain;
             try {
-                res.on('close', function() {
-                    console.log('Send Ok2!');
-                    jsGen.dao.db.close();
-                    //dm.dispose();
+                res.on('finish', function () {
+                    //jsGen.dao.db.close();
+                    process.nextTick(function () {
+                        dm.dispose();
+                    });
                 });
                 if (err.hasOwnProperty('name')) {
                     res.sendjson({
@@ -108,29 +106,20 @@ serverDm.run(function() {
                     });
                 } else {
                     res.r404();
+                    console.log('ReqErr:******************');
                     jsGen.errlog.error(err);
                 }
             } catch (err) {
-                // var err = jsGen.lib.tools.intersect({
-                //     name: '',
-                //     message: ''
-                // }, err);
-                console.log('catchErr:**************');
-                console.log(err);
+                delete err.domain;
+                console.log('CatchERR:******************');
                 jsGen.errlog.error(err);
                 dm.dispose();
             }
         });
-        res.on('close', function() {
-            console.log('Send Ok!');
-            res.end();
-            jsGen.dao.db.close();
-            dm.dispose();
-        });
-        dm.run(function() {
+        dm.run(function () {
             if (req.path[0] === 'api') {
                 jsGen.api[req.path[1]][req.method](req, res, dm);
-                process.nextTick(function() {
+                process.nextTick(function () {
                     jsGen.api.index.updateOnlineCache(req);
                 });
             } else {

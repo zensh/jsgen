@@ -4985,4 +4985,9 @@ aside.panel {
 .media-list > li {
     border-top: 1px solid #eeeeee;
     padding-top: 5px;
+    margin-top: 5px;
+}
+#comments h6 {
+    margin-top: 0;
+    margin-bottom: 0;
 }

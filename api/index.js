@@ -10,6 +10,7 @@ var url = require('url'),
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
 var onlineCache = {}, onlineArray = [];
+
 function updateOnlineCache(req) {
     var now = Date.now(),
         users = 0,
@@ -41,7 +42,7 @@ function checkTimeInterval(req, type, add) {
 };
 
 function setGlobalConfig(obj, callback) {
-    jsGen.dao.index.setGlobalConfig(obj, function(err, doc) {
+    jsGen.dao.index.setGlobalConfig(obj, function (err, doc) {
         if (doc) jsGen.config._update(doc);
         if (callback) return callback(err, doc);
     });
@@ -60,14 +61,14 @@ function setVisitHistory(req) {
     visit.data[3] = req.referer || 'direct';
     visit.data[4] = info.name || 'unknow';
     visit.data[5] = info.os.toString() || 'unknow';
-    process.nextTick(function() {
+    process.nextTick(function () {
         setGlobalConfig({
             visitors: 1
         });
-        jsGen.dao.index.setVisitHistory(visit, function(err, doc) {
+        jsGen.dao.index.setVisitHistory(visit, function (err, doc) {
             if (err && err.code === 10131) {
                 visit._id += 1;
-                jsGen.dao.index.newVisitHistory(visit, function(err, doc) {
+                jsGen.dao.index.newVisitHistory(visit, function (err, doc) {
                     if (!err) {
                         setGlobalConfig({
                             visitHistory: visit._id
@@ -85,7 +86,7 @@ function getvisitHistory(req, res, dm) {
         data: []
     };
     if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    jsGen.dao.index.getVisitHistory(jsGen.config.visitHistory, dm.intercept(function(doc) {
+    jsGen.dao.index.getVisitHistory(jsGen.config.visitHistory, dm.intercept(function (doc) {
         if (!doc) {
             jsGen.dao.db.close();
             return res.sendjson(body);
@@ -101,7 +102,7 @@ function getIndex(req, res, dm) {
     delete body.smtp;
     body.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
-        jsGen.api.user.userCache.getP(req.session.Uid, dm.intercept(function(doc) {
+        jsGen.api.user.userCache.getP(req.session.Uid, dm.intercept(function (doc) {
             body.user = doc;
             return res.sendjson(body);
         }));
@@ -191,10 +192,10 @@ function setGlobal(req, res, dm) {
     if (setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
     if (setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
     if (setObj.TimeInterval && setObj.TimeInterval < 5) setObj.TimeInterval = 5;
-    Object.keys(setObj).forEach(function(key) {
+    Object.keys(setObj).forEach(function (key) {
         if (equal(setObj[key], jsGen.config[key])) delete setObj[key];
     });
-    setGlobalConfig(setObj, dm.intercept(function(doc) {
+    setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
         return res.sendjson(body);
     }));

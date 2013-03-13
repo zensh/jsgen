@@ -49,17 +49,45 @@ directive('ngPagination', function() {
     //     total: 1,  //总页数
     //     num: 20, //分页的每页数量
     //     nums: [20, 50, 100]  //自定义num，不定长，可留空
+    //     display: {first: '首页', prev: '上一页', next: '下一页', last: '尾页'}
     // }
     // 翻页事件发生时触发pagination事件
     return {
         transclude: true,
         scope: true,
-        template: '<ul class="pagination">' + '<li><a href="#" ng-click="paginationTo(\'first\')"><i class=" glyphicon glyphicon-step-backward"></i></a></li>' + '<li><a href="#" ng-click="paginationTo(\'prev\')"><i class="glyphicon glyphicon-backward"></i></a></li>' + '<li class="disabled"><a>{{now}}</a></li>' + '<li><a href="#" ng-click="paginationTo(\'next\')"><i class="glyphicon glyphicon-forward"></i></a></li>' + '<li><a href="#" ng-click="paginationTo(\'last\')"><i class="glyphicon glyphicon-step-forward"></i></a></li>' + '<li ng-repeat="n in nums"><a href="#" ng-click="setNum(n)" title="每页{{n}}">{{n}}</a></li>' + '</ul>',
+        template: '<ul class="pagination">' +
+                            '<li id="pagination-first"><a href="#" ng-click="paginationTo(\'first\')">{{display.first}}</a></li>' +
+                            '<li id="pagination-prev"><a href="#" ng-click="paginationTo(\'prev\')">{{display.prev}}</a></li>' +
+                            '<li class="disabled"><a>{{now}}</a></li>' +
+                            '<li id="pagination-next"><a href="#" ng-click="paginationTo(\'next\')">{{display.next}}</a></li>' +
+                            '<li id="pagination-last"><a href="#" ng-click="paginationTo(\'last\')">{{display.last}}</a></li>' +
+                            '<li ng-repeat="n in nums"><a href="#" ng-click="setNum(n)" title="每页{{n}}">{{n}}</a></li>' +
+                        '</ul>',
         link: function(scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngPagination);
             scope.$watch(attr.ngPagination, function ngPaginationWatchAction(value) {
-                scope.now = value.now;
-                scope.nums = value.nums;
+                if (!value) return;
+                scope.now = value.now || 1;
+                scope.nums = value.nums || 20;
+                if (!scope.display) {
+                    scope.display = value.display || {first: '首页', prev: '上一页', next: '下一页', last: '尾页'};
+                    if (!scope.display.first) {
+                        var dom = document.getElementById('pagination-first');
+                        dom.parentNode.removeChild(dom);
+                    }
+                    if (!scope.display.prev) {
+                        var dom = document.getElementById('pagination-prev');
+                        dom.parentNode.removeChild(dom);
+                    }
+                    if (!scope.display.next) {
+                        var dom = document.getElementById('pagination-next');
+                        dom.parentNode.removeChild(dom);
+                    }
+                    if (!scope.display.last) {
+                        var dom = document.getElementById('pagination-last');
+                        dom.parentNode.removeChild(dom);
+                    }
+                }
                 scope.paginationTo = function(to) {
                     var p = 1;
                     var params = {};
@@ -84,7 +112,7 @@ directive('ngPagination', function() {
                         n: value.num,
                         p: p
                     };
-                    scope.$emit('pagination', params);
+                    if (scope.now !== p) scope.$emit('pagination', params);
                 };
                 scope.setNum = function(num) {
                     scope.$emit('pagination', {
@@ -93,9 +121,6 @@ directive('ngPagination', function() {
                     });
                 };
             }, true);
-            attr.ngPagination.now = attr.ngPagination.now || 1;
-            attr.ngPagination.total = attr.ngPagination.total || 1;
-            attr.ngPagination.num = attr.ngPagination.num || 20;
         }
     };
 });

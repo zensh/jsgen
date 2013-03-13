@@ -71,7 +71,7 @@ factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
                 return sanitize(MdParse(text), level);
             }
         }, idPostfix);
-        var element = angular.element(document.getElementById('#wmd-preview' + idPostfix));
+        var element = angular.element(document.getElementById('wmd-preview' + idPostfix));
         editor.hooks.chain("onPreviewRefresh", function() {
             element.children('pre').addClass('prettyprint'); // linenums have bug!
             element.children('code').addClass('prettyprint');
