@@ -181,7 +181,6 @@ function login(req, res, dm) {
                 }
             });
             userCache.getP(doc._id, dm.intercept(function(doc) {
-                console.log(doc);
                 return res.sendjson(doc);
             }));
         } else {

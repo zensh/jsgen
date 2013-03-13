@@ -37,8 +37,8 @@ articleCache.getP = function(ID, callback, convert) {
             });
             convertArticles(doc.commentsList.reverse(), function(err, commentsList) {
                 if (commentsList) doc.commentsList = commentsList;
-                callback(err, doc);
-            }, 'comment');
+                return callback(err, doc);
+            }, 'id');
         } else return callback(null, doc);
     } else jsGen.dao.article.getArticle(_id, function(err, doc) {
         if (err) return callback(err, null);
@@ -53,8 +53,8 @@ articleCache.getP = function(ID, callback, convert) {
                 });
                 convertArticles(doc.commentsList.reverse(), function(err, commentsList) {
                     if (commentsList) doc.commentsList = commentsList;
-                    callback(err, doc);
-                }, 'comment');
+                    return callback(err, doc);
+                }, 'id');
             } else return callback(null, doc);
         }
     });
@@ -77,10 +77,11 @@ commentCache.getP = function(ID, callback, convert) {
             getConvert(doc);
             convertArticles(doc.commentsList, function(err, commentsList) {
                 if (commentsList) doc.commentsList = commentsList;
-                callback(err, doc);
-            }, 'comment');
+                return callback(err, doc);
+            }, 'id');
         } else return callback(null, doc);
     } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function(err, doc) {
+        if (err) return callback(err, null);
         if (doc) {
             doc._id = ID;
             doc = intersect(union(comment), doc);
@@ -89,11 +90,10 @@ commentCache.getP = function(ID, callback, convert) {
                 getConvert(doc);
                 convertArticles(doc.commentsList, function(err, commentsList) {
                     if (commentsList) doc.commentsList = commentsList;
-                    callback(err, doc);
-                }, 'comment');
-            }
+                    return callback(err, doc);
+                }, 'id');
+            } else callback(err, doc);
         }
-        return callback(err, doc);
     });
 };
 
@@ -168,10 +168,14 @@ cache._remove = function(ID) {
 
 function convertArticles(_idArray, callback, mode) {
     var result = [];
+    callback = callback || jsGen.lib.tools.callbackFn;
     if (!Array.isArray(_idArray)) _idArray = [_idArray];
     if (_idArray.length === 0) return callback(null, result);
     _idArray.reverse();
-    next();
+    if (mode === 'id') {
+        for (var i = _idArray.length - 1; i >=0; i--) result.push(jsGen.dao.article.convertID(_idArray[i]));
+        return callback(null, result);
+    } else next();
 
     function next() {
         var ID = _idArray.pop();
@@ -183,11 +187,13 @@ function convertArticles(_idArray, callback, mode) {
                 if (doc) result.push(doc);
                 next();
             });
-        } else listCache.getP(ID, function(err, doc) {
-            if (err) return callback(err, result);
-            if (doc) result.push(doc);
-            next();
-        });
+        } else {
+            listCache.getP(ID, function(err, doc) {
+                if (err) return callback(err, result);
+                if (doc) result.push(doc);
+                next();
+            });
+        }
     }
 };
 
@@ -201,6 +207,45 @@ function convertRefer(refer) {
         _id: null,
         url: refer
     }
+};
+
+function pagination(req, list, callback, mode) {
+    var p = req.getparam.p || req.getparam.page,
+        n = req.getparam.n || req.getparam.num,
+        result = {
+            pagination: {},
+            data: []
+        };
+    callback = callback || jsGen.lib.tools.callbackFn;
+
+    if (n && n >= 10 && n <= 500) n = Math.floor(n);
+    else n = 20;
+    if (p && p >= 1) p = Math.floor(p);
+    else p = 1;
+    result.pagination.total = list.length;
+    list = list.slice((p - 1) * n, p * n);
+    result.pagination.now = p;
+    result.pagination.num = n;
+    list.reverse();
+    next();
+
+    function next() {
+        var ID = list.pop();
+        if (!ID) return callback(null, result);
+        if (mode === 'comment') {
+            commentCache.getP(ID, function(err, doc) {
+                if (err) return callback(err, result);
+                if (doc) result.data.push(doc);
+                next();
+            });
+        } else {
+            listCache.getP(ID, function(err, doc) {
+                if (err) return callback(err, result);
+                if (doc) result.data.push(doc);
+                next();
+            });
+        }
+    };
 };
 
 function getArticle(req, res, dm) {
