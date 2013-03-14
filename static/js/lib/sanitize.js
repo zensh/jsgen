@@ -284,7 +284,7 @@ Sanitize.Config.RELAXED = {
     'colgroup', 'dd', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'small', 'strike', 'strong',
     'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'u',
-    'ul'],
+    'ul', 'div'],
 
   attributes: {
     'a'         : ['href', 'title'],
@@ -298,7 +298,8 @@ Sanitize.Config.RELAXED = {
     'td'        : ['abbr', 'axis', 'colspan', 'rowspan', 'width'],
     'th'        : ['abbr', 'axis', 'colspan', 'rowspan', 'scope',
                      'width'],
-    'ul'        : ['type']
+    'ul'        : ['type'],
+    'div'      : ['class']
   },
 
   protocols: {

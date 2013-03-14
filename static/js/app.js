@@ -10,43 +10,47 @@ function($routeProvider, $locationProvider) {
         controller: 'indexCtrl'
     }).
     when('/err', {
-        templateUrl: 'static/tpl/err.html',
+        templateUrl: '/static/tpl/err.html',
         controller: 'errCtrl'
     }).
     when('/login', {
-        templateUrl: 'static/tpl/login.html',
+        templateUrl: '/static/tpl/login.html',
         controller: 'userLoginCtrl'
     }).
     when('/register', {
-        templateUrl: 'static/tpl/register.html',
+        templateUrl: '/static/tpl/register.html',
         controller: 'userRegisterCtrl'
     }).
     when('/home', {
-        templateUrl: 'static/tpl/user.html',
+        templateUrl: '/static/tpl/user.html',
         controller: 'homeCtrl'
     }).
     when('/admin', {
-        templateUrl: 'static/tpl/admin.html',
+        templateUrl: '/static/tpl/admin.html',
         controller: 'adminCtrl'
     }).
     when('/add', {
-        templateUrl: 'static/tpl/article-add.html',
-        controller: 'addArticleCtrl'
+        templateUrl: '/static/tpl/article-editor.html',
+        controller: 'articleEditorCtrl'
     }).
     when('/U:ID', {
-        templateUrl: 'static/tpl/user.html',
+        templateUrl: '/static/tpl/user.html',
         controller: 'userCtrl'
     }).
+    when('/A:ID/edit', {
+        templateUrl: '/static/tpl/article-editor.html',
+        controller: 'articleEditorCtrl'
+    }).
     when('/A:ID', {
-        templateUrl: 'static/tpl/article.html',
+        templateUrl: '/static/tpl/article.html',
         controller: 'articleCtrl'
     }).
     when('/T:ID', {
-        templateUrl: 'static/tpl/tag.html',
+        templateUrl: '/static/tpl/tag.html',
         controller: 'tagCtrl'
     }).
     when('/O:ID', {
-        templateUrl: 'static/tpl/collection.html',
+        templateUrl: '/static/tpl/collection.html',
         controller: 'collectionCtrl'
     }).
     otherwise({
@@ -54,8 +58,8 @@ function($routeProvider, $locationProvider) {
     });
     $locationProvider.html5Mode(true);
 }]).
-run(['$rootScope', '$http', '$location', '$timeout', '$filter', 'cache', 'rest', 'sanitize', 'MdParse', 'MdEditor',
-function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize, MdParse, MdEditor) {
+run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'cache', 'rest', 'sanitize', 'MdParse', 'MdEditor', 'getArticle', 'getMarkdown',
+function($rootScope, $http, $location, $timeout, $filter, $anchorScroll, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
     // 注册全局变量jsGen
     window.jsGen = {
         global: {}
@@ -243,11 +247,14 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
     jsGen.location = $location;
     jsGen.timeout = $timeout;
     jsGen.filter = $filter;
+    jsGen.anchorScroll = $anchorScroll;
     jsGen.cache = cache;
     jsGen.rest = rest;
     jsGen.sanitize = sanitize;
     jsGen.MdParse = MdParse;
     jsGen.MdEditor = MdEditor;
+    jsGen.getArticle = getArticle;
+    jsGen.getMarkdown = getMarkdown;
     jsGen.err = null;
 
     $rootScope.isAdmin = false;
@@ -289,7 +296,8 @@ function($rootScope, $http, $location, $timeout, $filter, cache, rest, sanitize,
     $rootScope.$watch(function() {return $location.path();}, function(path, previous) {
         jsGen.previous = previous;
         var element = angular.element(document.getElementById('main'));
-        if (path === '/add') element.addClass('container-large');
+        var reg = /\/add|^\/A.+\/edit$/;
+        if (reg.test(path)) element.addClass('container-large');
         else element.removeClass('container-large');
-    })
+    });
 }]);

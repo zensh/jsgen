@@ -18,111 +18,104 @@ articleCache.getP = function (ID, callback, convert) {
         _id = jsGen.dao.article.convertID(ID);
 
     function getConvert(doc) {
+        doc.visitors += 1;
+        getHots(doc);
+        that.put(ID, doc);
+        listCache.update(ID, function (value) {
+            value.visitors += 1;
+            value.hots = cache[ID].hots;
+            return value;
+        });
+        jsGen.dao.article.setArticle({
+            _id: _id,
+            visitors: 1,
+            hots: cache[ID].hots
+        });
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.favorsList = jsGen.api.user.convertUsers(doc.favorsList);
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
         doc.collectorsList = jsGen.api.user.convertUsers(doc.collectorsList);
         doc.refer = convertRefer(doc.refer);
+        convertArticles(doc.commentsList.reverse(), function (err, commentsList) {
+            if (commentsList) doc.commentsList = commentsList;
+            return callback(err, doc);
+        }, 'id');
     };
+
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
     if (doc) {
-        doc.hots = cache[ID].hots;
-        doc.visitors = cache[ID].visitors;
-        if (convert) {
-            getConvert(doc);
-            jsGen.dao.article.setArticle({
-                _id: _id,
-                visitors: 1
-            });
-            convertArticles(doc.commentsList.reverse(), function (err, commentsList) {
-                if (commentsList) doc.commentsList = commentsList;
-                return callback(err, doc);
-            }, 'id');
-        } else return callback(null, doc);
+        if (convert) getConvert(doc);
+        else return callback(null, doc);
     } else jsGen.dao.article.getArticle(_id, function (err, doc) {
-        if (err) return callback(err, null);
         if (doc) {
             doc._id = ID;
-            that.put(ID, doc);
-            if (convert) {
-                getConvert(doc);
-                jsGen.dao.article.setArticle({
-                    _id: _id,
-                    visitors: 1
-                });
-                convertArticles(doc.commentsList.reverse(), function (err, commentsList) {
-                    if (commentsList) doc.commentsList = commentsList;
-                    return callback(err, doc);
-                }, 'id');
-            } else return callback(null, doc);
-        }
+            if (convert) getConvert(doc);
+            else return callback(null, doc);
+        } else return callback(err, null);
     });
 };
 
 commentCache.getP = function (ID, callback, convert) {
     var that = this,
-        doc = this.get(ID);
+        doc = this.get(ID),
+        _id = jsGen.dao.article.convertID(ID);
 
     function getConvert(doc) {
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.favorsList = jsGen.api.user.convertUsers(doc.favorsList);
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
         doc.refer = convertRefer(doc.refer);
+        convertArticles(doc.commentsList, function (err, commentsList) {
+            if (commentsList) doc.commentsList = commentsList;
+            return callback(err, doc);
+        }, 'id');
     };
+
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
     if (doc) {
-        if (convert) {
-            getConvert(doc);
-            convertArticles(doc.commentsList, function (err, commentsList) {
-                if (commentsList) doc.commentsList = commentsList;
-                return callback(err, doc);
-            }, 'id');
-        } else return callback(null, doc);
-    } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function (err, doc) {
-        if (err) return callback(err, null);
+        if (convert) getConvert(doc);
+        else return callback(null, doc);
+    } else jsGen.dao.article.getArticle(_id, function (err, doc) {
         if (doc) {
             doc._id = ID;
             doc = intersect(union(comment), doc);
             that.put(ID, doc);
-            if (convert) {
-                getConvert(doc);
-                convertArticles(doc.commentsList, function (err, commentsList) {
-                    if (commentsList) doc.commentsList = commentsList;
-                    return callback(err, doc);
-                }, 'id');
-            } else callback(err, doc);
-        }
+            if (convert) getConvert(doc);
+            else return callback(null, doc);
+        } else return callback(err, null);
     });
 };
 
 listCache.getP = function (ID, callback, convert) {
     var that = this,
-        doc = this.get(ID);
+        doc = this.get(ID),
+        _id = jsGen.dao.article.convertID(ID);
 
     function getConvert() {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.refer = convertRefer(doc.refer);
     };
+
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
     if (doc) {
-        if (convert) getConvert(doc);
         doc.hots = cache[ID].hots;
-        doc.visitors = cache[ID].visitors;
+        if (convert) getConvert(doc);
         return callback(null, doc);
-    } else jsGen.dao.article.getArticle(jsGen.dao.article.convertID(ID), function (err, doc) {
+    } else jsGen.dao.article.getArticle(_id, function (err, doc) {
         if (doc) {
             doc._id = ID;
+            doc.hots = cache[ID].hots;
             doc.content = filterSummary(jsGen.module.marked(doc.content));
             doc = intersect(union(listArticle), doc);
             that.put(ID, doc);
             if (convert) getConvert(doc);
-        }
-        return callback(err, doc);
+            return callback(null, doc);
+        } else return callback(err, null);
     });
 };
 
@@ -214,6 +207,16 @@ function convertRefer(refer) {
         _id: null,
         url: refer
     }
+};
+
+function getHots(doc) {
+    doc.hots = jsGen.config.ArticleHots[0] * doc.visitors;
+    doc.hots += jsGen.config.ArticleHots[1] * doc.favorsList.length;
+    doc.hots -= jsGen.config.ArticleHots[1] * doc.opposesList.length;
+    doc.hots += jsGen.config.ArticleHots[2] * doc.commentsList.length;
+    doc.hots += jsGen.config.ArticleHots[3] * doc.collectorsList.length;
+    doc.hots += jsGen.config.ArticleHots[4] * (doc.status === 2 ? 1 : 0);
+    cache[doc._id].hots = doc.hots;
 };
 
 function getArticle(req, res, dm) {
@@ -413,13 +416,12 @@ function setArticle(req, res, dm) {
         if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
         filterArticle(req.apibody, dm.intercept(function (comment) {
             if (!checkID(comment.refer, 'A') || !cache[comment.refer]) comment.refer = articleID;
-            // articleCache.remove(articleID);
-            // if (articleID !== referID) commentCache.remove(referID);
             var refer_id = 0;
             var article_id = jsGen.dao.article.convertID(articleID);
             if (comment.refer !== articleID) refer_id = jsGen.dao.article.convertID(comment.refer);
-            comment.date = Date.now();
-            comment.updateTime = comment.date;
+            var date = Date.now();
+            comment.date = date;
+            comment.updateTime = date;
             comment.display = 0;
             comment.status = -1;
             comment.author = jsGen.dao.user.convertID(req.session.Uid);
@@ -430,10 +432,18 @@ function setArticle(req, res, dm) {
                         _id: article_id,
                         commentsList: doc._id
                     });
+                    jsGen.dao.article.setArticle({
+                        _id: article_id,
+                        updateTime: date
+                    });
                     if (refer_id) {
                         jsGen.dao.article.setComment({
                             _id: refer_id,
                             commentsList: doc._id
+                        });
+                        jsGen.dao.article.setArticle({
+                            _id: refer_id,
+                            updateTime: date
                         });
                     }
                     jsGen.dao.user.setArticle({
@@ -442,10 +452,12 @@ function setArticle(req, res, dm) {
                     });
                     articleCache.update(articleID, function (value) {
                         value.commentsList.push(doc._id);
+                        value.updateTime = date;
                         return value;
                     });
                     if (refer_id) commentCache.update(comment.refer, function (value) {
                         value.commentsList.push(doc._id);
+                        value.updateTime = date;
                         return value;
                     });
                     doc._id = jsGen.dao.article.convertID(doc._id);

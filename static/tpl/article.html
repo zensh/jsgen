@@ -6,10 +6,11 @@
                 <ul class="list-inline">
                     <li ng-show="article.refer">引文:<a ng-href="{{article.refer.url}}">{{article.refer.url}}</a></li>
                     <li>时间:{{article.date | formatDate}}</li>
-                    <li>更新:{{article.date | formatDate}}</li>
+                    <li>更新:{{article.updateTime | formatDate}}</li>
                     <li>访问:{{article.visitors}}次</li>
                     <li>热度:{{article.hots}}</li>
-                    <li><a class="btn btn-mini btn-success" href="#" ng-click="reply(article)">{{article.comments}}条评论</a></li>
+                    <li><a class="btn btn-mini btn-success" ng-click="reply(article)">{{article.comments}}条评论</a></li>
+                    <li ng-show="isMe"><a class="btn btn-mini btn-primary" ng-href="{{'/'+article._id+'/edit'}}">编辑</a></li>
                 </ul>
                 <ul class="list-inline">
                     <li ng-repeat="tag in article.tagsList">
@@ -52,7 +53,6 @@
                 </div>
             </footer>
         </article>
-        <a href="#comments" name="comments"></a>
         <aside class="panel clearfix" id="comments">
             <div id="reply" class="clearfix">
                 <div class="alert alert-error" ng-show="err">

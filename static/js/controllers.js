@@ -322,39 +322,19 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         name: '错误提示',
         message: '您需要先登录！'
     };
-
-    function getArticle(callback) {
-        var article = jsGen.cache.article.get('A' + $routeParams.ID);
-        if (article) return callback(article);
-        else {
-            article = jsGen.rest.article.get({
-                ID: 'A' + $routeParams.ID
-            }, function () {
-                if (!article.err) jsGen.cache.article.put(article._id, article);
-                return callback(article);
-            });
-        }
-    };
-
-    function getMarkdown() {
-        jsGen.http.get('/static/md/markdown.md', {
-            cache: true
-        }).success(function (data, status) {
-            if (!data.err) $scope.markdownHelp = data;
-            else $scope.err = data.err;
-        });
-    };
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
-    getArticle(function (article) {
+    jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (article.err) {
             jsGen.err = article.err;
             jsGen.location.path('/err');
         }
         $scope.article = article;
-        $scope.pagination = article.pagination;
-        $scope.pagination.num = 10;
-        $scope.pagination.display = {next: '下一页', last: '尾页'};
+        if (article.pagination) {
+            $scope.pagination = article.pagination;
+            $scope.pagination.num = 10;
+            $scope.pagination.display = {next: '下一页', last: '尾页'};
+        }
         $scope.title = '评论：' + article.title;
         $scope.replyTitle = $scope.title;
         $scope.refer = article._id;
@@ -411,18 +391,17 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             MdEditor.refreshPreview();
         } else if (s == 'help') {
             $scope.wmdShow = 'help';
-            $scope.replyTitle = 'Markdown简明语法';
-            getMarkdown();
+            jsGen.getMarkdown(function (data) {
+                $scope.replyTitle = data.title;
+                $scope.markdownHelp = data.content;
+                $scope.err = data.err;
+            });
         } else {
             $scope.wmdShow = 'edit';
             $scope.replyTitle = $scope.title;
         }
     };
     $scope.reply = function (article) {
-        if (!$scope.isLogin) {
-            $scope.err = Errmsg;
-            return;
-        }
         var dom = angular.element(document.getElementById(article._id));
         if (dom.length === 0) return;
         $scope.refer = article._id;
@@ -431,12 +410,18 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             $scope.replyToComment = false;
             $scope.title = '评论：' + jsGen.filter('cutText')(article.title, $scope.global.TitleMaxLen - 9);
             angular.element(document.getElementById('comments')).prepend(angular.element(document.getElementById('reply')));
+            jsGen.location.hash('comments');
+            jsGen.anchorScroll();
         } else {
             $scope.replyToComment = article._id;
             $scope.title = '评论：' + jsGen.filter('cutText')(jsGen.sanitize(jsGen.MdParse(article.content.trim()), 0), $scope.global.TitleMaxLen - 9);
             dom.append(angular.element(document.getElementById('reply')));
         }
         $scope.replyTitle = $scope.title;
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
     };
     $scope.$watch('content', function (content) {
         if (typeof content !== 'string') {
@@ -513,8 +498,9 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         });
     };
 }]).
-controller('addArticleCtrl', ['$scope', function ($scope) {
-    if (!$scope.isLogin) jsGen.location.path('/');
+controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
+    if (jsGen.previous === jsGen.location.path()) jsGen.previous = '/';
+    if (!$scope.isLogin) jsGen.location.path(jsGen.previous);
     $scope.previewTitle = '文章预览';
     $scope.markdownHelp = null;
     $scope.titleBytes = 0;
@@ -524,16 +510,17 @@ controller('addArticleCtrl', ['$scope', function ($scope) {
     $scope.tagsList = [];
     $scope.editSave = false;
 
-    function getMarkdown() {
-        jsGen.http.get('/static/md/markdown.md', {
-            cache: true
-        }).success(function (data, status) {
-            if (!data.err) {
-                $scope.previewTitle = 'Markdown简明语法';
-                $scope.markdownHelp = data;
-            } else $scope.err = data.err;
-        });
-    };
+    if ($routeParams.ID) jsGen.getArticle('A' + $routeParams.ID, function (article) {
+        if (!article.err) {
+            $scope.previewTitle = '编辑文章';
+            $scope.title = article.title;
+            $scope.content = article.content;
+            $scope.tagsList = article.tagsList.map(function (x) {
+                return x.tag;
+            });
+        } else $scope.err = article.err;
+    });
+
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
     $scope.$watch('title', function (title) {
@@ -570,7 +557,11 @@ controller('addArticleCtrl', ['$scope', function ($scope) {
             $scope.markdownHelp = null;
             $scope.previewTitle = $scope.title || '文章预览';
             MdEditor.refreshPreview();
-        } else getMarkdown();
+        } else jsGen.getMarkdown(function (data) {
+            $scope.previewTitle = data.title;
+            $scope.markdownHelp = data.content;
+            $scope.err = data.err;
+        });
     };
     $scope.getTag = function (t) {
         var tag = t.tag;

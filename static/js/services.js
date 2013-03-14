@@ -79,4 +79,32 @@ factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
         });
         return editor;
     };
+}]).
+factory('getArticle', ['rest', 'cache', function(rest, cache) {
+    return function (ID, callback) {
+        var article = cache.article.get(ID);
+        if (article) return callback(article);
+        else {
+            article = rest.article.get({
+                ID: ID
+            }, function () {
+                if (!article.err) cache.article.put(ID, article);
+                return callback(article);
+            });
+        }
+    };
+}]).
+factory('getMarkdown', ['$http', function($http) {
+    return function (callback) {
+        $http.get('/static/md/markdown.md', {
+            cache: true
+        }).success(function (data, status) {
+            var markdown = {};
+            if (!data.err) {
+                markdown.title = 'Markdown简明语法';
+                markdown.content = data;
+            } else markdown.err = data.err;
+            return callback(markdown);
+        });
+    };
 }]);

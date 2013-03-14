@@ -87,7 +87,7 @@ angular.module('jsGen.filters', []).
   filter('formatDate', ['$filter', function($filter) {
     return function(date) {
         var o = Date.now() - date;
-        if (o > 259200000) return $filter('date')(date, 'yyyy-MM-dd HH:mm'); // 三天前直接显示标准日期格式
+        if (o > 259200000) return $filter('date')(date, 'yy-MM-dd HH:mm'); // 三天前直接显示标准日期格式
         if (o > 86400000) return Math.floor(o / 86400000) + '天前';
         if (o > 3600000) return Math.floor(o / 3600000) + '小时前';
         if (o > 60000) return Math.floor(o / 60000) + '分钟前';
