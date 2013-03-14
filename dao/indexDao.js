@@ -6,10 +6,10 @@ var union = jsGen.lib.tools.union,
 
 var that = jsGen.dao.db.bind('global', {
 
-    getGlobalConfig: function(callback) {
+    getGlobalConfig: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
-            _id: globalConfig._id
+            _id: 'GlobalConfig'
         }, {
             sort: {
                 _id: -1
@@ -17,9 +17,9 @@ var that = jsGen.dao.db.bind('global', {
         }, callback);
     },
 
-    setGlobalConfig: function(Obj, callback) {
+    setGlobalConfig: function (Obj, callback) {
         var setObj = {},
-        defaultObj = {
+        newObj = {
             domain: '',
             title: '',
             url: '',
@@ -52,6 +52,14 @@ var that = jsGen.dao.db.bind('global', {
             UsersScore: [0, 0, 0, 0, 0, 0, 0],
             ArticleStatus: [0, 0],
             ArticleHots: [0, 0, 0, 0, 0],
+            userCache: 0,
+            articleCache: 0,
+            commentCache: 0,
+            listCache: 0,
+            tagCache: 0,
+            collectionCache: 0,
+            messageCache: 0,
+            paginationCache: [0, 0],
             smtp: {
                 host: '',
                 secureConnection: true,
@@ -64,11 +72,9 @@ var that = jsGen.dao.db.bind('global', {
                 senderEmail: ''
             },
             info: {}
-        },
-        newObj = union(defaultObj);
-        callback = callback || jsGen.lib.tools.callbackFn;
+        };
 
-        newObj = intersect(newObj, Obj);
+        intersect(newObj, Obj);
         if (Obj.visitors) {
             setObj.$inc = {
                 visitors: 1
@@ -79,15 +85,19 @@ var that = jsGen.dao.db.bind('global', {
             };
             delete newObj.visitHistory;
         } else setObj.$set = newObj;
-        that.findAndModify({
-            _id: globalConfig._id
+
+        if (callback) that.findAndModify({
+            _id: 'GlobalConfig'
         }, [], setObj, {
             w: 1,
             new: true
         }, callback);
+        else that.update({
+            _id: 'GlobalConfig'
+        }, setObj);
     },
 
-    initGlobalConfig: function(callback) {
+    initGlobalConfig: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         globalConfig.date = Date.now();
         that.insert(
@@ -96,7 +106,7 @@ var that = jsGen.dao.db.bind('global', {
         }, callback);
     },
 
-    getVisitHistory: function(_idArray, callback) {
+    getVisitHistory: function (_idArray, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         if (!Array.isArray(_idArray)) _idArray = [_idArray];
         that.find({
@@ -111,7 +121,7 @@ var that = jsGen.dao.db.bind('global', {
         }).each(callback);
     },
 
-    setVisitHistory: function(Obj, callback) {
+    setVisitHistory: function (Obj, callback) {
         var setObj = {},
         defaultObj = {
             data: [0, 0, '', '', '', ''] //[number,_id,IP,]
@@ -128,7 +138,7 @@ var that = jsGen.dao.db.bind('global', {
         }, callback);
     },
 
-    newVisitHistory: function(Obj, callback) {
+    newVisitHistory: function (Obj, callback) {
         var newObj = {
             _id: 1,
             data: []

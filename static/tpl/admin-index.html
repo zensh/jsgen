@@ -71,10 +71,6 @@
               <dd>
                 <span ng-repeat="(key, value) in global.sys.memory"><strong>{{key}}：</strong>{{value}} | </span>
               </dd>
-              <dt>分页缓存：</dt>
-              <dd>
-                <span ng-repeat="(key, value) in global.sys.pagination"><strong>{{key}}：</strong>{{value}} | </span>
-              </dd>
               <dt>用户缓存：</dt>
               <dd>
                 <span ng-repeat="(key, value) in global.sys.user"><strong>{{key}}：</strong>{{value}} | </span>
@@ -94,6 +90,18 @@
               <dt>标签缓存：</dt>
               <dd>
                 <span ng-repeat="(key, value) in global.sys.tag"><strong>{{key}}：</strong>{{value}} | </span>
+              </dd>
+              <dt>合集缓存：</dt>
+              <dd>
+                <span ng-repeat="(key, value) in global.sys.collection"><strong>{{key}}：</strong>{{value}} | </span>
+              </dd>
+              <dt>消息缓存：</dt>
+              <dd>
+                <span ng-repeat="(key, value) in global.sys.message"><strong>{{key}}：</strong>{{value}} | </span>
+              </dd>
+              <dt>分页导航缓存：</dt>
+              <dd>
+                <span ng-repeat="(key, value) in global.sys.pagination"><strong>{{key}}：</strong>{{value}} | </span>
               </dd>
             </dl>
         </div>

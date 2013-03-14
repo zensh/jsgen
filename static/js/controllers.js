@@ -374,6 +374,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         if (!$scope.isFavor && article.opposeList) $scope.isOppose = article.opposeList.some(function (x) {
             return x._id === $scope.global.user._id;
         });
+        for (var i = article.commentsList.length - 1; i >= 0; i--) jsGen.cache.article.put(article.commentsList[i]._id, article.commentsList[i]);
     });
     $scope.followMe = function (id) {
         var result;
@@ -457,6 +458,34 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             } else $scope.err = result.err;
         });
     });
+    $scope.getComments = function (idArray, to) {
+        $scope.referComments = [];
+        var dom = angular.element(document.getElementById(to));
+        var refer = angular.element(document.getElementById('refer-comments'));
+        if (dom.children('#refer-comments').length > 0) {
+            angular.element(document.getElementById('comments')).append(refer);
+            return;
+        } else dom.append(refer);
+        idArray = jsGen.union(idArray);
+        if (!angular.isArray(idArray)) idArray = [idArray];
+        for (var i = idArray.length - 1; i >= 0; i--) {
+            var comment = jsGen.cache.article.get(idArray[i]);
+            if (comment) {
+                $scope.referComments.push(comment);
+                idArray.splice(i, 1);
+            }
+        }
+        if (idArray.length > 0) {
+            var result = jsGen.rest.article.save({
+                    ID: 'comment'
+                }, {data: idArray}, function () {
+                    if (result.data) {
+                        $scope.referComments = $scope.referComments.concat(result.data);
+                        for (var i = result.data.length - 1; i >= 0; i--) jsGen.cache.article.put(result.data[i]._id, result.data[i]);
+                    } else if (result.err) $scope.err = result.err;
+                });
+        }
+    };
     $scope.submit = function () {
         if (!$scope.editSave) return;
         var data = {};
@@ -598,6 +627,9 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
         });
         angular.forEach(data.ArticleHots, function (value, key) {
             data.ArticleHots[key] = Number(value);
+        });
+        angular.forEach(data.paginationCache, function (value, key) {
+            data.paginationCache[key] = Number(value);
         });
         angular.forEach(data, function (value, key) {
             if (angular.equals(value, originData[key])) delete data[key];

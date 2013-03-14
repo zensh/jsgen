@@ -158,11 +158,15 @@ cache._remove = function (ID) {
 };
 (function () {
     var that = this;
+    jsGen.config.comments = 0;
+    jsGen.config.articles = 0;
     jsGen.dao.article.getArticlesIndex(function (err, doc) {
         if (err) throw err;
         if (doc) {
             doc._id = jsGen.dao.article.convertID(doc._id);
             that._update(doc);
+            if (doc.status === -1) jsGen.config.comments += 1;
+            else jsGen.config.articles += 1;
         }
     });
 }).call(cache);
@@ -188,13 +192,13 @@ function convertArticles(_idArray, callback, mode) {
             commentCache.getP(ID, function (err, doc) {
                 if (err) return callback(err, result);
                 if (doc) result.push(doc);
-                next();
+                return next();
             });
         } else {
             listCache.getP(ID, function (err, doc) {
                 if (err) return callback(err, result);
                 if (doc) result.push(doc);
-                next();
+                return next();
             });
         }
     }
@@ -219,6 +223,15 @@ function getArticle(req, res, dm) {
     if (!checkID(ID, 'A') || !cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
     if (cache[ID].display > 0 && !req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     articleCache.getP(ID, dm.intercept(function (doc) {
+        if (req.session.Uid !== doc.author._id) {
+            if (cache[ID].display === 1) {
+                jsGen.cache.user.getUser(doc.author._id, dm.intercept(function (user) {
+                    if (user.fansList.indexOf(jsGen.dao.user.convertID(req.session.Uid)) < 0) throw jsGen.Err(jsGen.lib.msg.articleDisplay1);
+                }), false);
+            } else if (cache[ID].display === 2) {
+                if (req.session.role !== 'admin' && req.session.role !== 'editor') throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
+            }
+        }
         doc.comments = doc.commentsList.length;
         var list = null;
         if (req.path[3] === 'comment') {
@@ -243,19 +256,32 @@ function getArticle(req, res, dm) {
                     req.session.commentPagination.key = doc._id + doc.updateTime;
                     jsGen.cache.pagination.put(req.session.commentPagination.key, list);
                 }
-                if (req.session.Uid === doc.author._id) return res.sendjson(doc);
-                if (cache[ID].display === 1) {
-                    jsGen.cache.user.getUser(doc.author._id, dm.intercept(function (user) {
-                        if (user.fansList.indexOf(jsGen.dao.user.convertID(req.session.Uid)) >= 0) return res.sendjson(doc);
-                        else throw jsGen.Err(jsGen.lib.msg.articleDisplay1);
-                    }), false);
-                } else if (cache[ID].display === 2) {
-                    if (req.session.role === 'admin' || req.session.role === 'editor') return res.sendjson(doc);
-                    else throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
-                } else return res.sendjson(doc);
+                return res.sendjson(doc);
             }));
         }
     }));
+};
+
+function getComments(req, res, dm) {
+    var result = {
+        err: null,
+        data: []
+    };
+
+    if (!Array.isArray(req.apibody.data)) req.apibody.data = [req.apibody.data];
+    if (req.apibody.data.length === 0) return res.sendjson(result);
+    req.apibody.data.reverse();
+    next();
+
+    function next() {
+        var ID = req.apibody.data.pop();
+        if (!ID) return res.sendjson(result);
+        if (!checkID(ID, 'A') || !cache[ID] || cache[ID].status > -1) return next();
+        commentCache.getP(ID, dm.intercept(function (doc) {
+            if (doc) result.data.push(doc);
+            return next();
+        }));
+    };
 };
 
 function getLatest(req, res, dm) {
@@ -298,7 +324,7 @@ function getLatest(req, res, dm) {
         if (!ID) return res.sendjson(body);
         listCache.getP(ID, dm.intercept(function (doc) {
             if (doc) body.data.push(doc);
-            next();
+            return next();
         }));
     };
 };
@@ -370,13 +396,7 @@ function addArticle(req, res, dm) {
                 doc._id = jsGen.dao.article.convertID(doc._id);
                 cache._update(doc);
                 articleCache.put(doc._id, doc);
-                process.nextTick(function () {
-                    var num = 0;
-                    for (var key in cache) {
-                        if (cache[key].status > -1) num += 1;
-                    }
-                    jsGen.config.articles = num;
-                });
+                jsGen.config.articles += 1;
             }
             articleCache.getP(doc._id, dm.intercept(function (doc) {
                 return res.sendjson(doc);
@@ -392,12 +412,12 @@ function setArticle(req, res, dm) {
     if (req.path[3] === 'comment') {
         if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
         filterArticle(req.apibody, dm.intercept(function (comment) {
-            var referID = 0;
             if (!checkID(comment.refer, 'A') || !cache[comment.refer]) comment.refer = articleID;
-            articleCache.remove(articleID);
-            if (articleID !== referID) commentCache.remove(referID);
-            articleID = jsGen.dao.article.convertID(articleID);
-            referID = jsGen.dao.article.convertID(comment.refer);
+            // articleCache.remove(articleID);
+            // if (articleID !== referID) commentCache.remove(referID);
+            var refer_id = 0;
+            var article_id = jsGen.dao.article.convertID(articleID);
+            if (comment.refer !== articleID) refer_id = jsGen.dao.article.convertID(comment.refer);
             comment.date = Date.now();
             comment.updateTime = comment.date;
             comment.display = 0;
@@ -407,12 +427,12 @@ function setArticle(req, res, dm) {
             jsGen.dao.article.setNewArticle(comment, dm.intercept(function (doc) {
                 if (doc) {
                     jsGen.dao.article.setComment({
-                        _id: articleID,
+                        _id: article_id,
                         commentsList: doc._id
                     });
-                    if (articleID !== referID) {
+                    if (refer_id) {
                         jsGen.dao.article.setComment({
-                            _id: referID,
+                            _id: refer_id,
                             commentsList: doc._id
                         });
                     }
@@ -420,16 +440,18 @@ function setArticle(req, res, dm) {
                         _id: comment.author,
                         articlesList: doc._id
                     });
+                    articleCache.update(articleID, function (value) {
+                        value.commentsList.push(doc._id);
+                        return value;
+                    });
+                    if (refer_id) commentCache.update(comment.refer, function (value) {
+                        value.commentsList.push(doc._id);
+                        return value;
+                    });
                     doc._id = jsGen.dao.article.convertID(doc._id);
                     cache._update(doc);
                     commentCache.put(doc._id, doc);
-                    process.nextTick(function () {
-                        var num = 0;
-                        for (var key in cache) {
-                            if (cache[key].status === -1) num += 1;
-                        }
-                        jsGen.config.comments = num;
-                    });
+                    jsGen.config.comments += 1;
                 }
                 commentCache.getP(doc._id, dm.intercept(function (doc) {
                     return res.sendjson(doc);
@@ -458,6 +480,8 @@ function postFn(req, res, dm) {
         case undefined:
         case 'index':
             return addArticle(req, res, dm);
+        case 'comment':
+            return getComments(req, res, dm);
         default:
             return setArticle(req, res, dm);
     }

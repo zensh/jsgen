@@ -48,13 +48,15 @@ serverDm.run(function () {
         jsGen.dao.index.getGlobalConfig(serverDm.intercept(function (doc) {
             that._update(doc);
             jsGen.cache = {};
-            jsGen.cache.pagination = new jsGen.lib.CacheTL(20 * 60 * 1000, 10000);
+            jsGen.cache.pagination = new jsGen.lib.CacheTL(jsGen.config.paginationCache[0] * 1000, jsGen.config.paginationCache[1]);
             jsGen.cache.timeInterval = new jsGen.lib.CacheTL(that.TimeInterval * 1000, 0, true);
-            jsGen.cache.user = new jsGen.lib.CacheLRU(100);
-            jsGen.cache.article = new jsGen.lib.CacheLRU(100);
-            jsGen.cache.comment = new jsGen.lib.CacheLRU(500);
-            jsGen.cache.list = new jsGen.lib.CacheLRU(500);
-            jsGen.cache.tag = new jsGen.lib.CacheLRU(100);
+            jsGen.cache.user = new jsGen.lib.CacheLRU(jsGen.config.userCache);
+            jsGen.cache.article = new jsGen.lib.CacheLRU(jsGen.config.articleCache);
+            jsGen.cache.comment = new jsGen.lib.CacheLRU(jsGen.config.commentCache);
+            jsGen.cache.list = new jsGen.lib.CacheLRU(jsGen.config.listCache);
+            jsGen.cache.tag = new jsGen.lib.CacheLRU(jsGen.config.tagCache);
+            jsGen.cache.collection = new jsGen.lib.CacheLRU(jsGen.config.collectionCache);
+            jsGen.cache.message = new jsGen.lib.CacheLRU(jsGen.config.messageCache);
             jsGen.api = {};
             jsGen.api.index = require('./api/index.js');
             jsGen.api.home = require('./api/home.js');
@@ -68,15 +70,8 @@ serverDm.run(function () {
             jsGen.api.install = require('./api/install.js');
 
             fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
-                jsGen.info = JSON.parse(data);
-                jsGen.info.nodejs = process.versions.node;
-                if (!jsGen.lib.tools.equal(jsGen.info, that.info)) jsGen.api.index.setGlobalConfig({
-                    info: jsGen.info
-                },
-                serverDm.intercept(function (doc) {
-                    that._update(doc);
-                    console.log(doc);
-                }));
+                jsGen.config.info = JSON.parse(data);
+                jsGen.config.info.nodejs = process.versions.node;
             }));
         }));
     }).call(jsGen.config);
@@ -87,6 +82,7 @@ serverDm.run(function () {
             //jsGen.dao.db.close();
             process.nextTick(function () {
                 dm.dispose();
+                console.log('dispose:' + Date.now());
             });
         });
         dm.add(req);
@@ -121,6 +117,7 @@ serverDm.run(function () {
                 jsGen.api[req.path[1]][req.method](req, res, dm);
                 process.nextTick(function () {
                     jsGen.api.index.updateOnlineCache(req);
+                    console.log('update:' + Date.now());
                 });
             } else {
                 res.file('/static/index.html');

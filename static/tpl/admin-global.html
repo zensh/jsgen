@@ -11,7 +11,10 @@
             <a href="#" ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
         </li>
         <li>
-            <a href="#" ng-click="setTab('tab3')" data-toggle="tab">SMTP设置</a>
+            <a href="#" ng-click="setTab('tab3')" data-toggle="tab">缓存设置</a>
+        </li>
+        <li>
+            <a href="#" ng-click="setTab('tab4')" data-toggle="tab">SMTP设置</a>
         </li>
     </ul>
 
@@ -254,6 +257,83 @@
         </div>
 
         <div class="" ng-switch-when="tab3">
+            <form name="globalEdit" class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">
+                    用户缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="userCache" ng-model="global.userCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    文章缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="articleCache" ng-model="global.articleCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    评论缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="commentCache" ng-model="global.commentCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    文章列表缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="listCache" ng-model="global.listCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    标签缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="tagCache" ng-model="global.tagCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    合集缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="collectionCache" ng-model="global.collectionCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    消息缓存容量：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="messageCache" ng-model="global.messageCache"/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    分页导航缓存：
+                    </label>
+                    <div class="controls">
+                    <input type="text" name="paginationCache" ng-model="global.paginationCache" ng-list="/[,，\s]/"/>
+                    <span class="text-info help-block">[有效期<strong>{{global.paginationCache[0]}}</strong>秒
+                    ，最大容量<strong>{{global.paginationCache[1]}}</strong>]</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls" ng-show="editSave">
+                        <button class="btn btn-primary" ng-click="submit()">保存</button>
+                        <button class="btn btn-success" ng-click="reset()">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="" ng-switch-when="tab4">
             <form name="globalEdit" class="form-horizontal">
                 <div class="control-group">
                     <label class="control-label">

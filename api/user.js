@@ -70,11 +70,13 @@ cache._remove = function (Uid) {
 };
 (function () {
     var that = this;
+    jsGen.config.users = 0;
     jsGen.dao.user.getUsersIndex(function (err, doc) {
         if (err) throw err;
         if (doc) {
             doc._id = jsGen.dao.user.convertID(doc._id);
             that._update(doc);
+            jsGen.config.users += 1;
         }
     });
 }).call(cache);
@@ -126,7 +128,7 @@ function adduser(userObj, callback) {
             body = intersect(body, doc);
             body.err = null;
             cache._update(body);
-            jsGen.config.users = cache._index.length;
+            jsGen.config.users += 1;
         }
         return callback(err, body);
     });
@@ -134,7 +136,7 @@ function adduser(userObj, callback) {
 
 function logout(req, res, dm) {
     req.delsession();
-    res.sendjson({
+    return res.sendjson({
         logout: true
     });
 };
@@ -256,7 +258,7 @@ function addUsers(req, res, dm) {
         if (!userObj) return res.sendjson(body);
         adduser(userObj, dm.intercept(function (doc) {
             body.push(doc);
-            next();
+            return next();
         }));
     };
 };
@@ -463,7 +465,7 @@ function editUsers(req, res, dm) {
                 data.email = doc.email;
                 body.data.push(data);
             }
-            next();
+            return next();
         }));
     };
 };

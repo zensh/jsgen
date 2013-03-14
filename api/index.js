@@ -28,10 +28,14 @@ function updateOnlineCache(req) {
     }
     jsGen.config.onlineNum = online;
     jsGen.config.onlineUsers = users;
-    if (online > jsGen.config.maxOnlineNum) setGlobalConfig({
-        maxOnlineNum: online,
-        maxOnlineTime: now
-    });
+    if (online > jsGen.config.maxOnlineNum) {
+        jsGen.config.maxOnlineNum = online;
+        jsGen.config.maxOnlineTime = now;
+        jsGen.dao.index.setGlobalConfig({
+            maxOnlineNum: online,
+            maxOnlineTime: now
+        });
+    }
 }
 
 function checkTimeInterval(req, type, add) {
@@ -39,13 +43,6 @@ function checkTimeInterval(req, type, add) {
     if (add) jsGen.cache.timeInterval.put(req.session._id + type);
     else if (jsGen.cache.timeInterval.get(req.session._id + type)) return false;
     return true;
-};
-
-function setGlobalConfig(obj, callback) {
-    jsGen.dao.index.setGlobalConfig(obj, function (err, doc) {
-        if (doc) jsGen.config._update(doc);
-        if (callback) return callback(err, doc);
-    });
 };
 
 function setVisitHistory(req) {
@@ -62,7 +59,8 @@ function setVisitHistory(req) {
     visit.data[4] = info.name || 'unknow';
     visit.data[5] = info.os.toString() || 'unknow';
     process.nextTick(function () {
-        setGlobalConfig({
+        jsGen.config.visitors += 1;
+        jsGen.dao.index.setGlobalConfig({
             visitors: 1
         });
         jsGen.dao.index.setVisitHistory(visit, function (err, doc) {
@@ -70,7 +68,8 @@ function setVisitHistory(req) {
                 visit._id += 1;
                 jsGen.dao.index.newVisitHistory(visit, function (err, doc) {
                     if (!err) {
-                        setGlobalConfig({
+                        jsGen.config.visitHistory.push(visit._id);
+                        jsGen.dao.index.setGlobalConfig({
                             visitHistory: visit._id
                         });
                         jsGen.dao.index.setVisitHistory(visit);
@@ -87,19 +86,44 @@ function getvisitHistory(req, res, dm) {
     };
     if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     jsGen.dao.index.getVisitHistory(jsGen.config.visitHistory, dm.intercept(function (doc) {
-        if (!doc) {
-            jsGen.dao.db.close();
-            return res.sendjson(body);
-        } else body.data = body.data.concat(doc.data);
+        if (doc) body.data = body.data.concat(doc.data);
+        return res.sendjson(body);
     }));
 };
 
 function getIndex(req, res, dm) {
-    var body = union(jsGen.config);
+    var config = {
+        domain: '',
+        title: '',
+        url: '',
+        logo: '',
+        email: '',
+        description: '',
+        metatitle: '',
+        metadesc: '',
+        keywords: '',
+        visitors: 0,
+        users: 0,
+        articles: 0,
+        comments: 0,
+        onlineNum: 0,
+        onlineUsers: 0,
+        maxOnlineNum: 0,
+        maxOnlineTime: 0,
+        ArticleTagsMax: 0,
+        UserTagsMax: 0,
+        TitleMinLen: 0,
+        TitleMaxLen: 0,
+        SummaryMaxLen: 0,
+        ContentMinLen: 0,
+        ContentMaxLen: 0,
+        UserNameMinLen: 0,
+        UserNameMaxLen: 0,
+        register: true,
+        info: {}
+    },
+    body = union(config, jsGen.config);
 
-    delete body.visitHistory;
-    delete body.email;
-    delete body.smtp;
     body.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
         jsGen.api.user.userCache.getP(req.session.Uid, dm.intercept(function (doc) {
@@ -118,12 +142,14 @@ function getGlobal(req, res, dm) {
         platform: process.platform,
         node: process.versions,
         memory: process.memoryUsage(),
-        pagination: jsGen.cache.pagination.info(),
         user: jsGen.cache.user.info(),
         article: jsGen.cache.article.info(),
         comment: jsGen.cache.comment.info(),
         list: jsGen.cache.list.info(),
         tag: jsGen.cache.tag.info(),
+        collection: jsGen.cache.collection.info(),
+        message: jsGen.cache.message.info(),
+        pagination: jsGen.cache.pagination.info()
     };
     body.sys.uptime = jsGen.lib.tools.formatTime(Math.round(body.sys.uptime));
     body.sys.memory.rss = jsGen.lib.tools.formatBytes(body.sys.memory.rss);
@@ -160,6 +186,14 @@ function setGlobal(req, res, dm) {
         UsersScore: [0, 0, 0, 0, 0, 0, 0],
         ArticleStatus: [0, 0],
         ArticleHots: [0, 0, 0, 0, 0],
+        userCache: 0,
+        articleCache: 0,
+        commentCache: 0,
+        listCache: 0,
+        tagCache: 0,
+        collectionCache: 0,
+        messageCache: 0,
+        paginationCache: [0, 0],
         smtp: {
             host: '',
             secureConnection: true,
@@ -191,12 +225,25 @@ function setGlobal(req, res, dm) {
     if (setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
     if (setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
     if (setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
+    if (setObj.paginationCache) setObj.paginationCache.forEach(checkArray);
     if (setObj.TimeInterval && setObj.TimeInterval < 5) setObj.TimeInterval = 5;
     Object.keys(setObj).forEach(function (key) {
         if (equal(setObj[key], jsGen.config[key])) delete setObj[key];
     });
-    setGlobalConfig(setObj, dm.intercept(function (doc) {
+    if (setObj.userCache) jsGen.cache.user.capacity = setObj.userCache
+    if (setObj.articleCache) jsGen.cache.article.capacity = setObj.articleCache
+    if (setObj.commentCache) jsGen.cache.comment.capacity = setObj.commentCache
+    if (setObj.listCache) jsGen.cache.list.capacity = setObj.listCache
+    if (setObj.tagCache) jsGen.cache.tag.capacity = setObj.tagCache
+    if (setObj.collectionCache) jsGen.cache.collection.capacity = setObj.collectionCache
+    if (setObj.messageCache) jsGen.cache.message.capacity = setObj.messageCache
+    if (setObj.paginationCache) {
+        jsGen.cache.pagination.timeLimit = setObj.paginationCache[0] * 1000;
+        jsGen.cache.pagination.capacity = setObj.paginationCache[1];
+    }
+    jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
+        union(jsGen.config, body);
         return res.sendjson(body);
     }));
 };
@@ -221,7 +268,6 @@ module.exports = {
     GET: getFn,
     POST: postFn,
     setVisitHistory: setVisitHistory,
-    setGlobalConfig: setGlobalConfig,
     updateOnlineCache: updateOnlineCache,
     checkTimeInterval: checkTimeInterval
 };

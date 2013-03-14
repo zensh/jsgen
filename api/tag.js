@@ -126,7 +126,7 @@ function setTag(tagObj, callback) {
                         _id: toID,
                         articlesList: article
                     });
-                    articlesListNext();
+                    return articlesListNext();
                 };
 
                 function usersListNext() {
@@ -136,7 +136,7 @@ function setTag(tagObj, callback) {
                         _id: toID,
                         usersList: user
                     });
-                    usersListNext();
+                    return usersListNext();
                 };
 
                 function delTag() {
@@ -189,10 +189,10 @@ function filterTags(tagArray, callback) {
         if (!tag) return callback(null, tags);
         if (cache[tag]) {
             tags.push(jsGen.dao.tag.convertID(cache[tag]._id));
-            next();
+            return next();
         } else if (cache[tag.toLowerCase()]) {
             tags.push(jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id));
-            next();
+            return next();
         } else {
             jsGen.dao.tag.setNewTag({
                 tag: tag
@@ -202,7 +202,7 @@ function filterTags(tagArray, callback) {
                     doc._id = jsGen.dao.tag.convertID(doc._id);
                     cache._update(doc);
                 }
-                next();
+                return next();
             });
         }
     };
