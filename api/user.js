@@ -283,47 +283,27 @@ function setUser(req, res, dm) {
 
     var _id = jsGen.dao.user.convertID(Uid);
     var _idReq = jsGen.dao.user.convertID(req.session.Uid);
-    if (req.apibody.follow === true) {
-        userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-            if (doc.followList.indexOf(_id) >= 0) throw jsGen.Err(jsGen.lib.msg.userFollowed);
-            jsGen.dao.user.setFollow({
-                _id: _idReq,
-                followList: _id
-            }, dm.intercept(function (doc) {
-                jsGen.dao.user.setFans({
-                    _id: _id,
-                    fansList: _idReq
+    var follow = !!req.apibody.follow;
+    userCache.getP(req.session.Uid, dm.intercept(function (doc) {
+        if (follow && doc.followList.indexOf(_id) >= 0) throw jsGen.Err(jsGen.lib.msg.userFollowed);
+        else if (!follow && doc.followList.indexOf(_id) < 0) throw jsGen.Err(jsGen.lib.msg.userUnfollowed);
+        jsGen.dao.user.setFollow({
+            _id: _idReq,
+            followList: follow ? _id : -_id
+        }, dm.intercept(function (doc) {
+            jsGen.dao.user.setFans({
+                _id: _id,
+                fansList: follow ? _idReq : -_idReq
+            });
+            userCache.remove(Uid);
+            userCache.remove(req.session.Uid);
+            userCache.getP(req.session.Uid, dm.intercept(function (doc) {
+                return res.sendjson({
+                    followList: doc.followList
                 });
-                userCache.remove(Uid);
-                userCache.remove(req.session.Uid);
-                userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-                    return res.sendjson({
-                        followList: doc.followList
-                    });
-                }));
             }));
-        }), false);
-    } else if (req.apibody.follow === false) {
-        userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-            if (doc.followList.indexOf(_id) < 0) throw jsGen.Err(jsGen.lib.msg.userUnfollowed);
-            jsGen.dao.user.setFollow({
-                _id: _idReq,
-                followList: -_id
-            }, dm.intercept(function (doc) {
-                jsGen.dao.user.setFans({
-                    _id: _id,
-                    fansList: -_idReq
-                });
-                userCache.remove(Uid);
-                userCache.remove(req.session.Uid);
-                userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-                    return res.sendjson({
-                        followList: doc.followList
-                    });
-                }));
-            }));
-        }), false);
-    } else throw jsGen.Err(jsGen.lib.msg.requestDataErr);
+        }));
+    }), false);
 };
 
 function getUsers(req, res, dm) {

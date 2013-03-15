@@ -132,31 +132,17 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
     });
     $scope.followMe = function (id) {
         var result;
-        if ($scope.isFollow) {
-            result = jsGen.rest.user.save({
-                Uid: id
-            }, {
-                follow: false
-            }, function () {
-                if (!result.err) {
-                    jsGen.union($scope.global.user.followList, result.followList);
-                    $scope.user.fans -= 1;
-                    $scope.isFollow = false;
-                }
-            });
-        } else {
-            result = jsGen.rest.user.save({
-                Uid: id
-            }, {
-                follow: true
-            }, function () {
-                if (!result.err) {
-                    jsGen.union($scope.global.user.followList, result.followList);
-                    $scope.user.fans += 1;
-                    $scope.isFollow = true;
-                }
-            });
-        }
+        result = jsGen.rest.user.save({
+            Uid: id
+        }, {
+            follow: !$scope.isFollow
+        }, function () {
+            if (!result.err) {
+                jsGen.union($scope.global.user.followList, result.followList);
+                $scope.user.fans += $scope.isFollow ? -1 : 1;
+                $scope.isFollow = !$scope.isFollow;
+            }
+        });
     };
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
@@ -358,31 +344,16 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     });
     $scope.followMe = function (id) {
         var result;
-        if ($scope.isFollow) {
-            result = jsGen.rest.user.save({
-                Uid: id
-            }, {
-                follow: false
-            }, function () {
-                if (!result.err) {
-                    jsGen.union($scope.global.user.followList, result.followList);
-                    $scope.user.fans -= 1;
-                    $scope.isFollow = false;
-                }
-            });
-        } else {
-            result = jsGen.rest.user.save({
-                Uid: id
-            }, {
-                follow: true
-            }, function () {
-                if (!result.err) {
-                    jsGen.union($scope.global.user.followList, result.followList);
-                    $scope.user.fans += 1;
-                    $scope.isFollow = true;
-                }
-            });
-        }
+        result = jsGen.rest.user.save({
+            Uid: id
+        }, {
+            follow: !$scope.isFollow
+        }, function () {
+            if (!result.err) {
+                jsGen.union($scope.global.user.followList, result.followList);
+                $scope.isFollow = !$scope.isFollow;
+            }
+        });
     };
     $scope.wmdHelp = function (s) {
         if (s == 'preview') {
@@ -499,8 +470,8 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     };
 }]).
 controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
-    if (jsGen.previous === jsGen.location.path()) jsGen.previous = '/';
-    if (!$scope.isLogin) jsGen.location.path(jsGen.previous);
+    if (jsGen.goBack === jsGen.location.path()) jsGen.goBack = '/';
+    if (!$scope.isLogin) jsGen.location.path(jsGen.goBack);
     $scope.previewTitle = '文章预览';
     $scope.markdownHelp = null;
     $scope.titleBytes = 0;
@@ -513,8 +484,10 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     if ($routeParams.ID) jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (!article.err) {
             $scope.previewTitle = '编辑文章';
+            $scope._id = article._id;
             $scope.title = article.title;
             $scope.content = article.content;
+            $scope.refer = article.refer.url;
             $scope.tagsList = article.tagsList.map(function (x) {
                 return x.tag;
             });
@@ -570,11 +543,14 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     $scope.submit = function () {
         if (!$scope.editSave) return;
         var data = {};
+        var parameter = {};
         data.content = jsGen.sanitize($scope.content);
         data.title = jsGen.sanitize($scope.title.trim(), 0);
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;
-        var result = jsGen.rest.article.save({}, data, function () {
+        data._id = $scope._id;
+        if ($routeParams.ID) parameter = {ID: 'A' + $routeParams.ID, OP: 'edit'};
+        var result = jsGen.rest.article.save(parameter, data, function () {
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);
                 jsGen.location.path('/' + result._id);

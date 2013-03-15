@@ -49,7 +49,7 @@ serverDm.run(function () {
             that._update(doc);
             jsGen.cache = {};
             jsGen.cache.pagination = new jsGen.lib.CacheTL(jsGen.config.paginationCache[0] * 1000, jsGen.config.paginationCache[1]);
-            jsGen.cache.timeInterval = new jsGen.lib.CacheTL(that.TimeInterval * 1000, 0, true);
+            jsGen.cache.timeInterval = new jsGen.lib.CacheTL(jsGen.config.TimeInterval * 1000, 0, true);
             jsGen.cache.user = new jsGen.lib.CacheLRU(jsGen.config.userCache);
             jsGen.cache.article = new jsGen.lib.CacheLRU(jsGen.config.articleCache);
             jsGen.cache.comment = new jsGen.lib.CacheLRU(jsGen.config.commentCache);
@@ -117,7 +117,6 @@ serverDm.run(function () {
                 jsGen.api[req.path[1]][req.method](req, res, dm);
                 process.nextTick(function () {
                     jsGen.api.index.updateOnlineCache(req);
-                    console.log('update:' + Date.now());
                 });
             } else {
                 res.file('/static/index.html');

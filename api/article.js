@@ -7,10 +7,12 @@ var listArticle = jsGen.lib.json.ListArticle,
     articleCache = jsGen.cache.article,
     commentCache = jsGen.cache.comment,
     listCache = jsGen.cache.list,
+    timeInterval = jsGen.cache.timeInterval,
     filterTitle = jsGen.lib.tools.filterTitle,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent,
-    pagination = jsGen.lib.tools.pagination;
+    pagination = jsGen.lib.tools.pagination,
+    checkTimeInterval = jsGen.lib.tools.checkTimeInterval;
 
 articleCache.getP = function (ID, callback, convert) {
     var that = this,
@@ -279,7 +281,7 @@ function getComments(req, res, dm) {
     function next() {
         var ID = req.apibody.data.pop();
         if (!ID) return res.sendjson(result);
-        if (!checkID(ID, 'A') || !cache[ID] || cache[ID].status > -1) return next();
+        if (!checkID(ID, 'A') || !cache[ID] || cache[ID].status > -1 || cache[ID].display > 0) return next();
         commentCache.getP(ID, dm.intercept(function (doc) {
             if (doc) result.data.push(doc);
             return next();
@@ -383,6 +385,7 @@ function filterArticle(articleObj, callback) {
 function addArticle(req, res, dm) {
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if (checkTimeInterval(req, 'A')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
     filterArticle(req.apibody, dm.intercept(function (article) {
         article.date = Date.now();
         article.updateTime = article.date;
@@ -401,6 +404,7 @@ function addArticle(req, res, dm) {
                 articleCache.put(doc._id, doc);
                 jsGen.config.articles += 1;
             }
+            checkTimeInterval(req, 'A', dm);
             articleCache.getP(doc._id, dm.intercept(function (doc) {
                 return res.sendjson(doc);
             }));
@@ -411,7 +415,11 @@ function addArticle(req, res, dm) {
 function setArticle(req, res, dm) {
     var articleID = req.path[2];
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    var author = jsGen.dao.user.convertID(req.session.Uid);
+    var date = Date.now();
     if (!checkID(articleID, 'A') || !cache[articleID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    if (checkTimeInterval(req, 'A')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
+    checkTimeInterval(req, 'A', dm);
     if (req.path[3] === 'comment') {
         if (req.session.role === 'guest') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
         filterArticle(req.apibody, dm.intercept(function (comment) {
@@ -419,12 +427,11 @@ function setArticle(req, res, dm) {
             var refer_id = 0;
             var article_id = jsGen.dao.article.convertID(articleID);
             if (comment.refer !== articleID) refer_id = jsGen.dao.article.convertID(comment.refer);
-            var date = Date.now();
             comment.date = date;
             comment.updateTime = date;
             comment.display = 0;
             comment.status = -1;
-            comment.author = jsGen.dao.user.convertID(req.session.Uid);
+            comment.author = author;
             delete comment._id;
             jsGen.dao.article.setNewArticle(comment, dm.intercept(function (doc) {
                 if (doc) {
@@ -470,7 +477,26 @@ function setArticle(req, res, dm) {
                 }));
             }));
         }));
-    } else if (req.path[3] === 'edit') {}
+    } else if (req.path[3] === 'edit') {
+        articleCache.getP(articleID, dm.intercept(function (doc) {
+            if (author !== doc.author) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+            var article_id = jsGen.dao.article.convertID(articleID);
+            filterArticle(req.apibody, dm.intercept(function (article) {
+                article._id = article_id;
+                article.updateTime = date;
+                jsGen.dao.article.setArticle(article, dm.intercept(function (doc) {
+                    if (doc) {
+                        doc._id = articleID;
+                        cache._update(doc);
+                        articleCache.put(doc._id, doc);
+                    }
+                    articleCache.getP(doc._id, dm.intercept(function (doc) {
+                        return res.sendjson(doc);
+                    }));
+                }));
+            }));
+        }), false);
+    } else if (req.path[3] === 'collect') {}
 };
 
 function getFn(req, res, dm) {

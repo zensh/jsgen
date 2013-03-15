@@ -3082,7 +3082,7 @@ button.close {
   position: relative;
   padding: 10px 15px;
   background-color: #eeeeee;
-  border-radius: 4px;
+  border-radius: 0px; /*jsGen*/
 }
 
 .navbar:before,

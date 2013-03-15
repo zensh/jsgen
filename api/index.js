@@ -9,8 +9,7 @@ var url = require('url'),
     checkUserName = jsGen.lib.tools.checkUserName,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256;
 
-var onlineCache = {}, onlineArray = [];
-
+var onlineCache = {};
 function updateOnlineCache(req) {
     var now = Date.now(),
         users = 0,
@@ -37,13 +36,6 @@ function updateOnlineCache(req) {
         });
     }
 }
-
-function checkTimeInterval(req, type, add) {
-    if (!req.session._id) return false;
-    if (add) jsGen.cache.timeInterval.put(req.session._id + type);
-    else if (jsGen.cache.timeInterval.get(req.session._id + type)) return false;
-    return true;
-};
 
 function setVisitHistory(req) {
     var visit = {
@@ -149,7 +141,8 @@ function getGlobal(req, res, dm) {
         tag: jsGen.cache.tag.info(),
         collection: jsGen.cache.collection.info(),
         message: jsGen.cache.message.info(),
-        pagination: jsGen.cache.pagination.info()
+        pagination: jsGen.cache.pagination.info(),
+        timeInterval: jsGen.cache.timeInterval.info()
     };
     body.sys.uptime = jsGen.lib.tools.formatTime(Math.round(body.sys.uptime));
     body.sys.memory.rss = jsGen.lib.tools.formatBytes(body.sys.memory.rss);
@@ -268,6 +261,5 @@ module.exports = {
     GET: getFn,
     POST: postFn,
     setVisitHistory: setVisitHistory,
-    updateOnlineCache: updateOnlineCache,
-    checkTimeInterval: checkTimeInterval
+    updateOnlineCache: updateOnlineCache
 };

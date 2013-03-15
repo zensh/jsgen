@@ -5,7 +5,7 @@
                 <h4>{{article.title}}</h4>
                 <ul class="list-inline">
                     <li ng-show="article.refer">引文:<a ng-href="{{article.refer.url}}">{{article.refer.url}}</a></li>
-                    <li>时间:{{article.date | formatDate}}</li>
+                    <li>发表:{{article.date | formatDate}}</li>
                     <li>更新:{{article.updateTime | formatDate}}</li>
                     <li>访问:{{article.visitors}}次</li>
                     <li>热度:{{article.hots}}</li>

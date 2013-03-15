@@ -293,8 +293,8 @@ function($rootScope, $http, $location, $timeout, $filter, $anchorScroll, cache, 
         $rootScope.global.UserNameMaxLen = $rootScope.global.UserNameMaxLen || 20;
         $rootScope.global.info.angularjs = angular.version.full;
     });
-    $rootScope.$watch(function() {return $location.path();}, function(path, previous) {
-        jsGen.previous = previous;
+    $rootScope.$watch(function() {return $location.path();}, function(path, goBack) {
+        jsGen.goBack = goBack;
         var element = angular.element(document.getElementById('main'));
         var reg = /\/add|^\/A.+\/edit$/;
         if (reg.test(path)) element.addClass('container-large');

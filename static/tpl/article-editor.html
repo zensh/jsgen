@@ -13,7 +13,7 @@
     <div class="span6">
         <div class="panel">
             <div class="page-header">
-                <h4>添加文章</h4>
+                <h4>添加/编辑文章</h4>
             </div>
             <div class="alert alert-error" ng-show="err">
                 <button type="button" class="close" ng-click="err=null">&times;</button>
@@ -27,7 +27,6 @@
                 <span class="text-warning">
                 [必填，{{global.TitleMinLen}} 到 {{global.TitleMaxLen}} 字节，当前<strong>{{titleBytes}}</strong>字节]
             </span>
-                <span>{{title}}</span>
                 <input class="input-block-level" type="text" placeholder="文章标题" name="title"
                 ng-model="title" required/>
                 <label>
