@@ -154,7 +154,7 @@ function login(req, res, dm) {
     var _id = jsGen.dao.user.convertID(cache[data.logname]._id);
     jsGen.dao.user.getAuth(_id, dm.intercept(function (doc) {
         if (doc.locked) {
-            throw jsGen.Err(jsGen.lib.msg.userLocked, 'locked');
+            throw jsGen.Err(jsGen.lib.msg.userLocked);
         } else if (doc.loginAttempts >= 5) {
             jsGen.dao.user.setUserInfo({
                 _id: _id,
@@ -165,7 +165,7 @@ function login(req, res, dm) {
                     loginAttempts: 0
                 });
             }));
-            throw jsGen.Err(jsGen.lib.msg.loginAttempts, 'locked');
+            throw jsGen.Err(jsGen.lib.msg.loginAttempts);
         }
         if (data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
             doc._id = jsGen.dao.user.convertID(doc._id);
@@ -192,7 +192,7 @@ function login(req, res, dm) {
                 _id: _id,
                 loginAttempts: 1
             });
-            throw jsGen.Err(jsGen.lib.msg.userPasswd, 'passwd');
+            throw jsGen.Err(jsGen.lib.msg.userPasswd);
         }
     }));
 };

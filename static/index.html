@@ -27,8 +27,9 @@
                 '/static/js/directives.js',
                 '/static/js/filters.js',
                 '/static/js/services.js',
-                '/static/js/app.js',
                 '/static/js/controllers.js',
+                '/static/js/tools.js',
+                '/static/js/app.js',
                 '/static/js/lib/marked.js',
                 '/static/js/lib/sanitize.js',
                 '/static/js/lib/Markdown.Editor.js',
@@ -110,5 +111,17 @@
                 </p>
             </div>
         </footer>
+        <div class="modal fade modal-content text-error" id="err-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">{{err.name}}</h3>
+            </div>
+            <div class="modal-body">
+                <p>{{err.message}}</p>
+            </div>
+            <div class="modal-footer">
+                <span ng-show="timeout">[<strong ng-timing="timeout"></strong>秒后自动返回]</span>
+                <a href="#" class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
+            </div>
+        </div>
     </body>
 </html>

@@ -32,7 +32,7 @@ controller('userLoginCtrl', ['$scope', function ($scope) {
                 $scope.checkUser();
                 jsGen.location.path('/home');
             } else {
-                $scope.err = result.err;
+                jsGen.rootScope.err = result.err;
                 $scope.isSubmit = false;
                 if ($scope.err.name === 'locked') {
                     resetName = '申请解锁';
@@ -56,7 +56,7 @@ controller('userLoginCtrl', ['$scope', function ($scope) {
             if (!result.err) {
                 $scope.request = result.request;
                 $scope.timeout = 5;
-                $scope.$on('timeout', function (event) {
+                $scope.$on('timeout!', function (event) {
                     event.stopPropagation();
                     jsGen.location.path('/');
                 });

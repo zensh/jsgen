@@ -63,13 +63,10 @@ serverDm.run(function () {
             jsGen.cache.message = new jsGen.lib.CacheLRU(jsGen.config.messageCache);
             jsGen.api = {};
             jsGen.api.index = require('./api/index.js');
-            jsGen.api.home = require('./api/home.js');
-            jsGen.api.admin = require('./api/admin.js');
             jsGen.api.user = require('./api/user.js');
             jsGen.api.article = require('./api/article.js');
             jsGen.api.tag = require('./api/tag.js');
             jsGen.api.collection = require('./api/collection.js');
-            jsGen.api.comment = require('./api/comment.js');
             jsGen.api.message = require('./api/message.js');
 
             fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {

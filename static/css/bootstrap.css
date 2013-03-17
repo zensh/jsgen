@@ -5000,3 +5000,11 @@ aside.panel {
   margin: 40px 0 20px;
   border-top: 1px solid #eeeeee;
 }
+#err-modal {
+    position: absolute;
+    max-width: 680px;
+    margin: 0 auto;
+    overflow-y: auto;
+    top: 20%;
+    bottom: auto;
+}

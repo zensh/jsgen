@@ -26,6 +26,7 @@ directive('ngTiming', ['$timeout', function($timeout) {
         template: '<i>{{timing}}</i>',
         link: function(scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngTiming);
+            var eventName = attr.ngTiming;
             scope.$watch(attr.ngTiming, function ngTimingWatchAction(value) {
                 var time = Number(value) || 0;
                 if (time <= 0) return;
@@ -33,7 +34,7 @@ directive('ngTiming', ['$timeout', function($timeout) {
                     scope.timing = time;
                     time -= 1;
                     if (time >= 0) $timeout(timing, 1000);
-                    else scope.$emit('timeout');
+                    else scope.$emit(eventName);
                 })();
             });
         }
@@ -64,6 +65,7 @@ directive('ngPagination', function() {
                         '</ul>',
         link: function(scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngPagination);
+            var eventName = attr.ngTiming;
             scope.$watch(attr.ngPagination, function ngPaginationWatchAction(value) {
                 if (!value) return;
                 scope.now = value.now || 1;
@@ -114,7 +116,7 @@ directive('ngPagination', function() {
                     if (scope.now !== p) scope.$emit('pagination', params);
                 };
                 scope.setNum = function(num) {
-                    scope.$emit('pagination', {
+                    scope.$emit(eventName, {
                         n: num,
                         p: 1
                     });
