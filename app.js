@@ -17,7 +17,6 @@ serverDm.run(function () {
     jsGen.module.marked = require('marked');
     jsGen.module.mongoskin = require('mongoskin');
     jsGen.module.nodemailer = require('nodemailer');
-    jsGen.module.platform = require('platform');
     //jsGen.module.qiniu = require('qiniu');
     jsGen.module.xss = require('xss');
     jsGen.errlog = jsGen.module.rrestjs.restlog;
@@ -46,6 +45,11 @@ serverDm.run(function () {
             this._initTime = Date.now();
         };
         jsGen.dao.index.getGlobalConfig(serverDm.intercept(function (doc) {
+            if (!doc) {
+                var install = require('./api/install.js');
+                install();
+                return;
+            }
             that._update(doc);
             jsGen.cache = {};
             jsGen.cache.pagination = new jsGen.lib.CacheTL(jsGen.config.paginationCache[0] * 1000, jsGen.config.paginationCache[1]);
@@ -67,7 +71,6 @@ serverDm.run(function () {
             jsGen.api.collection = require('./api/collection.js');
             jsGen.api.comment = require('./api/comment.js');
             jsGen.api.message = require('./api/message.js');
-            jsGen.api.install = require('./api/install.js');
 
             fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
                 jsGen.config.info = JSON.parse(data);
@@ -118,10 +121,7 @@ serverDm.run(function () {
                 process.nextTick(function () {
                     jsGen.api.index.updateOnlineCache(req);
                 });
-            } else {
-                res.file('/static/index.html');
-                jsGen.api.index.setVisitHistory(req);
-            }
+            } else res.file('/static/index.html');
             console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
         });
     }).listen(jsGen.conf.listenPort);

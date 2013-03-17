@@ -1,7 +1,6 @@
 'use strict';
 
 /* Directives */
-
 angular.module('jsGen.directives', []).
 directive('ngParseMarkdown', ['MdParse', function(MdParse) {
     // <div ng-parse-markdown="document"></div>

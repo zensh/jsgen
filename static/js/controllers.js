@@ -119,31 +119,16 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         }
     };
     $scope.isMe = false;
-    $scope.isFollow = false;
     getUser(function (user) {
         if (user.err) return jsGen.location.path('/');
         if ($scope.global.user && $scope.global.user._id === user._id) jsGen.location.path('/home');
         $scope.user = user;
         if ($scope.global.user) {
-            $scope.isFollow = $scope.global.user.followList.some(function (x) {
+            $scope.user.isFollow = $scope.global.user.followList.some(function (x) {
                 return x._id === user._id;
             });
         }
     });
-    $scope.followMe = function (id) {
-        var result;
-        result = jsGen.rest.user.save({
-            Uid: id
-        }, {
-            follow: !$scope.isFollow
-        }, function () {
-            if (!result.err) {
-                jsGen.union($scope.global.user.followList, result.followList);
-                $scope.user.fans += $scope.isFollow ? -1 : 1;
-                $scope.isFollow = !$scope.isFollow;
-            }
-        });
-    };
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
     if (!($scope.global.user && $scope.global.user.role === 'admin')) jsGen.location.path('/');
@@ -292,10 +277,6 @@ controller('userEditCtrl', ['$scope', function ($scope) {
 }]).
 controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
     $scope.isMe = false;
-    $scope.isFollow = false;
-    $scope.isFavor = false;
-    $scope.isOppose = false;
-    $scope.isCollector = false;
     $scope.editSave = false;
     $scope.wmdShow = 'edit';
     $scope.title = '';
@@ -310,16 +291,45 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     };
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
+    function checkArticleIs (article) {
+        var user = $scope.global.user || {followList: []};
+        article.markList = article.markList || [];
+        article.favorList = article.favorsList || [];
+        article.opposeList = article.opposesList || [];
+        article.author = article.author || {};
+        article.author.isFollow = user.followList.some(function (x) {
+            return x._id === article.author._id;
+        });
+        article.isMark = article.markList.some(function (x) {
+            return x._id === user._id;
+        });
+        article.isFavor = article.favorsList.some(function (x) {
+            return x._id === user._id;
+        });
+        article.isOppose = article.opposesList.some(function (x) {
+            return x._id === user._id;
+        });
+        if (article.commentsList && typeof article.commentsList[0] === 'object') article.commentsList.forEach(function (x) {
+            checkArticleIs(x);
+        })
+    };
     jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (article.err) {
             jsGen.err = article.err;
             jsGen.location.path('/err');
         }
+        article.commentsList.forEach(function (x) {
+            jsGen.cache.article.put(x._id, x);
+        });
+        checkArticleIs(article);
         $scope.article = article;
         if (article.pagination) {
             $scope.pagination = article.pagination;
             $scope.pagination.num = 10;
-            $scope.pagination.display = {next: '下一页', last: '尾页'};
+            $scope.pagination.display = {
+                next: '下一页',
+                last: '尾页'
+            };
         }
         $scope.title = '评论：' + article.title;
         $scope.replyTitle = $scope.title;
@@ -327,34 +337,8 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         if ($scope.global.user) {
             if ($scope.global.user._id === $scope.article.author._id) $scope.isMe = true;
             else $scope.isMe = false;
-            $scope.isFollow = $scope.global.user.followList.some(function (x) {
-                return x._id === $scope.global.user._id;
-            });
-            $scope.isCollector = $scope.global.user.collectList.some(function (x) {
-                return x._id === article._id;
-            });
         }
-        if (!$scope.isOppose && article.favorList) $scope.isFavor = article.favorList.some(function (x) {
-            return x._id === $scope.global.user._id;
-        });
-        if (!$scope.isFavor && article.opposeList) $scope.isOppose = article.opposeList.some(function (x) {
-            return x._id === $scope.global.user._id;
-        });
-        for (var i = article.commentsList.length - 1; i >= 0; i--) jsGen.cache.article.put(article.commentsList[i]._id, article.commentsList[i]);
     });
-    $scope.followMe = function (id) {
-        var result;
-        result = jsGen.rest.user.save({
-            Uid: id
-        }, {
-            follow: !$scope.isFollow
-        }, function () {
-            if (!result.err) {
-                jsGen.union($scope.global.user.followList, result.followList);
-                $scope.isFollow = !$scope.isFollow;
-            }
-        });
-    };
     $scope.wmdHelp = function (s) {
         if (s == 'preview') {
             $scope.wmdShow = 'preview';
@@ -416,7 +400,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     });
     $scope.getComments = function (idArray, to) {
         $scope.referComments = [];
-        var dom = angular.element(document.getElementById(to));
+        var dom = angular.element(document.getElementById(to._id));
         var refer = angular.element(document.getElementById('refer-comments'));
         if (dom.children('#refer-comments').length > 0) {
             angular.element(document.getElementById('comments')).append(refer);
@@ -424,26 +408,143 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         } else dom.append(refer);
         idArray = jsGen.union(idArray);
         if (!angular.isArray(idArray)) idArray = [idArray];
-        for (var i = idArray.length - 1; i >= 0; i--) {
-            var comment = jsGen.cache.article.get(idArray[i]);
+        idArray.forEach(function (x, i) {
+            var comment = jsGen.cache.article.get(x);
             if (comment) {
+                checkArticleIs(comment);
                 $scope.referComments.push(comment);
-                idArray.splice(i, 1);
+                delete idArray[i];
             }
-        }
+        });
+        jsGen.digestArray(idArray);
         if (idArray.length > 0) {
             var result = jsGen.rest.article.save({
-                    ID: 'comment'
-                }, {data: idArray}, function () {
-                    if (result.data) {
-                        $scope.referComments = $scope.referComments.concat(result.data);
-                        for (var i = result.data.length - 1; i >= 0; i--) jsGen.cache.article.put(result.data[i]._id, result.data[i]);
-                    } else if (result.err) $scope.err = result.err;
-                });
+                ID: 'comment'
+            }, {
+                data: idArray
+            }, function () {
+                if (result.data) {
+                    result.data.forEach(function (x) {
+                        jsGen.cache.article.put(x._id, x);
+                        checkArticleIs(x);
+                    })
+                    $scope.referComments = $scope.referComments.concat(result.data);
+                } else if (result.err) $scope.err = result.err;
+            });
         }
+    };
+    $scope.setMark = function (article) {
+        var result;
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
+        result = jsGen.rest.article.save({
+            ID: article._id,
+            OP: 'mark'
+        }, {
+            mark: !article.isMark
+        }, function () {
+            if (result.post) {
+                article.isMark = !article.isMark;
+                if (article.markList) {
+                    if (article.isMark) article.markList.push({
+                        _id: $scope.global.user._id,
+                        name: $scope.global.user.name,
+                        avatar: $scope.global.user.avatar
+                    });
+                    else article.markList.some(function (x, i, a) {
+                        if (x._id === $scope.global.user._id) {
+                            a.splice(i, 1);
+                            return true;
+                        }
+                    });
+                }
+            } else $scope.err = result.err;
+        });
+    };
+    $scope.setFavor = function (article) {
+        var result;
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
+        result = jsGen.rest.article.save({
+            ID: article._id,
+            OP: 'favor'
+        }, {
+            favor: !article.isFavor
+        }, function () {
+            if (result.post) {
+                article.isFavor = !article.isFavor;
+                if (article.favorsList) {
+                    if (article.isFavor) {
+                        article.favorsList.push({
+                            _id: $scope.global.user._id,
+                            name: $scope.global.user.name,
+                            avatar: $scope.global.user.avatar
+                        });
+                        article.opposesList.some(function (x, i, a) {
+                            if (x._id === $scope.global.user._id) {
+                                a.splice(i, 1);
+                                return true;
+                            }
+                        });
+                        article.isOppose = false;
+                    } else article.favorsList.some(function (x, i, a) {
+                        if (x._id === $scope.global.user._id) {
+                            a.splice(i, 1);
+                            return true;
+                        }
+                    });
+                }
+            } else $scope.err = result.err;
+        });
+    };
+    $scope.setOppose = function (article) {
+        var result;
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
+        result = jsGen.rest.article.save({
+            ID: article._id,
+            OP: 'oppose'
+        }, {
+            oppose: !article.isOppose
+        }, function () {
+            if (result.post) {
+                article.isOppose = !article.isOppose;
+                if (article.opposesList) {
+                    if (article.isOppose) {
+                        article.opposesList.push({
+                            _id: $scope.global.user._id,
+                            name: $scope.global.user.name,
+                            avatar: $scope.global.user.avatar
+                        });
+                        article.favorsList.some(function (x, i, a) {
+                            if (x._id === $scope.global.user._id) {
+                                a.splice(i, 1);
+                                return true;
+                            }
+                        });
+                        article.isFavor = false;
+                    } else article.opposesList.some(function (x, i, a) {
+                        if (x._id === $scope.global.user._id) {
+                            a.splice(i, 1);
+                            return true;
+                        }
+                    });
+                }
+            } else $scope.err = result.err;
+        });
     };
     $scope.submit = function () {
         if (!$scope.editSave) return;
+        if (!$scope.isLogin) {
+            $scope.err = Errmsg;
+            return;
+        }
         var data = {};
         data.content = jsGen.sanitize($scope.content);
         data.title = $scope.title;
@@ -454,6 +555,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }, data, function () {
             if (!result.err) {
                 $scope.article.commentsList.unshift(result);
+                $scope.article.comments += 1;
                 if ($scope.replyToComment) $scope.article.commentsList.some(function (x, i) {
                     if ($scope.replyToComment === x._id) {
                         $scope.article.commentsList[i].commentsList.push(result._id);
@@ -549,7 +651,10 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;
         data._id = $scope._id;
-        if ($routeParams.ID) parameter = {ID: 'A' + $routeParams.ID, OP: 'edit'};
+        if ($routeParams.ID) parameter = {
+            ID: 'A' + $routeParams.ID,
+            OP: 'edit'
+        };
         var result = jsGen.rest.article.save(parameter, data, function () {
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);

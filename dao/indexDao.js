@@ -86,13 +86,14 @@ var that = jsGen.dao.db.bind('global', {
             delete newObj.visitHistory;
         } else setObj.$set = newObj;
 
-        if (callback) that.findAndModify({
-            _id: 'GlobalConfig'
-        }, [], setObj, {
-            w: 1,
-            new: true
-        }, callback);
-        else that.update({
+        if (callback) {
+            that.findAndModify({
+                _id: 'GlobalConfig'
+            }, [], setObj, {
+                w: 1,
+                new: true
+            }, callback);
+        } else that.update({
             _id: 'GlobalConfig'
         }, setObj);
     },
@@ -104,52 +105,6 @@ var that = jsGen.dao.db.bind('global', {
         globalConfig, {
             w: 1
         }, callback);
-    },
-
-    getVisitHistory: function (_idArray, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
-        if (!Array.isArray(_idArray)) _idArray = [_idArray];
-        that.find({
-            _id: {
-                $in: _idArray
-            }
-        }, {
-            fields: {
-                _id: 0,
-                data: 1
-            }
-        }).each(callback);
-    },
-
-    setVisitHistory: function (Obj, callback) {
-        var setObj = {},
-        defaultObj = {
-            data: [0, 0, '', '', '', ''] //[number,_id,IP,]
-        };
-        callback = callback || jsGen.lib.tools.callbackFn;
-        defaultObj = intersect(defaultObj, Obj);
-        setObj.$push = {
-            data: defaultObj.data
-        };
-        that.update({
-            _id: Obj._id
-        }, setObj, {
-            w: 1
-        }, callback);
-    },
-
-    newVisitHistory: function (Obj, callback) {
-        var newObj = {
-            _id: 1,
-            data: []
-        }
-        callback = callback || jsGen.lib.tools.callbackFn;
-        if (Obj && Obj._id) newObj._id = Obj._id;
-
-        that.insert(
-        newObj, {
-            w: 1
-        }, callback);
     }
 
 });
@@ -157,8 +112,5 @@ var that = jsGen.dao.db.bind('global', {
 module.exports = {
     getGlobalConfig: that.getGlobalConfig,
     setGlobalConfig: that.setGlobalConfig,
-    initGlobalConfig: that.initGlobalConfig,
-    getVisitHistory: that.getVisitHistory,
-    setVisitHistory: that.setVisitHistory,
-    newVisitHistory: that.newVisitHistory
+    initGlobalConfig: that.initGlobalConfig
 };

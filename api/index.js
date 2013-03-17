@@ -37,52 +37,6 @@ function updateOnlineCache(req) {
     }
 }
 
-function setVisitHistory(req) {
-    var visit = {
-        _id: 0,
-        data: []
-    };
-    var info = jsGen.module.platform.parse(req.useragent);
-    visit._id = jsGen.config._initTime ? jsGen.config.visitHistory[jsGen.config.visitHistory.length - 1] : 1;
-    visit.data[0] = Date.now();
-    visit.data[1] = req.session.Uid;
-    visit.data[2] = req.ip || '0.0.0.0';
-    visit.data[3] = req.referer || 'direct';
-    visit.data[4] = info.name || 'unknow';
-    visit.data[5] = info.os.toString() || 'unknow';
-    process.nextTick(function () {
-        jsGen.config.visitors += 1;
-        jsGen.dao.index.setGlobalConfig({
-            visitors: 1
-        });
-        jsGen.dao.index.setVisitHistory(visit, function (err, doc) {
-            if (err && err.code === 10131) {
-                visit._id += 1;
-                jsGen.dao.index.newVisitHistory(visit, function (err, doc) {
-                    if (!err) {
-                        jsGen.config.visitHistory.push(visit._id);
-                        jsGen.dao.index.setGlobalConfig({
-                            visitHistory: visit._id
-                        });
-                        jsGen.dao.index.setVisitHistory(visit);
-                    }
-                });
-            }
-        });
-    });
-};
-
-function getvisitHistory(req, res, dm) {
-    var body = {
-        data: []
-    };
-    if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    jsGen.dao.index.getVisitHistory(jsGen.config.visitHistory, dm.intercept(function (doc) {
-        if (doc) body.data = body.data.concat(doc.data);
-        return res.sendjson(body);
-    }));
-};
-
 function getIndex(req, res, dm) {
     var config = {
         domain: '',
@@ -234,6 +188,7 @@ function setGlobal(req, res, dm) {
         jsGen.cache.pagination.timeLimit = setObj.paginationCache[0] * 1000;
         jsGen.cache.pagination.capacity = setObj.paginationCache[1];
     }
+    if (setObj.TimeInterval) jsGen.cache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
         union(jsGen.config, body);
@@ -260,6 +215,5 @@ function postFn(req, res, dm) {
 module.exports = {
     GET: getFn,
     POST: postFn,
-    setVisitHistory: setVisitHistory,
     updateOnlineCache: updateOnlineCache
 };

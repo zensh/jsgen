@@ -9,7 +9,7 @@
                 <img ng-src="{{user.avatar}}" />
                 <div class="caption">
                     <h5 class="text-center">{{user.name}}&nbsp;
-                    <a href="#" ng-show="!isMe" ng-click="followMe(user._id)" class="btn btn-mini btn-success">{{isFollow | follow}}</a>
+                    <a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-mini btn-success">{{user.isFollow | follow}}</a>
                 </h5>
                     <ul class="list-inline">
                         <li>

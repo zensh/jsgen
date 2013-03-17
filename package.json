@@ -7,7 +7,7 @@
     "name": "jsGen",
     "version": "0.0.1",
     "description": "",
-    "keywords": ["Node.js", "AngularJS", "mongoDB"],
+    "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
     "main": "app.js",
     "engines": {
@@ -18,8 +18,7 @@
         "mongoskin": ">=0.5.X",
         "marked": ">=0.2.x",
         "nodemailer": ">=0.3.x",
-        "xss": ">=0.0.3",
-        "platform": ">=1.0.0"
+        "xss": ">=0.0.3"
     },
     "scripts": {
         "start": "node app.js",

@@ -207,15 +207,6 @@
                 </div>
                 <div class="control-group">
                     <label class="control-label">
-                    操作时间间隔：
-                    </label>
-                    <div class="controls">
-                    <input type="number" name="TimeInterval" ng-model="global.TimeInterval"/>
-                    <span class="text-info help-block">秒，搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为5秒</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label">
                     用户积分系数：
                     </label>
                     <div class="controls">
@@ -322,6 +313,15 @@
                     <input type="text" name="paginationCache" ng-model="global.paginationCache" ng-list="/[,，\s]/"/>
                     <span class="text-info help-block">[有效期<strong>{{global.paginationCache[0]}}</strong>秒
                     ，最大容量<strong>{{global.paginationCache[1]}}</strong>]</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">
+                    操作限时缓存：
+                    </label>
+                    <div class="controls">
+                    <input type="number" name="TimeInterval" ng-model="global.TimeInterval"/>
+                    <span class="text-info help-block">秒，搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为3秒</span>
                     </div>
                 </div>
                 <div class="control-group">

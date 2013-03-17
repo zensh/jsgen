@@ -6,7 +6,7 @@
     setArticle(articleObj, callback);
     setFavor(articleObj);
     setOppose(articleObj);
-    setCollector(articleObj);
+    setMark(articleObj);
     setComment(articleObj, callback);
     setNewArticle(articleObj, callback);
     delArticle(_idArray, callback);
@@ -96,7 +96,7 @@ var that = jsGen.dao.db.bind('articles', {
                 tagsList: 1,
                 favorsList: 1,
                 opposesList: 1,
-                collectorsList: 1,
+                markList: 1,
                 comment: 1,
                 commentsList: 1
             }
@@ -180,20 +180,20 @@ var that = jsGen.dao.db.bind('articles', {
         }, setObj);
     },
 
-    setCollector: function(articleObj) {
+    setMark: function(articleObj) {
         var setObj = {},
         newObj = {
-            collectorsList: 0
+            markList: 0
         };
 
         intersect(newObj, articleObj);
-        if (newObj.collectorsList < 0) {
-            newObj.collectorsList = -newObj.collectorsList;
+        if (newObj.markList < 0) {
+            newObj.markList = -newObj.markList;
             setObj.$pull = {
-                collectorsList: newObj.collectorsList
+                markList: newObj.markList
             };
         } else setObj.$push = {
-            collectorsList: newObj.collectorsList
+            markList: newObj.markList
         };
 
         that.update({
@@ -264,7 +264,7 @@ module.exports = {
     setArticle: that.setArticle,
     setFavor: that.setFavor,
     setOppose: that.setOppose,
-    setCollector: that.setCollector,
+    setMark: that.setMark,
     setComment: that.setComment,
     setNewArticle: that.setNewArticle,
     delArticle: that.delArticle

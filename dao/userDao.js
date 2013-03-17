@@ -15,7 +15,7 @@ setFans(userObj); 增加或减少用户粉丝;
 setFollow(userObj, callback); 增加或减少用户关注对象;
 setArticle(userObj, callback); 增加或减少用户主题;
 setCollection(userObj, callback); 增加或减少用户合集;
-setCollect(userObj, callback); 增加或减少用户收藏;
+setMark(userObj, callback); 增加或减少用户收藏;
 setMessages(userObj); 增加或重置用户未读信息;
 setReceive(userObj); 增加或减少用户接收的消息;
 setSend(userObj); 增加或减少用户发送的消息;
@@ -29,7 +29,7 @@ var union = jsGen.lib.tools.union,
 
 var that = jsGen.dao.db.bind('users', {
 
-    convertID: function(id) {
+    convertID: function (id) {
         switch (typeof id) {
             case 'string':
                 id = id.substring(1);
@@ -47,12 +47,12 @@ var that = jsGen.dao.db.bind('users', {
         }
     },
 
-    getUsersNum: function(callback) {
+    getUsersNum: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.count(callback);
     },
 
-    getUsersIndex: function(callback) {
+    getUsersIndex: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.find({}, {
             sort: {
@@ -70,7 +70,7 @@ var that = jsGen.dao.db.bind('users', {
         }).each(callback);
     },
 
-    getLatestId: function(callback) {
+    getLatestId: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
@@ -85,7 +85,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    getAuth: function(_id, callback) {
+    getAuth: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
@@ -103,7 +103,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    getSocial: function(_id, callback) {
+    getSocial: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
@@ -116,7 +116,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    getUserInfo: function(_id, callback) {
+    getUserInfo: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
@@ -131,7 +131,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setUserInfo: function(userObj, callback) {
+    setUserInfo: function (userObj, callback) {
         var setObj = {},
         newObj = {
             name: '',
@@ -149,19 +149,21 @@ var that = jsGen.dao.db.bind('users', {
             tagsList: [0]
         };
 
-        callback = callback || jsGen.lib.tools.callbackFn;
-
         newObj = intersect(newObj, userObj);
         setObj.$set = newObj;
-        that.findAndModify({
+        if (callback) {
+            that.findAndModify({
+                _id: userObj._id
+            }, [], setObj, {
+                w: 1,
+                new: true
+            }, callback);
+        } else that.update({
             _id: userObj._id
-        }, [], setObj, {
-            w: 1,
-            new: true
-        }, callback);
+        }, setObj);
     },
 
-    setLoginAttempt: function(userObj) {
+    setLoginAttempt: function (userObj) {
         var setObj = {},
         newObj = {
             loginAttempts: 0,
@@ -178,7 +180,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setLogin: function(userObj) {
+    setLogin: function (userObj) {
         var setObj = {},
         newObj = {
             lastLoginDate: 0,
@@ -200,7 +202,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setSocial: function(userObj, callback) {
+    setSocial: function (userObj, callback) {
         var setObj = {
             $set: {
                 'social.weibo': {},
@@ -248,7 +250,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setFans: function(userObj) {
+    setFans: function (userObj) {
         var setObj = {},
         newObj = {
             fansList: 0
@@ -277,7 +279,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setFollow: function(userObj, callback) {
+    setFollow: function (userObj, callback) {
         var setObj = {},
         newObj = {
             followList: 0
@@ -309,7 +311,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setArticle: function(userObj, callback) {
+    setArticle: function (userObj, callback) {
         var setObj = {},
         newObj = {
             articlesList: 0
@@ -341,7 +343,7 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setCollection: function(userObj, callback) {
+    setCollection: function (userObj, callback) {
         var setObj = {},
         newObj = {
             collectionsList: 0
@@ -373,31 +375,28 @@ var that = jsGen.dao.db.bind('users', {
         }, callback);
     },
 
-    setCollect: function(userObj, callback) {
+    setMark: function (userObj) {
         var setObj = {},
         newObj = {
-            collectList: 0
+            markList: 0
         };
-        callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
-        if (newObj.collectList < 0) {
-            newObj.collectList = -newObj.collectList;
+        if (newObj.markList < 0) {
+            newObj.markList = -newObj.markList;
             setObj.$pull = {
-                collectList: newObj.collectList
+                markList: newObj.markList
             };
         } else setObj.$push = {
-            collectList: newObj.collectList
+            markList: newObj.markList
         };
 
         that.update({
             _id: userObj._id
-        }, setObj, {
-            w: 1
-        }, callback);
+        }, setObj);
     },
 
-    setMessages: function(userObj) {
+    setMessages: function (userObj) {
         var setObj = {
             $set: {
                 'messages.article': 0,
@@ -452,7 +451,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setReceive: function(userObj) {
+    setReceive: function (userObj) {
         var setObj = {},
         newObj = {
             receiveList: 0
@@ -475,7 +474,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setSend: function(userObj) {
+    setSend: function (userObj) {
         var setObj = {},
         newObj = {
             sendList: 0
@@ -498,7 +497,7 @@ var that = jsGen.dao.db.bind('users', {
         }, setObj);
     },
 
-    setNewUser: function(userObj, callback) {
+    setNewUser: function (userObj, callback) {
         var user = union(defautUser),
             newUser = union(defautUser);
         callback = callback || jsGen.lib.tools.callbackFn;
@@ -507,7 +506,7 @@ var that = jsGen.dao.db.bind('users', {
         newUser = union(user, newUser);
         newUser.date = Date.now();
 
-        that.getLatestId(function(err, doc) {
+        that.getLatestId(function (err, doc) {
             if (err) return callback(err, null);
             if (!doc) preAllocate._id = newUser._id || 1;
             else preAllocate._id = doc._id + 1;
@@ -515,7 +514,7 @@ var that = jsGen.dao.db.bind('users', {
             that.insert(
             preAllocate, {
                 w: 1
-            }, function(err, doc) {
+            }, function (err, doc) {
                 if (err) return callback(err, doc);
                 that.findAndModify({
                     _id: preAllocate._id
@@ -544,7 +543,7 @@ module.exports = {
     setFollow: that.setFollow,
     setArticle: that.setArticle,
     setCollection: that.setCollection,
-    setCollect: that.setCollect,
+    setMark: that.setMark,
     setMessages: that.setMessages,
     setReceive: that.setReceive,
     setSend: that.setSend,

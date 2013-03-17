@@ -4995,3 +4995,8 @@ aside.panel {
     margin-top: 0;
     margin-bottom: 0;
 }
+.page-footer {
+  padding-top: 10px;
+  margin: 40px 0 20px;
+  border-top: 1px solid #eeeeee;
+}

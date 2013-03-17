@@ -12,7 +12,8 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     gravatar = jsGen.lib.tools.gravatar,
     userCache = jsGen.cache.user,
     filterSummary = jsGen.lib.tools.filterSummary,
-    pagination = jsGen.lib.tools.pagination;
+    pagination = jsGen.lib.tools.pagination,
+    checkTimeInterval = jsGen.lib.tools.checkTimeInterval;
 
 userCache.getP = function (Uid, callback, convert) {
     var that = this,
@@ -200,6 +201,7 @@ function register(req, res, dm) {
     var data = req.apibody;
 
     if (!jsGen.config.register) throw jsGen.Err(jsGen.lib.msg.registerClose);
+    if (checkTimeInterval(req, 'Re')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
     adduser(data, dm.intercept(function (doc) {
         if (doc) {
             req.session.Uid = doc._id;
@@ -208,13 +210,14 @@ function register(req, res, dm) {
                 u: doc._id,
                 r: 'role'
             }, dm.intercept(function () {
-                userCache.getP(doc._id, dm.intercept(function (doc) {
-                    return res.sendjson(doc);
-                }));
                 if (jsGen.config.email) {
                     var url = jsGen.config.url + '/' + doc._id;
                     jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
                 }
+                checkTimeInterval(req, 'Re', dm);
+                userCache.getP(doc._id, dm.intercept(function (doc) {
+                    return res.sendjson(doc);
+                }));
             }));
         }
     }));
@@ -280,7 +283,7 @@ function setUser(req, res, dm) {
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     else if (req.session.Uid === Uid || !req.apibody) throw jsGen.Err(jsGen.lib.msg.requestDataErr);
-
+    if (checkTimeInterval(req, 'Fo')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
     var _id = jsGen.dao.user.convertID(Uid);
     var _idReq = jsGen.dao.user.convertID(req.session.Uid);
     var follow = !!req.apibody.follow;
@@ -295,13 +298,20 @@ function setUser(req, res, dm) {
                 _id: _id,
                 fansList: follow ? _idReq : -_idReq
             });
-            userCache.remove(Uid);
-            userCache.remove(req.session.Uid);
-            userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-                return res.sendjson({
-                    followList: doc.followList
-                });
-            }));
+            userCache.update(Uid, function (value) {
+                if (follow) value.fansList.push(_idReq);
+                else value.fansList.splice(value.fansList.indexOf(_idReq), 1);
+                return value;
+            });
+            userCache.update(req.session.Uid, function (value) {
+                if (follow) value.followList.push(_id);
+                else value.followList.splice(value.followList.indexOf(_id), 1);
+                return value;
+            });
+            checkTimeInterval(req, 'Fo', dm);
+            return res.sendjson({
+                follow: follow ? convertUsers(Uid)[0] : null
+            });
         }));
     }), false);
 };

@@ -1,6 +1,5 @@
 'use strict';
 
-// Declare app level module which depends on filters, and services
 angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers']).
 config(['$routeProvider', '$locationProvider',
 function($routeProvider, $locationProvider) {
@@ -127,18 +126,19 @@ function($rootScope, $http, $location, $timeout, $filter, $anchorScroll, cache, 
                     if (a.length === 0) union(a, b);
                     else {
                         var o = union(a[0]);
-                        var typeAkey = checkType(a[0]);
-                        if (typeAkey !== 'function') {
+                        var typeAkey = checkType(o);
+                        if (typeAkey !== 'function' && b.length > 0) {
                             for (var i = b.length - 1; i >= 0; i--) {
                                 typeBkey = checkType(b[i]);
+                                console.log(typeBkey);
                                 if (typeBkey === typeAkey) {
                                     if (typeBkey === 'object' || typeBkey === 'array') {
                                         a[i] = union(o);
                                         intersect(a[i], b[i]);
                                     } else a[i] = b[i];
-                                }
+                                } else delete a[i];
                             }
-                        }
+                        } else delete a[0];
                     }
                 } else if (typeA === 'object' && typeB === 'object' && Object.keys(a).length === 0) {
                     union(a, b);
@@ -161,7 +161,6 @@ function($rootScope, $http, $location, $timeout, $filter, $anchorScroll, cache, 
         //a的某属性值与b的对应属性值全等时，删除a的该属性，运算直接修改a，返回值也是a。
         //ignore，不参与对比的属性模板;
         //keyMode为true时，对属性进行补集元算，即a的属性名在b中也存在时，则删除a中该属性。
-
         function complement(a, b, ignore, keyMode) {
             if (a && b) {
                 var typeA = checkType(a),
@@ -279,6 +278,26 @@ function($rootScope, $http, $location, $timeout, $filter, $anchorScroll, cache, 
             $rootScope.isLogin = false;
             $rootScope.isAdmin = false;
         }
+    };
+    $rootScope.followMe = function (user) {
+        var result;
+        result = jsGen.rest.user.save({
+            Uid: user._id
+        }, {
+            follow: !user.isFollow
+        }, function () {
+            if (!result.err) {
+                if (result.follow) $rootScope.global.user.followList.push(result.follow);
+                else $rootScope.global.user.followList.some(function (x, i, a) {
+                    if (x._id === user._id) {
+                        a.splice(i, 1);
+                        return true;
+                    }
+                });
+                if (user.fans) user.fans += user.isFollow ? -1 : 1;
+                user.isFollow = !user.isFollow;
+            }
+        });
     };
     $rootScope.global = jsGen.rest.index.get({}, function() {
         $rootScope.checkUser();

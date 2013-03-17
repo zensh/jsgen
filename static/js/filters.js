@@ -1,7 +1,6 @@
 'use strict';
 
 /* Filters */
-
 angular.module('jsGen.filters', []).
   filter('role', function() {
     return function(text) {
@@ -33,8 +32,8 @@ angular.module('jsGen.filters', []).
   }).
   filter('follow', function() {
     return function(text) {
-      if (text) return '取消关注';
-      return '关注我！';
+      if (text) return '已关注';
+      return '关注';
     };
   }).
   filter('favor', function() {
@@ -43,10 +42,10 @@ angular.module('jsGen.filters', []).
       return '支持';
     };
   }).
-  filter('collector', function() {
+  filter('mark', function() {
     return function(text) {
-      if (text) return '已收藏';
-      return '收藏';
+      if (text) return '已标记';
+      return '标记';
     };
   }).
   filter('oppose', function() {
