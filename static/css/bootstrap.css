@@ -5000,10 +5000,11 @@ aside.panel {
   margin: 40px 0 20px;
   border-top: 1px solid #eeeeee;
 }
-#err-modal {
+#msg-modal {
     position: absolute;
     max-width: 680px;
     margin: 0 auto;
+    padding: 10px;
     overflow-y: auto;
     top: 20%;
     bottom: auto;

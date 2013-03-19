@@ -9,10 +9,6 @@ function ($routeProvider, $locationProvider) {
         templateUrl: '/static/tpl/index.html',
         controller: 'indexCtrl'
     }).
-    when('/err', {
-        templateUrl: '/static/tpl/err.html',
-        controller: 'errCtrl'
-    }).
     when('/login', {
         templateUrl: '/static/tpl/login.html',
         controller: 'userLoginCtrl'
@@ -32,6 +28,10 @@ function ($routeProvider, $locationProvider) {
     when('/add', {
         templateUrl: '/static/tpl/article-editor.html',
         controller: 'articleEditorCtrl'
+    }).
+    when('/reset/:RE', {
+        templateUrl: '/static/tpl/reset.html',
+        controller: 'userResetCtrl'
     }).
     when('/U:ID', {
         templateUrl: '/static/tpl/user.html',
@@ -62,9 +62,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     'MdParse', 'MdEditor', 'getArticle', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
     $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
     // 注册全局变量jsGen
-    window.jsGen = {
-        global: {}
-    };
+    window.jsGen = jsGen || {};
 
     jsGen = tools(jsGen); //添加jsGen系列工具函数
     jsGen.http = $http;
@@ -126,37 +124,39 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     };
     $rootScope.global = jsGen.rest.index.get({}, function () {
         $rootScope.checkUser();
-        $rootScope.global.ArticleTagsMax = $rootScope.global.ArticleTagsMax || 5;
-        $rootScope.global.UserTagsMax = $rootScope.global.UserTagsMax || 5;
-        $rootScope.global.TitleMinLen = $rootScope.global.TitleMinLen || 9;
-        $rootScope.global.TitleMaxLen = $rootScope.global.TitleMaxLen || 180;
-        $rootScope.global.SummaryMaxLen = $rootScope.global.SummaryMaxLen || 480;
-        $rootScope.global.ContentMinLen = $rootScope.global.ContentMinLen || 18;
-        $rootScope.global.ContentMaxLen = $rootScope.global.ContentMaxLen || 50000;
-        $rootScope.global.UserNameMinLen = $rootScope.global.UserNameMinLen || 5;
-        $rootScope.global.UserNameMaxLen = $rootScope.global.UserNameMaxLen || 20;
         $rootScope.global.info.angularjs = angular.version.full;
+        if (!$rootScope.global.date) $rootScope.msg = {
+            name: '错误提示',
+            message: '网页初始化出错',
+            type: 'error'
+        };
     });
     $rootScope.$watch(function () {
         return $location.path();
     }, function (path, goBack) {
-        jsGen.goBack = goBack;
+        jsGen.goBack = goBack || '/';
         var element = angular.element(document.getElementById('main'));
         var reg = /\/add|^\/A.+\/edit$/;
         if (reg.test(path)) element.addClass('container-large');
         else element.removeClass('container-large');
     });
-    $rootScope.$watch('err', function (err) {
-        if (err && err.message) {
-            var dom = angular.element(document.getElementById('err-modal'));
+    $rootScope.$watch('msg', function (msg) {
+        if (msg && (msg.name || msg.message)) {
+            if (msg.type === 'error') $rootScope.msgmodal = 'text-error';
+            else $rootScope.msgmodal = 'text-success';
+            var dom = angular.element(document.getElementById('msg-modal'));
             dom.modal('show');
             $rootScope.timeout = 5;
             $rootScope.$on('timeout', function (event) {
                 event.stopPropagation();
-                $rootScope.err = null;
+                var url = null;
+                if (msg && msg.url) url = msg.url;
+                msg = null;
+                $rootScope.msg = null;
                 $rootScope.timeout = undefined;
                 dom.modal('hide');
+                if (url) $location.path(url);
             });
         }
-    });
+    }, true);
 }]);

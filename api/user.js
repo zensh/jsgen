@@ -154,7 +154,7 @@ function login(req, res, dm) {
     var _id = jsGen.dao.user.convertID(cache[data.logname]._id);
     jsGen.dao.user.getAuth(_id, dm.intercept(function (doc) {
         if (doc.locked) {
-            throw jsGen.Err(jsGen.lib.msg.userLocked);
+            throw jsGen.Err(jsGen.lib.msg.userLocked, 'locked');
         } else if (doc.loginAttempts >= 5) {
             jsGen.dao.user.setUserInfo({
                 _id: _id,
@@ -192,7 +192,7 @@ function login(req, res, dm) {
                 _id: _id,
                 loginAttempts: 1
             });
-            throw jsGen.Err(jsGen.lib.msg.userPasswd);
+            throw jsGen.Err(jsGen.lib.msg.userPasswd, 'passwd');
         }
     }));
 };
@@ -479,7 +479,8 @@ function getReset(req, res, dm) {
     }
     setReset(resetObj, dm.intercept(function () {
         return res.sendjson({
-            request: jsGen.lib.msg.requestSent
+            name: 'success',
+            message: jsGen.lib.msg.requestSent
         });
     }));
 };

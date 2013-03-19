@@ -1,77 +1,39 @@
 <div class="row">
     <div class="span4">
         <div class="panel-transparent">
-        <div class="page-header">
-            <h4>{{header}}</h4>
-        </div>
-        <div class="alert alert-error" ng-show="err && !request">
-            <button type="button" class="close" ng-click="err=null">&times;</button>
-            <strong>{{err.name}}：</strong>
-            {{err.message}}
-            <p ng-show="userReset">[<a href="#" ng-click="isReset=!isReset">{{userReset}}</a>]</p>
-        </div>
-        <div class="alert alert-success" ng-show="request">
-            <button type="button" class="close" ng-click="request=null">&times;</button>
-            <strong>{{request}}</strong>
-            <!-- <p>[<span ng-timing="timeout"></span>秒后返回首页]</p> -->
-        </div>
-        <form class="form-horizontal form-min" name="login" ng-hide="isReset">
-            <div class="control-group">
-                <label class="control-label">用户名：</label>
-                <div class="controls">
-                    <input class="input-block-level" type="text" placeholder="name or Email or Uid"
-                    name="name" ng-model="logname" required/>
-                    <span class="text-error help-inline" ng-show="login.name.$error.required">
-                        请输入用户名、Email或Uid!
+            <div class="page-header">
+                <h4>用户登录</h4>
+            </div>
+            <form class="form-horizontal form-min" name="login">
+                <div class="control-group">
+                    <label class="control-label">用户名：</label>
+                    <div class="controls">
+                        <input class="input-block-level" type="text" placeholder="name or Email or Uid"
+                        name="name" ng-model="logname" required/>
+                        <span class="text-error help-inline" ng-show="login.name.$error.required">
+                            请输入用户名、Email或Uid!
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">密码：</label>
+                  <div class="controls">
+                    <input class="input-block-level" type="password" placeholder="password"
+                    name="password" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
+                    <span class="text-error help-inline" ng-show="login.password.$error.required">
+                        请输入密码!
                     </span>
+                    </div>
                 </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">密码：</label>
-              <div class="controls">
-                <input class="input-block-level" type="password" placeholder="password"
-                name="password" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
-                <span class="text-error help-inline" ng-show="login.password.$error.required">
-                    请输入密码!
-                </span>
+                <div class="control-group">
+                  <div class="controls">
+                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.name.$error.required
+                                        || login.password.$error.required">登  录</button>
+                    <a ng-show="userReset" ng-href="{{'/reset/'+userReset}}" class="btn btn-warning">{{resetName}}</a>
+                    </div>
                 </div>
-            </div>
-            <div class="control-group">
-              <div class="controls">
-                <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.name.$error.required
-                                    || login.password.$error.required || isSubmit">登  录</button>
-                </div>
-            </div>
-        </form>
-        <form class="form-horizontal form-min" name="reset" ng-show="isReset">
-            <div class="control-group">
-                <label class="control-label">用户名：</label>
-                <div class="controls">
-                    <input class="input-block-level" type="text" placeholder="name or Uid"
-                    name="name" ng-model="name" required/>
-                    <span class="text-error help-inline" ng-show="reset.name.$error.required">
-                        请输入用户名或Uid!
-                    </span>
-                </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">邮箱：</label>
-              <div class="controls">
-                    <input class="input-block-level" type="email" placeholder="Email"
-                    name="email" ng-model="email" required/>
-                    <span class="text-error help-inline" ng-show="reset.email.$error.required">
-                        请输入Email!
-                    </span>
-                </div>
-            </div>
-            <div class="control-group">
-              <div class="controls">
-                    <button ng-click="resetMe()" class="btn btn-primary" ng-disabled="login.name.$error.required
-                                        || login.email.$error.required || login.email.$error.email || isSubmit">提  交</button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
     </div>
     <div class="span8">
     </div>

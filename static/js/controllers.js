@@ -4,25 +4,10 @@
 angular.module('jsGen.controllers', []).
 controller('indexCtrl', ['$scope', function ($scope) {}]).
 controller('userLoginCtrl', ['$scope', function ($scope) {
-    var request;
-    $scope.header = '用户登录';
-    $scope.request = undefined;
     $scope.userReset = undefined;
-    $scope.isReset = undefined;
-    $scope.isSubmit = undefined;
-    var resetName = undefined;
-    $scope.$watch(function () {
-        if ($scope.isReset) {
-            $scope.header = resetName;
-            $scope.userReset = '返回登录';
-        } else {
-            $scope.header = '用户登录';
-            $scope.userReset = resetName;
-        }
-    });
+    $scope.resetName = undefined;
     $scope.submit = function () {
         var data = {}, result;
-        $scope.isSubmit = true;
         data.logname = $scope.logname;
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
@@ -32,38 +17,34 @@ controller('userLoginCtrl', ['$scope', function ($scope) {
                 $scope.checkUser();
                 jsGen.location.path('/home');
             } else {
-                jsGen.rootScope.err = result.err;
-                $scope.isSubmit = false;
-                if ($scope.err.name === 'locked') {
-                    resetName = '申请解锁';
-                    request = 'locked';
-                } else if ($scope.err.name === 'passwd') {
-                    resetName = '找回密码';
-                    request = 'passwd';
+                if (result.err.name === 'locked') {
+                    $scope.resetName = '申请解锁';
+                    $scope.userReset = 'locked';
+                } else if (result.err.name === 'passwd') {
+                    $scope.resetName = '找回密码';
+                    $scope.userReset = 'passwd';
                 }
-                $scope.userReset = resetName;
+                jsGen.rootScope.msg = result.err;
             }
         });
     };
-    $scope.resetMe = function () {
-        $scope.isSubmit = true;
-        $scope.timeout = 0;
+}]).
+controller('userResetCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
+    var request = $routeParams.RE;
+    if (request === 'locked') $scope.header = '申请解锁';
+    else if (request === 'passwd') $scope.header = '找回密码';
+    else jsGen.location.path(jsGen.goBack);
+    $scope.submit = function () {
         var result = jsGen.rest.reset.save({}, {
             name: $scope.name,
             email: $scope.email,
             request: request
         }, function () {
             if (!result.err) {
-                $scope.request = result.request;
-                $scope.timeout = 5;
-                $scope.$on('timeout!', function (event) {
-                    event.stopPropagation();
-                    jsGen.location.path('/');
-                });
-            } else {
-                $scope.err = result.err;
-                $scope.isSubmit = false;
-            }
+                result.name = '请求成功';
+                result.url = '/';
+                jsGen.rootScope.msg = result;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
 }]).
@@ -84,7 +65,7 @@ controller('userRegisterCtrl', ['$scope', function ($scope) {
                 $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
                 jsGen.location.path('/home');
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
 }]).
@@ -158,7 +139,7 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
                 $scope.data = result.data;
                 originData = jsGen.union($scope.data);
                 jsGen.union($scope.pagination, result.pagination);
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     });
     $scope.$emit('pagination', {
@@ -200,8 +181,11 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
             if (!result.err) {
                 $scope.data = jsGen.union(result.data);
                 originData = jsGen.union(result.data);
-                $scope.request = '修改成功！';
-            } else $scope.err = result.err;
+                jsGen.rootScope.msg = {
+                    name: '请求成功',
+                    message: '修改成功！'
+                };
+            } else jsGen.rootScope.msg = result.err;
         });
     };
 }]).
@@ -257,8 +241,9 @@ controller('userEditCtrl', ['$scope', function ($scope) {
                     jsGen.union(originData, {
                         email: data.email
                     });
-                    $scope.request = changeEmail.request;
-                } else $scope.err = changeEmail.err;
+                    changeEmail.name = '请求成功';
+                    jsGen.rootScope.msg = changeEmail;
+                } else jsGen.rootScope.msg = changeEmail.err;
             });
         }
         delete data.email;
@@ -269,8 +254,11 @@ controller('userEditCtrl', ['$scope', function ($scope) {
                     originData = jsGen.union($scope.user);
                     initTags($scope.user.tagsList);
                     $scope.$emit('update', result);
-                    $scope.request = '修改成功！';
-                } else $scope.err = result.err;
+                    jsGen.rootScope.msg = {
+                        name: '请求成功',
+                        message: '修改成功！'
+                    };
+                } else jsGen.rootScope.msg = result.err;
             });
         }
     };
@@ -349,7 +337,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.getMarkdown(function (data) {
                 $scope.replyTitle = data.title;
                 $scope.markdownHelp = data.content;
-                $scope.err = data.err;
+                jsGen.rootScope.msg = data.err;
             });
         } else {
             $scope.wmdShow = 'edit';
@@ -374,7 +362,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }
         $scope.replyTitle = $scope.title;
         if (!$scope.isLogin) {
-            $scope.err = Errmsg;
+            jsGen.rootScope.msg = Errmsg;
             return;
         }
     };
@@ -395,7 +383,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             if (!result.err) {
                 $scope.pagination = result.pagination;
                 $scope.article.commentsList = $scope.article.commentsList.concat(result.data);
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     });
     $scope.getComments = function (idArray, to) {
@@ -429,14 +417,14 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                         checkArticleIs(x);
                     })
                     $scope.referComments = $scope.referComments.concat(result.data);
-                } else if (result.err) $scope.err = result.err;
+                } else if (result.err) jsGen.rootScope.msg = result.err;
             });
         }
     };
     $scope.setMark = function (article) {
         var result;
         if (!$scope.isLogin) {
-            $scope.err = Errmsg;
+            jsGen.rootScope.msg = Errmsg;
             return;
         }
         result = jsGen.rest.article.save({
@@ -460,13 +448,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                         }
                     });
                 }
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
     $scope.setFavor = function (article) {
         var result;
         if (!$scope.isLogin) {
-            $scope.err = Errmsg;
+            jsGen.rootScope.msg = Errmsg;
             return;
         }
         result = jsGen.rest.article.save({
@@ -498,13 +486,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                         }
                     });
                 }
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
     $scope.setOppose = function (article) {
         var result;
         if (!$scope.isLogin) {
-            $scope.err = Errmsg;
+            jsGen.rootScope.msg = Errmsg;
             return;
         }
         result = jsGen.rest.article.save({
@@ -536,13 +524,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                         }
                     });
                 }
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
     $scope.submit = function () {
         if (!$scope.editSave) return;
         if (!$scope.isLogin) {
-            $scope.err = Errmsg;
+            jsGen.rootScope.msg = Errmsg;
             return;
         }
         var data = {};
@@ -567,7 +555,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                 $scope.title = '评论：' + jsGen.filter('cutText')($scope.article.title, $scope.global.TitleMaxLen - 9);
                 $scope.content = '';
                 angular.element(document.getElementById('comments')).prepend(angular.element(document.getElementById('reply')));
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
 }]).
@@ -593,7 +581,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             $scope.tagsList = article.tagsList.map(function (x) {
                 return x.tag;
             });
-        } else $scope.err = article.err;
+        } else jsGen.rootScope.msg = article.err;
     });
 
     var MdEditor = jsGen.MdEditor();
@@ -635,7 +623,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         } else jsGen.getMarkdown(function (data) {
             $scope.previewTitle = data.title;
             $scope.markdownHelp = data.content;
-            $scope.err = data.err;
+            jsGen.rootScope.msg = data.err;
         });
     };
     $scope.getTag = function (t) {
@@ -659,7 +647,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);
                 jsGen.location.path('/' + result._id);
-            } else $scope.err = result.err;
+            } else jsGen.rootScope.msg = result.err;
         });
     };
 }]).
@@ -677,8 +665,7 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
     });
     $scope.setTab = function (tab) {
         $scope.switchTab = tab;
-        $scope.err = null;
-        $scope.request = null;
+        jsGen.rootScope.msg = null;
     }
     $scope.setClass = function (b) {
         if (b) return 'btn-warning';
@@ -713,12 +700,11 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
                 var clone = jsGen.union($scope.global);
                 jsGen.intersect(clone, $scope.global);
                 jsGen.union($scope.global, clone);
-                $scope.request = '修改成功！';
-            } else $scope.err = result.err;
+                jsGen.rootScope.msg = {
+                    name: '请求成功',
+                    message: '修改成功！'
+                };
+            } else jsGen.rootScope.msg = result.err;
         });
     };
-}]).
-controller('errCtrl', ['$scope', function ($scope) {
-    $scope.err = jeGen.union(jsGen.err);
-    jsGen.err = null;
 }]);

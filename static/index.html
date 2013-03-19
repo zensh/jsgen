@@ -106,17 +106,17 @@
                 <p class="navbar-text">
                     <a ng-href="{{global.url}}">{{global.title}}</a> ©2013 <span class="divider-vertical"></span> Powered by
                     <a href="https://github.com/zensh/jsgen">jsGen {{global.info.version}}</a>
-                    [<a href="https://angularjs.org">AngularJS {{global.info.angularjs}}</a>
+                    [<a href="https://angularjs.org">AngularJS {{global.info.angularjs}}</a>,&nbsp;
                     <a href="https://angularjs.org">Node.js {{global.info.nodejs}}</a>]
                 </p>
             </div>
         </footer>
-        <div class="modal fade modal-content text-error" id="err-modal">
+        <div class="modal fade modal-content" id="msg-modal" ng-class="msgmodal">
             <div class="modal-header">
-                <h3 class="modal-title">{{err.name}}</h3>
+                <h3 class="modal-title">{{msg.name}}</h3>
             </div>
             <div class="modal-body">
-                <p>{{err.message}}</p>
+                <p>{{msg.message}}</p>
             </div>
             <div class="modal-footer">
                 <span ng-show="timeout">[<strong ng-timing="timeout"></strong>秒后自动返回]</span>

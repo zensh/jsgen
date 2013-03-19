@@ -1,3 +1,5 @@
+var callback;
+
 function global() {
     jsGen.dao.db.createCollection("global", {
         w: 1
@@ -8,7 +10,12 @@ function global() {
         }, {
             background: true
         });
-        jsGen.dao.index.initGlobalConfig(articles);
+        collection.findOne({
+            _id: 'GlobalConfig'
+        }, function (err, doc) {
+            if (err) throw err;
+            if (!doc) jsGen.dao.index.initGlobalConfig(articles);
+        });
     });
 };
 
@@ -17,17 +24,16 @@ function articles() {
         w: 1
     }, function (err, collection) {
         if (err) throw err;
-        jsGen.dao.db.command({
-            collMod: "articles",
-            usePowerOf2Sizes: true
-        });
         collection.ensureIndex({
             _id: -1,
             hots: -1
         }, {
             background: true
         });
-        collections();
+        jsGen.dao.db.command({
+            collMod: "articles",
+            usePowerOf2Sizes: true
+        }, collections);
     });
 };
 
@@ -36,17 +42,16 @@ function collections() {
         w: 1
     }, function (err, collection) {
         if (err) throw err;
-        jsGen.dao.db.command({
-            collMod: "collections",
-            usePowerOf2Sizes: true
-        });
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
         }, {
             background: true
         });
-        messages();
+        jsGen.dao.db.command({
+            collMod: "collections",
+            usePowerOf2Sizes: true
+        }, messages);
     });
 };
 
@@ -60,7 +65,10 @@ function messages() {
         }, {
             background: true
         });
-        tags();
+        jsGen.dao.db.command({
+            collMod: "messages",
+            usePowerOf2Sizes: true
+        }, tags);
     });
 };
 
@@ -69,17 +77,16 @@ function tags() {
         w: 1
     }, function (err, collection) {
         if (err) throw err;
-        jsGen.dao.db.command({
-            collMod: "tags",
-            usePowerOf2Sizes: true
-        });
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
         }, {
             background: true
         });
-        users();
+        jsGen.dao.db.command({
+            collMod: "tags",
+            usePowerOf2Sizes: true
+        }, users);
     });
 };
 
@@ -88,35 +95,37 @@ function users() {
         w: 1
     }, function (err, collection) {
         if (err) throw err;
-        jsGen.dao.db.command({
-            collMod: "users",
-            usePowerOf2Sizes: true
-        });
         collection.ensureIndex({
             _id: -1,
             score: -1
         }, {
             background: true
         });
-        jsGen.dao.user.setNewUser({
-            _id: jsGen.dao.user.convertID('Uadmin'),
-            name: 'admin',
-            email: 'admin@zensh.com',
-            passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
-            role: 'admin',
-            avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
-            desc: '梦造互联网 By ZENSH'
+        jsGen.dao.db.command({
+            collMod: "users",
+            usePowerOf2Sizes: true
         }, function (err, doc) {
-            if (err) throw err;
-            if (doc) {
-                console.log(doc);
-                console.log('Ready!!!');
-            }
+            var _id = jsGen.dao.user.convertID('Uadmin');
+            collection.findOne({
+                _id: _id
+            }, function (err, doc) {
+                if (err) throw err;
+                if (!doc) jsGen.dao.user.setNewUser({
+                    _id: jsGen.dao.user.convertID('Uadmin'),
+                    name: 'admin',
+                    email: 'admin@zensh.com',
+                    passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
+                    role: 'admin',
+                    avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
+                    desc: '梦造互联网 By ZENSH'
+                }, callback);
+            });
         });
     });
 }
 
-function install() {
+function install(cb) {
+    callback = cb || jsGen.lib.tools.callbackFn;
     global();
 };
 

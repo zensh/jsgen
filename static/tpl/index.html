@@ -14,11 +14,6 @@
                 <a href="/add" class="btn btn-success pull-right" ng-show="isLogin">发表文章</a>
             </ul>
             <div class="tab-content">
-                <div class="alert alert-error" ng-show="err">
-                    <button type="button" class="close" ng-click="err=null">&times;</button>
-                    <strong>{{err.name}}：</strong>
-                    {{err.message}}
-                </div>
                 <ul class="list-inline">
                     <li ng-repeat="tag in global.tagsList">
                         <a ng-href="/{{tag._id}}" class="btn btn-small btn-info">{{tag.tag}}</a>
