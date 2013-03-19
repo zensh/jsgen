@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="span4">
+        <div class="panel-transparent">
+        <div class="page-header">
+            <h4>{{header}}</h4>
+        </div>
+        <form class="form-horizontal form-min" name="reset">
+            <div class="control-group">
+                <label class="control-label">用户名：</label>
+                <div class="controls">
+                    <input class="input-block-level" type="text" placeholder="name or Uid"
+                    name="name" ng-model="name" required/>
+                    <span class="text-error help-inline" ng-show="reset.name.$error.required">
+                        请输入用户名或Uid!
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">邮箱：</label>
+              <div class="controls">
+                    <input class="input-block-level" type="email" placeholder="Email"
+                    name="email" ng-model="email" required/>
+                    <span class="text-error help-inline" ng-show="reset.email.$error.required">
+                        请输入Email!
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.name.$error.required
+                                        || login.email.$error.required || login.email.$error.email">提  交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+    <div class="span8">
+    </div>
+</div>
