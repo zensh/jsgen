@@ -2,7 +2,24 @@
 
 /* Controllers */
 angular.module('jsGen.controllers', []).
-controller('indexCtrl', ['$scope', function ($scope) {}]).
+controller('indexCtrl', ['$scope', function ($scope) {
+    $scope.data = null;
+    $scope.pagination = null;
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        var result = jsGen.rest.article.get(doc, function () {
+            if (!result.err) {
+                $scope.data = result.data;
+                jsGen.union($scope.pagination, result.pagination);
+            } else jsGen.rootScope.msg = result.err;
+        });
+    });
+    $scope.$emit('pagination', {
+        n: 20,
+        p: 1
+    });
+    $scope.getList = function (s) {};
+}]).
 controller('userLoginCtrl', ['$scope', function ($scope) {
     $scope.userReset = undefined;
     $scope.resetName = undefined;
@@ -279,8 +296,11 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     };
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
-    function checkArticleIs (article) {
-        var user = $scope.global.user || {followList: []};
+
+    function checkArticleIs(article) {
+        var user = $scope.global.user || {
+            followList: []
+        };
         article.markList = article.markList || [];
         article.favorList = article.favorsList || [];
         article.opposeList = article.opposesList || [];

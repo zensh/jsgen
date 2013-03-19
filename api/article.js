@@ -103,7 +103,7 @@ listCache.getP = function (ID, callback, convert) {
         doc = this.get(ID),
         _id = jsGen.dao.article.convertID(ID);
 
-    function getConvert() {
+    function getConvert(doc) {
         doc.hots = cache[ID].hots;
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
@@ -132,9 +132,9 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
-    if (!this[obj._id]) {
-        this[obj._id] = {};
-        if (obj.status > -1) this._index.push(obj._id);
+    if (!this[obj._id]) this[obj._id] = {status: -1};
+    if (this[obj._id].status === -1 && obj.status > -1) {
+        this._index.push(obj._id);
         this._initTime = Date.now();
     }
     this[obj._id].display = obj.display;
@@ -295,48 +295,19 @@ function getComments(req, res, dm) {
 };
 
 function getLatest(req, res, dm) {
-    var array = [],
-        p = req.getparam.p || req.getparam.page,
-        n = req.getparam.n || req.getparam.num,
-        body = {
-            pagination: {},
-            data: []
-        };
+    var p = req.getparam.p || req.getparam.page || 1;
 
-    if (!req.session.pagination) {
-        req.session.pagination = {
-            pagID: 'a' + cache._initTime,
-            total: cache._index.length,
-            num: 20,
-            now: 1
-        };
-        jsGen.cache.pagination.put(req.session.pagination.pagID, cache._index);
+    if (!req.session.latestPagination) req.session.latestPagination = {key: cache._initTime};
+    var list = jsGen.cache.pagination.get(req.session.latestPagination.key);
+    if (!list || (p === 1 && req.session.latestPagination.key !== cache._initTime)) {
+        req.session.latestPagination.key = cache._initTime;
+        list = cache._index;
+        jsGen.cache.pagination.put(req.session.latestPagination.key, list);
     }
-    if (n && n >= 1 && n <= 100) req.session.pagination.num = Math.floor(n);
-    if (p && p >= 1) req.session.pagination.now = Math.floor(p);
-    p = req.session.pagination.now;
-    n = req.session.pagination.num;
-    array = jsGen.cache.pagination.get(req.session.pagination.pagID);
-    if (!array || (p === 1 && req.session.pagination.pagID !== 'a' + cache._initTime)) {
-        req.session.pagination.pagID = 'a' + cache._initTime;
-        req.session.pagination.total = cache._index.length;
-        jsGen.cache.pagination.put(req.session.pagination.pagID, cache._index);
-        array = cache._index;
-    }
-    array = array.slice((p - 1) * n, p * n);
-    body.pagination.total = req.session.pagination.total;
-    body.pagination.now = p;
-    body.pagination.num = n;
-    next();
-
-    function next() {
-        var ID = array.pop();
-        if (!ID) return res.sendjson(body);
-        listCache.getP(ID, dm.intercept(function (doc) {
-            if (doc) body.data.push(doc);
-            return next();
-        }));
-    };
+    pagination(req, list, listCache, dm.intercept(function (articlesList) {
+        union(req.session.latestPagination, articlesList.pagination);
+        return res.sendjson(articlesList);
+    }));
 };
 
 function filterArticle(articleObj, callback) {
@@ -594,8 +565,8 @@ function setArticle(req, res, dm) {
         var oppose = !!req.apibody.oppose;
         articleCache.getP(articleID, dm.intercept(function (doc) {
             var index = doc.opposesList.indexOf(user_id);
-            if (oppose && index >= 0) throw jsGen.Err(jsGen.lib.msg.userFavor);
-            else if (!oppose && index < 0) throw jsGen.Err(jsGen.lib.msg.userUnfavor);
+            if (oppose && index >= 0) throw jsGen.Err(jsGen.lib.msg.userOppose);
+            else if (!oppose && index < 0) throw jsGen.Err(jsGen.lib.msg.userUnoppose);
             jsGen.dao.article.setOppose({
                 _id: article_id,
                 opposesList: oppose ? user_id : -user_id

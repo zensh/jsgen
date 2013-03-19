@@ -96,7 +96,7 @@
                     <div class="media-content" ng-parse-markdown="comment.content"></div>
                     <footer>
                         <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
-                            发表于{{comment.date | formatDate}}</span>
+                            {{comment.date | formatDate}}发表</span>
                         <div class="btn-toolbar pull-right">
                             <div class="btn-group">
                                 <a type="button" class="btn btn-mini" ng-click="setFavor(comment)">{{comment.isFavor | favor}}[{{comment.favorsList.length}}]</a>

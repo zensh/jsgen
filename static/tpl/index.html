@@ -21,18 +21,29 @@
                 </ul>
                 <ul class="media-list">
                     <li class="media" ng-repeat="article in data">
-                        <a class="pull-left" href="#">
-              <img class="media-object" ng-src="{{article.author.avatar}}">
-            </a>
-                        <div class="media-body">
-                            <h5 class="media-heading">Media heading</h5>
-                            <div class="media">
-                                ...
-                            </div>
-                        </div>
+                      <a class="pull-left" ng-href="{{'/'+article.author._id}}">
+                        <img class="media-object" ng-src="{{article.author.avatar}}">
+                      </a>
+                      <div class="media-body" id="{{article._id}}">
+                        <header class="media-heading">
+                            <h5><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
+                            <i class="btn btn-mini btn-info pull-right" title="热度">{{article.hots}}</i>
+                            </h5>
+                        </header>
+                        <div class="media-content" ng-parse-markdown="article.content"></div>
+                        <footer>
+                            <ul class="list-inline muted">
+                                <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
+                                {{article.date | formatDate}}发表</li>
+                                <li>{{article.updateTime | formatDate}}更新</li>
+                                <li>{{article.visitors}}次访问</li>
+                            </ul>
+                        </footer>
+                      </div>
                     </li>
                 </ul>
             </div>
+            <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
         </div>
     </div>
     <div class="span3">

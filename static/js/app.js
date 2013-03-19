@@ -62,7 +62,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     'MdParse', 'MdEditor', 'getArticle', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
     $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
     // 注册全局变量jsGen
-    window.jsGen = jsGen || {};
+    window.jsGen = {};
 
     jsGen = tools(jsGen); //添加jsGen系列工具函数
     jsGen.http = $http;
