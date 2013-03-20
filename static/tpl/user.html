@@ -4,7 +4,7 @@
         </div>
     </div>
     <div class="span3">
-        <div class="panel">
+        <div class="panel inner sidebar">
             <div class="thumbnail">
                 <img ng-src="{{user.avatar}}" />
                 <div class="caption">
@@ -63,8 +63,8 @@
                 </div>
             </div>
         </div>
-        <div class="panel">
-            <ul class="sidebar nav nav-list text-center" ng-show="isMe">
+        <div class="panel inner sidebar">
+            <ul class="nav nav-list text-center" ng-show="isMe">
                 <li>
                     <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的收藏 </a>
                 </li>

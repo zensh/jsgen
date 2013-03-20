@@ -80,7 +80,6 @@ factory('tools', function () {
                             if (typeAkey !== 'function' && b.length > 0) {
                                 for (var i = b.length - 1; i >= 0; i--) {
                                     typeBkey = checkType(b[i]);
-                                    console.log(typeBkey);
                                     if (typeBkey === typeAkey) {
                                         if (typeBkey === 'object' || typeBkey === 'array') {
                                             a[i] = union(o);

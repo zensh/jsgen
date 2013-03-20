@@ -3,22 +3,38 @@
 /* Controllers */
 angular.module('jsGen.controllers', []).
 controller('indexCtrl', ['$scope', function ($scope) {
+    $scope.view = 'latest';
     $scope.data = null;
     $scope.pagination = null;
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
+        doc.ID = $scope.view;
         var result = jsGen.rest.article.get(doc, function () {
             if (!result.err) {
-                $scope.data = result.data;
-                jsGen.union($scope.pagination, result.pagination);
+                if (result.pagination) {
+                    if (result.pagination.now === 1) $scope.data = result.data;
+                    else $scope.data = $scope.data.concat(result.data);
+                    $scope.pagination = result.pagination;
+                    if (!$scope.pagination.display) $scope.pagination.display = {
+                        first: '首页',
+                        next: '下一页',
+                        last: '尾页'
+                    };
+                } else $scope.data = result.data;
             } else jsGen.rootScope.msg = result.err;
         });
     });
     $scope.$emit('pagination', {
-        n: 20,
+        n: 10,
         p: 1
     });
-    $scope.getList = function (s) {};
+    $scope.getList = function (s) {
+        $scope.view = s;
+        $scope.$emit('pagination', {
+            n: 10,
+            p: 1
+        });
+    };
 }]).
 controller('userLoginCtrl', ['$scope', function ($scope) {
     $scope.userReset = undefined;
@@ -292,7 +308,8 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     $scope.replyToComment = false;
     var Errmsg = {
         name: '错误提示',
-        message: '您需要先登录！'
+        message: '您需要先登录！',
+        type: 'error'
     };
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
@@ -333,7 +350,6 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         $scope.article = article;
         if (article.pagination) {
             $scope.pagination = article.pagination;
-            $scope.pagination.num = 10;
             $scope.pagination.display = {
                 next: '下一页',
                 last: '尾页'
@@ -564,6 +580,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             if (!result.err) {
                 $scope.article.commentsList.unshift(result);
                 $scope.article.comments += 1;
+                $scope.article.updateTime = Date.now();
                 if ($scope.replyToComment) $scope.article.commentsList.some(function (x, i) {
                     if ($scope.replyToComment === x._id) {
                         $scope.article.commentsList[i].commentsList.push(result._id);
@@ -597,7 +614,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             $scope._id = article._id;
             $scope.title = article.title;
             $scope.content = article.content;
-            $scope.refer = article.refer.url;
+            if (article.refer && article.refer.url) $scope.refer = article.refer.url;
             $scope.tagsList = article.tagsList.map(function (x) {
                 return x.tag;
             });

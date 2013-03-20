@@ -18,8 +18,8 @@
                     </li>
                 </ul>
             </header>
-            <div class="main" ng-parse-markdown="article.content">
-            </div>
+            <section class="main" ng-parse-markdown="article.content">
+            </section>
             <footer class="clearfix page-footer">
                 <div class="btn-toolbar pull-right">
                     <div class="btn-group">
@@ -54,7 +54,7 @@
             </footer>
         </article>
         <aside class="panel clearfix" id="comments">
-            <div id="reply" class="clearfix">
+            <section id="reply" class="clearfix">
                 <h5>{{replyTitle}}</h5>
                 <div id="wmd-preview" class="well wmd-preview" ng-show="wmdShow=='preview'">
                 </div>
@@ -83,7 +83,7 @@
                         <a type="button" ng-click="submit()" class="btn btn-primary" ng-disabled="!editSave">提    交</a>
                     </div>
                 </div>
-            </div>
+            </section>
             <ul class="media-list">
                 <li class="media" ng-repeat="comment in article.commentsList">
                   <a class="pull-left" ng-href="{{'/'+comment.author._id}}">
@@ -111,7 +111,7 @@
                   </div>
                 </li>
             </ul>
-            <div id="refer-comments">
+            <section id="refer-comments">
                 <div class="media" ng-repeat="comment in referComments">
                   <a class="pull-left" ng-href="{{'/'+comment.author._id}}">
                     <img class="media-object" ng-src="{{comment.author.avatar}}">
@@ -120,7 +120,7 @@
                     <header class="media-heading">
                         <h6>{{comment.title}}</h6>
                     </header>
-                    <div class="media-content" ng-parse-markdown="comment.content"></div>
+                    <section class="media-content" ng-parse-markdown="comment.content"></section>
                     <footer>
                         <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
                             发表于{{comment.date | formatDate}}</span>
@@ -134,12 +134,12 @@
                     </footer>
                   </div>
                 </div>
-            </div>
-            <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
+            </section>
+            <section class="pull-left" ng-pagination="pagination" ng-show="pagination"></section>
         </aside>
     </div>
     <div class="span3">
-        <div class="panel">
+        <div class="panel inner sidebar">
             <div class="media">
               <a class="pull-left" ng-href="{{'/'+article.author._id}}">
                 <img class="media-object" ng-src="{{article.author.avatar}}">

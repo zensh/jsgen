@@ -65,6 +65,8 @@ serverDm.run(function () {
                 jsGen.cache.tag = new jsGen.lib.CacheLRU(doc.tagCache);
                 jsGen.cache.collection = new jsGen.lib.CacheLRU(doc.collectionCache);
                 jsGen.cache.message = new jsGen.lib.CacheLRU(doc.messageCache);
+                jsGen.cache.updateList = [];
+                jsGen.cache.hotsList = [];
                 jsGen.api = {};
                 jsGen.api.index = require('./api/index.js');
                 jsGen.api.user = require('./api/user.js');

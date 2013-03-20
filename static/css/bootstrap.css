@@ -3789,7 +3789,7 @@ button.close {
   z-index: 1040;
   display: none;
   overflow: auto;
-  overflow-y: scroll;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -4241,9 +4241,9 @@ a.thumbnail:focus {
   margin-top: 15px;
 }
 
-.media:first-child {
+/*.media:first-child { jsGen
   margin-top: 0;
-}
+}*/
 
 .media-object {
   display: block;
@@ -4862,14 +4862,11 @@ a.badge:focus {
 .nav img {
     height: 50px;
 }
-.sidebar .glyphicon {
-    float: left;
-}
 .footer {
     text-align: center;
     padding: 30px 0;
     margin-top: 100px;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #ddd;
 }
 
 .content,
@@ -4960,7 +4957,7 @@ a.badge:focus {
 .panel,
 .panel-transparent {
     margin-top: 15px;
-    padding: 10px;
+    padding: 15px 0;
 }
 .panel {
     background-color: #ffffff;
@@ -4968,9 +4965,8 @@ a.badge:focus {
 body {
     background:url('./img/bg.png') repeat fixed;
 }
-article.panel,
-aside.panel {
-    padding: 15px 25px;
+.panel .nav-tabs {
+    padding: 0 10px;
 }
 .container-large {
     width: 100%;
@@ -4985,11 +4981,24 @@ aside.panel {
 #refer-comments {
     margin-top: 10px;
 }
-.media-list > li,
-#refer-comments .media {
-    border-top: 1px solid #eeeeee;
-    padding-top: 5px;
-    margin-top: 5px;
+.media {
+    padding: 0 10px;
+    margin: 0;
+}
+.media-list > li {
+    border-top: 1px solid #ddd;
+    padding: 5px 25px;
+}
+.media-list > li:hover {
+    background-color: #f4f4f4;
+}
+.media-list > li:first-child {
+    margin-top: 10px;
+    border-top: none;
+}
+.main,
+.media-content {
+    text-indent: 2em;
 }
 #comments h6 {
     margin-top: 0;
@@ -4998,14 +5007,36 @@ aside.panel {
 .page-footer {
   padding-top: 10px;
   margin: 40px 0 20px;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid #ddd;
 }
 #msg-modal {
-    position: absolute;
     max-width: 680px;
     margin: 0 auto;
     padding: 10px;
-    overflow-y: auto;
     top: 20%;
     bottom: auto;
+}
+.panel > header,
+.panel > footer,
+.panel > section {
+    padding-left: 25px;
+    padding-right: 25px;
+}
+.inner {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.text-hot {
+  color: red;
+}
+.sidebar .glyphicon {
+    float: left;
+}
+.sidebar > header,
+.sidebar > section {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.sidebar > header {
+    border-bottom: 1px solid #ddd;
 }

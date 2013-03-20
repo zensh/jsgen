@@ -122,20 +122,17 @@ var that = jsGen.dao.db.bind('articles', {
             comment: true
         };
 
-        callback = callback || jsGen.lib.tools.callbackFn;
         intersect(newObj, articleObj);
-        if (newObj.visitors) {
-            setObj.$inc = {
-                visitors: 1
-            };
-        } else setObj.$set = newObj;
-
-        that.findAndModify({
+        setObj.$set = newObj;
+        if (callback) that.findAndModify({
             _id: articleObj._id
         }, [], setObj, {
             w: 1,
             new: true
         }, callback);
+        else that.update({
+            _id: articleObj._id
+        }, setObj);
     },
 
     setFavor: function(articleObj) {

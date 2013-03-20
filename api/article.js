@@ -8,6 +8,7 @@ var listArticle = jsGen.lib.json.ListArticle,
     commentCache = jsGen.cache.comment,
     listCache = jsGen.cache.list,
     timeInterval = jsGen.cache.timeInterval,
+    MD5 = jsGen.lib.tools.MD5,
     filterTitle = jsGen.lib.tools.filterTitle,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent,
@@ -21,11 +22,11 @@ articleCache.getP = function (ID, callback, convert) {
 
     function getConvert(doc) {
         doc.visitors += 1;
-        getHots(doc);
+        calcuHots(doc);
+        union(doc, cache[ID]);
         that.put(ID, doc);
         listCache.update(ID, function (value) {
             value.visitors += 1;
-            value.hots = cache[ID].hots;
             return value;
         });
         jsGen.dao.article.setArticle({
@@ -65,7 +66,8 @@ commentCache.getP = function (ID, callback, convert) {
         _id = jsGen.dao.article.convertID(ID);
 
     function getConvert(doc) {
-        getHots(doc);
+        calcuHots(doc);
+        union(doc, cache[ID]);
         that.put(ID, doc);
         jsGen.dao.article.setArticle({
             _id: _id,
@@ -104,7 +106,7 @@ listCache.getP = function (ID, callback, convert) {
         _id = jsGen.dao.article.convertID(ID);
 
     function getConvert(doc) {
-        doc.hots = cache[ID].hots;
+        union(doc, cache[ID]);
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.refer = convertRefer(doc.refer);
@@ -132,10 +134,20 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
-    if (!this[obj._id]) this[obj._id] = {status: -1};
-    if (this[obj._id].status === -1 && obj.status > -1) {
-        this._index.push(obj._id);
-        this._initTime = Date.now();
+    if (!this[obj._id]) this[obj._id] = {status: -1, updateTime: 0, hots: 0};
+    if (obj.status > -1) {
+        if (this[obj._id].status === -1) {
+            this._index.push(obj._id);
+            this._initTime = Date.now();
+        }
+        if (obj.updateTime > this[obj._id].updateTime) {
+            this[obj._id].updateTime = obj.updateTime;
+            updateList(obj._id);
+        }
+        if (obj.hots > this[obj._id].hots) {
+            this[obj._id].hots = obj.hots;
+            hotsList(obj._id);
+        }
     }
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
@@ -170,6 +182,39 @@ cache._remove = function (ID) {
         }
     });
 }).call(cache);
+
+function updateList(ID) {
+    var x = 0;
+    for (var i = jsGen.cache.updateList.length - 1; i >= 0; i--) {
+        if (jsGen.cache.updateList[i] === ID) {
+            jsGen.cache.updateList.splice(i, 1);
+            continue;
+        }
+        if (x === 0 && jsGen.cache.updateList[i] && cache[ID].updateTime < cache[jsGen.cache.updateList[i]].updateTime) {
+            x = i + 1;
+            jsGen.cache.updateList.splice(x, 0, ID);
+        }
+    }
+    if (x === 0) jsGen.cache.updateList.splice(0, 0, ID);
+    if (jsGen.cache.updateList.length > 500) jsGen.cache.updateList.length = 500;
+};
+
+function hotsList(ID) {
+    var x = 0, now = Date.now();
+    if (now - cache[ID].updateTime > 604800000) return;
+    for (var i = jsGen.cache.hotsList.length - 1; i >= 0; i--) {
+        if (now - cache[jsGen.cache.hotsList[i]].updateTime > 604800000 || jsGen.cache.hotsList[i] === ID) {
+            jsGen.cache.hotsList.splice(i, 1);
+            continue;
+        }
+        if (x === 0 && jsGen.cache.hotsList[i] && cache[ID].hots < cache[jsGen.cache.hotsList[i]].hots) {
+            x = i + 1;
+            jsGen.cache.hotsList.splice(x, 0, ID);
+        }
+    }
+    if (x === 0) jsGen.cache.hotsList.splice(0, 0, ID);
+    if (jsGen.cache.hotsList.length > 100) jsGen.cache.hotsList.length = 100;
+};
 
 function convertArticles(_idArray, callback, mode) {
     var result = [];
@@ -216,14 +261,14 @@ function convertRefer(refer) {
     }
 };
 
-function getHots(doc) {
+function calcuHots(doc) {
     doc.hots = jsGen.config.ArticleHots[0] * (doc.visitors ? doc.visitors : 0);
     doc.hots += jsGen.config.ArticleHots[1] * (doc.favorsList ? doc.favorsList.length : 0);
     doc.hots -= jsGen.config.ArticleHots[1] * (doc.opposesList ? doc.opposesList.length : 0);
     doc.hots += jsGen.config.ArticleHots[2] * (doc.commentsList ? doc.commentsList.length : 0);
     doc.hots += jsGen.config.ArticleHots[3] * (doc.markList ? doc.markList.length : 0);
     doc.hots += jsGen.config.ArticleHots[4] * (doc.status === 2 ? 1 : 0);
-    cache[doc._id].hots = doc.hots;
+    cache._update(doc);
 };
 
 function getArticle(req, res, dm) {
@@ -245,7 +290,7 @@ function getArticle(req, res, dm) {
         doc.comments = doc.commentsList.length;
         var list = null;
         if (req.path[3] === 'comment') {
-            if (!req.session.commentPagination) return res.sendjson({});
+            if (!req.session.commentPagination) return res.sendjson({data:null});
             list = jsGen.cache.pagination.get(req.session.commentPagination.key);
             if (!list || (p === 1 && req.session.commentPagination.key !== doc._id + doc.updateTime)) {
                 req.session.commentPagination.key = doc._id + doc.updateTime;
@@ -260,9 +305,9 @@ function getArticle(req, res, dm) {
             list = doc.commentsList;
             pagination(req, list, commentCache, dm.intercept(function (commentsList) {
                 doc.commentsList = commentsList.data;
-                if (commentsList.pagination.total > commentsList.pagination.num) {
+                if (commentsList.pagination) {
                     doc.pagination = commentsList.pagination;
-                    req.session.commentPagination = doc.pagination;
+                    req.session.commentPagination = union(doc.pagination);
                     req.session.commentPagination.key = doc._id + doc.updateTime;
                     jsGen.cache.pagination.put(req.session.commentPagination.key, list);
                 }
@@ -295,17 +340,87 @@ function getComments(req, res, dm) {
 };
 
 function getLatest(req, res, dm) {
-    var p = req.getparam.p || req.getparam.page || 1;
+    var list,
+    p = req.getparam.p || req.getparam.page || 1,
+    n = Number(req.path[3]);
 
-    if (!req.session.latestPagination) req.session.latestPagination = {key: cache._initTime};
-    var list = jsGen.cache.pagination.get(req.session.latestPagination.key);
-    if (!list || (p === 1 && req.session.latestPagination.key !== cache._initTime)) {
-        req.session.latestPagination.key = cache._initTime;
-        list = cache._index;
-        jsGen.cache.pagination.put(req.session.latestPagination.key, list);
+    p = Number(p);
+    if (req.path[2] === 'latest' && n > 0) {
+        if (n > 20) n = 20;
+        req.getparam = req.getparam || {};
+        req.getparam.p = 1;
+        req.getparam.n = n;
+        list = cache._index.slice(-n).reverse();
+    } else {
+        n = 0;
+        if (!req.session.listPagination) req.session.listPagination = {key: cache._initTime};
+        list = jsGen.cache.pagination.get(req.session.listPagination.key);
+        if (!list || (p === 1 && req.session.listPagination.key !== cache._initTime)) {
+            req.session.listPagination.key = cache._initTime;
+            list = cache._index.slice(0).reverse();
+            jsGen.cache.pagination.put(req.session.listPagination.key, list);
+        }
     }
     pagination(req, list, listCache, dm.intercept(function (articlesList) {
-        union(req.session.latestPagination, articlesList.pagination);
+        if (articlesList.pagination) union(req.session.listPagination, articlesList.pagination);
+        return res.sendjson(articlesList);
+    }));
+};
+
+function getUpdate(req, res, dm) {
+    var list,
+        p = req.getparam.p || req.getparam.page || 1,
+        n = Number(req.path[3]),
+        key = MD5(JSON.stringify(jsGen.cache.updateList), 'base64');
+
+    p = Number(p);
+    if (n > 0) {
+        if (n > 20) n = 20;
+        req.getparam = req.getparam || {};
+        req.getparam.p = 1;
+        req.getparam.n = n;
+        list = jsGen.cache.updateList.slice(0, n);
+    } else {
+        n = 0;
+        if (!req.session.listPagination) req.session.listPagination = {key: key};
+        list = jsGen.cache.pagination.get(req.session.listPagination.key);
+        if (!list || (p === 1 && req.session.listPagination.key !== key)) {
+            req.session.listPagination.key = key;
+            list = jsGen.cache.updateList.slice(0);
+            jsGen.cache.pagination.put(req.session.listPagination.key, list);
+        }
+    }
+    pagination(req, list, listCache, dm.intercept(function (articlesList) {
+        if (articlesList.pagination) union(req.session.listPagination, articlesList.pagination);
+        return res.sendjson(articlesList);
+    }));
+};
+
+function getHots(req, res, dm) {
+    var list,
+        p = req.getparam.p || req.getparam.page || 1,
+        n = Number(req.path[3]),
+        key = MD5(JSON.stringify(jsGen.cache.hotsList), 'base64');
+
+    p = Number(p);
+    if (n > 0) {
+        if (n > 20) n = 20;
+        req.getparam = req.getparam || {};
+        req.getparam.p = 1;
+        req.getparam.n = n;
+        list = jsGen.cache.hotsList.slice(0, n);
+    } else {
+        n = 0;
+        if (!req.session.listPagination) req.session.listPagination = {key: key};
+        list = jsGen.cache.pagination.get(req.session.listPagination.key);
+        if (!list || (p === 1 && req.session.listPagination.key !== key)) {
+            req.session.listPagination.key = key;
+            list = jsGen.cache.hotsList.slice(0);
+            jsGen.cache.pagination.put(req.session.listPagination.key, list);
+        }
+    }
+    pagination(req, list, listCache, dm.intercept(function (articlesList) {
+        if (articlesList.pagination) union(req.session.listPagination, articlesList.pagination);
         return res.sendjson(articlesList);
     }));
 };
@@ -459,8 +574,8 @@ function setArticle(req, res, dm) {
                                 _id: article_id,
                                 status: value.status
                             });
-                            cache._update(value);
                         }
+                        cache._update(value);
                         articleCache.put(value._id, value);
                     }, false);
                     if (refer_id) commentCache.getP(comment.refer, function (err, value) {
@@ -472,8 +587,8 @@ function setArticle(req, res, dm) {
                                 _id: refer_id,
                                 status: value.status
                             });
-                            cache._update(value);
                         }
+                        cache._update(value);
                         commentCache.put(value._id, value);
                     }, false);
                 }
@@ -595,9 +710,10 @@ function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
+        case 'latest':
             return getLatest(req, res, dm);
-        case 'hot':
-            return getHot(req, res, dm);
+        case 'hots':
+            return getHots(req, res, dm);
         case 'update':
             return getUpdate(req, res, dm);
         default:

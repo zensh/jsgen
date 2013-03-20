@@ -89,6 +89,7 @@
                                 {{global.user.name}}[{{global.user.role | role}}] <b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
+                                    <li><a href="/add">发表文章</a></li>
                                     <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
                                     <li class="divider"></li>
                                     <li ng-show="isAdmin"><a ng-href="/admin">网站管理</a></li>
@@ -111,16 +112,18 @@
                 </p>
             </div>
         </footer>
-        <div class="modal fade modal-content" id="msg-modal" ng-class="msgmodal">
-            <div class="modal-header">
-                <h3 class="modal-title">{{msg.name}}</h3>
-            </div>
-            <div class="modal-body">
-                <p>{{msg.message}}</p>
-            </div>
-            <div class="modal-footer">
-                <span ng-show="timeout">[<strong ng-timing="timeout"></strong>秒后自动返回]</span>
-                <a href="#" class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
+        <div class="modal fade" id="msg-modal" ng-class="msgmodal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{msg.name}}</h3>
+                </div>
+                <div class="modal-body">
+                    <p>{{msg.message}}</p>
+                </div>
+                <div class="modal-footer">
+                    <span ng-show="timeout">[<strong ng-timing="timeout"></strong>秒后自动返回]</span>
+                    <a href="#" class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
+                </div>
             </div>
         </div>
     </body>

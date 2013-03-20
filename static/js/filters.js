@@ -78,7 +78,7 @@ angular.module('jsGen.filters', []).
         if (bytes.length > len) {
             bytes.length = len;
             text = utf8.bytesToString(bytes);
-            text = text.slice(0, -1) + '…';
+            text = text.slice(0, -2) + '…';
         }
         return text;
     };

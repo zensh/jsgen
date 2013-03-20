@@ -1,4 +1,4 @@
-<div ng-controller="adminGlobalCtrl">
+<section class="clearfix" ng-controller="adminGlobalCtrl">
     <div class="page-header">
             <h4>网站信息</h4>
     </div>
@@ -28,21 +28,21 @@
               <dd>{{global.keywords}}</dd>
               <dt>上线时间：</dt>
               <dd>{{global.date | date:'yy-MM-dd HH:mm'}}</dd>
-              <dt>总访问次数：</dt>
+              <dt>访问总数：</dt>
               <dd>{{global.visitors}}</dd>
-              <dt>总用户数量：</dt>
+              <dt>会员总数：</dt>
               <dd>{{global.users}}</dd>
-              <dt>总文章数量：</dt>
+              <dt>文章总数：</dt>
               <dd>{{global.articles}}</dd>
-              <dt>总评论数量：</dt>
+              <dt>评论总数：</dt>
               <dd>{{global.comments}}</dd>
-              <dt>在线用户数量：</dt>
+              <dt>在线用户：</dt>
               <dd>{{global.onlineNum}}</dd>
-              <dt>在线会员数量：</dt>
+              <dt>在线会员：</dt>
               <dd>{{global.onlineUsers}}</dd>
-              <dt>最多在线用户记录：</dt>
+              <dt>在线记录：</dt>
               <dd>{{global.maxOnlineNum}}</dd>
-              <dt>在线记录时间：</dt>
+              <dt>记录时间：</dt>
               <dd>{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</dd>
             </dl>
         </div>
@@ -110,4 +110,4 @@
             </dl>
         </div>
     </div>
-</div>
+</section>
