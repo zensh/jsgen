@@ -146,7 +146,7 @@
               </a>
               <div class="media-body">
                 <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
-                <a type="button" class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
+                <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
               </div>
             </div>
         </div>

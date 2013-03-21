@@ -23,16 +23,16 @@
                     <li class="media" ng-repeat="article in data">
                       <div class="media-body" id="{{article._id}}">
                         <header class="media-heading">
-                            <h5><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
+                            <h5><a ng-href="{{'/'+article._id}}" target="_blank">{{article.title}}</a>
                             <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
                             <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
-                            <i class="btn btn-mini btn-info pull-right" title="热度">{{article.hots}}</i>
+                            <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
                             </h5>
                         </header>
                         <section class="media-content" ng-parse-markdown="article.content"></section>
                         <footer>
                             <ul class="list-inline muted">
-                                <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
+                                <li><a ng-href="{{'/'+article.author._id}}" target="_blank">{{article.author.name}}</a>
                                 {{article.date | formatDate}}发表</li>
                                 <li>{{article.visitors}}次访问</li>
                                 <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
@@ -41,27 +41,71 @@
                       </div>
                     </li>
                 </ul>
+                <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
             </div>
-            <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
         </div>
     </div>
-    <div class="span3">
+    <div class="span3 sidebar">
+        <div class="panel">
+            <div class="thumbnail inner text-center">
+                <img src="/static/img/angularjs.png" alt="angularjs">
+                <div class="caption">
+                <h3>中文社区</h3>
+                <h5 class="text-success text-left">使用超动感HTML &amp; JS开发WEB应用！</h5>
+                <p><a href="https://github.com/angular/angular.js" class="btn btn-success" target="_blank">GitHub开源</a>
+                    <a href="http://code.angularjs.org/" class="btn btn-primary" target="_blank">最新下载</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="thumbnail inner text-center">
+                <h2><strong>{<span class="text-success">js</span><span class="text-hot">G</span><span class="text-success">en</span>}</strong></h2>
+                <div class="caption">
+                <h5 class="text-success text-left">纯JavaScript构建的新一代开源实时社区网站系统，基于Node.js &amp; AngularJS！</h5>
+                <p><a href="https://github.com/zensh/jsgen" class="btn btn-success" target="_blank">GitHub开源</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">热门评论</strong>
+            </header>
+            <ul class="media-list inner">
+                <li class="media" ng-repeat="comment in hotComments">
+                  <div class="media-body" id="{{comment._id}}">
+                    <strong class="text-hot pull-left" title="热度"><em>{{comment.hots}}</em></strong>
+                    <section class="media-content" ng-parse-markdown="comment.content"></section>
+                    <footer>
+                        <em><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
+                            <a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a></em>
+                    </footer>
+                  </div>
+                </li>
+            </ul>
+        </div>
+        <div class="panel sidebar">
+            <header class="inner">
+                <strong class="muted">赞助链接</strong>
+            </header>
+            <div class="inner">
+            </div>
+        </div>
         <div class="panel sidebar">
             <header class="inner">
                 <strong class="muted">网站状态</strong>
             </header>
-            <section class="inner">
-                <ul class="list-unstyled">
+            <div class="inner">
+                <ul class="list-inline inner">
                   <li>访问总数：{{global.visitors}}</li>
                   <li>文章总数：{{global.articles}}</li>
                   <li>评论总数：{{global.comments}}</li>
                   <li>会员总数：{{global.users}}</li>
-                  <li>在线用户：{{global.onlineNum}}</li>
+                  <li>在线访客：{{global.onlineNum}}</li>
                   <li>在线会员：{{global.onlineUsers}}</li>
                   <li>在线记录：{{global.maxOnlineNum}}</li>
-                  <li>记录时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
+                  <li>时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
                 </ul>
-            </section>
+            </div>
         </div>
     </div>
 </div>

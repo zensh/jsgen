@@ -29,6 +29,7 @@ var that = jsGen.dao.db.bind('global', {
             metatitle: '',
             metadesc: '',
             keywords: '',
+            robots: '',
             visitors: 0,
             users: 0,
             articles: 0,

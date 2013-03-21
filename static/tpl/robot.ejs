@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <title><%- global.title + '|' + global.description %></title>
+        <meta http-equiv="content-type" content="text/html">
+        <meta name="title" content="<%- global.metatitle %>">
+        <meta name="description" content="<%- global.metadesc %>">
+        <meta name="keywords" content="<%- global.keywords %>">
+    </head>
+
+    <body>
+        <div>
+            <article>
+                <header>
+                    <h4><%- article.title %></h4>
+                    <ul>
+                        <li>
+                            访问:
+                            <%- article.visitors %>
+                                次
+                        </li>
+                        <li>
+                            热度:
+                            <%- article.hots %>
+                        </li>
+                        <li>
+                            <%- article.comments %>
+                                条评论
+                        </li>
+                    </ul>
+                    <ul>
+                        <% article.tagsList.forEach(function(tag){ %>
+                        <li>
+                            <a href="<%- '/'+tag._id %>"><%- tag.tag %></a>
+                        </li>
+                        <% }); %>
+                    </ul>
+                </header>
+                <section ><%- article.content %></section>
+            </article>
+            <aside>
+                <ul>
+                    <% article.commentsList.forEach(function(comment){ %>
+                    <li>
+                        <div id="<%- comment._id %>">
+                            <header>
+                                <h6><%- comment.title %></h6>
+                            </header>
+                            <section ><%- comment.content %></section>
+                            <footer>
+                                <span><a href="<%- '/'+comment.author._id %>"><%- comment.author.name %></a></span>
+                            </footer>
+                        </div>
+                    </li>
+                    <% }); %>
+                </ul>
+            </aside>
+        </div>
+        <footer>
+            <div>
+                <p>
+                    <a href="<%- global.url %>"><%- global.title %></a>
+                    ©2013 Powered by
+                    <a href="https://github.com/zensh/jsgen">jsGen <%- global.info.version %></a>
+                    [
+                    <a href="https://angularjs.org">AngularJS <%- global.info.angularjs %></a>
+                    ,&nbsp;
+                    <a href="https://angularjs.org">Node.js <%- global.info.nodejs %></a>
+                    ]
+                </p>
+            </div>
+        </footer>
+    </body>
+
+</html>

@@ -4,18 +4,13 @@
 angular.module('jsGen.services', ['ngResource']).
 factory('rest', ['$resource', function($resource) {
     return {
-        index: $resource('/api/index'),
-        indexAdmin: $resource('/api/index/admin'),
-        login: $resource('/api/user/login'),
-        logout: $resource('/api/user/logout'),
-        reset: $resource('/api/user/reset'),
-        register: $resource('/api/user/register'),
-        home: $resource('/api/user/index'),
+        index: $resource('/api/index/:OP', {
+            OP: 'index'
+        }),
         user: $resource('/api/user/:Uid/:OP', {
             Uid: 'index',
             OP: 'index'
         }),
-        userAdmin: $resource('/api/user/admin'),
         article: $resource('/api/article/:ID/:OP', {
             ID: 'index',
             OP: 'index'

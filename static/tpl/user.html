@@ -3,53 +3,50 @@
         <div class="panel" ng-include src="getTpl">
         </div>
     </div>
-    <div class="span3">
-        <div class="panel inner sidebar">
-            <div class="thumbnail">
-                <img ng-src="{{user.avatar}}" />
-                <div class="caption">
-                    <h5 class="text-center">{{user.name}}&nbsp;
-                    <a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-mini btn-success">{{user.isFollow | follow}}</a>
-                </h5>
+    <div class="span3 sidebar">
+        <div class="panel">
+            <div class="media inner">
+              <a class="pull-left" ng-href="{{'/'+user._id}}">
+                <img class="media-object" ng-src="{{user.avatar}}">
+              </a>
+              <div class="media-body">
+                <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></h5>
+                <span>Uid:{{user._id}}</span>
+                <span ng-show="user.role">{{user.role | role}}</span>
+                <p><a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a></p>
+              </div>
+            </div>
+            <div class="inner">
                     <ul class="list-inline">
-                        <li>
-                            Uid：{{user._id}}
-                        </li>
                         <li ng-show="user.email">
-                            Email：{{user.email}}
-                        </li>
-                        <li ng-show="user.role">
-                            权限：{{user.role | role}}
+                            <span class="muted">Email：</span>{{user.email}}
                         </li>
                         <li ng-show="user.sex">
-                            性别：{{user.sex | sex}}
+                            <span class="muted">性别：</span>{{user.sex | sex}}
                         </li>
                         <li ng-show="user.score">
-                            积分：{{user.score}}
+                            <span class="muted">积分：</span>{{user.score}}
                         </li>
                         <li ng-show="user.fans">
-                            粉丝：{{user.fans}}
+                            <span class="muted">粉丝：</span>{{user.fans}}
                         </li>
                         <li ng-show="user.follow">
-                            关注：{{user.follow}}
+                            <span class="muted">关注：</span>{{user.follow}}
                         </li>
                         <li ng-show="user.collect">
-                            收藏：{{user.collect}}
+                            <span class="muted">收藏：</span>{{user.collect}}
                         </li>
                         <li ng-show="user.articles">
-                            文章：{{user.articles}}
+                            <span class="muted">文章：</span>{{user.articles}}
                         </li>
                         <li ng-show="user.comments">
-                            评论：{{user.comments}}
+                            <span class="muted">评论：</span>{{user.comments}}
                         </li>
                         <li ng-show="user.collections">
-                            合集：{{user.collections}}
+                            <span class="muted">合集：</span>{{user.collections}}
                         </li>
                         <li ng-show="user.date">
-                            {{user.date | formatDate}}注册
-                        </li>
-                        <li ng-show="user.lastLoginDate">
-                            {{user.lastLoginDate | formatDate}}最后登录
+                            {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
                         </li>
                     </ul>
                     <dl>
@@ -60,45 +57,44 @@
                         <a ng-href="{{'/'+tag._id}}" class="btn btn-small">{{tag.tag}}</a>
                       </li></ul></dd>
                     </dl>
-                </div>
             </div>
         </div>
-        <div class="panel inner sidebar">
-            <ul class="nav nav-list text-center" ng-show="isMe">
+        <div class="panel">
+            <ul class="nav nav-list text-center inner" ng-show="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的收藏 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','mark')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的标记 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
+                    <a href="#" ng-click="setTpl('user-index.html', 'follow')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','comment')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','message')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html', 'edit')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
-            <ul class="sidebar nav nav-list text-center" ng-hide="isMe">
+            <ul class="nav nav-list text-center inner" ng-hide="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的文章 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的合集 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的粉丝 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的粉丝 </a>
                 </li>
             </ul>
         </div>

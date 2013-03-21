@@ -119,6 +119,7 @@ function setGlobal(req, res, dm) {
         metatitle: '',
         metadesc: '',
         keywords: '',
+        robots: '',
         TimeInterval: 0,
         ArticleTagsMax: 0,
         UserTagsMax: 0,
@@ -189,6 +190,7 @@ function setGlobal(req, res, dm) {
         jsGen.cache.pagination.capacity = setObj.paginationCache[1];
     }
     if (setObj.TimeInterval) jsGen.cache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
+    if (setObj.robots) jsGen.robotReg = new RegExp(setObj.robots, 'i');
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
         union(jsGen.config, body);

@@ -31,7 +31,7 @@ articleCache.getP = function (ID, callback, convert) {
         });
         jsGen.dao.article.setArticle({
             _id: _id,
-            visitors: 1,
+            visitors: doc.visitors,
             hots: cache[ID].hots
         });
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
@@ -134,21 +134,15 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
-    if (!this[obj._id]) this[obj._id] = {status: -1, updateTime: 0, hots: 0};
+    if (!this[obj._id]) this[obj._id] = {status: -1, updateTime: 0, hots: -1};
     if (obj.status > -1) {
         if (this[obj._id].status === -1) {
             this._index.push(obj._id);
             this._initTime = Date.now();
         }
-        if (obj.updateTime > this[obj._id].updateTime) {
-            this[obj._id].updateTime = obj.updateTime;
-            updateList(obj._id);
-        }
-        if (obj.hots > this[obj._id].hots) {
-            this[obj._id].hots = obj.hots;
-            hotsList(obj._id);
-        }
-    }
+        if (obj.updateTime > this[obj._id].updateTime) updateList(obj);
+        if (obj.hots > this[obj._id].hots) hotsList(obj);
+    } else if (obj.hots > this[obj._id].hots) hotCommentsList(obj);
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
     this[obj._id].updateTime = obj.updateTime;
@@ -183,37 +177,54 @@ cache._remove = function (ID) {
     });
 }).call(cache);
 
-function updateList(ID) {
+function updateList(article) {
     var x = 0;
     for (var i = jsGen.cache.updateList.length - 1; i >= 0; i--) {
-        if (jsGen.cache.updateList[i] === ID) {
+        if (jsGen.cache.updateList[i] === article._id) {
             jsGen.cache.updateList.splice(i, 1);
             continue;
         }
-        if (x === 0 && jsGen.cache.updateList[i] && cache[ID].updateTime < cache[jsGen.cache.updateList[i]].updateTime) {
+        if (x === 0 && jsGen.cache.updateList[i] && article.updateTime < cache[jsGen.cache.updateList[i]].updateTime) {
             x = i + 1;
-            jsGen.cache.updateList.splice(x, 0, ID);
+            jsGen.cache.updateList.splice(x, 0, article._id);
         }
     }
-    if (x === 0) jsGen.cache.updateList.splice(0, 0, ID);
+    if (x === 0) jsGen.cache.updateList.unshift(article._id);
     if (jsGen.cache.updateList.length > 500) jsGen.cache.updateList.length = 500;
 };
 
-function hotsList(ID) {
+function hotsList(article) {
     var x = 0, now = Date.now();
-    if (now - cache[ID].updateTime > 604800000) return;
+    if (now - article.updateTime > 604800000) return;
     for (var i = jsGen.cache.hotsList.length - 1; i >= 0; i--) {
-        if (now - cache[jsGen.cache.hotsList[i]].updateTime > 604800000 || jsGen.cache.hotsList[i] === ID) {
+        if (now - cache[jsGen.cache.hotsList[i]].updateTime > 604800000 || jsGen.cache.hotsList[i] === article._id) {
             jsGen.cache.hotsList.splice(i, 1);
             continue;
         }
-        if (x === 0 && jsGen.cache.hotsList[i] && cache[ID].hots < cache[jsGen.cache.hotsList[i]].hots) {
+        if (x === 0 && jsGen.cache.hotsList[i] && article.hots < cache[jsGen.cache.hotsList[i]].hots) {
             x = i + 1;
-            jsGen.cache.hotsList.splice(x, 0, ID);
+            jsGen.cache.hotsList.splice(x, 0, article._id);
         }
     }
-    if (x === 0) jsGen.cache.hotsList.splice(0, 0, ID);
+    if (x === 0) jsGen.cache.hotsList.unshift(article._id);
     if (jsGen.cache.hotsList.length > 100) jsGen.cache.hotsList.length = 100;
+};
+
+function hotCommentsList(article) {
+    var x = 0, now = Date.now();
+    if (now - article.updateTime > 604800000) return;
+    for (var i = jsGen.cache.hotCommentsList.length - 1; i >= 0; i--) {
+        if (now - cache[jsGen.cache.hotCommentsList[i]].updateTime > 604800000 || jsGen.cache.hotCommentsList[i] === article._id) {
+            jsGen.cache.hotCommentsList.splice(i, 1);
+            continue;
+        }
+        if (x === 0 && jsGen.cache.hotCommentsList[i] && article.hots < cache[jsGen.cache.hotCommentsList[i]].hots) {
+            x = i + 1;
+            jsGen.cache.hotCommentsList.splice(x, 0, article._id);
+        }
+    }
+    if (x === 0) jsGen.cache.hotCommentsList.unshift(article._id);
+    if (jsGen.cache.hotCommentsList.length > 50) jsGen.cache.hotCommentsList.length = 50;
 };
 
 function convertArticles(_idArray, callback, mode) {
@@ -221,18 +232,22 @@ function convertArticles(_idArray, callback, mode) {
     callback = callback || jsGen.lib.tools.callbackFn;
     if (!Array.isArray(_idArray)) _idArray = [_idArray];
     if (_idArray.length === 0) return callback(null, result);
-    _idArray.reverse();
-    if (mode === 'id') {
-        for (var i = _idArray.length - 1; i >= 0; i--) {
-            if (_idArray[i] > 0) result.push(jsGen.dao.article.convertID(_idArray[i]));
+    if (typeof _idArray[0] === 'number') {
+        for (var i = 0, len =  _idArray.length; i < len; i++) {
+            if (_idArray[i] > 0) _idArray[i] = jsGen.dao.article.convertID(_idArray[i]);
         }
+    }
+    if (mode === 'id') {
+        result = _idArray.slice(0);
         return callback(null, result);
-    } else next();
+    } else {
+        _idArray.reverse();
+        next();
+    }
 
     function next() {
         var ID = _idArray.pop();
         if (!ID) return callback(null, result);
-        ID = jsGen.dao.article.convertID(ID);
         if (mode === 'comment') {
             commentCache.getP(ID, function (err, doc) {
                 if (err) return callback(err, result);
@@ -422,6 +437,16 @@ function getHots(req, res, dm) {
     pagination(req, list, listCache, dm.intercept(function (articlesList) {
         if (articlesList.pagination) union(req.session.listPagination, articlesList.pagination);
         return res.sendjson(articlesList);
+    }));
+};
+
+function getHotComments(req, res, dm) {
+    var list, n = Number(req.path[3]) || 5;
+
+    if (n < 3) n =3;
+    list = jsGen.cache.hotCommentsList.slice(0, n);
+    convertArticles(list, dm.intercept(function (doc) {
+        return res.sendjson({data: doc});
     }));
 };
 
@@ -706,6 +731,24 @@ function setArticle(req, res, dm) {
     } else throw jsGen.Err(jsGen.lib.msg.requestDataErr);
 };
 
+function robot(req, res, dm) {
+    var obj = {}, ID = req.path[0];
+    obj.global = union(jsGen.config);
+    if (!checkID(ID, 'A') || !cache[ID] || cache[ID].display > 0) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    articleCache.getP(ID, dm.intercept(function (doc) {
+        doc.content = jsGen.module.marked(doc.content);
+        doc.comments = doc.commentsList.length;
+        convertArticles(doc.commentsList, dm.intercept(function (commentsList) {
+            commentsList.forEach(function (comment, i) {
+                commentsList[i].content = jsGen.module.marked(comment.content);
+            });
+            doc.commentsList = commentsList;
+            obj.article = doc;
+            res.render('/robot.ejs', obj);
+        }), 'comment');
+    }));
+};
+
 function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
@@ -716,6 +759,8 @@ function getFn(req, res, dm) {
             return getHots(req, res, dm);
         case 'update':
             return getUpdate(req, res, dm);
+        case 'comment':
+            return getHotComments(req, res, dm);
         default:
             return getArticle(req, res, dm);
     }
@@ -739,5 +784,7 @@ module.exports = {
     GET: getFn,
     POST: postFn,
     DELETE: deleteFn,
-    convertArticles: convertArticles
+    convertArticles: convertArticles,
+    cache: cache,
+    robot: robot
 };

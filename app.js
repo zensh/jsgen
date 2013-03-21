@@ -67,6 +67,9 @@ serverDm.run(function () {
                 jsGen.cache.message = new jsGen.lib.CacheLRU(doc.messageCache);
                 jsGen.cache.updateList = [];
                 jsGen.cache.hotsList = [];
+                jsGen.cache.hotCommentsList = [];
+                jsGen.robot = {};
+                jsGen.robot.reg = new RegExp(doc.robots || 'Baiduspider|Googlebot|BingBot|Slurp!', 'i');
                 jsGen.api = {};
                 jsGen.api.index = require('./api/index.js');
                 jsGen.api.user = require('./api/user.js');
@@ -134,6 +137,8 @@ serverDm.run(function () {
                     process.nextTick(function () {
                         jsGen.api.index.updateOnlineCache(req);
                     });
+                } else if (jsGen.robot.reg.test(req.useragent)) {
+                    jsGen.api.article.robot(req, res, dm);
                 } else {
                     jsGen.config.visitors += 1;
                     jsGen.dao.index.setGlobalConfig({

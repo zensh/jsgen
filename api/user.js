@@ -532,6 +532,43 @@ function resetUser(req, res, dm) {
     }));
 };
 
+function getArticles(req, res, dm) {
+    var list, key,
+    p = req.getparam.p || req.getparam.page || 1;
+
+    p = Number(p);
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    key = req.session.Uid + req.path[2];
+    list = jsGen.cache.pagination.get(key);
+
+    if (!list || p === 1) {
+        userCache.getP(req.session.Uid, dm.intercept(function (user) {
+            if (req.path[2] === 'mark') jsGen.api.article.convertArticles(user.markList, dm.intercept(function (IDList) {
+                jsGen.cache.pagination.put(req.session.Uid + 'mark', IDList.reverse());
+                list = jsGen.cache.pagination.get(key);
+                getPagination();
+            }), 'id');
+            else jsGen.api.article.convertArticles(user.articlesList, dm.intercept(function (IDList) {
+                var articlesList = [], commentsList = [];
+                IDList.forEach(function (ID) {
+                    if (jsGen.api.article.cache[ID].status > -1) articlesList.push(ID);
+                    else commentsList.push(ID);
+                });
+                jsGen.cache.pagination.put(req.session.Uid + 'article', articlesList.reverse());
+                jsGen.cache.pagination.put(req.session.Uid + 'comment', commentsList.reverse());
+                list = jsGen.cache.pagination.get(key);
+                getPagination();
+            }), 'id');
+        }), false);
+    } else getPagination();
+
+    function getPagination() {
+        pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
+            return res.sendjson(articlesList);
+        }));
+    };
+};
+
 function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
@@ -543,6 +580,10 @@ function getFn(req, res, dm) {
             return getUsers(req, res, dm);
         case 'reset':
             return resetUser(req, res, dm);
+        case 'article':
+        case 'comment':
+        case 'mark':
+            return getArticles(req, res, dm);
         default:
             return getUser(req, res, dm);
     }

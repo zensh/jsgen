@@ -4197,7 +4197,7 @@ button.close {
 .img-thumbnail {
   padding: 4px;
   line-height: 20px;
-  border: 1px solid #ddd;
+/*  border: 1px solid #ddd; jsGen*/
   border-radius: 4px;
   -webkit-transition: all 0.2s ease-in-out;
      -moz-transition: all 0.2s ease-in-out;
@@ -4957,13 +4957,18 @@ a.badge:focus {
 .panel,
 .panel-transparent {
     margin-top: 15px;
-    padding: 15px 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 .panel {
     background-color: #ffffff;
 }
+/*body {
+    background:url('./img/bg2.png') repeat fixed;
+}*/
 body {
-    background:url('./img/bg.png') repeat fixed;
+    word-wrap: break-word;
+    background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAYCAYAAACIhL/AAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAACYUlEQVRIx42WYXLrIAyEBSb3v2OvkSDen7f0y0Y49UynDgYhrVYrtZ+fn/V4PGLOGRERa62IiGitvb231iIiIjOj9x561lp7X+89MnN/u64r1lqRmduGzmdmrLU+9tBG7z2GLtbh6llrbQf5+H5dquB0sd61npn7rILzgLV/aKMi0EME3RAdI8qOtlDQhUJHSDFwrdFGay0GI9fFfknl8LfnFNzdQ7B0ZtAB8eGEDh11jlZpYhr5V9kmt2lvcMENeOReHNzHb478af0vyA6mt0or14jc6eLqvPaLg6ziKjCeGadUni4k0Yksif8NvdN3nt9Fcl3X5h61Sr+pSSQytU+/SW79JkKUlznnm4PSYZerUZHXUWCqvUDudJKBZGaMMW5VgpKzOajUXNf1Idgu3lWXYdSy4YGJa6eiqFIrv8acM+ac8Xq9ynbl6MhpBuHSUfGaSHphsNu4QgwS3KXEHaTjXs3uCB1iMN/aKB3NzF+ZqdqZizFTQSNe4XSGRVS1sqo1EuXRe/+oUKFadRDXNBdxn1oqLSVyfocjO06OONycRIiKf6c88V1VrMx4/2eVv3FwzhnP57M8SEc8TZVznlpRQo55toSwayrtvKWYhNXhSvkpH3ekp8ZS4KvZs+L/fz96OY146Z8qrRJ2rv91xuQgy/tHNeY44St99JQzbacJR9+47u8e0HDBJNkrOakEmkZPE/paazcETtP6z16sPt1ai04dvOPEtzGsCqripTgvqar6L9f2NMMq8wnmrtq8q9C4pqQq5U4daibRHyQn+Xjqx3d9+jRtnzLknclRbK3FP3PnY9UL0WZ9AAAAAElFTkSuQmCC) repeat fixed;
 }
 .panel .nav-tabs {
     padding: 0 10px;
@@ -4990,7 +4995,14 @@ body {
     padding: 5px 25px;
 }
 .media-list > li:hover {
-    background-color: #f4f4f4;
+    background-color: #f6f6f6;
+}
+.sidebar .media-list > li {
+    border-top: 1px solid #eee;
+    padding: 5px 10px;
+}
+.sidebar .media-list > li:hover {
+    background-color: #fff;
 }
 .media-list > li:first-child {
     margin-top: 10px;
@@ -5031,11 +5043,6 @@ body {
 }
 .sidebar .glyphicon {
     float: left;
-}
-.sidebar > header,
-.sidebar > section {
-    padding-left: 10px;
-    padding-right: 10px;
 }
 .sidebar > header {
     border-bottom: 1px solid #ddd;

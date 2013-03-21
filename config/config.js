@@ -60,11 +60,11 @@ module.exports = {
 	logMaxSize:1024*1024*10, //单个日志文件大小
 	logFileNum:10, //当单个日志文件大小达标时，自动切分，这里设置最多切分多少个日志文件
 //Template
-	tempSet:'jade', //使用哪种页面模版：jade或者ejs
-	tempFolder :'/static/template', //默认读取模版的根目录
+	tempSet:'ejs', //使用哪种页面模版：jade或者ejs
+	tempFolder :'/static/tpl', //默认读取模版的根目录
 	tempHtmlCache:false, //是否开启模版的html缓存，当输出模版需要大量数据库或缓存I/O操作，且实时性要求不高时可以使用
 	tempCacheTime:1000*60*60,//模版缓存时间
-	tempCacheFolder:'/tmp/template', //模版缓存 存放目录
+	tempCacheFolder:'/tmp/tpl', //模版缓存 存放目录
 //mongodb 配置
 	isMongodb:true, //是否开启mongodb支持，注意：如果使用数据库存储session，这里必须开启
 	MongodbIp:'127.0.0.1', //mongodb地址

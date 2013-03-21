@@ -85,7 +85,7 @@
                             <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
                             <li ng-show="isLogin"><img ng-src="{{global.user.avatar}}" /></li>
                             <li class="dropdown" ng-show="isLogin">
-                                <a ng-href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
+                                <a href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
                                 {{global.user.name}}[{{global.user.role | role}}] <b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
