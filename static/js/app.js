@@ -82,7 +82,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     $rootScope.isAdmin = false;
     $rootScope.isLogin = false;
     $rootScope.logout = function () {
-        var doc = jsGen.rest.logout.get({}, function () {
+        var doc = jsGen.rest.user.get({Uid: 'logout'}, function () {
             if (doc.logout) delete $rootScope.global.user;
             $rootScope.checkUser();
             jsGen.location.path('/');

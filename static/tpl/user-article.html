@@ -1,6 +1,9 @@
 <div ng-controller="userArticleCtrl">
     <ul class="media-list">
         <li class="media" ng-repeat="article in data">
+            <a class="pull-left muted" href="#" ng-click="remove(article)">
+                <i class="glyphicon glyphicon-remove" ng-show="isMe"></i>
+            </a>
           <div class="media-body" id="{{article._id}}">
             <header class="media-heading">
                 <h5><a ng-href="{{'/'+article._id}}" target="_blank">{{article.title}}</a>

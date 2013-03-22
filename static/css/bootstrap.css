@@ -5044,6 +5044,7 @@ body {
 .sidebar .glyphicon {
     float: left;
 }
-.sidebar > header {
-    border-bottom: 1px solid #ddd;
+.sidebar .panel > header {
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 5px;
 }

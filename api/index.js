@@ -72,7 +72,7 @@ function getIndex(req, res, dm) {
 
     body.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
-        jsGen.api.user.userCache.getP(req.session.Uid, dm.intercept(function (doc) {
+        jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
             body.user = doc;
             return res.sendjson(body);
         }));

@@ -267,19 +267,43 @@ function addUsers(req, res, dm) {
 };
 
 function getUser(req, res, dm) {
-    var Uid = null;
-    if (cache[req.path[2]]) Uid = cache[req.path[2]]._id;
+    var Uid = req.path[2];
+    if (checkUserID(Uid) && cache[Uid]) Uid = cache[Uid]._id;
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
-    userCache.getP(Uid, dm.intercept(function (doc) {
-        doc = intersect(union(UserPublicTpl), doc);
-        return res.sendjson(doc);
+    userCache.getP(Uid, dm.intercept(function (user) {
+        var list, key,
+        p = req.getparam.p || req.getparam.page || 1;
+        p = Number(p);
+        key = Uid + 'pubArticle';
+        list = jsGen.cache.pagination.get(key);
+        user = intersect(union(UserPublicTpl), user);
+        if (!list || p === 1) {
+            jsGen.api.article.convertArticles(user.articlesList, dm.intercept(function (IDList) {
+                list = [];
+                IDList.forEach(function (ID) {
+                    if (jsGen.api.article.cache[ID] && jsGen.api.article.cache[ID].status > -1 && jsGen.api.article.cache[ID].display < 2)
+                        list.push(ID);
+                });
+                list.reverse();
+                jsGen.cache.pagination.put(Uid + 'pubArticle', list);
+                getPagination();
+            }), 'id');
+        } else getPagination();
+
+        function getPagination() {
+            pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
+                var body = articlesList;
+                if (p === 1 && req.path[3] === 'index') body.user = user;
+                return res.sendjson(body);
+            }));
+        };
     }));
 };
 
 function setUser(req, res, dm) {
-    var Uid = null;
+    var Uid = req.path[2];
 
-    if (cache[req.path[2]]) Uid = cache[req.path[2]]._id;
+    if (checkUserID(Uid) && cache[Uid]) Uid = cache[Uid]._id;
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     else if (req.session.Uid === Uid || !req.apibody) throw jsGen.Err(jsGen.lib.msg.requestDataErr);
@@ -491,7 +515,7 @@ function resetUser(req, res, dm) {
 
     var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
     if (!reset.u || !reset.r || !reset.k) throw jsGen.Err(jsGen.lib.msg.resetInvalid);
-    if (cache[reset.u]) _id = jsGen.dao.user.convertID(cache[reset.u]._id);
+    if (checkUserID(reset.u) && cache[reset.u]) _id = jsGen.dao.user.convertID(cache[reset.u]._id);
     else throw jsGen.Err(jsGen.lib.msg.resetInvalid);
     jsGen.dao.user.getAuth(_id, dm.intercept(function (doc) {
         var userObj = {};
@@ -551,7 +575,7 @@ function getArticles(req, res, dm) {
             else jsGen.api.article.convertArticles(user.articlesList, dm.intercept(function (IDList) {
                 var articlesList = [], commentsList = [];
                 IDList.forEach(function (ID) {
-                    if (jsGen.api.article.cache[ID].status > -1) articlesList.push(ID);
+                    if (jsGen.api.article.cache[ID] && jsGen.api.article.cache[ID].status > -1) articlesList.push(ID);
                     else commentsList.push(ID);
                 });
                 jsGen.cache.pagination.put(req.session.Uid + 'article', articlesList.reverse());
@@ -610,6 +634,6 @@ function postFn(req, res, dm) {
 module.exports = {
     GET: getFn,
     POST: postFn,
-    userCache: userCache,
+    cache: cache,
     convertUsers: convertUsers
 };

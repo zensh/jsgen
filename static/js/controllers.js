@@ -113,11 +113,11 @@ controller('userRegisterCtrl', ['$scope', function ($scope) {
 controller('homeCtrl', ['$scope', function ($scope) {
     if (!$scope.global.user || !$scope.global.user.name) jsGen.location.path('/');
     $scope.isMe = true;
-    $scope.userOperate = 'index';
+    $scope.userOperate = {Uid: 'index', OP: 'index'};
     $scope.getTpl = '/static/tpl/user-index.html';
     $scope.setTpl = function (tpl, operate) {
         $scope.getTpl = '/static/tpl/' + tpl;
-        $scope.userOperate = operate;
+        $scope.userOperate.Uid = operate;
     };
     $scope.user = $scope.global.user;
     if (!$scope.user || !$scope.user.date) $scope.global.user = jsGen.rest.user.get({}, function () {
@@ -143,10 +143,21 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         }
     };
     $scope.isMe = false;
+    $scope.userOperate = {Uid: 'U' + $routeParams.ID, OP: 'article'};
+    $scope.getTpl = '/static/tpl/user-article.html';
+    $scope.setTpl = function (tpl, operate) {
+        $scope.getTpl = '/static/tpl/' + tpl;
+        $scope.userOperate.OP = operate;
+    };
     getUser(function (user) {
         if (user.err) return jsGen.location.path('/');
-        if ($scope.global.user && $scope.global.user._id === user._id) jsGen.location.path('/home');
-        $scope.user = user;
+        if ($scope.global.user && $scope.global.user._id === user._id) {
+            jsGen.location.path('/home');
+            return;
+        }
+        $scope.user = user.user;
+        if (user.data) $scope.data = user.data;
+        if (user.pagination) $scope.pagination = user.pagination;
         if ($scope.global.user) {
             $scope.user.isFollow = $scope.global.user.followList.some(function (x) {
                 return x._id === user._id;
@@ -163,11 +174,10 @@ controller('adminCtrl', ['$scope', function ($scope) {
 }]).
 controller('userIndexCtrl', ['$scope', function ($scope) {}]).
 controller('userArticleCtrl', ['$scope', function ($scope) {
-    $scope.data = null;
-    $scope.pagination = null;
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
-        doc.Uid = $scope.userOperate;
+        doc.Uid = $scope.userOperate.Uid;
+        doc.OP = $scope.userOperate.OP;
         var result = jsGen.rest.user.get(doc, function () {
             if (!result.err) {
                 if (result.pagination) {
@@ -188,11 +198,24 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
             n: 10,
             p: 1
         });
-    });
-    // $scope.$emit('pagination', {
-    //     n: 10,
-    //     p: 1
-    // });
+    }, true);
+    $scope.remove = function (article) {
+        var result = jsGen.rest.article.remove({ID: article._id}, null, function () {
+            if (result.remove) {
+                $scope.data.some(function (x, i) {
+                    if (x._id ===article._id) {
+                        $scope.data.splice(i, 1);
+                        return true;
+                    }
+                });
+                jsGen.rootScope.msg = {
+                    name: '删除文章',
+                    message: '已成功删除文章《' + article.title + '》！',
+                    type: 'success'
+                }
+            } else jsGen.rootScope.msg = result.err;
+        });
+    };
 }]).
 controller('userAdminCtrl', ['$scope', function ($scope) {
     var result = {},
@@ -383,8 +406,9 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     };
     jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (article.err) {
-            jsGen.err = article.err;
-            jsGen.location.path('/err');
+            article.err.url = jsGen.goBack;
+            jsGen.rootScope.msg = article.err;
+            return;
         }
         article.commentsList.forEach(function (x) {
             jsGen.cache.article.put(x._id, x);
@@ -512,7 +536,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }, {
             mark: !article.isMark
         }, function () {
-            if (result.post) {
+            if (result.save) {
                 article.isMark = !article.isMark;
                 if (article.markList) {
                     if (article.isMark) article.markList.push({
@@ -542,7 +566,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }, {
             favor: !article.isFavor
         }, function () {
-            if (result.post) {
+            if (result.save) {
                 article.isFavor = !article.isFavor;
                 if (article.favorsList) {
                     if (article.isFavor) {
@@ -580,7 +604,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }, {
             oppose: !article.isOppose
         }, function () {
-            if (result.post) {
+            if (result.save) {
                 article.isOppose = !article.isOppose;
                 if (article.opposesList) {
                     if (article.isOppose) {

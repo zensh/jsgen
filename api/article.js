@@ -134,25 +134,31 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
+    var i = null;
     if (!this[obj._id]) this[obj._id] = {status: -1, updateTime: 0, hots: -1};
-    if (obj.status > -1) {
-        if (this[obj._id].status === -1) {
-            this._index.push(obj._id);
-            this._initTime = Date.now();
-        }
-        if (obj.updateTime > this[obj._id].updateTime) updateList(obj);
-        if (obj.hots > this[obj._id].hots) hotsList(obj);
-    } else if (obj.hots > this[obj._id].hots) hotCommentsList(obj);
+    if (obj.display < 2) {
+        if (obj.status > -1) {
+            if (this[obj._id].status === -1) {
+                this._index.push(obj._id);
+                this._initTime = Date.now();
+            }
+            if (obj.updateTime > this[obj._id].updateTime) updateList(obj);
+            if (obj.hots > this[obj._id].hots) hotsList(obj);
+        } else if (obj.hots > this[obj._id].hots) hotCommentsList(obj);
+    } else this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+    if (obj.display > 2) {
+        jsGen.cache.updateList.splice(i = jsGen.cache.updateList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+        if (i >=0) this._initTime = Date.now();
+        jsGen.cache.hotsList.splice(i = jsGen.cache.hotsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+        jsGen.cache.hotCommentsList.splice(i = jsGen.cache.hotCommentsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+    }
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
     this[obj._id].updateTime = obj.updateTime;
     this[obj._id].hots = obj.hots;
     if (obj.status === 2) {
-        this._index.splice(this._index.lastIndexOf(obj._id), 1);
+        this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
         this._index.push(obj._id);
-    }
-    if (obj.display === 2) {
-        this._index.splice(this._index.lastIndexOf(obj._id), 1);
     }
     return this;
 };
@@ -292,6 +298,7 @@ function getArticle(req, res, dm) {
 
     if (!checkID(ID, 'A') || !cache[ID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
     if (cache[ID].display > 0 && !req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    if (cache[ID].display > 2 && req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     articleCache.getP(ID, dm.intercept(function (doc) {
         if (req.session.Uid !== doc.author._id) {
             if (cache[ID].display === 1) {
@@ -543,7 +550,7 @@ function checkStatus(article) {
 function setArticle(req, res, dm) {
     var articleID = req.path[2];
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
-    if (!checkID(articleID, 'A') || !cache[articleID]) throw jsGen.Err(jsGen.lib.msg.articleNone);
+    if (!checkID(articleID, 'A') || !cache[articleID] || cache[articleID].display >= 2) throw jsGen.Err(jsGen.lib.msg.articleNone);
 
     var article_id = jsGen.dao.article.convertID(articleID);
     var user_id = jsGen.dao.user.convertID(req.session.Uid);
@@ -669,7 +676,7 @@ function setArticle(req, res, dm) {
             });
             checkTimeInterval(req, 'Ma', dm);
             return res.sendjson({
-                post: 'Ok!'
+                save: 'Ok!'
             });
         }), false);
     } else if (req.path[3] === 'favor') {
@@ -697,7 +704,7 @@ function setArticle(req, res, dm) {
             articleCache.put(articleID, doc);
             checkTimeInterval(req, 'Fa', dm);
             return res.sendjson({
-                post: 'Ok!'
+                save: 'Ok!'
             });
         }), false);
     } else if (req.path[3] === 'oppose') {
@@ -725,7 +732,7 @@ function setArticle(req, res, dm) {
             articleCache.put(articleID, doc);
             checkTimeInterval(req, 'Op', dm);
             return res.sendjson({
-                post: 'Ok!'
+                save: 'Ok!'
             });
         }), false);
     } else throw jsGen.Err(jsGen.lib.msg.requestDataErr);
@@ -778,7 +785,29 @@ function postFn(req, res, dm) {
     }
 };
 
-function deleteFn(req, res) {};
+function deleteFn(req, res, dm) {
+    var articleID = req.path[2];
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    if (!checkID(articleID, 'A') || !cache[articleID] || cache[articleID].display === 3) throw jsGen.Err(jsGen.lib.msg.articleNone);
+
+    listCache.getP(articleID, dm.intercept(function (article) {
+        if (req.session.Uid !== jsGen.dao.user.convertID(article.author)) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+        var setObj = {_id: articleID, display: 3, updateTime: Date.now()};
+        cache._update(setObj);
+        setObj._id = jsGen.dao.article.convertID(setObj._id);
+        jsGen.dao.article.setArticle(setObj);
+        jsGen.cache.user.update(req.session.Uid, function (user) {
+            var i;
+            user.articlesList.splice(i = user.articlesList.lastIndexOf(setObj._id), i >= 0 ? 1 : 0);
+            return user;
+        });
+        jsGen.dao.user.setArticle({
+            _id: article.author,
+            articlesList: -setObj._id
+        });
+        return res.sendjson({remove: 'Ok'});
+    }), false);
+};
 
 module.exports = {
     GET: getFn,
