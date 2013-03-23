@@ -1,17 +1,20 @@
-var jsGen = exports = function() {return coding(true);};
-========================================================
-
-jsGen is web software you can generate a beautiful website or blog with javascript, Building with MongoDB, Node.js and Angular.js
+{jsGen} ——JavaScript Generated
+==============================
 
 
-jsGen是一个纯javascript编写的网站平台，采用NodeJS编写服务器程序，MongoDB作为数据库，AngularJS编写前端应用。jsGen还使用了rrestjs框架和mongoskin驱动。
+JsGen is a next generation，free, open source web software that you can generate a powerful website, such as blog, forum, etc. It is coded by pure JavaScript, based on Node.js, AngularJS, MongoDB.
 
-jsGen是专门正对移动网站开发的系统。其基本原理：客户端浏览器发起访问请求后，NodeJS服务器先响应由AngularJS编写的应用框架，这个框架是html模板、js和css组成的静态文件（压缩后发送）。客户端获取到AngularJS应用后，再由AngularJS与后台的NodeJS服务器API接口通信，根据用户请求相关数据，这些数据是纯粹json数据包，AngularJS获取到json数据包后再编译成相关页面展现给用户。因此，对于用户的访问请求，只需在首次载入视图模板（html、js、css），其后的所有请求都是纯json数据交换，不再包含html代码，大大减少了数据流量。
+jsGen是用纯JavaScript编写的新一代免费开源的实时社区网站系统，主要用于搭建SNS类型的专业社区，稍作修改也可变成多用户博客系统、论坛或者CMS内容管理系统。
 
-正在填...
+jsGen基于NodeJS编写服务器端程序，提供静态文件响应和REST API接口服务;基于AngularJS编写浏览器端应用，构建实时交互的网页UI视图;基于MongoDB编写数据存储系统。
 
+jsGen开发理念是提供强大的实时交互功能，尽量减少浏览器与服务器之间的数据流量，非常适合搭建移动网站系统。
 
-**页面URL链接示例：**
+jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先响应由AngularJS编写的Web应用，这个应用是由html模板、js和css静态文件组成。客户端获取到AngularJS应用后，再由AngularJS与后台的NodeJS服务器API接口通信，根据用户请求交换数据，这些数据是纯粹json数据包，AngularJS获取到json数据包后再编译成相关页面展现给用户。因此，用户进入网站时，只需在首次载入视图模板（html、js、css），其后的所有请求都是纯json数据交换，不再包含html代码，大大减少了数据流量。
+
+## 特点：
+
+## 用户访问URL
 
     /  //首页
 
@@ -36,15 +39,15 @@ jsGen是专门正对移动网站开发的系统。其基本原理：客户端浏
     /collection/top //热门合集列表
     /collection/add
 
+## REST API接口
 
-
-**API URL链接，GET、POST、PUT、DELETE请求，JSON数据格式**
+**API接口采用JSON作为GET、POST、PUT、DELETE请求的数据交换格式**
 
     /api/index  //GET方法，获取全局配置数据，包括网站名。。。
 
     /api/user/index  //GET、POST、DELETE请求，对当前登录用户做相关操作
     /api/user/Uxxxxx  //GET请求，获取用户Uxxxxx公开信息
-    /api/user/login  //POST请求，登录认证 {logname: 'name or email or Uid', logpwd: 'HmacSHA256(sha256(pwd), logname)', redirect:'uri'},{err: null}
+    /api/user/login  //POST请求，登录认证
     /api/user/logout  //GET请求，注销
     /api/user/register  //PUT请求，注册用户
     /api/user/admin  //GET POST PUT管理员后台用户管理
