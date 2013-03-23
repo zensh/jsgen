@@ -42,7 +42,7 @@
                         <li ng-show="user.collections">
                             <span class="muted">合集：</span>{{user.collections}}
                         </li>
-                        <li ng-show="user.date">
+                        <li ng-show="user.date" class="muted">
                             {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
                         </li>
                     </ul>
@@ -59,10 +59,13 @@
         <div class="panel">
             <ul class="nav nav-list text-center inner" ng-show="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-article.html','mark')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的标记 </a>
+                    <a href="#" ng-click="setTpl('user-list.html', 'follow')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html', 'follow')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
+                    <a href="#" ng-click="setTpl('user-list.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
+                </li>
+                <li>
+                    <a href="#" ng-click="setTpl('user-article.html','mark')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的标记 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
@@ -71,13 +74,10 @@
                     <a href="#" ng-click="setTpl('user-article.html','comment')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','message')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
-                </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-index.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-edit.html', 'edit')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
@@ -85,13 +85,13 @@
             </ul>
             <ul class="nav nav-list text-center inner" ng-hide="isMe">
                 <li>
-                    <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的文章 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的合集 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 他的粉丝 </a>
+                    <a href="#" ng-click="setTpl('user-list.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的粉丝 </a>
                 </li>
             </ul>
         </div>

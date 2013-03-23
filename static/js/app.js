@@ -102,6 +102,14 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             $rootScope.isAdmin = false;
         }
     };
+    $rootScope.checkIsFollow = function (user) {
+        var me = $rootScope.global.user || {
+            followList: []
+        };
+        user.isFollow = me.followList.some(function (x) {
+            return x === user._id;
+        });
+    };
     $rootScope.followMe = function (user) {
         var result;
         result = jsGen.rest.user.save({

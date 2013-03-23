@@ -155,14 +155,10 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
             jsGen.location.path('/home');
             return;
         }
+        $scope.checkIsFollow(user.user);
         $scope.user = user.user;
         if (user.data) $scope.data = user.data;
         if (user.pagination) $scope.pagination = user.pagination;
-        if ($scope.global.user) {
-            $scope.user.isFollow = $scope.global.user.followList.some(function (x) {
-                return x._id === user._id;
-            });
-        }
     });
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
@@ -173,6 +169,36 @@ controller('adminCtrl', ['$scope', function ($scope) {
     };
 }]).
 controller('userIndexCtrl', ['$scope', function ($scope) {}]).
+controller('userListCtrl', ['$scope', function ($scope) {
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        doc.Uid = $scope.userOperate.Uid;
+        doc.OP = $scope.userOperate.OP;
+        var result = jsGen.rest.user.get(doc, function () {
+            if (!result.err) {
+                result.data.forEach(function (x) {
+                    $scope.checkIsFollow(x);
+                });
+                if (result.pagination) {
+                    if (result.pagination.now === 1) $scope.data = result.data;
+                    else $scope.data = $scope.data.concat(result.data);
+                    $scope.pagination = result.pagination;
+                    if (!$scope.pagination.display) $scope.pagination.display = {
+                        first: '首页',
+                        next: '下一页',
+                        last: '尾页'
+                    };
+                } else $scope.data = result.data;
+            } else jsGen.rootScope.msg = result.err;
+        });
+    });
+    $scope.$watch('userOperate', function () {
+        $scope.$emit('pagination', {
+            n: 10,
+            p: 1
+        });
+    }, true);
+}]).
 controller('userArticleCtrl', ['$scope', function ($scope) {
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
@@ -389,7 +415,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         article.opposeList = article.opposesList || [];
         article.author = article.author || {};
         article.author.isFollow = user.followList.some(function (x) {
-            return x._id === article.author._id;
+            return x === article.author._id;
         });
         article.isMark = article.markList.some(function (x) {
             return x._id === user._id;
@@ -738,7 +764,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         if (!$scope.editSave) return;
         var data = {};
         var parameter = {};
-        data.content = jsGen.sanitize($scope.content);
+        data.content = $scope.content;
         data.title = jsGen.sanitize($scope.title.trim(), 0);
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;

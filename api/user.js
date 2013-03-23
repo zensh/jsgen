@@ -21,20 +21,19 @@ userCache.getP = function (Uid, callback, convert) {
 
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) convert = true;
+    function getConvert(doc) {
+        doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
+        doc.followList = convertUsers(doc.followList, 'Uid');
+    };
     if (doc) {
-        if (convert) {
-            doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-            doc.followList = convertUsers(doc.followList);
-        }
+        if (convert) getConvert(doc);
         return callback(null, doc);
     } else jsGen.dao.user.getUserInfo(jsGen.dao.user.convertID(Uid), function (err, doc) {
         if (doc) {
             doc._id = Uid;
+            doc = intersect(union(UserPrivateTpl), doc);
             that.put(Uid, doc);
-            if (convert) {
-                doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
-                doc.followList = convertUsers(doc.followList);
-            }
+            if (convert) getConvert(doc);
         }
         return callback(err, doc);
     });
@@ -82,12 +81,13 @@ cache._remove = function (Uid) {
     });
 }).call(cache);
 
-function convertUsers(_idArray) {
+function convertUsers(_idArray, mode) {
     var result = [];
     if (!Array.isArray(_idArray)) _idArray = [_idArray];
     if (typeof _idArray[0] === 'number') _idArray = _idArray.map(function (x) {
         return jsGen.dao.user.convertID(x);
     });
+    if (mode === 'Uid') return _idArray;
     if (typeof _idArray[0] !== 'string') return result;
     _idArray.forEach(function (x, i) {
         if (cache[x]) result.push({
@@ -593,6 +593,26 @@ function getArticles(req, res, dm) {
     };
 };
 
+function getUsersList(req, res, dm) {
+    var list,
+    p = req.getparam.p || req.getparam.page || 1;
+
+    p = Number(p);
+    if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
+    userCache.getP(req.session.Uid, dm.intercept(function (user) {
+        if (req.path[2] === 'fans') list = user.fansList;
+        else if (req.path[2] === 'follow') list = user.followList;
+        else throw jsGen.Err(jsGen.lib.msg.requestDataErr);
+        list = convertUsers(list, 'Uid');
+        pagination(req, list, userCache, dm.intercept(function (usersList) {
+            usersList.data.forEach(function (user, i) {
+                usersList.data[i] = intersect(union(UserPublicTpl), user);
+            });
+            return res.sendjson(usersList);
+        }));
+    }), false);
+};
+
 function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
@@ -608,6 +628,9 @@ function getFn(req, res, dm) {
         case 'comment':
         case 'mark':
             return getArticles(req, res, dm);
+        case 'fans':
+        case 'follow':
+            return getUsersList(req, res, dm);
         default:
             return getUser(req, res, dm);
     }

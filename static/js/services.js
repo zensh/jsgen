@@ -29,7 +29,7 @@ factory('cache', ['$cacheFactory', function($cacheFactory) {
 }]).
 factory('MdParse', function() {
     return function(html) {
-        if (typeof html !== 'string') return;
+        if (typeof html !== 'string') return '';
         return marked(html);
     };
 }).
@@ -55,13 +55,14 @@ factory('sanitize', function() {
 }).
 factory('MdEditor', ['MdParse', 'sanitize', function(MdParse, sanitize) {
     return function(idPostfix, level) {
+        idPostfix = idPostfix || '';
         var editor = new Markdown.Editor({
             makeHtml: function(text) {
                 return sanitize(MdParse(text), level);
             }
         }, idPostfix);
         var element = angular.element(document.getElementById('wmd-preview' + idPostfix));
-        editor.hooks.chain("onPreviewRefresh", function() {
+        editor.hooks.chain('onPreviewRefresh', function() {
             element.children('pre').addClass('prettyprint'); // linenums have bug!
             element.children('code').addClass('prettyprint');
             prettyPrint();

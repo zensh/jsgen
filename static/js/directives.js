@@ -2,14 +2,16 @@
 
 /* Directives */
 angular.module('jsGen.directives', []).
-directive('ngParseMarkdown', ['MdParse', function(MdParse) {
+directive('ngParseMarkdown', ['MdParse', 'sanitize', function(MdParse, sanitize) {
     // <div ng-parse-markdown="document"></div>
     // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
     return function(scope, element, attr) {
-        element.addClass('ng-binding').data('$binding', attr.ngParseMarkdown);
+        element.addClass('ng-binding parse-markdown').data('$binding', attr.ngParseMarkdown);
         scope.$watch(attr.ngParseMarkdown, function ngParseMarkdownWatchAction(value) {
+            value = value || '';
             value = MdParse(value);
-            element.html(value || '');
+            value = sanitize(value);
+            element.html(value);
             element.children('pre').addClass('prettyprint');  // linenums have bug!
             element.children('code').addClass('prettyprint');
             element.find('a').attr('target', function() {

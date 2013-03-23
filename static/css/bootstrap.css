@@ -5008,10 +5008,6 @@ body {
     margin-top: 10px;
     border-top: none;
 }
-.main,
-.media-content {
-    text-indent: 2em;
-}
 #comments h6 {
     margin-top: 0;
     margin-bottom: 0;
@@ -5047,4 +5043,7 @@ body {
 .sidebar .panel > header {
     border-bottom: 2px solid #ddd;
     margin-bottom: 5px;
+}
+.parse-markdown > p {
+    text-indent: 2em;
 }

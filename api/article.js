@@ -633,8 +633,7 @@ function setArticle(req, res, dm) {
     } else if (req.path[3] === 'edit') {
         if (checkTimeInterval(req, 'Ed')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
         articleCache.getP(articleID, dm.intercept(function (doc) {
-            if (author !== doc.author) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-            var article_id = jsGen.dao.article.convertID(articleID);
+            if (user_id !== doc.author) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
             filterArticle(req.apibody, dm.intercept(function (article) {
                 article._id = article_id;
                 article.updateTime = date;
