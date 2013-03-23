@@ -15,30 +15,30 @@ var union = jsGen.lib.tools.union,
 
 var that = jsGen.dao.db.bind('messages', {
 
-    convertID: function(id) {
-        switch(typeof id) {
-        case 'string':
-            id = id.substring(1);
-            id = jsGen.lib.converter(id, 62, IDString);
-            return id;
-        case 'number':
-            id = jsGen.lib.converter(id, 62, IDString);
-            while(id.length < 3) {
-                id = '0' + id;
-            }
-            id = 'M' + id;
-            return id;
-        default:
-            return null;
+    convertID: function (id) {
+        switch (typeof id) {
+            case 'string':
+                id = id.substring(1);
+                id = jsGen.lib.converter(id, 62, IDString);
+                return id;
+            case 'number':
+                id = jsGen.lib.converter(id, 62, IDString);
+                while (id.length < 3) {
+                    id = '0' + id;
+                }
+                id = 'M' + id;
+                return id;
+            default:
+                return null;
         }
     },
 
-    getMessagesNum: function(callback) {
+    getMessagesNum: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.count(callback);
     },
 
-    getLatestId: function(callback) {
+    getLatestId: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
@@ -53,9 +53,11 @@ var that = jsGen.dao.db.bind('messages', {
         }, callback);
     },
 
-    getMessagesList: function(_idArray, callback) {
+    getMessagesList: function (_idArray, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
-        if(!Array.isArray(_idArray)) _idArray = [_idArray];
+        if (!Array.isArray(_idArray)) {
+            _idArray = [_idArray];
+        }
         that.find({
             _id: {
                 $in: _idArray
@@ -70,7 +72,7 @@ var that = jsGen.dao.db.bind('messages', {
         }).toArray(callback);
     },
 
-    getMessage: function(_id, callback) {
+    getMessage: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
@@ -88,21 +90,21 @@ var that = jsGen.dao.db.bind('messages', {
         }, callback);
     },
 
-    setMessage: function(messageObj) {
+    setMessage: function (messageObj) {
         var query = {},
-            setObj = {},
-            newObj = {
-                receiver: {
-                    _id: 0,
-                    read: false
-                }
-            };
+        setObj = {},
+        newObj = {
+            receiver: {
+                _id: 0,
+                read: false
+            }
+        };
 
         newObj = intersect(newObj, messageObj);
 
         that.update({
-                _id: messageObj._id,
-                'receiver._id': newObj.receiver._id
+            _id: messageObj._id,
+            'receiver._id': newObj.receiver._id
         }, {
             $set: {
                 'receiver.$.read': true
@@ -110,7 +112,7 @@ var that = jsGen.dao.db.bind('messages', {
         });
     },
 
-    setNewMessage: function(messageObj, callback) {
+    setNewMessage: function (messageObj, callback) {
         var message = union(defautMessage),
             newMessage = union(defautMessage);
         callback = callback || jsGen.lib.tools.callbackFn;
@@ -119,12 +121,15 @@ var that = jsGen.dao.db.bind('messages', {
         newMessage = union(message, newMessage);
         newMessage.date = Date.now();
 
-        that.getLatestId(function(err, doc) {
-            if(err) {
+        that.getLatestId(function (err, doc) {
+            if (err) {
                 return callback(err, null);
             }
-            if (!doc) newMessage._id = 1;
-            else newMessage._id = doc._id + 1;
+            if (!doc) {
+                newMessage._id = 1;
+            } else {
+                newMessage._id = doc._id + 1;
+            }
             that.insert(
             newMessage, {
                 w: 1
@@ -132,7 +137,7 @@ var that = jsGen.dao.db.bind('messages', {
         });
     },
 
-    delMessage: function(_id, callback) {
+    delMessage: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id

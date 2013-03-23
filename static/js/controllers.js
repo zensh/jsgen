@@ -343,6 +343,10 @@ controller('userEditCtrl', ['$scope', function ($scope) {
         if ($scope.passwd && $scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
         else $scope.checkResult = false;
     });
+    $scope.getTag = function (t) {
+        var tag = t.tag;
+        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+    };
     $scope.reset = function () {
         $scope.user = jsGen.union(originData);
         $scope.editSave = false;

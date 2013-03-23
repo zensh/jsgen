@@ -19,7 +19,7 @@ var union = jsGen.lib.tools.union,
 
 var that = jsGen.dao.db.bind('articles', {
 
-    convertID: function(id) {
+    convertID: function (id) {
         switch (typeof id) {
             case 'string':
                 id = id.substring(1);
@@ -37,7 +37,7 @@ var that = jsGen.dao.db.bind('articles', {
         }
     },
 
-    getLatestId: function(callback) {
+    getLatestId: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({}, {
             sort: {
@@ -52,7 +52,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, callback);
     },
 
-    getArticlesIndex: function(callback) {
+    getArticlesIndex: function (callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.find({}, {
             sort: {
@@ -72,7 +72,7 @@ var that = jsGen.dao.db.bind('articles', {
         }).each(callback);
     },
 
-    getArticle: function(_id, callback) {
+    getArticle: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.findOne({
             _id: _id
@@ -103,7 +103,7 @@ var that = jsGen.dao.db.bind('articles', {
         }, callback);
     },
 
-    setArticle: function(articleObj, callback) {
+    setArticle: function (articleObj, callback) {
         var setObj = {},
         newObj = {
             author: 0,
@@ -124,18 +124,21 @@ var that = jsGen.dao.db.bind('articles', {
 
         intersect(newObj, articleObj);
         setObj.$set = newObj;
-        if (callback) that.findAndModify({
-            _id: articleObj._id
-        }, [], setObj, {
-            w: 1,
-            new: true
-        }, callback);
-        else that.update({
-            _id: articleObj._id
-        }, setObj);
+        if (callback) {
+            that.findAndModify({
+                _id: articleObj._id
+            }, [], setObj, {
+                w: 1,
+                new: true
+            }, callback);
+        } else {
+            that.update({
+                _id: articleObj._id
+            }, setObj);
+        }
     },
 
-    setFavor: function(articleObj) {
+    setFavor: function (articleObj) {
         var setObj = {},
         newObj = {
             favorsList: 0
@@ -147,16 +150,18 @@ var that = jsGen.dao.db.bind('articles', {
             setObj.$pull = {
                 favorsList: newObj.favorsList
             };
-        } else setObj.$push = {
-            favorsList: newObj.favorsList
-        };
+        } else {
+            setObj.$push = {
+                favorsList: newObj.favorsList
+            };
+        }
 
         that.update({
             _id: articleObj._id
         }, setObj);
     },
 
-    setOppose: function(articleObj) {
+    setOppose: function (articleObj) {
         var setObj = {},
         newObj = {
             opposesList: 0
@@ -168,16 +173,18 @@ var that = jsGen.dao.db.bind('articles', {
             setObj.$pull = {
                 opposesList: newObj.opposesList
             };
-        } else setObj.$push = {
-            opposesList: newObj.opposesList
-        };
+        } else {
+            setObj.$push = {
+                opposesList: newObj.opposesList
+            };
+        }
 
         that.update({
             _id: articleObj._id
         }, setObj);
     },
 
-    setMark: function(articleObj) {
+    setMark: function (articleObj) {
         var setObj = {},
         newObj = {
             markList: 0
@@ -189,16 +196,18 @@ var that = jsGen.dao.db.bind('articles', {
             setObj.$pull = {
                 markList: newObj.markList
             };
-        } else setObj.$push = {
-            markList: newObj.markList
-        };
+        } else {
+            setObj.$push = {
+                markList: newObj.markList
+            };
+        }
 
         that.update({
             _id: articleObj._id
         }, setObj);
     },
 
-    setComment: function(articleObj, callback) {
+    setComment: function (articleObj, callback) {
         var setObj = {},
         newObj = {
             commentsList: 0
@@ -210,9 +219,11 @@ var that = jsGen.dao.db.bind('articles', {
             setObj.$pull = {
                 commentsList: newObj.commentsList
             };
-        } else setObj.$push = {
-            commentsList: newObj.commentsList
-        };
+        } else {
+            setObj.$push = {
+                commentsList: newObj.commentsList
+            };
+        }
 
         that.update({
             _id: articleObj._id
@@ -221,17 +232,22 @@ var that = jsGen.dao.db.bind('articles', {
         }, callback);
     },
 
-    setNewArticle: function(articleObj, callback) {
+    setNewArticle: function (articleObj, callback) {
         var article = union(defautArticle),
             newArticle = union(defautArticle);
         callback = callback || jsGen.lib.tools.callbackFn;
         intersect(article, articleObj);
         union(newArticle, article);
 
-        that.getLatestId(function(err, doc) {
-            if (err) return callback(err, null);
-            if (!doc) newArticle._id = 1;
-            else newArticle._id = doc._id + 1;
+        that.getLatestId(function (err, doc) {
+            if (err) {
+                return callback(err, null);
+            }
+            if (!doc) {
+                newArticle._id = 1;
+            } else {
+                newArticle._id = doc._id + 1;
+            }
 
             that.findAndModify({
                 _id: newArticle._id
@@ -243,7 +259,7 @@ var that = jsGen.dao.db.bind('articles', {
         });
     },
 
-    delArticle: function(_id, callback) {
+    delArticle: function (_id, callback) {
         callback = callback || jsGen.lib.tools.callbackFn;
         that.remove({
             _id: _id

@@ -4,7 +4,9 @@ function global() {
     jsGen.dao.db.createCollection("global", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1
         }, {
@@ -13,8 +15,12 @@ function global() {
         collection.findOne({
             _id: 'GlobalConfig'
         }, function (err, doc) {
-            if (err) throw err;
-            if (!doc) jsGen.dao.index.initGlobalConfig(articles);
+            if (err) {
+                throw err;
+            }
+            if (!doc) {
+                jsGen.dao.index.initGlobalConfig(articles);
+            }
         });
     });
 };
@@ -23,7 +29,9 @@ function articles() {
     jsGen.dao.db.createCollection("articles", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1,
             hots: -1
@@ -41,7 +49,9 @@ function collections() {
     jsGen.dao.db.createCollection("collections", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
@@ -59,7 +69,9 @@ function messages() {
     jsGen.dao.db.createCollection("messages", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1
         }, {
@@ -76,7 +88,9 @@ function tags() {
     jsGen.dao.db.createCollection("tags", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1,
             updateTime: -1
@@ -94,7 +108,9 @@ function users() {
     jsGen.dao.db.createCollection("users", {
         w: 1
     }, function (err, collection) {
-        if (err) throw err;
+        if (err) {
+            throw err;
+        }
         collection.ensureIndex({
             _id: -1,
             score: -1
@@ -109,16 +125,20 @@ function users() {
             collection.findOne({
                 _id: _id
             }, function (err, doc) {
-                if (err) throw err;
-                if (!doc) jsGen.dao.user.setNewUser({
-                    _id: jsGen.dao.user.convertID('Uadmin'),
-                    name: 'admin',
-                    email: 'admin@zensh.com',
-                    passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
-                    role: 'admin',
-                    avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
-                    desc: '梦造互联网 By ZENSH'
-                }, callback);
+                if (err) {
+                    throw err;
+                }
+                if (!doc) {
+                    jsGen.dao.user.setNewUser({
+                        _id: jsGen.dao.user.convertID('Uadmin'),
+                        name: 'admin',
+                        email: 'admin@zensh.com',
+                        passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
+                        role: 'admin',
+                        avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
+                        desc: '梦造互联网 By ZENSH'
+                    }, callback);
+                }
             });
         });
     });

@@ -5041,7 +5041,7 @@ body {
     float: left;
 }
 .sidebar .panel > header {
-    border-bottom: 2px solid #ddd;
+    border-bottom: 3px solid #ddd;
     margin-bottom: 5px;
 }
 .parse-markdown > p {

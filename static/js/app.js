@@ -60,7 +60,7 @@ function ($routeProvider, $locationProvider) {
 }]).
 run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'tools', 'cache', 'rest', 'sanitize',
     'MdParse', 'MdEditor', 'getArticle', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
-    $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
+$anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
     // 注册全局变量jsGen
     window.jsGen = {};
 
@@ -82,8 +82,12 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     $rootScope.isAdmin = false;
     $rootScope.isLogin = false;
     $rootScope.logout = function () {
-        var doc = jsGen.rest.user.get({Uid: 'logout'}, function () {
-            if (doc.logout) delete $rootScope.global.user;
+        var doc = jsGen.rest.user.get({
+            Uid: 'logout'
+        }, function () {
+            if (doc.logout) {
+                delete $rootScope.global.user;
+            }
             $rootScope.checkUser();
             jsGen.location.path('/');
         });
@@ -95,8 +99,11 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     $rootScope.checkUser = function () {
         if ($rootScope.global.user && $rootScope.global.user.role) {
             $rootScope.isLogin = true;
-            if ($rootScope.global.user.role === 'admin') $rootScope.isAdmin = true;
-            else $rootScope.isAdmin = false;
+            if ($rootScope.global.user.role === 'admin') {
+                $rootScope.isAdmin = true;
+            } else {
+                $rootScope.isAdmin = false;
+            }
         } else {
             $rootScope.isLogin = false;
             $rootScope.isAdmin = false;
@@ -106,7 +113,9 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         var me = $rootScope.global.user || {
             followList: []
         };
-        if (user._id === me._id) user.isMe = true;
+        if (user._id === me._id) {
+            user.isMe = true;
+        }
         user.isFollow = me.followList.some(function (x) {
             return x === user._id;
         });
@@ -119,26 +128,35 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             follow: !user.isFollow
         }, function () {
             if (!result.err) {
-                if (result.follow) $rootScope.global.user.followList.push(user._id);
-                else $rootScope.global.user.followList.some(function (x, i, a) {
-                    if (x === user._id) {
-                        a.splice(i, 1);
-                        return true;
-                    }
-                });
-                if (user.fans) user.fans += user.isFollow ? -1 : 1;
+                if (result.follow) {
+                    $rootScope.global.user.followList.push(user._id);
+                } else {
+                    $rootScope.global.user.followList.some(function (x, i, a) {
+                        if (x === user._id) {
+                            a.splice(i, 1);
+                            return true;
+                        }
+                    });
+                }
+                if (user.fans) {
+                    user.fans += user.isFollow ? -1 : 1;
+                }
                 user.isFollow = !user.isFollow;
-            } else $rootScope.msg = result.err;
+            } else {
+                $rootScope.msg = result.err;
+            }
         });
     };
     $rootScope.global = jsGen.rest.index.get({}, function () {
         $rootScope.checkUser();
         $rootScope.global.info.angularjs = angular.version.full;
-        if (!$rootScope.global.date) $rootScope.msg = {
-            name: '错误提示',
-            message: '网页初始化出错',
-            type: 'error'
-        };
+        if (!$rootScope.global.date) {
+            $rootScope.msg = {
+                name: '错误提示',
+                message: '网页初始化出错',
+                type: 'error'
+            };
+        }
     });
     $rootScope.$watch(function () {
         return $location.path();
@@ -146,25 +164,35 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         jsGen.goBack = goBack || '/';
         var element = angular.element(document.getElementById('main'));
         var reg = /\/add|^\/A.+\/edit$/;
-        if (reg.test(path)) element.addClass('container-large');
-        else element.removeClass('container-large');
+        if (reg.test(path)) {
+            element.addClass('container-large');
+        } else {
+            element.removeClass('container-large');
+        }
     });
     $rootScope.$watch('msg', function (msg) {
         if (msg && (msg.name || msg.message)) {
-            if (msg.type === 'error') $rootScope.msgmodal = 'text-error';
-            else $rootScope.msgmodal = 'text-success';
+            if (msg.type === 'error') {
+                $rootScope.msgmodal = 'text-error';
+            } else {
+                $rootScope.msgmodal = 'text-success';
+            }
             var dom = angular.element(document.getElementById('msg-modal'));
             dom.modal('show');
             $rootScope.timeout = 5;
             $rootScope.$on('timeout', function (event) {
                 event.stopPropagation();
                 var url = null;
-                if (msg && msg.url) url = msg.url;
+                if (msg && msg.url) {
+                    url = msg.url;
+                }
                 msg = null;
                 $rootScope.msg = null;
                 $rootScope.timeout = undefined;
                 dom.modal('hide');
-                if (url) $location.path(url);
+                if (url) {
+                    $location.path(url);
+                }
             });
         }
     }, true);

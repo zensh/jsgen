@@ -158,9 +158,11 @@ var that = jsGen.dao.db.bind('users', {
                 w: 1,
                 new: true
             }, callback);
-        } else that.update({
-            _id: userObj._id
-        }, setObj);
+        } else {
+            that.update({
+                _id: userObj._id
+            }, setObj);
+        }
     },
 
     setLoginAttempt: function (userObj) {
@@ -170,10 +172,13 @@ var that = jsGen.dao.db.bind('users', {
         };
 
         newObj = intersect(newObj, userObj);
-        if (newObj.loginAttempts === 0) setObj.$set = newObj;
-        else setObj.$inc = {
-            loginAttempts: 1
-        };
+        if (newObj.loginAttempts === 0) {
+            setObj.$set = newObj;
+        } else {
+            setObj.$inc = {
+                loginAttempts: 1
+            };
+        }
 
         that.update({
             _id: userObj._id
@@ -234,14 +239,26 @@ var that = jsGen.dao.db.bind('users', {
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
-        if (newObj.social.weibo) setObj.$set['social.weibo'] = newObj.social.weibo;
-        else delete setObj.$set['social.weibo'];
-        if (newObj.social.qq) setObj.$set['social.qq'] = newObj.social.qq;
-        else delete setObj.$set['social.qq'];
-        if (newObj.social.google) setObj.$set['social.google'] = newObj.social.google;
-        else delete setObj.$set['social.google'];
-        if (newObj.social.baidu) setObj.$set['social.baidu'] = newObj.social.baidu;
-        else delete setObj.$set['social.baidu'];
+        if (newObj.social.weibo) {
+            setObj.$set['social.weibo'] = newObj.social.weibo;
+        } else {
+            delete setObj.$set['social.weibo'];
+        }
+        if (newObj.social.qq) {
+            setObj.$set['social.qq'] = newObj.social.qq;
+        } else {
+            delete setObj.$set['social.qq'];
+        }
+        if (newObj.social.google) {
+            setObj.$set['social.google'] = newObj.social.google;
+        } else {
+            delete setObj.$set['social.google'];
+        }
+        if (newObj.social.baidu) {
+            setObj.$set['social.baidu'] = newObj.social.baidu;
+        } else {
+            delete setObj.$set['social.baidu'];
+        }
 
         that.update({
             _id: userObj._id
@@ -387,9 +404,11 @@ var that = jsGen.dao.db.bind('users', {
             setObj.$pull = {
                 markList: newObj.markList
             };
-        } else setObj.$push = {
-            markList: newObj.markList
-        };
+        } else {
+            setObj.$push = {
+                markList: newObj.markList
+            };
+        }
 
         that.update({
             _id: userObj._id
@@ -425,26 +444,56 @@ var that = jsGen.dao.db.bind('users', {
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
-        if (newObj.messages.article === 0) setObj.$set['messages.article'] = [];
-        else delete setObj.$set['messages.article'];
-        if (newObj.messages.article > 0) setObj.$push['messages.article'] = newObj.messages.article;
-        else delete setObj.$push['messages.article'];
-        if (newObj.messages.collection === 0) setObj.$set['messages.collection'] = [];
-        else delete setObj.$set['messages.collection'];
-        if (newObj.messages.collection > 0) setObj.$push['messages.collection'] = newObj.messages.collection;
-        else delete setObj.$push['messages.collection'];
-        if (newObj.messages.comment === 0) setObj.$set['messages.comment'] = [];
-        else delete setObj.$set['messages.comment'];
-        if (newObj.messages.comment > 0) setObj.$push['messages.comment'] = newObj.messages.comment;
-        else delete setObj.$push['messages.comment'];
-        if (newObj.messages.fan === 0) setObj.$set['messages.fan'] = [];
-        else delete setObj.$set['messages.fan'];
-        if (newObj.messages.fan > 0) setObj.$push['messages.fan'] = newObj.messages.fan;
-        else delete setObj.$push['messages.fan'];
-        if (newObj.messages.receive === 0) setObj.$set['messages.receive'] = [];
-        else delete setObj.$set['messages.receive'];
-        if (newObj.messages.receive > 0) setObj.$push['messages.receive'] = newObj.messages.receive;
-        else delete setObj.$push['messages.receive'];
+        if (newObj.messages.article === 0) {
+            setObj.$set['messages.article'] = [];
+        } else {
+            delete setObj.$set['messages.article'];
+        }
+        if (newObj.messages.article > 0) {
+            setObj.$push['messages.article'] = newObj.messages.article;
+        } else {
+            delete setObj.$push['messages.article'];
+        }
+        if (newObj.messages.collection === 0) {
+            setObj.$set['messages.collection'] = [];
+        } else {
+            delete setObj.$set['messages.collection'];
+        }
+        if (newObj.messages.collection > 0) {
+            setObj.$push['messages.collection'] = newObj.messages.collection;
+        } else {
+            delete setObj.$push['messages.collection'];
+        }
+        if (newObj.messages.comment === 0) {
+            setObj.$set['messages.comment'] = [];
+        } else {
+            delete setObj.$set['messages.comment'];
+        }
+        if (newObj.messages.comment > 0) {
+            setObj.$push['messages.comment'] = newObj.messages.comment;
+        } else {
+            delete setObj.$push['messages.comment'];
+        }
+        if (newObj.messages.fan === 0) {
+            setObj.$set['messages.fan'] = [];
+        } else {
+            delete setObj.$set['messages.fan'];
+        }
+        if (newObj.messages.fan > 0) {
+            setObj.$push['messages.fan'] = newObj.messages.fan;
+        } else {
+            delete setObj.$push['messages.fan'];
+        }
+        if (newObj.messages.receive === 0) {
+            setObj.$set['messages.receive'] = [];
+        } else {
+            delete setObj.$set['messages.receive'];
+        }
+        if (newObj.messages.receive > 0) {
+            setObj.$push['messages.receive'] = newObj.messages.receive;
+        } else {
+            delete setObj.$push['messages.receive'];
+        }
 
         that.update({
             _id: userObj._id
@@ -508,15 +557,22 @@ var that = jsGen.dao.db.bind('users', {
         newUser.lastLoginDate = newUser.date;
 
         that.getLatestId(function (err, doc) {
-            if (err) return callback(err, null);
-            if (!doc) preAllocate._id = newUser._id || 1;
-            else preAllocate._id = doc._id + 1;
+            if (err) {
+                return callback(err, null);
+            }
+            if (!doc) {
+                preAllocate._id = newUser._id || 1;
+            } else {
+                preAllocate._id = doc._id + 1;
+            }
             delete newUser._id;
             that.insert(
             preAllocate, {
                 w: 1
             }, function (err, doc) {
-                if (err) return callback(err, doc);
+                if (err) {
+                    return callback(err, doc);
+                }
                 that.findAndModify({
                     _id: preAllocate._id
                 }, [], newUser, {

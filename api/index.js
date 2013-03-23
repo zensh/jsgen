@@ -17,10 +17,13 @@ function updateOnlineCache(req) {
     if (req.session.Uid) {
         delete onlineCache[req.session._id];
         onlineCache[req.session.Uid] = now;
-    } else onlineCache[req.session._id] = now;
+    } else {
+        onlineCache[req.session._id] = now;
+    }
     for (var key in onlineCache) {
-        if ((now - onlineCache[key]) > 600000) delete onlineCache[key];
-        else {
+        if ((now - onlineCache[key]) > 600000) {
+            delete onlineCache[key];
+        } else {
             online += 1;
             if (key[0] === 'U') users += 1;
         }
@@ -76,12 +79,16 @@ function getIndex(req, res, dm) {
             body.user = doc;
             return res.sendjson(body);
         }));
-    } else return res.sendjson(body);
+    } else {
+        return res.sendjson(body);
+    }
 };
 
 function getGlobal(req, res, dm) {
     var body = union(jsGen.config);
-    if (req.session.role !== 'admin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if (req.session.role !== 'admin') {
+        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    }
     body.sys = {
         uptime: process.uptime(),
         cpus: os.cpus(),
@@ -156,41 +163,84 @@ function setGlobal(req, res, dm) {
     };
 
     function checkArray(key, i, array) {
-        if (typeof key !== 'number') key = Number(key);
-        if (key < 0) key = 0;
+        if (typeof key !== 'number') {
+            key = Number(key);
+        }
+        if (key < 0) {
+            key = 0;
+        }
         array[i] = key;
     }
     var setObj = union(defaultObj);
     intersect(setObj, req.apibody);
 
-    if (req.session.Uid !== 'Uadmin') throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    if (setObj.domain && !checkUrl(setObj.domain)) throw jsGen.Err(jsGen.lib.msg.globalDomainErr);
-    if (setObj.url) {
-        if (!checkUrl(setObj.url)) throw jsGen.Err(jsGen.lib.msg.globalUrlErr);
-        else setObj.url = setObj.url.replace(/(\/)+$/, '');
+    if (req.session.Uid !== 'Uadmin') {
+        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
-    if (setObj.email && !checkEmail(setObj.email)) throw jsGen.Err(jsGen.lib.msg.globalEmailErr);
-    if (setObj.UsersScore) setObj.UsersScore.forEach(checkArray);
-    if (setObj.ArticleStatus) setObj.ArticleStatus.forEach(checkArray);
-    if (setObj.ArticleHots) setObj.ArticleHots.forEach(checkArray);
-    if (setObj.paginationCache) setObj.paginationCache.forEach(checkArray);
-    if (setObj.TimeInterval && setObj.TimeInterval < 5) setObj.TimeInterval = 5;
+    if (setObj.domain && !checkUrl(setObj.domain)) {
+        throw jsGen.Err(jsGen.lib.msg.globalDomainErr);
+    }
+    if (setObj.url) {
+        if (!checkUrl(setObj.url)) {
+            throw jsGen.Err(jsGen.lib.msg.globalUrlErr);
+        } else {
+            setObj.url = setObj.url.replace(/(\/)+$/, '');
+        }
+    }
+    if (setObj.email && !checkEmail(setObj.email)) {
+        throw jsGen.Err(jsGen.lib.msg.globalEmailErr);
+    }
+    if (setObj.UsersScore) {
+        setObj.UsersScore.forEach(checkArray);
+    }
+    if (setObj.ArticleStatus) {
+        setObj.ArticleStatus.forEach(checkArray);
+    }
+    if (setObj.ArticleHots) {
+        setObj.ArticleHots.forEach(checkArray);
+    }
+    if (setObj.paginationCache) {
+        setObj.paginationCache.forEach(checkArray);
+    }
+    if (setObj.TimeInterval && setObj.TimeInterval < 5) {
+        setObj.TimeInterval = 5;
+    }
     Object.keys(setObj).forEach(function (key) {
-        if (equal(setObj[key], jsGen.config[key])) delete setObj[key];
+        if (equal(setObj[key], jsGen.config[key])) {
+            delete setObj[key];
+        }
     });
-    if (setObj.userCache) jsGen.cache.user.capacity = setObj.userCache
-    if (setObj.articleCache) jsGen.cache.article.capacity = setObj.articleCache
-    if (setObj.commentCache) jsGen.cache.comment.capacity = setObj.commentCache
-    if (setObj.listCache) jsGen.cache.list.capacity = setObj.listCache
-    if (setObj.tagCache) jsGen.cache.tag.capacity = setObj.tagCache
-    if (setObj.collectionCache) jsGen.cache.collection.capacity = setObj.collectionCache
-    if (setObj.messageCache) jsGen.cache.message.capacity = setObj.messageCache
+    if (setObj.userCache) {
+        jsGen.cache.user.capacity = setObj.userCache;
+    }
+    if (setObj.articleCache) {
+        jsGen.cache.article.capacity = setObj.articleCache;
+    }
+    if (setObj.commentCache) {
+        jsGen.cache.comment.capacity = setObj.commentCache;
+    }
+    if (setObj.listCache) {
+        jsGen.cache.list.capacity = setObj.listCache;
+    }
+    if (setObj.tagCache) {
+        jsGen.cache.tag.capacity = setObj.tagCache;
+    }
+    if (setObj.collectionCache) {
+        jsGen.cache.collection.capacity = setObj.collectionCache;
+    }
+    if (setObj.messageCache) {
+        jsGen.cache.message.capacity = setObj.messageCache;
+    }
     if (setObj.paginationCache) {
         jsGen.cache.pagination.timeLimit = setObj.paginationCache[0] * 1000;
         jsGen.cache.pagination.capacity = setObj.paginationCache[1];
     }
-    if (setObj.TimeInterval) jsGen.cache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
-    if (setObj.robots) jsGen.robotReg = new RegExp(setObj.robots, 'i');
+    if (setObj.TimeInterval) {
+        jsGen.cache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
+    }
+    if (setObj.robots) {
+        jsGen.robotReg = new RegExp(setObj.robots, 'i');
+    }
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
         union(jsGen.config, body);

@@ -51,7 +51,7 @@
                       <dd>{{user.desc}}</dd>
                       <dt> 用户标签：</dt>
                       <dd><ul class="list-inline"><li ng-repeat="tag in user.tagsList">
-                        <a ng-href="{{'/'+tag._id}}" class="btn btn-small">{{tag.tag}}</a>
+                        <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
                       </li></ul></dd>
                     </dl>
             </div>
@@ -74,7 +74,7 @@
                     <a href="#" ng-click="setTpl('user-article.html','comment')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-article.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
+                    <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','message')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
@@ -88,7 +88,7 @@
                     <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
                 </li>
                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
+                    <a href="#" ng-click="setTpl('user-index.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-list.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的粉丝 </a>

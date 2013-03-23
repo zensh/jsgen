@@ -85,7 +85,9 @@ var that = jsGen.dao.db.bind('global', {
                 visitHistory: newObj.visitHistory
             };
             delete newObj.visitHistory;
-        } else setObj.$set = newObj;
+        } else {
+            setObj.$set = newObj;
+        }
 
         if (callback) {
             that.findAndModify({
@@ -94,9 +96,11 @@ var that = jsGen.dao.db.bind('global', {
                 w: 1,
                 new: true
             }, callback);
-        } else that.update({
-            _id: 'GlobalConfig'
-        }, setObj);
+        } else {
+            that.update({
+                _id: 'GlobalConfig'
+            }, setObj);
+        }
     },
 
     initGlobalConfig: function (callback) {

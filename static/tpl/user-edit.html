@@ -46,7 +46,16 @@
             用户标签：
             </label>
             <div class="controls">
-                <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" ng-change="checkTags()" class="input-block-level" />
+                <textarea name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" class="input-block-level">
+                </textarea>
+                <div class="well well-small">
+                    <ul class="list-inline">
+                        <span>热门标签：</span>
+                        <li ng-repeat="tag in global.tagsList">
+                            <a href="#" ng-click="getTag(tag)" class="btn btn-mini">{{tag.tag}}</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="control-group">
