@@ -47,11 +47,11 @@ cache._update = function(obj) {
     return this;
 };
 cache._remove = function(tagID) {
-    var that = this;
+    var i, that = this;
     if (this[tagID]) {
         delete this[this[tagID].tag.toLowerCase()];
         delete this[tagID];
-        this._index.splice(this._index.indexOf(tagID), 1);
+        this._index.splice(i = this._index.indexOf(tagID), i >= 0 ? 1 : 0);
         this._index.sort(function(a, b) {
             return that[b].articles + that[b].users - that[a].articles - that[a].users;
         });

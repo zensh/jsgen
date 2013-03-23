@@ -106,6 +106,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         var me = $rootScope.global.user || {
             followList: []
         };
+        if (user._id === me._id) user.isMe = true;
         user.isFollow = me.followList.some(function (x) {
             return x === user._id;
         });
@@ -118,16 +119,16 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             follow: !user.isFollow
         }, function () {
             if (!result.err) {
-                if (result.follow) $rootScope.global.user.followList.push(result.follow);
+                if (result.follow) $rootScope.global.user.followList.push(user._id);
                 else $rootScope.global.user.followList.some(function (x, i, a) {
-                    if (x._id === user._id) {
+                    if (x === user._id) {
                         a.splice(i, 1);
                         return true;
                     }
                 });
                 if (user.fans) user.fans += user.isFollow ? -1 : 1;
                 user.isFollow = !user.isFollow;
-            }
+            } else $rootScope.msg = result.err;
         });
     };
     $rootScope.global = jsGen.rest.index.get({}, function () {

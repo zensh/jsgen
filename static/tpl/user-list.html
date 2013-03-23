@@ -1,0 +1,53 @@
+<div ng-controller="userListCtrl">
+    <ul class="media-list">
+        <li class="media" ng-repeat="user in data">
+          <a class="pull-left" ng-href="{{'/'+comment.author._id}}">
+            <img class="media-object" ng-src="{{user.avatar}}">
+          </a>
+          <div class="media-body" id="{{user._id}}">
+            <header class="media-heading">
+                <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a>
+                    <a href="#" ng-click="followMe(user)" class="btn btn-small btn-success" ng-hide="user.isMe">{{user.isFollow | follow}}</a>
+                </h5>
+                <ul class="list-inline muted">
+                    <li ng-show="user._id">
+                        Uid：{{user._id}}
+                    </li>
+                    <li ng-show="user.sex">
+                        权限：{{user.role | role}}
+                    </li>
+                    <li ng-show="user.sex">
+                        性别：{{user.sex | sex}}
+                    </li>
+                    <li ng-show="user.score">
+                        积分：{{user.score}}
+                    </li>
+                    <li ng-show="user.fans">
+                        粉丝：{{user.fans}}
+                    </li>
+                    <li ng-show="user.follow">
+                        关注：{{user.follow}}
+                    </li>
+                    <li ng-show="user.articles">
+                        文章/评论：{{user.articles}}
+                    </li>
+                    <li ng-show="user.collections">
+                        合集：{{user.collections}}
+                    </li>
+                    <li ng-show="user.date" class="muted">
+                        {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
+                    </li>
+                </ul>
+            </header>
+            <div class="media-content" ng-parse-markdown="user.desc"></div>
+            <footer>
+                <ul class="list-inline">
+                    <li ng-repeat="tag in user.tagsList">
+                    <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
+                    </li>
+                </ul>
+            </footer>
+          </div>
+        </li>
+    </ul>
+</div>

@@ -163,8 +163,9 @@ cache._update = function (obj) {
     return this;
 };
 cache._remove = function (ID) {
+    var i;
     delete this[ID];
-    this._index.splice(this._index.indexOf(ID), 1);
+    this._index.splice(i = this._index.indexOf(ID), i >= 0 ? 1 : 0);
     this._initTime = Date.now();
     return this;
 };
@@ -666,11 +667,12 @@ function setArticle(req, res, dm) {
                 markList: mark ? article_id : -article_id
             });
             if (mark) doc.markList.push(user_id);
-            else doc.markList.splice(index, 1);
+            else doc.markList.splice(index, index >= 0 ? 1 : 0);
             articleCache.put(articleID, doc);
             jsGen.cache.user.update(req.session.Uid, function (value) {
+                var i;
                 if (mark) value.markList.push(article_id);
-                else value.markList.splice(value.markList.indexOf(article_id), 1);
+                else value.markList.splice(i = value.markList.indexOf(article_id), i >= 0 ? 1 : 0);
                 return value;
             });
             checkTimeInterval(req, 'Ma', dm);
@@ -699,7 +701,7 @@ function setArticle(req, res, dm) {
                     });
                 }
                 doc.favorsList.push(user_id);
-            } else doc.favorsList.splice(index, 1);
+            } else doc.favorsList.splice(index, index >= 0 ? 1 : 0);
             articleCache.put(articleID, doc);
             checkTimeInterval(req, 'Fa', dm);
             return res.sendjson({
@@ -727,7 +729,7 @@ function setArticle(req, res, dm) {
                     });
                 }
                 doc.opposesList.push(user_id);
-            } else doc.opposesList.splice(index, 1);
+            } else doc.opposesList.splice(index, index >= 0 ? 1 : 0);
             articleCache.put(articleID, doc);
             checkTimeInterval(req, 'Op', dm);
             return res.sendjson({

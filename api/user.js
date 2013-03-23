@@ -58,12 +58,12 @@ cache._update = function (obj) {
     return this;
 };
 cache._remove = function (Uid) {
-    var that = this;
+    var i, that = this;
     if (this[Uid]) {
         delete this[this[Uid].name];
         delete this[this[Uid].email];
         delete this[Uid];
-        this._index.splice(this._index.indexOf(Uid), 1);
+        this._index.splice(i = this._index.indexOf(Uid), i >= 0 ? 1 : 0);
         this._initTime = Date.now();
     }
     return this;
@@ -204,6 +204,7 @@ function register(req, res, dm) {
     if (checkTimeInterval(req, 'Re')) throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
     adduser(data, dm.intercept(function (doc) {
         if (doc) {
+            checkTimeInterval(req, 'Re', dm);
             req.session.Uid = doc._id;
             req.session.role = doc.role;
             setReset({
@@ -214,11 +215,8 @@ function register(req, res, dm) {
                     var url = jsGen.config.url + '/' + doc._id;
                     jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
                 }
-                checkTimeInterval(req, 'Re', dm);
-                userCache.getP(doc._id, dm.intercept(function (doc) {
-                    return res.sendjson(doc);
-                }));
             }));
+            return res.sendjson(doc);
         }
     }));
 };
@@ -271,29 +269,40 @@ function getUser(req, res, dm) {
     if (checkUserID(Uid) && cache[Uid]) Uid = cache[Uid]._id;
     else throw jsGen.Err(jsGen.lib.msg.UidNone);
     userCache.getP(Uid, dm.intercept(function (user) {
-        var list, key,
+        var list, key = Uid + req.path[3];
         p = req.getparam.p || req.getparam.page || 1;
         p = Number(p);
-        key = Uid + 'pubArticle';
         list = jsGen.cache.pagination.get(key);
-        user = intersect(union(UserPublicTpl), user);
         if (!list || p === 1) {
-            jsGen.api.article.convertArticles(user.articlesList, dm.intercept(function (IDList) {
-                list = [];
-                IDList.forEach(function (ID) {
-                    if (jsGen.api.article.cache[ID] && jsGen.api.article.cache[ID].status > -1 && jsGen.api.article.cache[ID].display < 2)
-                        list.push(ID);
-                });
-                list.reverse();
-                jsGen.cache.pagination.put(Uid + 'pubArticle', list);
+            if (req.path[3] === 'fans') {
+                list = convertUsers(user.fansList, 'Uid');
+                jsGen.cache.pagination.put(key, list);
                 getPagination();
-            }), 'id');
+            } else {
+                jsGen.api.article.convertArticles(user.articlesList, dm.intercept(function (IDList) {
+                    list = [];
+                    IDList.forEach(function (ID) {
+                        if (jsGen.api.article.cache[ID] && jsGen.api.article.cache[ID].status > -1) list.push(ID);
+                    });
+                    list.reverse();
+                    jsGen.cache.pagination.put(key, list);
+                    getPagination();
+                }), 'id');
+            }
         } else getPagination();
 
         function getPagination() {
-            pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
-                var body = articlesList;
-                if (p === 1 && req.path[3] === 'index') body.user = user;
+            var cache;
+            if (req.path[3] === 'fans') cache = userCache;
+            else {
+                cache = jsGen.cache.list;
+                list.forEach(function (ID, i) {
+                    if (jsGen.api.article.cache[ID].display >= 2) list.splice(i, 1);
+                });
+            }
+            pagination(req, list, cache, dm.intercept(function (doc) {
+                var body = doc;
+                if (p === 1 && req.path[3] === 'index') body.user = intersect(union(UserPublicTpl), user);
                 return res.sendjson(body);
             }));
         };
@@ -323,18 +332,20 @@ function setUser(req, res, dm) {
                 fansList: follow ? _idReq : -_idReq
             });
             userCache.update(Uid, function (value) {
+                var i;
                 if (follow) value.fansList.push(_idReq);
-                else value.fansList.splice(value.fansList.indexOf(_idReq), 1);
+                else value.fansList.splice(i = value.fansList.indexOf(_idReq), i >= 0 ? 1 : 0);
                 return value;
             });
             userCache.update(req.session.Uid, function (value) {
+                var i;
                 if (follow) value.followList.push(_id);
-                else value.followList.splice(value.followList.indexOf(_id), 1);
+                else value.followList.splice(i = value.followList.indexOf(_id), i >= 0 ? 1 : 0);
                 return value;
             });
             checkTimeInterval(req, 'Fo', dm);
             return res.sendjson({
-                follow: follow ? convertUsers(Uid)[0] : null
+                follow: follow
             });
         }));
     }), false);
