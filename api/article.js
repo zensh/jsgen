@@ -441,12 +441,11 @@ function filterArticle(articleObj, callback) {
                 return callback(null, newObj);
             }
             articleCache.getP(articleObj._id, function (err, doc) {
+                var tagList = {}, setTagList = [];
                 articleObj._id = jsGen.dao.article.convertID(articleObj._id);
                 if (err) {
                     return callback(err, null);
                 }
-                var tagList = {},
-                setTagList = [];
                 if (doc) {
                     doc.tagsList.forEach(function (x) {
                         tagList[x] = -articleObj._id;
@@ -461,7 +460,7 @@ function filterArticle(articleObj, callback) {
                 });
                 for (var key in tagList) {
                     setTagList.push({
-                        _id: Number(key),
+                        _id: +key,
                         articlesList: tagList[key]
                     });
                 }
@@ -572,9 +571,9 @@ function getComments(req, res, dm) {
 function getLatest(req, res, dm) {
     var list,
     p = req.getparam.p || req.getparam.page || 1,
-        n = Number(req.path[3]);
+        n = +req.path[3];
 
-    p = Number(p);
+    p = +p;
     if (req.path[2] === 'latest' && n > 0) {
         if (n > 20) {
             n = 20;
@@ -608,10 +607,10 @@ function getLatest(req, res, dm) {
 function getUpdate(req, res, dm) {
     var list,
     p = req.getparam.p || req.getparam.page || 1,
-        n = Number(req.path[3]),
+        n = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.updateList), 'base64');
 
-    p = Number(p);
+    p = +p;
     if (n > 0) {
         if (n > 20) {
             n = 20;
@@ -645,10 +644,10 @@ function getUpdate(req, res, dm) {
 function getHots(req, res, dm) {
     var list,
     p = req.getparam.p || req.getparam.page || 1,
-        n = Number(req.path[3]),
+        n = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.hotsList), 'base64');
 
-    p = Number(p);
+    p = +p;
     if (n > 0) {
         if (n > 20) {
             n = 20;
@@ -680,7 +679,7 @@ function getHots(req, res, dm) {
 };
 
 function getHotComments(req, res, dm) {
-    var list, n = Number(req.path[3]) || 5;
+    var list, n = +req.path[3] || 5;
 
     if (n < 3) {
         n = 3;
@@ -717,6 +716,12 @@ function addArticle(req, res, dm) {
                 jsGen.dao.user.setArticle({
                     _id: article.author,
                     articlesList: doc._id
+                });
+                doc.tagsList.forEach(function (x) {
+                    jsGen.dao.tag.setTag({
+                        _id: x,
+                        articlesList: doc._id
+                    });
                 });
                 doc._id = jsGen.dao.article.convertID(doc._id);
                 cache._update(doc);
@@ -974,25 +979,32 @@ function setArticle(req, res, dm) {
 function robot(req, res, dm) {
     var obj = {}, ID = req.path[0];
     obj.global = union(jsGen.config);
-    if (!ID || ID === 'index') {
-        var list = cache._index.slice(-100);
-        convertArticles(list, function () {}, 'id');
-    }
-    if (!checkID(ID, 'A') || !cache[ID] || cache[ID].display > 0) {
-        throw jsGen.Err(jsGen.lib.msg.articleNone);
-    }
-    articleCache.getP(ID, dm.intercept(function (doc) {
-        doc.content = jsGen.module.marked(doc.content);
-        doc.comments = doc.commentsList.length;
-        convertArticles(doc.commentsList, dm.intercept(function (commentsList) {
-            commentsList.forEach(function (comment, i) {
-                commentsList[i].content = jsGen.module.marked(comment.content);
+    obj.articlesList = cache._index.slice(-200).reverse();
+
+    if (!ID || !checkID(ID, 'A') || !cache[ID] || cache[ID].display > 0) {
+        var list = obj.articlesList.slice(0, 50);
+        convertArticles(list, dm.intercept(function (doc) {
+            doc.forEach(function (article, i) {
+                doc[i].content = jsGen.module.marked(article.content);
+                doc[i].date = new Date(article.date).toString();
             });
-            doc.commentsList = commentsList;
-            obj.article = doc;
-            res.render('/robot.ejs', obj);
-        }), 'comment');
-    }));
+            obj.data = doc;
+            res.render('/robot-index.ejs', obj);
+        }));
+    } else {
+        articleCache.getP(ID, dm.intercept(function (doc) {
+            doc.content = jsGen.module.marked(doc.content);
+            doc.comments = doc.commentsList.length;
+            convertArticles(doc.commentsList, dm.intercept(function (commentsList) {
+                commentsList.forEach(function (comment, i) {
+                    commentsList[i].content = jsGen.module.marked(comment.content);
+                });
+                doc.commentsList = commentsList;
+                obj.article = doc;
+                res.render('/robot-article.ejs', obj);
+            }), 'comment');
+        }));
+    }
 };
 
 function deleteFn(req, res, dm) {

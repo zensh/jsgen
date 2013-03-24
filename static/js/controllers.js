@@ -2,47 +2,130 @@
 
 /* Controllers */
 angular.module('jsGen.controllers', []).
-controller('indexCtrl', ['$scope', function ($scope) {
-    $scope.view = 'latest';
+controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
+    var viewID, restPath = jsGen.rest.article;
+    $scope.other = {};
     $scope.data = null;
     $scope.pagination = null;
+
+    function checkRouteParams() {
+        if ((/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
+            restPath = jsGen.rest.tag;
+            $scope.other._id = $routeParams.OP;
+            viewID = 'view-other';
+        } else {
+            restPath = jsGen.rest.article;
+            if ($routeParams.OP !== 'hots' && $routeParams.OP !== 'update') {
+                $routeParams.OP = 'latest';
+            }
+            viewID = 'view-' + $routeParams.OP;
+        }
+        var element = angular.element(document.getElementById(viewID));
+        element.parent().children().removeClass('active');
+        element.addClass('active');
+    };
+
+    if ($routeParams.OP) checkRouteParams();
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
-        doc.ID = $scope.view;
-        var result = jsGen.rest.article.get(doc, function () {
+        doc.ID = $routeParams.OP || 'latest';
+        var result = restPath.get(doc, function () {
             if (!result.err) {
+                if (result.tag) {
+                    $scope.other.name = result.tag.tag;
+                }
                 if (result.pagination) {
-                    if (result.pagination.now === 1) $scope.data = result.data;
-                    else $scope.data = $scope.data.concat(result.data);
+                    if (result.pagination.now === 1) {
+                        $scope.data = result.data;
+                    } else {
+                        $scope.data = $scope.data.concat(result.data).slice(-200);
+                    }
                     $scope.pagination = result.pagination;
-                    if (!$scope.pagination.display) $scope.pagination.display = {
-                        first: '首页',
-                        next: '下一页',
-                        last: '尾页'
-                    };
-                } else $scope.data = result.data;
-            } else jsGen.rootScope.msg = result.err;
+                    if (!$scope.pagination.display) {
+                        $scope.pagination.display = {
+                            first: '首页',
+                            next: '下一页',
+                            last: '尾页'
+                        };
+                    }
+                } else {
+                    $scope.data = result.data;
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     });
     $scope.$emit('pagination', {
         n: 10,
         p: 1
     });
-    var result = jsGen.rest.article.get({ID: 'comment', n: 5}, function () {
-        if (!result.err) {
-            result.data.forEach(function (comment, i) {
-                result.data[i].content = jsGen.filter('cutText')(comment.content, 180);
+    var hotComments = jsGen.rest.article.get({ID: 'comment', OP: 5}, function () {
+        if (!hotComments.err) {
+            hotComments.data.forEach(function (comment, i) {
+                hotComments.data[i].content = jsGen.filter('cutText')(comment.content, 180);
             })
-            $scope.hotComments = result.data;
-        } else jsGen.rootScope.msg = result.err;
+            $scope.hotComments = hotComments.data;
+        } else {
+            jsGen.rootScope.msg = hotComments.err;
+        }
     });
     $scope.getList = function (s) {
-        $scope.view = s;
+        $routeParams.OP = s;
+        checkRouteParams();
         $scope.$emit('pagination', {
             n: 10,
             p: 1
         });
     };
+}]).
+controller('tagCtrl', ['$scope', function ($scope) {
+    $scope.data = null;
+    $scope.pagination = null;
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        var result = jsGen.rest.tag.get(doc, function () {
+            if (!result.err) {
+                if (result.pagination) {
+                    if (result.pagination.now === 1) {
+                        $scope.data = result.data;
+                    } else {
+                        $scope.data = $scope.data.concat(result.data).slice(-500);
+                    }
+                    $scope.pagination = result.pagination;
+                    if (!$scope.pagination.display) {
+                        $scope.pagination.display = {
+                            first: '首页',
+                            next: '下一页',
+                            last: '尾页'
+                        };
+                    }
+                } else {
+                    $scope.data = result.data;
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    });
+    $scope.$emit('pagination', {
+        n: 50,
+        p: 1
+    });
+    var hotArticles = jsGen.rest.article.get({ID: 'hots', OP: 5}, function () {
+        if (!hotArticles.err) {
+            $scope.hotArticles = hotArticles.data;
+        } else {
+            jsGen.rootScope.msg = hotArticles.err;
+        }
+    });
+    var latestArticles = jsGen.rest.article.get({ID: 'latest', OP: 5}, function () {
+        if (!latestArticles.err) {
+            $scope.latestArticles = latestArticles.data;
+        } else {
+            jsGen.rootScope.msg = latestArticles.err;
+        }
+    });
 }]).
 controller('userLoginCtrl', ['$scope', function ($scope) {
     $scope.userReset = undefined;
@@ -72,9 +155,13 @@ controller('userLoginCtrl', ['$scope', function ($scope) {
 }]).
 controller('userResetCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
     var request = $routeParams.RE;
-    if (request === 'locked') $scope.header = '申请解锁';
-    else if (request === 'passwd') $scope.header = '找回密码';
-    else jsGen.location.path(jsGen.goBack);
+    if (request === 'locked') {
+        $scope.header = '申请解锁';
+    } else if (request === 'passwd') {
+        $scope.header = '找回密码';
+    } else {
+        jsGen.location.path(jsGen.goBack);
+    }
     $scope.submit = function () {
         var result = jsGen.rest.user.save({Uid: 'reset'}, {
             name: $scope.name,
@@ -85,15 +172,20 @@ controller('userResetCtrl', ['$scope', '$routeParams', function ($scope, $routeP
                 result.name = '请求成功';
                 result.url = '/';
                 jsGen.rootScope.msg = result;
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
 controller('userRegisterCtrl', ['$scope', function ($scope) {
     $scope.checkResult = true;
     $scope.checkPwd = function () {
-        if ($scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
-        else $scope.checkResult = false;
+        if ($scope.passwd2 !== $scope.passwd) {
+            $scope.checkResult = true;
+        } else {
+            $scope.checkResult = false;
+        }
     };
     $scope.submit = function () {
         var data = {},
@@ -106,12 +198,16 @@ controller('userRegisterCtrl', ['$scope', function ($scope) {
                 $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
                 jsGen.location.path('/home');
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
 controller('homeCtrl', ['$scope', function ($scope) {
-    if (!$scope.global.user || !$scope.global.user.name) jsGen.location.path('/');
+    if (!$scope.global.user || !$scope.global.user.name) {
+        jsGen.location.path('/');
+    }
     $scope.isMe = true;
     $scope.userOperate = {Uid: 'index', OP: 'index'};
     $scope.getTpl = '/static/tpl/user-index.html';
@@ -120,9 +216,11 @@ controller('homeCtrl', ['$scope', function ($scope) {
         $scope.userOperate.Uid = operate;
     };
     $scope.user = $scope.global.user;
-    if (!$scope.user || !$scope.user.date) $scope.global.user = jsGen.rest.user.get({}, function () {
-        $scope.user = $scope.global.user;
-    });
+    if (!$scope.user || !$scope.user.date) {
+        $scope.global.user = jsGen.rest.user.get({}, function () {
+            $scope.user = $scope.global.user;
+        });
+    }
     $scope.$on('update', function (event, doc) {
         event.stopPropagation();
         $scope.user.tagsList = [];
@@ -132,12 +230,15 @@ controller('homeCtrl', ['$scope', function ($scope) {
 controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
     function getUser(callback) {
         var user = jsGen.cache.user.get('U' + $routeParams.ID);
-        if (user) return callback(user);
-        else {
+        if (user) {
+            return callback(user);
+        } else {
             user = jsGen.rest.user.get({
                 Uid: 'U' + $routeParams.ID
             }, function () {
-                if (!user.err) jsGen.cache.user.put(user._id, user);
+                if (!user.err) {
+                    jsGen.cache.user.put(user._id, user);
+                }
                 return callback(user);
             });
         }
@@ -150,19 +251,23 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         $scope.userOperate.OP = operate;
     };
     getUser(function (user) {
-        if (user.err) return jsGen.location.path('/');
+        if (user.err) {
+            return jsGen.location.path('/');
+        }
         if ($scope.global.user && $scope.global.user._id === user._id) {
             jsGen.location.path('/home');
             return;
         }
         $scope.checkIsFollow(user.user);
         $scope.user = user.user;
-        if (user.data) $scope.data = user.data;
-        if (user.pagination) $scope.pagination = user.pagination;
+        $scope.data = user.data;
+        $scope.pagination = user.pagination;
     });
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
-    if (!($scope.global.user && $scope.global.user.role === 'admin')) jsGen.location.path('/');
+    if (!($scope.global.user && $scope.global.user.role === 'admin')) {
+        jsGen.location.path('/');
+    }
     $scope.getTpl = '/static/tpl/admin-index.html';
     $scope.setTpl = function (tpl) {
         $scope.getTpl = '/static/tpl/' + tpl;
@@ -180,16 +285,25 @@ controller('userListCtrl', ['$scope', function ($scope) {
                     $scope.checkIsFollow(x);
                 });
                 if (result.pagination) {
-                    if (result.pagination.now === 1) $scope.data = result.data;
-                    else $scope.data = $scope.data.concat(result.data);
+                    if (result.pagination.now === 1) {
+                        $scope.data = result.data;
+                    } else {
+                        $scope.data = $scope.data.concat(result.data).slice(-200);
+                    }
                     $scope.pagination = result.pagination;
-                    if (!$scope.pagination.display) $scope.pagination.display = {
-                        first: '首页',
-                        next: '下一页',
-                        last: '尾页'
-                    };
-                } else $scope.data = result.data;
-            } else jsGen.rootScope.msg = result.err;
+                    if (!$scope.pagination.display) {
+                        $scope.pagination.display = {
+                            first: '首页',
+                            next: '下一页',
+                            last: '尾页'
+                        };
+                    }
+                } else {
+                    $scope.data = result.data;
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     });
     $scope.$watch('userOperate', function () {
@@ -207,16 +321,25 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         var result = jsGen.rest.user.get(doc, function () {
             if (!result.err) {
                 if (result.pagination) {
-                    if (result.pagination.now === 1) $scope.data = result.data;
-                    else $scope.data = $scope.data.concat(result.data);
+                    if (result.pagination.now === 1) {
+                        $scope.data = result.data;
+                    } else {
+                        $scope.data = $scope.data.concat(result.data).slice(-200);
+                    }
                     $scope.pagination = result.pagination;
-                    if (!$scope.pagination.display) $scope.pagination.display = {
-                        first: '首页',
-                        next: '下一页',
-                        last: '尾页'
-                    };
-                } else $scope.data = result.data;
-            } else jsGen.rootScope.msg = result.err;
+                    if (!$scope.pagination.display) {
+                        $scope.pagination.display = {
+                            first: '首页',
+                            next: '下一页',
+                            last: '尾页'
+                        };
+                    }
+                } else {
+                    $scope.data = result.data;
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     });
     $scope.$watch('userOperate', function () {
@@ -239,7 +362,9 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
                     message: '已成功删除文章《' + article.title + '》！',
                     type: 'success'
                 }
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
@@ -264,7 +389,9 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
                 $scope.data = result.data;
                 originData = jsGen.union($scope.data);
                 jsGen.union($scope.pagination, result.pagination);
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     });
     $scope.$emit('pagination', {
@@ -272,8 +399,11 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
         p: $scope.pagination.now
     });
     $scope.$watch(function () {
-        if (angular.equals($scope.data, originData)) $scope.editSave = false;
-        else $scope.editSave = true;
+        if (angular.equals($scope.data, originData)) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
     });
     $scope.reset = function () {
         $scope.data = jsGen.union(originData);
@@ -295,7 +425,9 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
         originData = jsGen.intersect(jsGen.union(defaultObj), originData);
         data = jsGen.intersect(jsGen.union(defaultObj), data);
         angular.forEach(data, function (value, key) {
-            if (angular.equals(value, originData[key])) delete data[key];
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
         });
         jsGen.complement(data, originData, [{
             _id: ''
@@ -310,7 +442,9 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
                     name: '请求成功',
                     message: '修改成功！'
                 };
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
@@ -332,20 +466,30 @@ controller('userEditCtrl', ['$scope', function ($scope) {
     initTags($scope.user.tagsList);
     $scope.checkResult = false;
     $scope.$watch('tagsList', function () {
-        if ($scope.tagsList.length > $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.slice(0, $scope.global.UserTagsMax);
+        if ($scope.tagsList.length > $scope.global.UserTagsMax) {
+            $scope.tagsList = $scope.tagsList.slice(0, $scope.global.UserTagsMax);
+        }
     });
     $scope.$watch('user.desc', function () {
         $scope.descBytes = jsGen.filter('length')($scope.user.desc);
     });
     $scope.$watch(function () {
-        if (angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray) && !$scope.passwd) $scope.editSave = false;
-        else $scope.editSave = true;
-        if ($scope.passwd && $scope.passwd2 !== $scope.passwd) $scope.checkResult = true;
-        else $scope.checkResult = false;
+        if (angular.equals($scope.user, originData) && angular.equals($scope.tagsList, tagsArray) && !$scope.passwd) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
+        if ($scope.passwd && $scope.passwd2 !== $scope.passwd) {
+            $scope.checkResult = true;
+        } else {
+            $scope.checkResult = false;
+        }
     });
     $scope.getTag = function (t) {
         var tag = t.tag;
-        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.UserTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.UserTagsMax) {
+            $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+        }
     };
     $scope.reset = function () {
         $scope.user = jsGen.union(originData);
@@ -356,11 +500,19 @@ controller('userEditCtrl', ['$scope', function ($scope) {
         data = jsGen.union($scope.user);
         $scope.editSave = false;
         angular.forEach(data, function (value, key) {
-            if (angular.equals(value, originData[key])) delete data[key];
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
         });
-        if ($scope.user.desc) $scope.user.desc = jsGen.sanitize(jsGen.MdParse($scope.user.desc), 1);
-        if ($scope.passwd && $scope.passwd2 === $scope.passwd) data.passwd = CryptoJS.SHA256($scope.passwd).toString();
-        if (!angular.equals($scope.tagsList, tagsArray)) data.tagsList = $scope.tagsList;
+        if ($scope.user.desc) {
+            $scope.user.desc = jsGen.sanitize(jsGen.MdParse($scope.user.desc), 1);
+        }
+        if ($scope.passwd && $scope.passwd2 === $scope.passwd) {
+            data.passwd = CryptoJS.SHA256($scope.passwd).toString();
+        }
+        if (!angular.equals($scope.tagsList, tagsArray)) {
+            data.tagsList = $scope.tagsList;
+        }
         if (data.email) {
             changeEmail = jsGen.rest.user.save({Uid: 'reset'}, {
                 email: data.email,
@@ -372,7 +524,9 @@ controller('userEditCtrl', ['$scope', function ($scope) {
                     });
                     changeEmail.name = '请求成功';
                     jsGen.rootScope.msg = changeEmail;
-                } else jsGen.rootScope.msg = changeEmail.err;
+                } else {
+                    jsGen.rootScope.msg = changeEmail.err;
+                }
             });
         }
         delete data.email;
@@ -387,7 +541,9 @@ controller('userEditCtrl', ['$scope', function ($scope) {
                         name: '请求成功',
                         message: '修改成功！'
                     };
-                } else jsGen.rootScope.msg = result.err;
+                } else {
+                    jsGen.rootScope.msg = result.err;
+                }
             });
         }
     };
@@ -430,9 +586,11 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         article.isOppose = article.opposesList.some(function (x) {
             return x._id === user._id;
         });
-        if (article.commentsList && typeof article.commentsList[0] === 'object') article.commentsList.forEach(function (x) {
-            checkArticleIs(x);
-        })
+        if (article.commentsList && typeof article.commentsList[0] === 'object') {
+            article.commentsList.forEach(function (x) {
+                checkArticleIs(x);
+            });
+        }
     };
     jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (article.err) {
@@ -456,8 +614,11 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         $scope.replyTitle = $scope.title;
         $scope.refer = article._id;
         if ($scope.global.user) {
-            if ($scope.global.user._id === $scope.article.author._id) $scope.isMe = true;
-            else $scope.isMe = false;
+            if ($scope.global.user._id === $scope.article.author._id) {
+                $scope.isMe = true;
+            } else {
+                $scope.isMe = false;
+            }
         }
     });
     $scope.wmdHelp = function (s) {
@@ -505,8 +666,11 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             return;
         }
         $scope.contentBytes = jsGen.filter('length')(content);
-        if ($scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
-        else $scope.editSave = false;
+        if ($scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) {
+            $scope.editSave = true;
+        } else {
+            $scope.editSave = false;
+        }
     });
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
@@ -515,8 +679,10 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         var result = jsGen.rest.article.get(doc, function () {
             if (!result.err) {
                 $scope.pagination = result.pagination;
-                $scope.article.commentsList = $scope.article.commentsList.concat(result.data);
-            } else jsGen.rootScope.msg = result.err;
+                $scope.article.commentsList = $scope.article.commentsList.concat(result.data).slice(-200);
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     });
     $scope.getComments = function (idArray, to) {
@@ -526,9 +692,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         if (dom.children('#refer-comments').length > 0) {
             angular.element(document.getElementById('comments')).append(refer);
             return;
-        } else dom.append(refer);
+        } else {
+            dom.append(refer);
+        }
         idArray = jsGen.union(idArray);
-        if (!angular.isArray(idArray)) idArray = [idArray];
+        if (!angular.isArray(idArray)) {
+            idArray = [idArray];
+        }
         idArray.forEach(function (x, i) {
             var comment = jsGen.cache.article.get(x);
             if (comment) {
@@ -549,8 +719,10 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                         jsGen.cache.article.put(x._id, x);
                         checkArticleIs(x);
                     })
-                    $scope.referComments = $scope.referComments.concat(result.data);
-                } else if (result.err) jsGen.rootScope.msg = result.err;
+                    $scope.referComments = $scope.referComments.concat(result.data).slice(-200);
+                } else if (result.err) {
+                    jsGen.rootScope.msg = result.err;
+                }
             });
         }
     };
@@ -569,19 +741,24 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             if (result.save) {
                 article.isMark = !article.isMark;
                 if (article.markList) {
-                    if (article.isMark) article.markList.push({
-                        _id: $scope.global.user._id,
-                        name: $scope.global.user.name,
-                        avatar: $scope.global.user.avatar
-                    });
-                    else article.markList.some(function (x, i, a) {
-                        if (x._id === $scope.global.user._id) {
-                            a.splice(i, 1);
-                            return true;
-                        }
-                    });
+                    if (article.isMark) {
+                        article.markList.push({
+                            _id: $scope.global.user._id,
+                            name: $scope.global.user.name,
+                            avatar: $scope.global.user.avatar
+                        });
+                    } else {
+                        article.markList.some(function (x, i, a) {
+                            if (x._id === $scope.global.user._id) {
+                                a.splice(i, 1);
+                                return true;
+                            }
+                        });
+                    }
                 }
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
     $scope.setFavor = function (article) {
@@ -612,14 +789,18 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                             }
                         });
                         article.isOppose = false;
-                    } else article.favorsList.some(function (x, i, a) {
-                        if (x._id === $scope.global.user._id) {
-                            a.splice(i, 1);
-                            return true;
-                        }
-                    });
+                    } else {
+                        article.favorsList.some(function (x, i, a) {
+                            if (x._id === $scope.global.user._id) {
+                                a.splice(i, 1);
+                                return true;
+                            }
+                        });
+                    }
                 }
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
     $scope.setOppose = function (article) {
@@ -650,18 +831,24 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                             }
                         });
                         article.isFavor = false;
-                    } else article.opposesList.some(function (x, i, a) {
-                        if (x._id === $scope.global.user._id) {
-                            a.splice(i, 1);
-                            return true;
-                        }
-                    });
+                    } else {
+                        article.opposesList.some(function (x, i, a) {
+                            if (x._id === $scope.global.user._id) {
+                                a.splice(i, 1);
+                                return true;
+                            }
+                        });
+                    }
                 }
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
     $scope.submit = function () {
-        if (!$scope.editSave) return;
+        if (!$scope.editSave) {
+            return;
+        }
         if (!$scope.isLogin) {
             jsGen.rootScope.msg = Errmsg;
             return;
@@ -689,13 +876,19 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
                 $scope.title = '评论：' + jsGen.filter('cutText')($scope.article.title, $scope.global.TitleMaxLen - 9);
                 $scope.content = '';
                 angular.element(document.getElementById('comments')).prepend(angular.element(document.getElementById('reply')));
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
 controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
-    if (jsGen.goBack === jsGen.location.path()) jsGen.goBack = '/';
-    if (!$scope.isLogin) jsGen.location.path(jsGen.goBack);
+    if (jsGen.goBack === jsGen.location.path()) {
+        jsGen.goBack = '/';
+    }
+    if (!$scope.isLogin) {
+        jsGen.location.path(jsGen.goBack);
+    }
     $scope.previewTitle = '文章预览';
     $scope.markdownHelp = null;
     $scope.titleBytes = 0;
@@ -705,18 +898,22 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     $scope.tagsList = [];
     $scope.editSave = false;
 
-    if ($routeParams.ID) jsGen.getArticle('A' + $routeParams.ID, function (article) {
-        if (!article.err) {
-            $scope.previewTitle = '编辑文章';
-            $scope._id = article._id;
-            $scope.title = article.title;
-            $scope.content = article.content;
-            if (article.refer && article.refer.url) $scope.refer = article.refer.url;
-            $scope.tagsList = article.tagsList.map(function (x) {
-                return x.tag;
-            });
-        } else jsGen.rootScope.msg = article.err;
-    });
+    if ($routeParams.ID) {
+        jsGen.getArticle('A' + $routeParams.ID, function (article) {
+            if (!article.err) {
+                $scope.previewTitle = '编辑文章';
+                $scope._id = article._id;
+                $scope.title = article.title;
+                $scope.content = article.content;
+                if (article.refer && article.refer.url) $scope.refer = article.refer.url;
+                $scope.tagsList = article.tagsList.map(function (x) {
+                    return x.tag;
+                });
+            } else {
+                jsGen.rootScope.msg = article.err;
+            }
+        });
+    }
 
     var MdEditor = jsGen.MdEditor();
     MdEditor.run();
@@ -731,8 +928,11 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             $scope.titleBytes = jsGen.filter('length')(title);
         }
         $scope.title = title;
-        if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen && $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
-        else $scope.editSave = false;
+        if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen && $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) {
+            $scope.editSave = true;
+        } else {
+            $scope.editSave = false;
+        }
         if (!$scope.markdownHelp) {
             $scope.previewTitle = $scope.title || '文章预览';
         }
@@ -743,29 +943,40 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             return;
         }
         $scope.contentBytes = jsGen.filter('length')(content);
-        if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen && $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) $scope.editSave = true;
-        else $scope.editSave = false;
+        if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen && $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) {
+            $scope.editSave = true;
+        } else {
+            $scope.editSave = false;
+        }
     });
     $scope.$watch('tagsList', function (tagsList) {
-        if (tagsList.length > $scope.global.ArticleTagsMax) $scope.tagsList = tagsList.slice(0, $scope.global.ArticleTagsMax);
+        if (tagsList.length > $scope.global.ArticleTagsMax) {
+            $scope.tagsList = tagsList.slice(0, $scope.global.ArticleTagsMax);
+        }
     });
     $scope.wmdHelp = function (s) {
         if (s === 'preview') {
             $scope.markdownHelp = null;
             $scope.previewTitle = $scope.title || '文章预览';
             MdEditor.refreshPreview();
-        } else jsGen.getMarkdown(function (data) {
-            $scope.previewTitle = data.title;
-            $scope.markdownHelp = data.content;
-            jsGen.rootScope.msg = data.err;
-        });
+        } else {
+            jsGen.getMarkdown(function (data) {
+                $scope.previewTitle = data.title;
+                $scope.markdownHelp = data.content;
+                jsGen.rootScope.msg = data.err;
+            });
+        }
     };
     $scope.getTag = function (t) {
         var tag = t.tag;
-        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.ArticleTagsMax) $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+        if ($scope.tagsList.indexOf(tag) === -1 && $scope.tagsList.length < $scope.global.ArticleTagsMax) {
+            $scope.tagsList = $scope.tagsList.concat(tag); // 此处push方法不会更新tagsList视图
+        }
     };
     $scope.submit = function () {
-        if (!$scope.editSave) return;
+        if (!$scope.editSave) {
+            return;
+        }
         var data = {};
         var parameter = {};
         data.content = $scope.content;
@@ -773,15 +984,19 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;
         data._id = $scope._id;
-        if ($routeParams.ID) parameter = {
-            ID: 'A' + $routeParams.ID,
-            OP: 'edit'
-        };
+        if ($routeParams.ID) {
+            parameter = {
+                ID: 'A' + $routeParams.ID,
+                OP: 'edit'
+            };
+        }
         var result = jsGen.rest.article.save(parameter, data, function () {
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);
                 jsGen.location.path('/' + result._id);
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]).
@@ -794,16 +1009,18 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
     $scope.editSave = false;
     $scope.switchTab = 'tab1';
     $scope.$watch(function () {
-        if (angular.equals($scope.global, originData)) $scope.editSave = false;
-        else $scope.editSave = true;
+        if (angular.equals($scope.global, originData)) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
     });
     $scope.setTab = function (tab) {
         $scope.switchTab = tab;
         jsGen.rootScope.msg = null;
     }
     $scope.setClass = function (b) {
-        if (b) return 'btn-warning';
-        else return 'btn-success';
+        return b ? 'btn-warning' : 'btn-success';
     };
     $scope.reset = function () {
         $scope.global = jsGen.union(originData);
@@ -813,19 +1030,21 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
         var data = jsGen.union($scope.global);
         $scope.editSave = false;
         angular.forEach(data.UsersScore, function (value, key) {
-            data.UsersScore[key] = Number(value);
+            data.UsersScore[key] = +value;
         });
         angular.forEach(data.ArticleStatus, function (value, key) {
-            data.ArticleStatus[key] = Number(value);
+            data.ArticleStatus[key] = +value;
         });
         angular.forEach(data.ArticleHots, function (value, key) {
-            data.ArticleHots[key] = Number(value);
+            data.ArticleHots[key] = +value;
         });
         angular.forEach(data.paginationCache, function (value, key) {
-            data.paginationCache[key] = Number(value);
+            data.paginationCache[key] = +value;
         });
         angular.forEach(data, function (value, key) {
-            if (angular.equals(value, originData[key])) delete data[key];
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
         });
         var result = jsGen.rest.index.save({OP: 'admin'}, data, function () {
             if (!result.err) {
@@ -838,7 +1057,9 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
                     name: '请求成功',
                     message: '修改成功！'
                 };
-            } else jsGen.rootScope.msg = result.err;
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
         });
     };
 }]);

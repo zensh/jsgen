@@ -15,7 +15,11 @@ factory('rest', ['$resource', function ($resource) {
             ID: 'index',
             OP: 'index'
         }),
-    }
+        tag: $resource('/api/tag/:ID/:OP', {
+            ID: 'index',
+            OP: 'index'
+        }),
+    };
 }]).
 factory('cache', ['$cacheFactory', function ($cacheFactory) {
     return {
@@ -25,7 +29,7 @@ factory('cache', ['$cacheFactory', function ($cacheFactory) {
         article: $cacheFactory('article', {
             capacity: 20
         })
-    }
+    };
 }]).
 factory('MdParse', function () {
     return function (html) {

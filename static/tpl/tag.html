@@ -1,0 +1,69 @@
+<div class="row">
+    <div class="span9">
+        <div class="panel">
+            <header class="page-header">
+                <h4>热门标签</h4>
+            </header>
+            <section>
+                <ul class="list-inline">
+                    <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
+                        <a class="btn btn-success" ng-href="{{'/'+tag._id}}">{{tag.tag}}</a>
+                        <p class="muted">文章{{tag.articles}}/会员{{tag.users}}</p>
+                    </li>
+                </ul>
+                <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
+            </section>
+        </div>
+    </div>
+    <div class="span3 sidebar">
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">最新文章</strong>
+            </header>
+            <ul class="media-list inner">
+                <li class="media" ng-repeat="article in latestArticles">
+                  <div class="media-body" id="{{article._id}}">
+                    <span class="media-content"><a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a></span>
+                  </div>
+                </li>
+            </ul>
+        </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">热门文章</strong>
+            </header>
+            <ul class="media-list inner">
+                <li class="media" ng-repeat="article in hotArticles">
+                  <div class="media-body" id="{{article._id}}">
+                    <strong class="text-hot" title="热度"><em>{{article.hots}}</em></strong>&nbsp;
+                    <span class="media-content"><a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a></span>
+                  </div>
+                </li>
+            </ul>
+        </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">赞助链接</strong>
+            </header>
+            <div class="inner">
+            </div>
+        </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">网站状态</strong>
+            </header>
+            <div class="inner">
+                <ul class="list-inline inner">
+                  <li>访问总数：{{global.visitors}}</li>
+                  <li>文章总数：{{global.articles}}</li>
+                  <li>评论总数：{{global.comments}}</li>
+                  <li>会员总数：{{global.users}}</li>
+                  <li>在线访客：{{global.onlineNum}}</li>
+                  <li>在线会员：{{global.onlineUsers}}</li>
+                  <li>在线记录：{{global.maxOnlineNum}}</li>
+                  <li>时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

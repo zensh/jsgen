@@ -312,9 +312,9 @@ function getUser(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.UidNone);
     }
     userCache.getP(Uid, dm.intercept(function (user) {
-        var list, key = Uid + req.path[3];
-        p = req.getparam.p || req.getparam.page || 1;
-        p = Number(p);
+        var list, key = Uid + req.path[3],
+            p = req.getparam.p || req.getparam.page || 1;
+        p = +p;
         list = jsGen.cache.pagination.get(key);
         if (!list || p === 1) {
             if (req.path[3] === 'fans') {
@@ -501,7 +501,7 @@ function editUser(req, res, dm) {
                 });
                 for (var key in tagList) {
                     setTagList.push({
-                        _id: Number(key),
+                        _id: +key,
                         usersList: tagList[key]
                     });
                 }
@@ -690,7 +690,7 @@ function getArticles(req, res, dm) {
     var list, key,
     p = req.getparam.p || req.getparam.page || 1;
 
-    p = Number(p);
+    p = +p;
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     }
@@ -735,7 +735,7 @@ function getUsersList(req, res, dm) {
     var list,
     p = req.getparam.p || req.getparam.page || 1;
 
-    p = Number(p);
+    p = +p;
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     }

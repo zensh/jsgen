@@ -93,8 +93,9 @@ filter('checkName', function () {
             } else {
                 return false;
             }
-        };
-    }).
+        }
+    };
+}).
 filter('length', function () {
     return function (text) {
         if (text) {

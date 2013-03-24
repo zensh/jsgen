@@ -11,6 +11,15 @@
     </head>
 
     <body>
+        <header>
+            <ul>
+                <% articlesList.forEach(function(article){ %>
+                <li>
+                    <a href="<%- '/'+article %>"><%- article %></a>
+                </li>
+                <% }); %>
+            </ul>
+        </header>
         <div>
             <article>
                 <header>
@@ -33,7 +42,7 @@
                     <ul>
                         <% article.tagsList.forEach(function(tag){ %>
                         <li>
-                            <a href="<%- '/'+tag._id %>"><%- tag.tag %></a>
+                            <%- tag.tag %>
                         </li>
                         <% }); %>
                     </ul>
@@ -50,7 +59,7 @@
                             </header>
                             <section ><%- comment.content %></section>
                             <footer>
-                                <span><a href="<%- '/'+comment.author._id %>"><%- comment.author.name %></a></span>
+                                <span><%- comment.author.name %></span>
                             </footer>
                         </div>
                     </li>

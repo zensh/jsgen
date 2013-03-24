@@ -6,7 +6,7 @@
             </a>
           <div class="media-body" id="{{article._id}}">
             <header class="media-heading">
-                <h5><a ng-href="{{'/'+article._id}}" target="_blank">{{article.title}}</a>
+                <h5><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
                 <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
                 <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
                 <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
@@ -14,7 +14,7 @@
             </header>
             <footer>
                 <ul class="list-inline muted">
-                    <li><a ng-href="{{'/'+article.author._id}}" target="_blank">{{article.author.name}}</a>
+                    <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
                     {{article.date | formatDate}}发表</li>
                     <li>{{article.visitors}}次访问</li>
                     <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>

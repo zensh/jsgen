@@ -32,7 +32,7 @@ directive('ngTiming', ['$timeout', function ($timeout) {
             element.addClass('ng-binding').data('$binding', attr.ngTiming);
             var eventName = attr.ngTiming;
             scope.$watch(attr.ngTiming, function ngTimingWatchAction(value) {
-                var time = Number(value) || 0;
+                var time = +value || 0;
                 if (time <= 0) {
                     return;
                 }

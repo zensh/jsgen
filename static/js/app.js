@@ -29,6 +29,10 @@ function ($routeProvider, $locationProvider) {
         templateUrl: '/static/tpl/article-editor.html',
         controller: 'articleEditorCtrl'
     }).
+    when('/tag', {
+        templateUrl: '/static/tpl/tag.html',
+        controller: 'tagCtrl'
+    }).
     when('/reset/:RE', {
         templateUrl: '/static/tpl/reset.html',
         controller: 'userResetCtrl'
@@ -45,13 +49,13 @@ function ($routeProvider, $locationProvider) {
         templateUrl: '/static/tpl/article.html',
         controller: 'articleCtrl'
     }).
-    when('/T:ID', {
-        templateUrl: '/static/tpl/tag.html',
-        controller: 'tagCtrl'
-    }).
-    when('/O:ID', {
+    when('/C:ID', {
         templateUrl: '/static/tpl/collection.html',
         controller: 'collectionCtrl'
+    }).
+    when('/:OP', {
+        templateUrl: '/static/tpl/index.html',
+        controller: 'indexCtrl'
     }).
     otherwise({
         redirectTo: '/'

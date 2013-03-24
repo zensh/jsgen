@@ -90,7 +90,6 @@ var that = jsGen.dao.db.bind('tags', {
     },
 
     setTag: function (tagObj, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
         var setObj = {},
         newObj = {
             tag: '',
@@ -105,7 +104,7 @@ var that = jsGen.dao.db.bind('tags', {
             };
         } else if (newObj.articlesList) {
             if (newObj.articlesList < 0) {
-                newObj.articlesList = Math.abs(newObj.articlesList);
+                newObj.articlesList = -newObj.articlesList;
                 setObj.$inc = {
                     articles: -1
                 };
@@ -122,7 +121,7 @@ var that = jsGen.dao.db.bind('tags', {
             }
         } else if (newObj.usersList) {
             if (newObj.usersList < 0) {
-                newObj.usersList = Math.abs(newObj.usersList);
+                newObj.usersList = -newObj.usersList;
                 setObj.$inc = {
                     users: -1
                 };
@@ -139,12 +138,18 @@ var that = jsGen.dao.db.bind('tags', {
             }
         }
 
-        that.findAndModify({
-            _id: tagObj._id
-        }, [], setObj, {
-            w: 1,
-            new: true
-        }, callback);
+        if (callback) {
+            that.findAndModify({
+                _id: tagObj._id
+            }, [], setObj, {
+                w: 1,
+                new: true
+            }, callback);
+        } else {
+            that.update({
+                _id: tagObj._id
+            }, setObj);
+        }
     },
 
     setNewTag: function (tagObj, callback) {

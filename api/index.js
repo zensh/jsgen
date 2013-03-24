@@ -163,9 +163,7 @@ function setGlobal(req, res, dm) {
     };
 
     function checkArray(key, i, array) {
-        if (typeof key !== 'number') {
-            key = Number(key);
-        }
+        key = +key;
         if (key < 0) {
             key = 0;
         }
