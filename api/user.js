@@ -17,6 +17,7 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
 
 userCache.getP = function (Uid, callback, convert) {
     var that = this,
+        _id = jsGen.dao.user.convertID(Uid),
         doc = this.get(Uid);
 
     callback = callback || jsGen.lib.tools.callbackFn;
@@ -27,13 +28,24 @@ userCache.getP = function (Uid, callback, convert) {
     function getConvert(doc) {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.followList = convertUsers(doc.followList, 'Uid');
+        jsGen.api.article.convertArticles(doc.articlesList, function (err, list) {
+            if (err) {
+                return callback(err, doc);
+            }
+            doc.articlesList = list;
+            calcuScore(doc);
+            jsGen.dao.user.setUserInfo({
+                _id: _id,
+                score: doc.score
+            });
+        },'id');
     };
     if (doc) {
         if (convert) {
             getConvert(doc);
         }
         return callback(null, doc);
-    } else jsGen.dao.user.getUserInfo(jsGen.dao.user.convertID(Uid), function (err, doc) {
+    } else jsGen.dao.user.getUserInfo(_id, function (err, doc) {
         if (doc) {
             doc._id = Uid;
             doc = intersect(union(UserPrivateTpl), doc);
@@ -59,6 +71,10 @@ cache._update = function (obj) {
     this[obj._id].name = obj.name;
     this[obj._id].email = obj.email;
     this[obj._id].avatar = obj.avatar;
+    this[obj._id].score = obj.score;
+    this[obj._id].fans = obj.fans;
+    this[obj._id].follow = obj.follow;
+    this[obj._id].articles = obj.articles;
     this[obj.name] = this[obj._id];
     this[obj.email] = this[obj._id];
     this._initTime = Date.now();
@@ -103,19 +119,39 @@ function convertUsers(_idArray, mode) {
     if (mode === 'Uid') {
         return _idArray;
     }
-    if (typeof _idArray[0] !== 'string') {
-        return result;
-    }
     _idArray.forEach(function (x, i) {
         if (cache[x]) {
             result.push({
                 _id: cache[x]._id,
                 name: cache[x].name,
-                avatar: cache[x].avatar
+                avatar: cache[x].avatar,
+                score: cache[x].score,
+                fans: cache[x].fans,
+                follow: cache[x].follow,
+                articles: cache[x].articles
             });
         }
     });
     return result;
+};
+
+function calcuScore(user) {
+    //UsersScore: [1, 3, 5, 10, 0.5, 1]
+    // 用户积分系数，表示评论×1，文章×3，关注×5，粉丝×10，文章热度×0.5，注册时长天数×1
+    user.score = 0;
+    for (var i = user.articlesList.length - 1; i >= 0; i--) {
+        if (jsGen.api.article.cache[user.articlesList[i]].status === -1) {
+            user.score += jsGen.config.UsersScore[0];
+        } else {
+            user.score += jsGen.config.UsersScore[1];
+        }
+        user.score += jsGen.config.UsersScore[4] * (jsGen.api.article.cache[user.articlesList[i]].hots || 0);
+    };
+    user.score += jsGen.config.UsersScore[2] * (user.follow || 0);
+    user.score += jsGen.config.UsersScore[3] * (user.fans || 0);
+    user.score += jsGen.config.UsersScore[5] * Math.floor((Date.now() - user.date) / 86400000);
+    user.score =  Math.floor(user.score);
+    cache._update(user);
 };
 
 function setCache(obj) {
@@ -283,7 +319,7 @@ function setReset(resetObj, callback) {
 function addUsers(req, res, dm) {
     var body = [];
 
-    if (req.session.role !== 'admin') {
+    if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (!Array.isArray(req.apibody)) {
@@ -419,7 +455,7 @@ function setUser(req, res, dm) {
 };
 
 function getUsers(req, res, dm) {
-    if (req.session.role !== 'admin') {
+    if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     pagination(req, cache._index, userCache, dm.intercept(function (doc) {
@@ -536,7 +572,7 @@ function editUsers(req, res, dm) {
         _id: '',
         email: '',
         locked: false,
-        role: ''
+        role: 0
     },
     body = {
         err: null,
@@ -574,8 +610,11 @@ function editUsers(req, res, dm) {
                 throw jsGen.Err(jsGen.lib.msg.userEmailExist);
             }
         }
-        if (userObj.role && ['admin', 'editor', 'author', 'user', 'guest', 'forbid'].lastIndexOf(userObj.role) < 0) {
-            delete userObj.role;
+        if (userObj.role) {
+            userObj.role = Math.floor(userObj.role);
+            if (userObj.role < 0 || userObj.role > 5) {
+                delete userObj.role;
+            }
         }
         if (userObj.locked !== false) {
             delete userObj.locked;
@@ -653,7 +692,7 @@ function resetUser(req, res, dm) {
                         userObj.locked = false;
                         break;
                     case 'role':
-                        userObj.role = 'user';
+                        userObj.role = 2;
                         break;
                     case 'email':
                         userObj.email = reset.e;

@@ -103,7 +103,7 @@ $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getM
     $rootScope.checkUser = function () {
         if ($rootScope.global.user && $rootScope.global.user.role) {
             $rootScope.isLogin = true;
-            if ($rootScope.global.user.role === 'admin') {
+            if ($rootScope.global.user.role === 5) {
                 $rootScope.isAdmin = true;
             } else {
                 $rootScope.isAdmin = false;

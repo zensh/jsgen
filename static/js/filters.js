@@ -5,17 +5,17 @@ angular.module('jsGen.filters', []).
 filter('role', function () {
     return function (text) {
         switch (text) {
-            case 'admin':
+            case 5:
                 return '管理员';
-            case 'editor':
+            case 4:
                 return '编辑';
-            case 'author':
-                return '作者';
-            case 'user':
+            case 3:
+                return '组员';
+            case 2:
                 return '会员';
-            case 'guest':
+            case 1:
                 return '待验证';
-            case 'forbid':
+            case 0:
                 return '禁言';
             default:
                 return text;

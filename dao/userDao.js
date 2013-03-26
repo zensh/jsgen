@@ -141,7 +141,7 @@ var that = jsGen.dao.db.bind('users', {
             resetDate: 0,
             locked: false,
             sex: '',
-            role: '',
+            role: 0,
             avatar: '',
             desc: '',
             score: 0,

@@ -265,7 +265,7 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
     });
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
-    if (!($scope.global.user && $scope.global.user.role === 'admin')) {
+    if (!($scope.global.user && $scope.global.user.role === 5)) {
         jsGen.location.path('/');
     }
     $scope.getTpl = '/static/tpl/admin-index.html';
@@ -371,7 +371,7 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
 controller('userAdminCtrl', ['$scope', function ($scope) {
     var result = {},
     originData = {};
-    $scope.roleArray = ['admin', 'editor', 'author', 'user', 'guest', 'forbid'];
+    $scope.roleArray = [0, 1, 2, 3, 4, 5];
     $scope.editEmail = false;
     $scope.editRole = false;
     $scope.editSave = false;
@@ -416,7 +416,7 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
             _id: '',
             email: '',
             locked: false,
-            role: ''
+            role: 0
         }];
         $scope.editEmail = false;
         $scope.editRole = false;

@@ -86,7 +86,7 @@ function getIndex(req, res, dm) {
 
 function getGlobal(req, res, dm) {
     var body = union(jsGen.config);
-    if (req.session.role !== 'admin') {
+    if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     body.sys = {

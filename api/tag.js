@@ -350,7 +350,7 @@ function getTags(req, res, dm) {
 function editTags(req, res, dm) {
     var body = {};
     body.data = [];
-    if (req.session.role === 'admin') {
+    if (req.session.role >= 4) {
         if (Array.isArray(req.apibody)) {
             req.apibody.forEach(function (tag, i, array) {
                 setTag(tag, function (err, doc) {
@@ -378,7 +378,7 @@ function delTag(req, res, dm) {
     var _id = null,
         body = {};
 
-    if (req.session.role === 'admin') {
+    if (req.session.role >= 4) {
         if (cache[tag]) {
             _id = jsGen.dao.tag.convertID(cache[tag]._id);
         } else if (cache[tag.toLowerCase()]) {
@@ -405,7 +405,7 @@ function delTag(req, res, dm) {
 function delTags(req, res, dm) {
     var body = {};
 
-    if (req.session.role === 'admin') {
+    if (req.session.role >= 4) {
         if (Array.isArray(req.apibody)) {
             req.apibody.forEach(function (tag, i) {
                 var _id = null;

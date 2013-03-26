@@ -485,8 +485,8 @@ function getArticle(req, res, dm) {
     if (cache[ID].display > 0 && !req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     }
-    if (cache[ID].display > 2 && req.session.role !== 'admin') {
-        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if (cache[ID].display > 2 && req.session.role < 4) {
+        throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
     }
     articleCache.getP(ID, dm.intercept(function (doc) {
         if (req.session.Uid !== doc.author._id) {
@@ -496,10 +496,6 @@ function getArticle(req, res, dm) {
                         throw jsGen.Err(jsGen.lib.msg.articleDisplay1);
                     }
                 }), false);
-            } else if (cache[ID].display === 2) {
-                if (req.session.role !== 'admin' && req.session.role !== 'editor') {
-                    throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
-                }
             }
         }
         doc.comments = doc.commentsList.length;
@@ -696,7 +692,7 @@ function addArticle(req, res, dm) {
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     }
-    if (req.session.role === 'guest') {
+    if (req.session.role < 2) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (checkTimeInterval(req, 'Ad')) {
@@ -749,7 +745,7 @@ function setArticle(req, res, dm) {
     var user_id = jsGen.dao.user.convertID(req.session.Uid);
     var date = Date.now();
     if (req.path[3] === 'comment') {
-        if (req.session.role === 'guest') {
+        if (req.session.role < 1) {
             throw jsGen.Err(jsGen.lib.msg.userRoleErr);
         }
         if (checkTimeInterval(req, 'Ad')) {
@@ -842,7 +838,7 @@ function setArticle(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
         }
         articleCache.getP(articleID, dm.intercept(function (doc) {
-            if (user_id !== doc.author) {
+            if (user_id !== doc.author || req.session.role < 4) {
                 throw jsGen.Err(jsGen.lib.msg.userRoleErr);
             }
             filterArticle(req.apibody, dm.intercept(function (article) {
