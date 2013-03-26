@@ -32,17 +32,19 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 9. **后台管理系统**，网站参数设置、缓存设置、网站运行信息、文章、评论、用户、标签、合集、站内短信等管理。
 
+10. **Robot SEO系统**，由于AngularJS网页内容在客户端动态生成，对搜索引擎robot天生免疫。jsGen针对robot访问，在服务器端动态生成robot专属html页面。搜索引擎Robot名称可在管理后台添加。
+
 ### 说明
 
 **jsGen** 是为[AngularJS中文社区][2]开发的网站系统，第一个测试版（0.1.0）即将上线，敬请关注。
 
-在移动互联网爆炸式发展、webOS类系统（谷歌ChromeOS、火狐OS等）进入实用阶段、TV机顶盒应用即将爆发等大环境大趋势下，JavaScript无疑将成为WEB中最重要的开发语言，深入学习JavaScript势在必行。JavaScript也是简单易学的语言，以我为例，从决心转行购入《JavaScript权威指南》学习到jsGen测试版上线，也就半年，此前只会用现有的建站系统搭设网站，能写点简单的Jquery、html、css代码。
+在移动互联网爆炸式发展、webOS类系统（谷歌ChromeOS、火狐OS等）进入实用阶段、TV机顶盒应用即将爆发等大环境大趋势下，JavaScript无疑将成为WEB中最重要的开发语言，深入学习JavaScript势在必行。
 
 AngularJS中文社区改版之后，致力于形成一个以AngularJS为主，WEB相关的各种JavaScript技术并行学习讨论交流的专业技术社区，我本人会将开发jsGen的经验心得形成文字与大家分享。
 
 同时也因为我是半路转行的新手，jsGen是我边学边写的第一个编程作业。jsGen表现形式参考了[Node.js中文社区][11]，但核心构架完全自我设计，未经验证！测试版上线无疑将出现各种问题，希望大家能积极评测反馈。jsGen代码将会持续优化，并完善相关代码解释说明文档。对于JS新手来说，这也许是个好的学习实例。
 
-非常感谢[GitHub][3]和在GitHub上贡献开源代码的[Node.js][4]、[AngularJS][5]、[MongoDB][6]、[Bootstrap][7]以及其他JavsScript插件的伟大码农们，还有国内码农贡献的[rrestjs][8]、[mongoskin][9]、[xss][10]等，是你们的贡献，帮助我这个外行半年内写出了这个项目。我这个项目也是开源免费（MIT协议）。
+非常感谢[GitHub][3]和在GitHub上贡献开源代码的[Node.js][4]、[AngularJS][5]、[MongoDB][6]、[Bootstrap][7]以及其他JavsScript插件的伟大码农们，还有国内码农贡献的[rrestjs][8]、[mongoskin][9]、[xss][10]等，是你们的贡献，让jsGen得以成型。jsGen也是开源免费（MIT协议）。
 
 ### 安装
 
