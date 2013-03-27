@@ -350,26 +350,23 @@ function getTags(req, res, dm) {
 function editTags(req, res, dm) {
     var body = {};
     body.data = [];
-    if (req.session.role >= 4) {
-        if (Array.isArray(req.apibody)) {
-            req.apibody.forEach(function (tag, i, array) {
-                setTag(tag, function (err, doc) {
-                    if (err) {
-                        body.err = err;
-                    }
-                    if (doc) {
-                        body.data.push(doc);
-                    }
-                    if (body.err || i >= array.length - 1) {
-                        jsGen.dao.db.close();
-                        return res.sendjson(body);
-                    }
-                });
+    if (req.session.role < 4) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+
+    if (Array.isArray(req.apibody)) {
+        req.apibody.forEach(function (tag, i, array) {
+            setTag(tag, function (err, doc) {
+                if (err) {
+                    body.err = err;
+                }
+                if (doc) {
+                    body.data.push(doc);
+                }
+                if (body.err || i >= array.length - 1) {
+                    jsGen.dao.db.close();
+                    return res.sendjson(body);
+                }
             });
-        }
-    } else {
-        body.err = jsGen.lib.msg.userRoleErr;
-        return res.sendjson(body);
+        });
     }
 };
 
@@ -378,63 +375,23 @@ function delTag(req, res, dm) {
     var _id = null,
         body = {};
 
-    if (req.session.role >= 4) {
-        if (cache[tag]) {
-            _id = jsGen.dao.tag.convertID(cache[tag]._id);
-        } else if (cache[tag.toLowerCase()]) {
-            _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
+    if (req.session.role < 4) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    if (cache[tag]) {
+        _id = jsGen.dao.tag.convertID(cache[tag]._id);
+    } else if (cache[tag.toLowerCase()]) {
+        _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
+    } else {
+        throw jsGen.Err(jsGen.lib.msg.tagNone);
+    }
+    jsGen.dao.tag.delTag(_id, function (err, doc) {
+        jsGen.dao.db.close();
+        if (err) {
+            body.err = jsGen.lib.msg.dbErr;
         } else {
-            body.err = jsGen.lib.msg.tagNone;
-            return res.sendjson(body);
+            body = doc;
         }
-        jsGen.dao.tag.delTag(_id, function (err, doc) {
-            jsGen.dao.db.close();
-            if (err) {
-                body.err = jsGen.lib.msg.dbErr;
-            } else {
-                body = doc;
-            }
-            return res.sendjson(body);
-        });
-    } else {
-        body.err = jsGen.lib.msg.userRoleErr;
         return res.sendjson(body);
-    }
-};
-
-function delTags(req, res, dm) {
-    var body = {};
-
-    if (req.session.role >= 4) {
-        if (Array.isArray(req.apibody)) {
-            req.apibody.forEach(function (tag, i) {
-                var _id = null;
-                if (cache[tag]) {
-                    _id = jsGen.dao.tag.convertID(cache[tag]._id);
-                } else if (cache[tag.toLowerCase()]) {
-                    _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
-                } else {
-                    body.err = jsGen.lib.msg.tagNone;
-                    return res.sendjson(body);
-                }
-                jsGen.dao.tag.delTag(_id, function (err, doc) {
-                    body.data = i + 1;
-                    if (i = req.apibody.length - 1) {
-                        jsGen.dao.db.close();
-                        return res.sendjson(body);
-                    }
-                    if (err) {
-                        jsGen.dao.db.close();
-                        body.err = jsGen.lib.msg.dbErr;
-                        return res.sendjson(body);
-                    }
-                });
-            });
-        }
-    } else {
-        body.err = jsGen.lib.msg.userRoleErr;
-        return res.sendjson(body);
-    }
+    });
 };
 
 function getFn(req, res, dm) {
@@ -460,13 +417,7 @@ function postFn(req, res, dm) {
 };
 
 function deleteFn(req, res, dm) {
-    switch (req.path[2]) {
-        case undefined:
-        case 'index':
-        case 'admin':
-            return delTags(req, res, dm);
-        default:
-            return delTag(req, res, dm);
+        return delTag(req, res, dm);
     }
 };
 

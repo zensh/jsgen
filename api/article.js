@@ -1003,7 +1003,7 @@ function robot(req, res, dm) {
     }
 };
 
-function deleteFn(req, res, dm) {
+function deleteArticle(req, res, dm) {
     var articleID = req.path[2];
     if (!req.session.Uid) throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     if (!checkID(articleID, 'A') || !cache[articleID] || cache[articleID].display === 3) {
@@ -1064,6 +1064,10 @@ function postFn(req, res, dm) {
         default:
             return setArticle(req, res, dm);
     }
+};
+
+function deleteFn(req, res, dm) {
+    return deleteArticle(req, res, dm);
 };
 
 module.exports = {
