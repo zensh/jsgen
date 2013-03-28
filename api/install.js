@@ -130,7 +130,7 @@ function users() {
                         name: 'admin',
                         email: 'admin@zensh.com',
                         passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
-                        role: 'admin',
+                        role: 5,
                         avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
                         desc: '梦造互联网 By ZENSH'
                     }, callback);

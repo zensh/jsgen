@@ -171,6 +171,7 @@ function adduser(userObj, callback) {
     delete userObj._id;
     userObj.avatar = gravatar(userObj.email);
     userObj.resetDate = Date.now();
+    userObj.role = 1;
     jsGen.dao.user.setNewUser(userObj, function (err, doc) {
         if (doc) {
             doc._id = jsGen.dao.user.convertID(doc._id);
