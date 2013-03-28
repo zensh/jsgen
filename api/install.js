@@ -33,8 +33,7 @@ function articles() {
             throw err;
         }
         collection.ensureIndex({
-            _id: -1,
-            hots: -1
+            _id: -1
         }, {
             background: true
         });
@@ -53,8 +52,7 @@ function collections() {
             throw err;
         }
         collection.ensureIndex({
-            _id: -1,
-            updateTime: -1
+            _id: -1
         }, {
             background: true
         });
@@ -92,8 +90,7 @@ function tags() {
             throw err;
         }
         collection.ensureIndex({
-            _id: -1,
-            updateTime: -1
+            _id: -1
         }, {
             background: true
         });
@@ -112,8 +109,7 @@ function users() {
             throw err;
         }
         collection.ensureIndex({
-            _id: -1,
-            score: -1
+            _id: -1
         }, {
             background: true
         });
