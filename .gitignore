@@ -13,11 +13,7 @@ logs
 results
 node_modules/
 test/
-mylogs/
 json/
 scss/
-tmp/static/*
-tmp/tpl/*
-tmp/upload/*
 
 npm-debug.log
