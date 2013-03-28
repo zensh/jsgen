@@ -6,54 +6,58 @@
     <div class="span3 sidebar">
         <div class="panel">
             <div class="media inner">
-              <a class="pull-left" ng-href="{{'/'+user._id}}">
-                <img class="media-object" ng-src="{{user.avatar}}">
-              </a>
-              <div class="media-body">
-                <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></h5>
-                <span>Uid:{{user._id}}</span>
-                <span ng-show="user.role">{{user.role | role}}</span>
-                <p><a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a></p>
-              </div>
+                <a class="pull-left" ng-href="{{'/'+user._id}}">
+                    <img class="media-object" ng-src="{{user.avatar}}">
+                </a>
+                <div class="media-body">
+                    <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></h5>
+                    <span>Uid:{{user._id}}</span>
+                    <span ng-show="user.role">{{user.role | role}}</span>
+                    <p><a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a></p>
+                </div>
             </div>
             <div class="inner">
-                    <ul class="list-inline">
-                        <li ng-show="user.email">
-                            <span class="muted">Email：</span>{{user.email}}
-                        </li>
-                        <li ng-show="user.sex">
-                            <span class="muted">性别：</span>{{user.sex | sex}}
-                        </li>
-                        <li ng-show="user.score">
-                            <span class="muted">积分：</span>{{user.score}}
-                        </li>
-                        <li ng-show="user.fans">
-                            <span class="muted">粉丝：</span>{{user.fans}}
-                        </li>
-                        <li ng-show="user.follow">
-                            <span class="muted">关注：</span>{{user.follow}}
-                        </li>
-                        <li ng-show="user.collect">
-                            <span class="muted">收藏：</span>{{user.collect}}
-                        </li>
-                        <li ng-show="user.articles">
-                            <span class="muted">文章/评论：</span>{{user.articles}}
-                        </li>
-                        <li ng-show="user.collections">
-                            <span class="muted">合集：</span>{{user.collections}}
-                        </li>
-                        <li ng-show="user.date" class="muted">
-                            {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
-                        </li>
-                    </ul>
-                    <dl>
-                      <dt> 用户简介：</dt>
-                      <dd>{{user.desc}}</dd>
-                      <dt> 用户标签：</dt>
-                      <dd><ul class="list-inline"><li ng-repeat="tag in user.tagsList">
-                        <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
-                      </li></ul></dd>
-                    </dl>
+                <ul class="list-inline">
+                    <li ng-show="user.email">
+                        <span class="muted">Email：</span>{{user.email}}
+                    </li>
+                    <li ng-show="user.sex">
+                        <span class="muted">性别：</span>{{user.sex | sex}}
+                    </li>
+                    <li ng-show="user.score">
+                        <span class="muted">积分：</span>{{user.score}}
+                    </li>
+                    <li ng-show="user.fans">
+                        <span class="muted">粉丝：</span>{{user.fans}}
+                    </li>
+                    <li ng-show="user.follow">
+                        <span class="muted">关注：</span>{{user.follow}}
+                    </li>
+                    <li ng-show="user.collect">
+                        <span class="muted">收藏：</span>{{user.collect}}
+                    </li>
+                    <li ng-show="user.articles">
+                        <span class="muted">文章/评论：</span>{{user.articles}}
+                    </li>
+                    <li ng-show="user.collections">
+                        <span class="muted">合集：</span>{{user.collections}}
+                    </li>
+                    <li ng-show="user.date" class="muted">
+                        {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
+                    </li>
+                </ul>
+                <dl>
+                    <dt> 用户简介：</dt>
+                    <dd>{{user.desc}}</dd>
+                    <dt> 用户标签：</dt>
+                    <dd>
+                        <ul class="list-inline">
+                            <li ng-repeat="tag in user.tagsList">
+                                <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
+                            </li>
+                        </ul>
+                    </dd>
+                </dl>
             </div>
         </div>
         <div class="panel">
@@ -73,23 +77,23 @@
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','comment')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
-                <li>
+<!--                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','message')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
-                </li>
+                </li> -->
                 <li>
-                    <a href="#" ng-click="setTpl('user-edit.html', 'edit')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
+                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
             <ul class="nav nav-list text-center inner" ng-hide="isMe">
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
                 </li>
-                <li>
+<!--                 <li>
                     <a href="#" ng-click="setTpl('user-index.html','article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
-                </li>
+                </li> -->
                 <li>
                     <a href="#" ng-click="setTpl('user-list.html','fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的粉丝 </a>
                 </li>

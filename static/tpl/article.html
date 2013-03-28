@@ -145,27 +145,34 @@
             </header>
             <div class="inner">
                 <div class="media">
-                  <a class="pull-left" ng-href="{{'/'+article.author._id}}">
-                    <img class="media-object" ng-src="{{article.author.avatar}}">
-                  </a>
-                  <div class="media-body">
-                    <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
-                    <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
+                    <a class="pull-left" ng-href="{{'/'+article.author._id}}">
+                        <img class="media-object" ng-src="{{article.author.avatar}}">
+                    </a>
+                    <div class="media-body">
+                        <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
+                        <span>Uid:{{article.author._id}}</span>
+                        <span ng-show="article.author.role">{{article.author.role | role}}</span>
+                        <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
+                    </div>
+                </div>
+                <div class="inner">
                     <ul class="list-inline">
                         <li ng-show="article.author.score">
-                            积分：{{article.author.score}}
+                            <span class="muted">积分：</span>{{article.author.score}}
                         </li>
                         <li ng-show="article.author.fans">
-                            粉丝：{{article.author.fans}}
+                            <span class="muted">粉丝：</span>{{article.author.fans}}
                         </li>
                         <li ng-show="article.author.follow">
-                            关注：{{article.author.follow}}
+                            <span class="muted">关注：</span>{{article.author.follow}}
                         </li>
                         <li ng-show="article.author.articles">
-                            文章/评论：{{article.author.articles}}
+                            <span class="muted">文章/评论：</span>{{article.author.articles}}
+                        </li>
+                        <li ng-show="article.author.collections">
+                            <span class="muted">合集：</span>{{article.author.collections}}
                         </li>
                     </ul>
-                  </div>
                 </div>
             </div>
         </div>

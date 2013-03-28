@@ -62,6 +62,8 @@ articleCache.getP = function (ID, callback, convert) {
         jsGen.dao.article.getArticle(_id, function (err, doc) {
             if (doc) {
                 doc._id = ID;
+                doc.comments = doc.commentsList.length;
+                that.put(ID, doc);
                 if (convert) {
                     getConvert(doc);
                 } else {
@@ -114,6 +116,7 @@ commentCache.getP = function (ID, callback, convert) {
         jsGen.dao.article.getArticle(_id, function (err, doc) {
             if (doc) {
                 doc._id = ID;
+                doc.comments = doc.commentsList.length;
                 doc = intersect(union(comment), doc);
                 that.put(ID, doc);
                 if (convert) {
@@ -154,6 +157,7 @@ listCache.getP = function (ID, callback, convert) {
             if (doc) {
                 doc._id = ID;
                 doc.content = filterSummary(jsGen.module.marked(doc.content));
+                doc.comments = doc.commentsList.length;
                 doc = intersect(union(listArticle), doc);
                 that.put(ID, doc);
                 if (convert) {
@@ -173,6 +177,7 @@ var cache = {
 };
 cache._update = function (obj) {
     var i = null;
+
     if (!this[obj._id]) {
         this[obj._id] = {
             status: -1,
@@ -209,6 +214,7 @@ cache._update = function (obj) {
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
     this[obj._id].updateTime = obj.updateTime;
+    this[obj._id].date = obj.date;
     this[obj._id].hots = obj.hots;
     if (obj.status === 2) {
         this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
@@ -498,7 +504,6 @@ function getArticle(req, res, dm) {
                 }), false);
             }
         }
-        doc.comments = doc.commentsList.length;
         var list = null;
         if (req.path[3] === 'comment') {
             if (!req.session.commentPagination) {
@@ -978,7 +983,14 @@ function robot(req, res, dm) {
     obj.articlesList = cache._index.slice(-200).reverse();
 
     if (!ID || !checkID(ID, 'A') || !cache[ID] || cache[ID].display > 0) {
-        var list = obj.articlesList.slice(0, 50);
+        var keywords, list = obj.articlesList.slice(0, 50);
+        keywords = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20)).map(function (tag) {
+            return tag.tag;
+        });
+        keywords = keywords.concat(obj.global.keywords.split(/[,，\s]/));
+        keywords = jsGen.lib.tools.uniqueArray(keywords);
+        obj.global.keywords = keywords.join();
+        obj.global.title =  obj.global.title + ' | ' + obj.global.description;
         convertArticles(list, dm.intercept(function (doc) {
             doc.forEach(function (article, i) {
                 doc[i].content = jsGen.module.marked(article.content);
@@ -991,6 +1003,10 @@ function robot(req, res, dm) {
         articleCache.getP(ID, dm.intercept(function (doc) {
             doc.content = jsGen.module.marked(doc.content);
             doc.comments = doc.commentsList.length;
+            obj.global.title = obj.global.title + ' | ' + doc.title;
+            obj.global.keywords = doc.tagsList.map(function (tag) {
+                return tag.tag;
+            }).join();
             convertArticles(doc.commentsList, dm.intercept(function (commentsList) {
                 commentsList.forEach(function (comment, i) {
                     commentsList[i].content = jsGen.module.marked(comment.content);

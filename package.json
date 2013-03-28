@@ -5,7 +5,7 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsGen",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
@@ -21,8 +21,9 @@
         "xss": ">=0.0.3"
     },
     "scripts": {
-        "start": "node app.js",
-        "test": "",
-        "install": ""
+        "start": "forever start -l forever.log -a app.js",
+        "stop": "forever stop -l forever.log -a app.js",
+        "restart": "forever restart -l forever.log -a app.js",
+        "stopall": "forever stopall"
     }
 }

@@ -246,7 +246,8 @@ function filterTags(tagArray, callback) {
 
 function getTag(req, res, dm) {
     var tag = req.path[2];
-    if (!checkID(tag, 'T')) {
+    console.log(tag);
+    if (tag[0] === '_') {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
     if (cache[tag]) {
@@ -263,7 +264,7 @@ function getTag(req, res, dm) {
             p = req.getparam.p || req.getparam.page || 1;
 
         doc.articlesList.forEach(function (x, i) {
-            doc.articlesList[i] = jsGen.dao.tag.convertID(x);
+            doc.articlesList[i] = jsGen.dao.article.convertID(x);
         });
         if (n > 0) {
             if (n > 20) {

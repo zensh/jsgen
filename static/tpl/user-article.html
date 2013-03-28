@@ -18,6 +18,7 @@
                     {{article.date | formatDate}}发表</li>
                     <li>{{article.visitors}}次访问</li>
                     <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
+                    <li>{{article.comments}}条评论</li>
                     <li ng-show="isMe"><a class="btn btn-mini" ng-href="{{'/'+article._id+'/edit'}}">编辑</a></li>
                 </ul>
             </footer>

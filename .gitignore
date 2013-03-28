@@ -16,6 +16,8 @@ test/
 mylogs/
 json/
 scss/
-tmp/
+tmp/static/*
+tmp/tpl/*
+tmp/upload/*
 
 npm-debug.log

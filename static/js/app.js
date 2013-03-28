@@ -41,6 +41,10 @@ function ($routeProvider, $locationProvider) {
         templateUrl: '/static/tpl/user.html',
         controller: 'userCtrl'
     }).
+    when('/user/:UID', {
+        templateUrl: '/static/tpl/user.html',
+        controller: 'userCtrl'
+    }).
     when('/A:ID/edit', {
         templateUrl: '/static/tpl/article-editor.html',
         controller: 'articleEditorCtrl'
@@ -52,6 +56,10 @@ function ($routeProvider, $locationProvider) {
     when('/C:ID', {
         templateUrl: '/static/tpl/collection.html',
         controller: 'collectionCtrl'
+    }).
+    when('/tag/:TAG', {
+        templateUrl: '/static/tpl/index.html',
+        controller: 'indexCtrl'
     }).
     when('/:OP', {
         templateUrl: '/static/tpl/index.html',
@@ -163,6 +171,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
                 type: 'error'
             };
         }
+        $rootScope.global.title2 = $rootScope.global.description;
     });
     $rootScope.$watch(function () {
         return $location.path();
@@ -189,10 +198,9 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             $rootScope.$on('timeout', function (event) {
                 event.stopPropagation();
                 var url = null;
-                if (msg && msg.url) {
-                    url = msg.url;
+                if ($rootScope.msg && $rootScope.msg.url) {
+                    url = $rootScope.msg.url;
                 }
-                msg = null;
                 $rootScope.msg = null;
                 $rootScope.timeout = undefined;
                 dom.modal('hide');

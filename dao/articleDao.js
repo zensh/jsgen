@@ -63,11 +63,11 @@ var that = jsGen.dao.db.bind('articles', {
             },
             fields: {
                 _id: 1,
+                date: 1,
                 display: 1,
                 status: 1,
                 updateTime: 1,
-                hots: 1,
-                visitors: 1
+                hots: 1
             }
         }).each(callback);
     },

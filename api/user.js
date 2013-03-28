@@ -314,19 +314,29 @@ function addUsers(req, res, dm) {
     if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
-    if (!Array.isArray(req.apibody)) {
-        req.apibody = [req.apibody];
+    var userList = req.apibody.data;
+    if (!Array.isArray(userList)) {
+        userList = userList;
     }
-    req.apibody.reverse();
+    userList.reverse();
     next();
 
     function next() {
-        var userObj = req.apibody.pop();
+        var userObj = userList.pop();
         if (!userObj) {
             return res.sendjson(body);
         }
         adduser(userObj, dm.intercept(function (doc) {
             body.push(doc);
+            setReset({
+                u: doc._id,
+                r: 'role'
+            }, dm.intercept(function () {
+                if (jsGen.config.email) {
+                    var url = jsGen.config.url + '/' + doc._id;
+                    jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
+                }
+            }));
             return next();
         }));
     };
@@ -334,7 +344,7 @@ function addUsers(req, res, dm) {
 
 function getUser(req, res, dm) {
     var Uid = req.path[2];
-    if (checkUserID(Uid) && cache[Uid]) {
+    if (cache[Uid] && checkUserID(Uid) || checkUserName(Uid)) {
         Uid = cache[Uid]._id;
     } else {
         throw jsGen.Err(jsGen.lib.msg.UidNone);
@@ -377,11 +387,10 @@ function getUser(req, res, dm) {
                 });
             }
             pagination(req, list, cache, dm.intercept(function (doc) {
-                var body = doc;
                 if (p === 1 && req.path[3] === 'index') {
-                    body.user = intersect(union(UserPublicTpl), user);
+                    doc.user = intersect(union(UserPublicTpl), user);
                 }
-                return res.sendjson(body);
+                return res.sendjson(doc);
             }));
         };
     }));
@@ -466,9 +475,65 @@ function getUserInfo(req, res, dm) {
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
     }
-    userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-        return res.sendjson(doc);
-    }));
+
+    userCache.getP(req.session.Uid, dm.intercept(function (user) {
+        var list, key = req.session.Uid + 'home',
+            p = req.getparam.p || req.getparam.page || 1;
+        p = +p;
+        list = jsGen.cache.pagination.get(key);
+        if (!list || p === 1) {
+            var articleList = [];
+            list = [];
+            for (var i = jsGen.api.article.cache._index.length - 1; i >= 0; i--) {
+                if (jsGen.api.article.cache[jsGen.api.article.cache._index[i]].date > user.readtimestamp) {
+                    articleList.push(jsGen.api.article.cache._index[i]);
+                } else {
+                    break;
+                }
+            };
+            checkList();
+
+            function checkList() {
+                var id = articleList.pop();
+                if (!id) {
+                    list.reverse();
+                    jsGen.cache.pagination.put(key, list);
+                    return getPagination();
+                }
+                jsGen.cache.list.getP(id, dm.intercept(function (article) {
+                    var checkTag = user.tagsList.some(function (x) {
+                        if (article.tagsList.indexOf(x) >= 0) return true;
+                    });
+                    if (user.followList.indexOf(article.author) >= 0 || checkTag) {
+                        list.push(id);
+                    }
+                    checkList();
+                }), false);
+            };
+        } else {
+            getPagination();
+        }
+
+        function getPagination() {
+            pagination(req, list, jsGen.cache.list, dm.intercept(function (doc) {
+                var now = Date.now();
+                if (p === 1) {
+                    jsGen.dao.user.setUserInfo({
+                        _id: jsGen.dao.user.convertID(req.session.Uid),
+                        readtimestamp: now
+                    });
+                    userCache.update(req.session.Uid, function (value) {
+                        value.readtimestamp = now;
+                        return value;
+                    });
+                    user.tagsList = jsGen.api.tag.convertTags(user.tagsList);
+                    user.followList = convertUsers(user.followList, 'Uid');
+                    doc.user = user;
+                }
+                return res.sendjson(doc);
+            }));
+        };
+    }), false);
 };
 
 function editUser(req, res, dm) {

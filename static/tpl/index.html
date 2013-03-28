@@ -22,7 +22,7 @@
                         <a ng-href="{{'/'+tag._id}}" class="btn btn-small btn-success">{{tag.tag}}</a>
                     </li>
                     <li>
-                        <a href="/tag" class="btn btn-small">更多标签...</a>
+                        <a href="/tag" class="btn btn-small btn-info">更多标签...</a>
                     </li>
                 </ul>
                 <ul class="media-list">
@@ -42,6 +42,7 @@
                                 {{article.date | formatDate}}发表</li>
                                 <li>{{article.visitors}}次访问</li>
                                 <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
+                                <li>{{article.comments}}条评论</li>
                                 <li ng-repeat="tag in article.tagsList">
                                     <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
                                 </li>

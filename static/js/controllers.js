@@ -9,9 +9,10 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
     $scope.pagination = null;
 
     function checkRouteParams() {
-        if ((/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
+        if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
             restPath = jsGen.rest.tag;
             $scope.other._id = $routeParams.OP;
+            $scope.other.name = $routeParams.TAG;
             viewID = 'view-other';
         } else {
             restPath = jsGen.rest.article;
@@ -25,10 +26,10 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
         element.addClass('active');
     };
 
-    if ($routeParams.OP) checkRouteParams();
+    if ($routeParams.TAG || $routeParams.OP) checkRouteParams();
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
-        doc.ID = $routeParams.OP || 'latest';
+        doc.ID = $routeParams.TAG || $routeParams.OP || 'latest';
         var result = restPath.get(doc, function () {
             if (!result.err) {
                 if (result.tag) {
@@ -50,6 +51,7 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
                     }
                 } else {
                     $scope.data = result.data;
+                    $scope.pagination = null;
                 }
             } else {
                 jsGen.rootScope.msg = result.err;
@@ -206,21 +208,39 @@ controller('userRegisterCtrl', ['$scope', function ($scope) {
 }]).
 controller('homeCtrl', ['$scope', function ($scope) {
     if (!$scope.global.user || !$scope.global.user.name) {
-        jsGen.location.path('/');
+        return jsGen.location.path('/');
     }
     $scope.isMe = true;
+    $scope.help = null;
     $scope.userOperate = {Uid: 'index', OP: 'index'};
     $scope.getTpl = '/static/tpl/user-index.html';
     $scope.setTpl = function (tpl, operate) {
         $scope.getTpl = '/static/tpl/' + tpl;
-        $scope.userOperate.Uid = operate;
+        if (operate) {
+            $scope.userOperate.Uid = operate;
+        }
     };
     $scope.user = $scope.global.user;
-    if (!$scope.user || !$scope.user.date) {
-        $scope.global.user = jsGen.rest.user.get({}, function () {
+    var result = jsGen.rest.user.get({}, function () {
+        if (result.err) {
+            jsGen.rootScope.msg = result.err;
+            return;
+        }
+        if (result.user) {
+            $scope.global.user = result.user;
             $scope.user = $scope.global.user;
-        });
-    }
+        }
+        if (result.data.length === 0) {
+            $scope.help = {
+                title: '暂无更新',
+                content: '这里显示您关注的标签或用户的最新文章。'
+            };
+        } else {
+            $scope.help = null;
+        }
+        $scope.data = result.data;
+        $scope.pagination = result.pagination;
+    });
     $scope.$on('update', function (event, doc) {
         event.stopPropagation();
         $scope.user.tagsList = [];
@@ -228,25 +248,36 @@ controller('homeCtrl', ['$scope', function ($scope) {
     });
 }]).
 controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
+    var Uid;
     $scope.isMe = false;
-    $scope.userOperate = {Uid: 'U' + $routeParams.ID, OP: 'article'};
+    if ($routeParams.UID) {
+        Uid = $routeParams.UID;
+    } else {
+        Uid = 'U' + $routeParams.ID;
+    }
+    $scope.userOperate = {Uid: Uid, OP: 'index'};
     $scope.getTpl = '/static/tpl/user-article.html';
     $scope.setTpl = function (tpl, operate) {
         $scope.getTpl = '/static/tpl/' + tpl;
-        $scope.userOperate.OP = operate;
-    };
-    jsGen.getUser('U' + $routeParams.ID, function (user) {
-        if (user.err) {
-            return jsGen.location.path('/');
+        if (operate) {
+            $scope.userOperate.OP = operate;
         }
-        if ($scope.global.user && $scope.global.user._id === user._id) {
-            jsGen.location.path('/home');
+    };
+    jsGen.getUser(Uid, function (result) {
+        if (result.err) {
+            jsGen.rootScope.msg = result.err;
             return;
         }
-        $scope.checkIsFollow(user.user);
-        $scope.user = user.user;
-        $scope.data = user.data;
-        $scope.pagination = user.pagination;
+        if (result.user) {
+            $scope.checkIsFollow(result.user);
+            $scope.user = result.user;
+            if ($scope.global.user && $scope.global.user._id === result.user._id) {
+                jsGen.location.path('/home');
+                return;
+            }
+        }
+        $scope.data = result.data;
+        $scope.pagination = result.pagination;
     });
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
@@ -304,30 +335,34 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         doc.Uid = $scope.userOperate.Uid;
         doc.OP = $scope.userOperate.OP;
         var result = jsGen.rest.user.get(doc, function () {
-            if (!result.err) {
-                if (result.pagination) {
-                    if (result.pagination.now === 1) {
-                        $scope.data = result.data;
-                    } else {
-                        $scope.data = $scope.data.concat(result.data).slice(-200);
-                    }
-                    $scope.pagination = result.pagination;
-                    if (!$scope.pagination.display) {
-                        $scope.pagination.display = {
-                            first: '首页',
-                            next: '下一页',
-                            last: '尾页'
-                        };
-                    }
-                } else {
+            if (result.err) {
+                result.err.url = '/';
+                jsGen.rootScope.msg = result.err;
+                return;
+            }
+            if (result.pagination) {
+                if (result.pagination.now === 1) {
                     $scope.data = result.data;
+                } else {
+                    $scope.data = $scope.data.concat(result.data).slice(-200);
+                }
+                $scope.pagination = result.pagination;
+                if (!$scope.pagination.display) {
+                    $scope.pagination.display = {
+                        first: '首页',
+                        next: '下一页',
+                        last: '尾页'
+                    };
                 }
             } else {
-                jsGen.rootScope.msg = result.err;
+                $scope.data = result.data;
             }
         });
     });
-    $scope.$watch('userOperate', function () {
+    $scope.$watch('userOperate', function (value) {
+        if (value.Uid === 'index' || (value.Uid[0] === 'U' || value.OP === 'index')) {
+            return;
+        }
         $scope.$emit('pagination', {
             n: 10,
             p: 1
@@ -583,6 +618,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.cache.article.put(x._id, x);
         });
         checkArticleIs(article);
+        jsGen.rootScope.global.title2 = article.title;
         $scope.article = article;
         if (article.pagination) {
             $scope.pagination = article.pagination;
@@ -595,7 +631,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         $scope.replyTitle = $scope.title;
         $scope.refer = article._id;
         if ($scope.global.user) {
-            if ($scope.global.user._id === $scope.article.article._id) {
+            if ($scope.global.user._id === $scope.article.author._id) {
                 $scope.isMe = true;
             } else {
                 $scope.isMe = false;
