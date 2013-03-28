@@ -63,8 +63,8 @@ function ($routeProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 }]).
 run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'tools', 'cache', 'rest', 'sanitize',
-    'MdParse', 'MdEditor', 'getArticle', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
-$anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getMarkdown) {
+    'MdParse', 'MdEditor', 'getArticle', 'getUser', 'getList', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
+    $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getUser, getList, getMarkdown) {
     // 注册全局变量jsGen
     window.jsGen = {};
 
@@ -80,6 +80,8 @@ $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getM
     jsGen.MdParse = MdParse;
     jsGen.MdEditor = MdEditor;
     jsGen.getArticle = getArticle;
+    jsGen.getUser = getUser;
+    jsGen.getList = getList;
     jsGen.getMarkdown = getMarkdown;
     jsGen.rootScope = $rootScope;
 

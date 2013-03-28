@@ -71,10 +71,6 @@ cache._update = function (obj) {
     this[obj._id].name = obj.name;
     this[obj._id].email = obj.email;
     this[obj._id].avatar = obj.avatar;
-    this[obj._id].score = obj.score;
-    this[obj._id].fans = obj.fans;
-    this[obj._id].follow = obj.follow;
-    this[obj._id].articles = obj.articles;
     this[obj.name] = this[obj._id];
     this[obj.email] = this[obj._id];
     this._initTime = Date.now();
@@ -124,11 +120,7 @@ function convertUsers(_idArray, mode) {
             result.push({
                 _id: cache[x]._id,
                 name: cache[x].name,
-                avatar: cache[x].avatar,
-                score: cache[x].score,
-                fans: cache[x].fans,
-                follow: cache[x].follow,
-                articles: cache[x].articles
+                avatar: cache[x].avatar
             });
         }
     });

@@ -60,14 +60,14 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
         n: 10,
         p: 1
     });
-    var hotComments = jsGen.rest.article.get({ID: 'comment', OP: 5}, function () {
-        if (!hotComments.err) {
-            hotComments.data.forEach(function (comment, i) {
-                hotComments.data[i].content = jsGen.filter('cutText')(comment.content, 180);
+    jsGen.getList('comment', function (list) {
+        if (!list.err) {
+            list.data.forEach(function (comment, i) {
+                list.data[i].content = jsGen.filter('cutText')(comment.content, 180);
             })
-            $scope.hotComments = hotComments.data;
+            $scope.hotComments = list.data.slice(0, 5);
         } else {
-            jsGen.rootScope.msg = hotComments.err;
+            jsGen.rootScope.msg = list.err;
         }
     });
     $scope.getList = function (s) {
@@ -112,18 +112,18 @@ controller('tagCtrl', ['$scope', function ($scope) {
         n: 50,
         p: 1
     });
-    var hotArticles = jsGen.rest.article.get({ID: 'hots', OP: 5}, function () {
-        if (!hotArticles.err) {
-            $scope.hotArticles = hotArticles.data;
+    jsGen.getList('hots', function (list) {
+        if (!list.err) {
+            $scope.hotArticles = list.data.slice(0, 5);
         } else {
-            jsGen.rootScope.msg = hotArticles.err;
+            jsGen.rootScope.msg = list.err;
         }
     });
-    var latestArticles = jsGen.rest.article.get({ID: 'latest', OP: 5}, function () {
-        if (!latestArticles.err) {
-            $scope.latestArticles = latestArticles.data;
+    jsGen.getList('latest', function (list) {
+        if (!list.err) {
+            $scope.latestArticles = list.data.slice(0, 5);
         } else {
-            jsGen.rootScope.msg = latestArticles.err;
+            jsGen.rootScope.msg = list.err;
         }
     });
 }]).
@@ -228,21 +228,6 @@ controller('homeCtrl', ['$scope', function ($scope) {
     });
 }]).
 controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
-    function getUser(callback) {
-        var user = jsGen.cache.user.get('U' + $routeParams.ID);
-        if (user) {
-            return callback(user);
-        } else {
-            user = jsGen.rest.user.get({
-                Uid: 'U' + $routeParams.ID
-            }, function () {
-                if (!user.err) {
-                    jsGen.cache.user.put(user._id, user);
-                }
-                return callback(user);
-            });
-        }
-    };
     $scope.isMe = false;
     $scope.userOperate = {Uid: 'U' + $routeParams.ID, OP: 'article'};
     $scope.getTpl = '/static/tpl/user-article.html';
@@ -250,7 +235,7 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         $scope.getTpl = '/static/tpl/' + tpl;
         $scope.userOperate.OP = operate;
     };
-    getUser(function (user) {
+    jsGen.getUser('U' + $routeParams.ID, function (user) {
         if (user.err) {
             return jsGen.location.path('/');
         }
@@ -573,10 +558,6 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         article.markList = article.markList || [];
         article.favorList = article.favorsList || [];
         article.opposeList = article.opposesList || [];
-        article.author = article.author || {};
-        article.author.isFollow = user.followList.some(function (x) {
-            return x === article.author._id;
-        });
         article.isMark = article.markList.some(function (x) {
             return x._id === user._id;
         });
@@ -614,11 +595,27 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         $scope.replyTitle = $scope.title;
         $scope.refer = article._id;
         if ($scope.global.user) {
-            if ($scope.global.user._id === $scope.article.author._id) {
+            if ($scope.global.user._id === $scope.article.article._id) {
                 $scope.isMe = true;
             } else {
                 $scope.isMe = false;
             }
+        }
+        jsGen.getUser(article.author._id, function (author) {
+            if (author.err) {
+                jsGen.rootScope.msg = author.err;
+                return;
+            }
+            $scope.checkIsFollow(author.user);
+            $scope.article.author = author.user;
+            $scope.authorArticles = author.data;
+        });
+    });
+    jsGen.getList('hots', function (list) {
+        if (!list.err) {
+            $scope.hotArticles = list.data;
+        } else {
+            jsGen.rootScope.msg = list.err;
         }
     });
     $scope.wmdHelp = function (s) {

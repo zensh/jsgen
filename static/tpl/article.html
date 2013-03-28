@@ -139,35 +139,60 @@
         </aside>
     </div>
     <div class="span3 sidebar">
-    <div class="panel">
-        <header class="inner">
-            <strong class="muted">作者信息</strong>
-        </header>
-        <div class="inner">
-            <div class="media">
-              <a class="pull-left" ng-href="{{'/'+article.author._id}}">
-                <img class="media-object" ng-src="{{article.author.avatar}}">
-              </a>
-              <div class="media-body">
-                <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
-                <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
-                <ul class="list-inline">
-                    <li ng-show="article.author.score">
-                        积分：{{article.author.score}}
-                    </li>
-                    <li ng-show="article.author.fans">
-                        粉丝：{{article.author.fans}}
-                    </li>
-                    <li ng-show="article.author.follow">
-                        关注：{{article.author.follow}}
-                    </li>
-                    <li ng-show="article.author.articles">
-                        文章/评论：{{article.author.articles}}
-                    </li>
-                </ul>
-              </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">作者信息</strong>
+            </header>
+            <div class="inner">
+                <div class="media">
+                  <a class="pull-left" ng-href="{{'/'+article.author._id}}">
+                    <img class="media-object" ng-src="{{article.author.avatar}}">
+                  </a>
+                  <div class="media-body">
+                    <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
+                    <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
+                    <ul class="list-inline">
+                        <li ng-show="article.author.score">
+                            积分：{{article.author.score}}
+                        </li>
+                        <li ng-show="article.author.fans">
+                            粉丝：{{article.author.fans}}
+                        </li>
+                        <li ng-show="article.author.follow">
+                            关注：{{article.author.follow}}
+                        </li>
+                        <li ng-show="article.author.articles">
+                            文章/评论：{{article.author.articles}}
+                        </li>
+                    </ul>
+                  </div>
+                </div>
             </div>
         </div>
-    </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">作者文章</strong>
+            </header>
+            <ul class="media-list inner">
+                <li class="media" ng-repeat="article in authorArticles">
+                  <div class="media-body" id="{{article._id}}">
+                    <span class="media-content"><a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a></span>
+                  </div>
+                </li>
+            </ul>
+        </div>
+        <div class="panel">
+            <header class="inner">
+                <strong class="muted">热门文章</strong>
+            </header>
+            <ul class="media-list inner">
+                <li class="media" ng-repeat="article in hotArticles">
+                  <div class="media-body" id="{{article._id}}">
+                    <strong class="text-hot" title="热度"><em>{{article.hots}}</em></strong>&nbsp;
+                    <span class="media-content"><a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a></span>
+                  </div>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

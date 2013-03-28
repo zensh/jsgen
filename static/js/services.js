@@ -24,10 +24,13 @@ factory('rest', ['$resource', function ($resource) {
 factory('cache', ['$cacheFactory', function ($cacheFactory) {
     return {
         user: $cacheFactory('user', {
-            capacity: 10
+            capacity: 50
         }),
         article: $cacheFactory('article', {
-            capacity: 20
+            capacity: 100
+        }),
+        list: $cacheFactory('list', {
+            capacity: 10
         })
     };
 }]).
@@ -99,6 +102,41 @@ factory('getArticle', ['rest', 'cache', function (rest, cache) {
                     cache.article.put(ID, article);
                 }
                 return callback(article);
+            });
+        }
+    };
+}]).
+factory('getUser', ['rest', 'cache', function (rest, cache) {
+    return function (Uid, callback) {
+        var user = cache.user.get(Uid);
+        if (user) {
+            return callback(user);
+        } else {
+            user = rest.user.get({
+                Uid: Uid
+            }, function () {
+                if (!user.err) {
+                    cache.user.put(Uid, user);
+                }
+                return callback(user);
+            });
+        }
+    };
+}]).
+factory('getList', ['rest', 'cache', function (rest, cache) {
+    return function (ID, callback) {
+        var list = cache.list.get(ID);
+        if (list) {
+            return callback(list);
+        } else {
+            list = rest.article.get({
+                ID: ID,
+                OP: 10
+            }, function () {
+                if (!list.err) {
+                    cache.list.put(ID, list);
+                }
+                return callback(list);
             });
         }
     };

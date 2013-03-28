@@ -418,7 +418,6 @@ function postFn(req, res, dm) {
 
 function deleteFn(req, res, dm) {
         return delTag(req, res, dm);
-    }
 };
 
 module.exports = {
