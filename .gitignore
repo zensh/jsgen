@@ -13,7 +13,9 @@ logs
 results
 node_modules/
 test/
+mylogs/
 json/
 scss/
+tmp/
 
 npm-debug.log
