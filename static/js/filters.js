@@ -82,7 +82,7 @@ filter('oppose', function () {
 filter('checkName', function () {
     return function (text) {
         if (text) {
-            var reg = /^[(\u4e00-\u9fa5)a-z][(\u4e00-\u9fa5)a-z0-9_]{1,15}$/;
+            var reg = /^[(\u4e00-\u9fa5)a-z][(\u4e00-\u9fa5)a-zA-Z0-9_]{1,15}$/;
             var len = utf8.stringToBytes(text).length;
             if (!reg.test(text)) {
                 return '支持汉字、小写字母a-z、数字0-9、或下划线_';
