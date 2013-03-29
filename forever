@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# forever      Start up node server daemon
+#
+# chkconfig: 345 85 15
+# description: Forever for Node.js
+#
+
+DEAMON=/home/www/jsgen/app.js
+
+case "$1" in
+    start)
+        forever start -l forever.log -a $DEAMON
+        ;;
+    stop)
+        forever stop -l forever.log -a $DEAMON
+        ;;
+    stopall)
+        forever stopall
+        ;;
+    reload|restart)
+        forever restart -l forever.log -a $DEAMON
+        ;;
+    list)
+        forever list
+        ;;
+    *)
+        echo "Usage: /etc.init.d/forever {start|stop|restart|reload|stopall|list}"
+        exit 1
+        ;;
+esac
