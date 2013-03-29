@@ -5,28 +5,29 @@
 # chkconfig: 345 88 08
 # description: Forever for Node.js
 
+FOREVER=/usr/bin/node/bin/forever
 DEAMON=/home/www/jsgen/app.js
 LOG=/home/www/jsgen/mylogs/forever.log
 PID=/root/.forever/pids/forever.pid
 
 case "$1" in
     start)
-        forever start -l $LOG --pidFile $PID -a $DEAMON
+        $FOREVER start -l $LOG --pidFile $PID -a $DEAMON
         ;;
     stop)
-        forever stop --pidFile $PID $DEAMON
+        $FOREVER stop --pidFile $PID $DEAMON
         ;;
     stopall)
-        forever stopall --pidFile $PID
+        $FOREVER stopall --pidFile $PID
         ;;
     restartall)
-        forever restartall --pidFile $PID
+        $FOREVER restartall --pidFile $PID
         ;;
     reload|restart)
-        forever restart -l $LOG --pidFile $PID -a $DEAMON
+        $FOREVER restart -l $LOG --pidFile $PID -a $DEAMON
         ;;
     list)
-        forever list
+        $FOREVER list
         ;;
     *)
         echo "Usage: /etc.init.d/node {start|stop|restart|reload|stopall|restartall|list}"
