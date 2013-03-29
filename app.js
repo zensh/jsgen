@@ -5,7 +5,7 @@ var serverDm = domain.create();
 
 serverDm.on('error', function (err) {
     delete err.domain;
-    console.log('SevERR:******************');
+    //console.log('SevERR:******************');
     jsGen.errlog.error(err);
 });
 serverDm.run(function () {
@@ -93,7 +93,7 @@ serverDm.run(function () {
                 //jsGen.dao.db.close();
                 process.nextTick(function () {
                     dm.dispose();
-                    console.log('dispose:' + Date.now());
+                    //console.log('dispose:' + Date.now());
                 });
             });
             dm.add(req);
@@ -121,12 +121,12 @@ serverDm.run(function () {
                                 url: '/'
                             }
                         });
-                        console.log('ReqErr:******************');
+                        //console.log('ReqErr:******************');
                         jsGen.errlog.error(err);
                     }
                 } catch (err) {
                     delete err.domain;
-                    console.log('CatchERR:******************');
+                    //console.log('CatchERR:******************');
                     jsGen.errlog.error(err);
                     dm.dispose();
                 }
@@ -146,7 +146,7 @@ serverDm.run(function () {
                     });
                     res.file('/static/index.html');
                 }
-                console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
+                //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             });
         }).listen(jsGen.conf.listenPort);
     };
