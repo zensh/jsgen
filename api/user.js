@@ -344,7 +344,7 @@ function addUsers(req, res, dm) {
 };
 
 function getUser(req, res, dm) {
-    var Uid = req.path[2];
+    var Uid = decodeURI(req.path[2]);
     if (cache[Uid] && checkUserID(Uid) || checkUserName(Uid)) {
         Uid = cache[Uid]._id;
     } else {

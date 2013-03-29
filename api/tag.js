@@ -245,8 +245,7 @@ function filterTags(tagArray, callback) {
 };
 
 function getTag(req, res, dm) {
-    var tag = req.path[2];
-    console.log(tag);
+    var tag = decodeURI(req.path[2]);
     if (tag[0] === '_') {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
