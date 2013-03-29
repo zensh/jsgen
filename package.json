@@ -21,9 +21,6 @@
         "xss": ">=0.0.3"
     },
     "scripts": {
-        "start": "forever start -l forever.log -a app.js",
-        "stop": "forever stop -l forever.log -a app.js",
-        "restart": "forever restart -l forever.log -a app.js",
-        "stopall": "forever stopall"
+        "start": "node app.js"
     }
 }

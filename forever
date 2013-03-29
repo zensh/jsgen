@@ -2,30 +2,34 @@
 #
 # forever      Start up node server daemon
 #
-# chkconfig: 345 85 15
+# chkconfig: 345 88 08
 # description: Forever for Node.js
-#
 
 DEAMON=/home/www/jsgen/app.js
+LOG=/home/www/jsgen/mylogs/forever.log
+PID=/root/.forever/pids/forever.pid
 
 case "$1" in
     start)
-        forever start -l forever.log -a $DEAMON
+        forever start -l $LOG --pidFile $PID -a $DEAMON
         ;;
     stop)
-        forever stop -l forever.log -a $DEAMON
+        forever stop --pidFile $PID $DEAMON
         ;;
     stopall)
-        forever stopall
+        forever stopall --pidFile $PID
+        ;;
+    restartall)
+        forever restartall --pidFile $PID
         ;;
     reload|restart)
-        forever restart -l forever.log -a $DEAMON
+        forever restart -l $LOG --pidFile $PID -a $DEAMON
         ;;
     list)
         forever list
         ;;
     *)
-        echo "Usage: /etc.init.d/forever {start|stop|restart|reload|stopall|list}"
+        echo "Usage: /etc.init.d/node {start|stop|restart|reload|stopall|restartall|list}"
         exit 1
         ;;
 esac
