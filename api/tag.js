@@ -402,12 +402,10 @@ function editTags(req, res, dm) {
     }
     req.apibody.data.reverse();
     next();
-    console.log(req.apibody.data);
 
     function next() {
         var tagObj = req.apibody.data.pop();
         if (!tagObj) {
-            console.log(body);
             return res.sendjson(body);
         }
         if (!tagObj._id || !tagObj.tag) {
