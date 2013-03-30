@@ -854,7 +854,10 @@ function setArticle(req, res, dm) {
                         doc._id = articleID;
                         cache._update(doc);
                         articleCache.put(doc._id, doc);
-                        listCache.put(doc._id, doc);
+                        doc2 = intersect(union(listArticle), doc);
+                        doc2.content = filterSummary(jsGen.module.marked(doc2.content));
+                        doc2.comments = doc.commentsList.length;
+                        listCache.put(doc._id, doc2);
                     }
                     checkTimeInterval(req, 'Ed', dm);
                     articleCache.getP(doc._id, dm.intercept(function (doc) {

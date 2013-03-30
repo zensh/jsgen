@@ -4998,7 +4998,7 @@ body {
     background-color: #f6f6f6;
 }
 .sidebar .media-list > li {
-    border-top: 1px solid #eee;
+    border-top: 1px solid #ddd;
     padding: 5px 10px;
 }
 .sidebar .media-list > li:hover {
