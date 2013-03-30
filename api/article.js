@@ -843,7 +843,7 @@ function setArticle(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]');
         }
         articleCache.getP(articleID, dm.intercept(function (doc) {
-            if (user_id !== doc.author || req.session.role < 4) {
+            if (user_id !== doc.author && req.session.role < 4) {
                 throw jsGen.Err(jsGen.lib.msg.userRoleErr);
             }
             filterArticle(req.apibody, dm.intercept(function (article) {
@@ -1002,7 +1002,6 @@ function robot(req, res, dm) {
     } else {
         articleCache.getP(ID, dm.intercept(function (doc) {
             doc.content = jsGen.module.marked(doc.content);
-            doc.comments = doc.commentsList.length;
             obj.global.title = obj.global.title + ' | ' + doc.title;
             obj.global.keywords = doc.tagsList.map(function (tag) {
                 return tag.tag;

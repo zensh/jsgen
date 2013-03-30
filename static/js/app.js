@@ -94,6 +94,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     jsGen.rootScope = $rootScope;
 
     $rootScope.isAdmin = false;
+    $rootScope.isEditor = false;
     $rootScope.isLogin = false;
     $rootScope.logout = function () {
         var doc = jsGen.rest.user.get({
@@ -118,9 +119,15 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             } else {
                 $rootScope.isAdmin = false;
             }
+            if ($rootScope.global.user.role >= 4) {
+                $rootScope.isEditor = true;
+            } else {
+                $rootScope.isEditor = false;
+            }
         } else {
             $rootScope.isLogin = false;
             $rootScope.isAdmin = false;
+            $rootScope.isEditor = false;
         }
     };
     $rootScope.checkIsFollow = function (user) {

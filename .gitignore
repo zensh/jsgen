@@ -17,6 +17,6 @@ mylogs/
 json/
 scss/
 tmp/
-config/
+config/config.js
 
 npm-debug.log
