@@ -12,13 +12,15 @@ tagCache.getP = function (tagID, callback) {
     callback = callback || jsGen.lib.tools.callbackFn;
     if (doc) {
         return callback(null, doc);
-    } else jsGen.dao.tag.getTag(jsGen.dao.tag.convertID(tagID), function (err, doc) {
-        if (doc) {
-            doc._id = jsGen.dao.tag.convertID(doc._id);
-            that.put(doc._id, doc);
-        }
-        return callback(err, doc);
-    });
+    } else {
+        jsGen.dao.tag.getTag(jsGen.dao.tag.convertID(tagID), function (err, doc) {
+            if (doc) {
+                doc._id = jsGen.dao.tag.convertID(doc._id);
+                that.put(doc._id, doc);
+            }
+            return callback(err, doc);
+        });
+    }
 };
 
 var cache = {
@@ -72,7 +74,9 @@ cache._remove = function (ID) {
 
 function convertTags(_idArray) {
     var result = [];
-    if (!Array.isArray(_idArray)) _idArray = [_idArray];
+    if (!Array.isArray(_idArray)) {
+        _idArray = [_idArray];
+    }
     if (typeof _idArray[0] === 'number') {
         _idArray = _idArray.map(function (x) {
             return jsGen.dao.tag.convertID(x);
@@ -128,7 +132,8 @@ function setTag(tagObj, callback) {
             return callback(null, null);
         }
         if (cache[tagObj.tag.toLowerCase()] && cache[tagObj.tag.toLowerCase()]._id !== tagID) {
-            toID = cache[tagObj.tag.toLowerCase()]._id;
+            var toID = cache[tagObj.tag.toLowerCase()]._id;
+            var to_id = jsGen.dao.article.convertID(toID);
             tagCache.getP(tagID, function (err, doc) {
                 if (err) {
                     return callback(err, null);
@@ -146,6 +151,23 @@ function setTag(tagObj, callback) {
                         _id: toID,
                         articlesList: article
                     });
+                    jsGen.cache.list.getP(jsGen.dao.article.convertID(article), function (err, value) {
+                        if (err) {
+                            return callback(err, null);
+                        }
+                        if (value.tagsList.indexOf(to_id) < 0) {
+                            value.tagsList.push(to_id);
+                            jsGen.cache.list.put(value._id, value);
+                            jsGen.cache.article.update(value._id, function (v) {
+                                v.tagsList = value.tagsList;
+                                return v;
+                            });
+                            jsGen.dao.article.setArticle({
+                                _id: article,
+                                tagsList: value.tagsList
+                            });
+                        }
+                    }, false);
                     return articlesListNext();
                 };
 
@@ -158,6 +180,19 @@ function setTag(tagObj, callback) {
                         _id: toID,
                         usersList: user
                     });
+                    jsGen.cache.user.getP(jsGen.dao.user.convertID(user), function (err, value) {
+                        if (err) {
+                            return callback(err, null);
+                        }
+                        if (value.tagsList.indexOf(to_id) < 0) {
+                            value.tagsList.push(to_id);
+                            jsGen.cache.user.put(value._id, value);
+                            jsGen.dao.user.setUserInfo({
+                                _id: user,
+                                tagsList: value.tagsList
+                            });
+                        }
+                    }, false);
                     return usersListNext();
                 };
 
@@ -259,7 +294,7 @@ function getTag(req, res, dm) {
 
     tagCache.getP(tag, dm.intercept(function (doc) {
         var list, key,
-            n = +req.path[3],
+        n = +req.path[3],
             p = req.getparam.p || req.getparam.page || 1;
 
         doc.articlesList.forEach(function (x, i) {
@@ -309,7 +344,7 @@ function getTag(req, res, dm) {
 
 function getTags(req, res, dm) {
     var list,
-        n = +req.path[3],
+    n = +req.path[3],
         p = req.getparam.p || req.getparam.page || 1;
 
     if (n > 0) {
@@ -319,7 +354,7 @@ function getTags(req, res, dm) {
         req.getparam = req.getparam || {};
         req.getparam.p = 1;
         req.getparam.n = n;
-        list = cache._index.slice(-n).reverse();
+        list = cache._index.slice(-n);
     } else {
         n = 0;
         p = +p;
@@ -331,7 +366,7 @@ function getTags(req, res, dm) {
         list = jsGen.cache.pagination.get(req.session.listPagination.key);
         if (!list || (p === 1 && req.session.listPagination.key !== 'tag' + cache._initTime)) {
             req.session.listPagination.key = 'tag' + cache._initTime;
-            list = cache._index.slice(0).reverse();
+            list = cache._index.slice(0);
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
@@ -348,56 +383,79 @@ function getTags(req, res, dm) {
 };
 
 function editTags(req, res, dm) {
-    var body = {};
-    body.data = [];
-    if (req.session.role < 4) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    var defaultObj = {
+        _id: '',
+        tag: ''
+    },
+    body = {
+        data: []
+    };
 
-    if (Array.isArray(req.apibody)) {
-        req.apibody.forEach(function (tag, i, array) {
-            setTag(tag, function (err, doc) {
-                if (err) {
-                    body.err = err;
-                }
-                if (doc) {
-                    body.data.push(doc);
-                }
-                if (body.err || i >= array.length - 1) {
-                    jsGen.dao.db.close();
-                    return res.sendjson(body);
-                }
-            });
-        });
+    if (req.session.role < 4) {
+        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
+    if (!req.apibody.data) {
+        throw jsGen.Err(jsGen.lib.msg.requestDataErr);
+    }
+    if (!Array.isArray(req.apibody.data)) {
+        req.apibody.data = [req.apibody.data];
+    }
+    req.apibody.data.reverse();
+    next();
+    console.log(req.apibody.data);
+
+    function next() {
+        var tagObj = req.apibody.data.pop();
+        if (!tagObj) {
+            console.log(body);
+            return res.sendjson(body);
+        }
+        if (!tagObj._id || !tagObj.tag) {
+            return next();
+        }
+        tagObj = intersect(union(defaultObj), tagObj);
+        setTag(tagObj, dm.intercept(function (doc) {
+            if (doc) {
+                delete doc.articlesList;
+                delete doc.usersList;
+                body.data.push(doc);
+            }
+            return next();
+        }));
+    };
 };
 
 function delTag(req, res, dm) {
-    var tag = req.path[2];
-    var _id = null,
-        body = {};
+    var tagID = req.path[2];
 
-    if (req.session.role < 4) throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    if (cache[tag]) {
-        _id = jsGen.dao.tag.convertID(cache[tag]._id);
-    } else if (cache[tag.toLowerCase()]) {
-        _id = jsGen.dao.tag.convertID(cache[tag.toLowerCase()]._id);
+    if (req.session.role !== 5) {
+        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
+    }
+    if (!checkID(tagID, 'T')) {
+        throw jsGen.Err(jsGen.lib.msg.tagNone);
+    }
+    if (cache[tagID]) {
+        tagID = cache[tagID]._id;
+    } else if (cache[tagID.toLowerCase()]) {
+        tagID = cache[tagID.toLowerCase()]._id;
     } else {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
-    jsGen.dao.tag.delTag(_id, function (err, doc) {
-        jsGen.dao.db.close();
-        if (err) {
-            body.err = jsGen.lib.msg.dbErr;
-        } else {
-            body = doc;
-        }
-        return res.sendjson(body);
-    });
+
+    jsGen.dao.tag.delTag(jsGen.dao.tag.convertID(tagID), dm.intercept(function () {
+        tagCache.remove(tagID);
+        cache._remove(tagID);
+        return res.sendjson({
+            remove: 'Ok'
+        });
+    }));
 };
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
         case undefined:
         case 'index':
+        case 'hots':
             return getTags(req, res, dm);
         default:
             return getTag(req, res, dm);
@@ -417,7 +475,7 @@ function postFn(req, res, dm) {
 };
 
 function deleteFn(req, res, dm) {
-        return delTag(req, res, dm);
+    return delTag(req, res, dm);
 };
 
 module.exports = {

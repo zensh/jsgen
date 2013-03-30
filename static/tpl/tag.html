@@ -7,12 +7,8 @@
             <section>
                 <ul class="list-inline">
                     <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
-                        <a class="tag-list" ng-href="{{'/'+tag._id}}">
-                            <fieldset>
-                                <legend>{{tag.tag}}</legend>
-                                文章{{tag.articles}}<br />会员{{tag.users}}
-                            </fieldset>
-                        </a>
+                        <a class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
+                        <small>文章{{tag.articles}}/会员{{tag.users}}</small></a>
                     </li>
                 </ul>
                 <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>

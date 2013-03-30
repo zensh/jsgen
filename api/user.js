@@ -633,11 +633,10 @@ function editUsers(req, res, dm) {
         role: 0
     },
     body = {
-        err: null,
         data: []
     };
 
-    if (req.session.Uid !== 'Uadmin') {
+    if (req.session.role !== 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (!req.apibody.data) {

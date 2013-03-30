@@ -200,6 +200,8 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             var timer = $timeout(function () {
                 if ($rootScope.loading) {
                     $rootScope.loadingOn = true;
+                } else {
+                    $rootScope.loadingOn = false;
                 }
             }, 1000);
         } else {

@@ -1,1 +1,22 @@
-
+<section class="clearfix" ng-controller="adminTagCtrl">
+    <div class="page-header">
+            <h4>标签管理
+                <a href="#" ng-click="editTag=!editTag">
+                <i class="glyphicon glyphicon-edit"></i></a>
+            </h4>
+    </div>
+    <ul class="list-inline">
+        <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
+            <a ng-hide="editTag" class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
+            <small>文章{{tag.articles}}/会员{{tag.users}}</small></a>
+            <a ng-show="editTag" class="form-inline"><input type="text" ng-model="tag.tag"/></a>
+            <a ng-hide="editTag" href="#" ng-click="remove(tag)" title="删除{{tag.tag}}">
+            <i class="glyphicon glyphicon-remove"></i></a>
+        </li>
+    </ul>
+    <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
+    <div class="pull-right" ng-show="editSave">
+        <button class="btn btn-primary" ng-click="submit()">保存</button>
+        <button class="btn btn-success" ng-click="reset()">重置</button>
+    </div>
+</section>

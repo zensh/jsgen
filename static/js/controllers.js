@@ -294,16 +294,6 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         $scope.pagination = result.pagination;
     });
 }]).
-controller('adminCtrl', ['$scope', function ($scope) {
-    if (!($scope.global.user && $scope.global.user.role === 5)) {
-        jsGen.location.path('/');
-    }
-    $scope.getTpl = '/static/tpl/admin-index.html';
-    $scope.setTpl = function (tpl) {
-        $scope.getTpl = '/static/tpl/' + tpl;
-    };
-}]).
-controller('userIndexCtrl', ['$scope', function ($scope) {}]).
 controller('userListCtrl', ['$scope', function ($scope) {
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
@@ -409,8 +399,7 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
     };
 }]).
 controller('userAdminCtrl', ['$scope', function ($scope) {
-    var result = {},
-    originData = {};
+    var originData = {};
     $scope.roleArray = [0, 1, 2, 3, 4, 5];
     $scope.editEmail = false;
     $scope.editRole = false;
@@ -425,7 +414,7 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
         event.stopPropagation();
         doc.Uid = 'admin';
         jsGen.rootScope.loading = true;
-        result = jsGen.rest.user.get(doc, function () {
+        var result = jsGen.rest.user.get(doc, function () {
             jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.data = result.data;
@@ -475,7 +464,7 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
             _id: ''
         }]);
         jsGen.rootScope.loading = true;
-        result = jsGen.rest.user.save({Uid: 'admin'}, {
+        var result = jsGen.rest.user.save({Uid: 'admin'}, {
             data: data
         }, function () {
             jsGen.rootScope.loading = false;
@@ -1073,6 +1062,109 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);
                 jsGen.location.path('/' + result._id);
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    };
+}]).
+controller('adminCtrl', ['$scope', function ($scope) {
+    if (!($scope.global.user && $scope.global.user.role === 5)) {
+        jsGen.location.path('/');
+    }
+    $scope.getTpl = '/static/tpl/admin-index.html';
+    $scope.setTpl = function (tpl) {
+        $scope.getTpl = '/static/tpl/' + tpl;
+    };
+}]).
+controller('adminTagCtrl', ['$scope', function ($scope) {
+    var originData = {};
+    $scope.data = null;
+    $scope.pagination = null;
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.tag.get(doc, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = result.data;
+                originData = jsGen.union(result.data);
+                if (result.pagination) {
+                    $scope.pagination = result.pagination;
+                    if (!$scope.pagination.display) {
+                        $scope.pagination.display = {
+                            first: '首页',
+                            next: '下一页',
+                            last: '尾页'
+                        };
+                    }
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    });
+    $scope.$emit('pagination', {
+        n: 50,
+        p: 1
+    });
+    $scope.$watch(function () {
+        if (angular.equals($scope.data, originData)) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
+    });
+    $scope.remove = function (tag) {
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.tag.remove({ID: tag._id}, null, function () {
+            jsGen.rootScope.loading = false;
+            if (result.remove) {
+                $scope.data.some(function (x, i) {
+                    if (x._id ===tag._id) {
+                        $scope.data.splice(i, 1);
+                        return true;
+                    }
+                });
+                originData = jsGen.union($scope.data);
+                jsGen.rootScope.msg = {
+                    name: '删除标签',
+                    message: '已成功删除标签：' + tag.tag + '！',
+                    type: 'success'
+                }
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    };
+    $scope.submit = function () {
+        var defaultObj = [{
+            _id: '',
+            tag: ''
+        }];
+        $scope.editTag = false;
+        $scope.editSave = false;
+        var data = jsGen.union($scope.data);
+        originData = jsGen.intersect(jsGen.union(defaultObj), originData);
+        data = jsGen.intersect(jsGen.union(defaultObj), data);
+        angular.forEach(data, function (value, key) {
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
+        });
+        jsGen.digestArray(data);
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.tag.save({ID: 'admin'}, {
+            data: data
+        }, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = jsGen.union(result.data);
+                originData = jsGen.union(result.data);
+                jsGen.rootScope.msg = {
+                    name: '请求成功',
+                    message: '修改成功！'
+                };
             } else {
                 jsGen.rootScope.msg = result.err;
             }
