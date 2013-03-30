@@ -30,7 +30,9 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
         doc.ID = $routeParams.TAG || $routeParams.OP || 'latest';
+        jsGen.rootScope.loading = true;
         var result = restPath.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 if (result.tag) {
                     $scope.other.name = result.tag.tag;
@@ -86,7 +88,9 @@ controller('tagCtrl', ['$scope', function ($scope) {
     $scope.pagination = null;
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.tag.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 if (result.pagination) {
                     if (result.pagination.now === 1) {
@@ -137,7 +141,9 @@ controller('userLoginCtrl', ['$scope', function ($scope) {
         data.logname = $scope.logname;
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
         data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.user.save({Uid: 'login'}, data, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
@@ -165,11 +171,13 @@ controller('userResetCtrl', ['$scope', '$routeParams', function ($scope, $routeP
         jsGen.location.path(jsGen.goBack);
     }
     $scope.submit = function () {
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.user.save({Uid: 'reset'}, {
             name: $scope.name,
             email: $scope.email,
             request: request
         }, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 result.name = '请求成功';
                 result.url = '/';
@@ -195,7 +203,9 @@ controller('userRegisterCtrl', ['$scope', function ($scope) {
         data.name = $scope.name;
         data.passwd = CryptoJS.SHA256($scope.passwd).toString();
         data.email = $scope.email;
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.user.save({Uid: 'register'}, data, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.global.user = jsGen.union(result);
                 $scope.checkUser();
@@ -221,7 +231,9 @@ controller('homeCtrl', ['$scope', function ($scope) {
         }
     };
     $scope.user = $scope.global.user;
+    jsGen.rootScope.loading = true;
     var result = jsGen.rest.user.get({}, function () {
+        jsGen.rootScope.loading = false;
         if (result.err) {
             jsGen.rootScope.msg = result.err;
             return;
@@ -263,7 +275,9 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
             $scope.userOperate.OP = operate;
         }
     };
+    jsGen.rootScope.loading = true;
     jsGen.getUser(Uid, function (result) {
+        jsGen.rootScope.loading = false;
         if (result.err) {
             jsGen.rootScope.msg = result.err;
             return;
@@ -295,7 +309,9 @@ controller('userListCtrl', ['$scope', function ($scope) {
         event.stopPropagation();
         doc.Uid = $scope.userOperate.Uid;
         doc.OP = $scope.userOperate.OP;
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.user.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 result.data.forEach(function (x) {
                     $scope.checkIsFollow(x);
@@ -334,7 +350,9 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         event.stopPropagation();
         doc.Uid = $scope.userOperate.Uid;
         doc.OP = $scope.userOperate.OP;
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.user.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (result.err) {
                 result.err.url = '/';
                 jsGen.rootScope.msg = result.err;
@@ -369,7 +387,9 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         });
     }, true);
     $scope.remove = function (article) {
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.article.remove({ID: article._id}, null, function () {
+            jsGen.rootScope.loading = false;
             if (result.remove) {
                 $scope.data.some(function (x, i) {
                     if (x._id ===article._id) {
@@ -404,7 +424,9 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
         doc.Uid = 'admin';
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.user.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.data = result.data;
                 originData = jsGen.union($scope.data);
@@ -452,9 +474,11 @@ controller('userAdminCtrl', ['$scope', function ($scope) {
         jsGen.complement(data, originData, [{
             _id: ''
         }]);
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.user.save({Uid: 'admin'}, {
             data: data
         }, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.data = jsGen.union(result.data);
                 originData = jsGen.union(result.data);
@@ -534,10 +558,12 @@ controller('userEditCtrl', ['$scope', function ($scope) {
             data.tagsList = $scope.tagsList;
         }
         if (data.email) {
+            jsGen.rootScope.loading = true;
             changeEmail = jsGen.rest.user.save({Uid: 'reset'}, {
                 email: data.email,
                 request: 'email'
             }, function () {
+                jsGen.rootScope.loading = false;
                 if (!changeEmail.err) {
                     jsGen.union(originData, {
                         email: data.email
@@ -551,7 +577,9 @@ controller('userEditCtrl', ['$scope', function ($scope) {
         }
         delete data.email;
         if (!angular.equals(data, {})) {
+            jsGen.rootScope.loading = true;
             result = jsGen.rest.user.save({}, data, function () {
+                jsGen.rootScope.loading = false;
                 if (!result.err) {
                     jsGen.union($scope.user, result);
                     originData = jsGen.union($scope.user);
@@ -608,6 +636,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             });
         }
     };
+    jsGen.rootScope.loading = true;
     jsGen.getArticle('A' + $routeParams.ID, function (article) {
         if (article.err) {
             article.err.url = jsGen.goBack;
@@ -638,6 +667,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             }
         }
         jsGen.getUser(article.author._id, function (author) {
+            jsGen.rootScope.loading = true;
             if (author.err) {
                 jsGen.rootScope.msg = author.err;
                 return;
@@ -709,7 +739,9 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         event.stopPropagation();
         doc.ID = $scope.article._id;
         doc.OP = 'comment';
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.article.get(doc, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.pagination = result.pagination;
                 $scope.article.commentsList = $scope.article.commentsList.concat(result.data).slice(-200);
@@ -742,11 +774,13 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         });
         jsGen.digestArray(idArray);
         if (idArray.length > 0) {
+            jsGen.rootScope.loading = true;
             var result = jsGen.rest.article.save({
                 ID: 'comment'
             }, {
                 data: idArray
             }, function () {
+                jsGen.rootScope.loading = false;
                 if (result.data) {
                     result.data.forEach(function (x) {
                         jsGen.cache.article.put(x._id, x);
@@ -765,12 +799,14 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.rootScope.msg = Errmsg;
             return;
         }
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.article.save({
             ID: article._id,
             OP: 'mark'
         }, {
             mark: !article.isMark
         }, function () {
+            jsGen.rootScope.loading = false;
             if (result.save) {
                 article.isMark = !article.isMark;
                 if (article.markList) {
@@ -800,12 +836,14 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.rootScope.msg = Errmsg;
             return;
         }
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.article.save({
             ID: article._id,
             OP: 'favor'
         }, {
             favor: !article.isFavor
         }, function () {
+            jsGen.rootScope.loading = false;
             if (result.save) {
                 article.isFavor = !article.isFavor;
                 if (article.favorsList) {
@@ -842,12 +880,14 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.rootScope.msg = Errmsg;
             return;
         }
+        jsGen.rootScope.loading = true;
         result = jsGen.rest.article.save({
             ID: article._id,
             OP: 'oppose'
         }, {
             oppose: !article.isOppose
         }, function () {
+            jsGen.rootScope.loading = false;
             if (result.save) {
                 article.isOppose = !article.isOppose;
                 if (article.opposesList) {
@@ -890,10 +930,12 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         data.content = jsGen.sanitize($scope.content);
         data.title = $scope.title;
         data.refer = $scope.refer;
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.article.save({
             ID: $scope.article._id,
             OP: 'comment'
         }, data, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.article.commentsList.unshift(result);
                 $scope.article.comments += 1;
@@ -932,7 +974,9 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     $scope.editSave = false;
 
     if ($routeParams.ID) {
+        jsGen.rootScope.loading = true;
         jsGen.getArticle('A' + $routeParams.ID, function (article) {
+            jsGen.rootScope.loading = false;
             if (!article.err) {
                 $scope.previewTitle = '编辑文章';
                 $scope._id = article._id;
@@ -1023,7 +1067,9 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
                 OP: 'edit'
             };
         }
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.article.save(parameter, data, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 jsGen.cache.article.put(result._id, result);
                 jsGen.location.path('/' + result._id);
@@ -1035,7 +1081,9 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
 }]).
 controller('adminGlobalCtrl', ['$scope', function ($scope) {
     var originData = {};
+    jsGen.rootScope.loading = true;
     $scope.global = jsGen.rest.index.get({OP: 'admin'}, function () {
+        jsGen.rootScope.loading = false;
         $scope.global = jsGen.union($scope.global);
         originData = jsGen.union($scope.global);
     });
@@ -1079,7 +1127,9 @@ controller('adminGlobalCtrl', ['$scope', function ($scope) {
                 delete data[key];
             }
         });
+        jsGen.rootScope.loading = true;
         var result = jsGen.rest.index.save({OP: 'admin'}, data, function () {
+            jsGen.rootScope.loading = false;
             if (!result.err) {
                 $scope.global = jsGen.union(result);
                 originData = jsGen.union(result);

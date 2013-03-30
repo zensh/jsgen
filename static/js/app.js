@@ -96,6 +96,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     $rootScope.isAdmin = false;
     $rootScope.isEditor = false;
     $rootScope.isLogin = false;
+    $rootScope.loading = false;
     $rootScope.logout = function () {
         var doc = jsGen.rest.user.get({
             Uid: 'logout'
@@ -168,7 +169,9 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             }
         });
     };
+    $rootScope.loading = true;
     $rootScope.global = jsGen.rest.index.get({}, function () {
+        $rootScope.loading = false;
         $rootScope.checkUser();
         $rootScope.global.info.angularjs = angular.version.full;
         if (!$rootScope.global.date) {
@@ -190,6 +193,18 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
             element.addClass('container-large');
         } else {
             element.removeClass('container-large');
+        }
+    });
+    $rootScope.$watch('loading', function (value) {
+        if (value) {
+            var timer = $timeout(function () {
+                if ($rootScope.loading) {
+                    $rootScope.loadingOn = true;
+                }
+            }, 1000);
+        } else {
+            $timeout.cancel(timer);
+            $rootScope.loadingOn = false;
         }
     });
     $rootScope.$watch('msg', function (msg) {

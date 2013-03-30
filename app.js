@@ -80,6 +80,7 @@ serverDm.run(function () {
                 fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
                     jsGen.config.info.nodejs = process.versions.node;
+                    console.log(jsGen.config.info);
                 }));
                 createServer();
             };
@@ -96,8 +97,8 @@ serverDm.run(function () {
                     //console.log('dispose:' + Date.now());
                 });
             });
-            dm.add(req);
-            dm.add(res);
+            //dm.add(req);
+            //dm.add(res);
             dm.on('error', function (err) {
                 delete err.domain;
                 err.type = 'error';

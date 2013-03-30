@@ -5066,3 +5066,16 @@ body {
 .tag-list legend {
     margin-bottom: 0;
 }
+#loading {
+    position: fixed;
+    top: 38%;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    text-align: center;
+}
+#loading div {
+    width: 50%;
+    max-width: 315px;
+    margin: 0 auto;
+}
