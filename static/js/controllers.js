@@ -656,7 +656,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             }
         }
         jsGen.getUser(article.author._id, function (author) {
-            jsGen.rootScope.loading = true;
+            jsGen.rootScope.loading = false;
             if (author.err) {
                 jsGen.rootScope.msg = author.err;
                 return;

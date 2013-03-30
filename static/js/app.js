@@ -92,6 +92,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     jsGen.getList = getList;
     jsGen.getMarkdown = getMarkdown;
     jsGen.rootScope = $rootScope;
+    jsGen.timer = null;
 
     $rootScope.isAdmin = false;
     $rootScope.isEditor = false;
@@ -197,15 +198,10 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     });
     $rootScope.$watch('loading', function (value) {
         if (value) {
-            var timer = $timeout(function () {
-                if ($rootScope.loading) {
-                    $rootScope.loadingOn = true;
-                } else {
-                    $rootScope.loadingOn = false;
-                }
+            $timeout(function () {
+                    $rootScope.loadingOn = $rootScope.loading;
             }, 1000);
         } else {
-            $timeout.cancel(timer);
             $rootScope.loadingOn = false;
         }
     });
