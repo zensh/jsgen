@@ -1,4 +1,4 @@
-{jsGen} <small>0.1.0</small>
+{jsGen} <small>0.1.1</small>
 =======
 **——JavaScript Generated**
 
@@ -36,7 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 说明
 
-**jsGen** 是为[AngularJS中文社区][2]开发的网站系统，第一个测试版（0.1.0）即将上线，敬请关注。
+**jsGen** 是为[AngularJS中文社区][2]开发的网站系统，测试版已经上线，还请大家温柔测试，积极反馈Bug。
 
 在移动互联网爆炸式发展、webOS类系统（谷歌ChromeOS、火狐OS等）进入实用阶段、TV机顶盒应用即将爆发等大环境大趋势下，JavaScript无疑将成为WEB中最重要的开发语言，深入学习JavaScript势在必行。
 
@@ -48,6 +48,22 @@ AngularJS中文社区改版之后，致力于形成一个以AngularJS为主，WE
 
 ### 安装
 
+系统需要Node.js和mongoDB。
+
+config目录下的config.js配置jsGen运行参数，包括监听端口（默认3000）、数据库等，内有详细说明。
+
+api目录下的install.js是jsGen运行初始化文件，其中第129、130行分别是超级管理员的用户Uid和用户名，请勿修改。第131行是管理员邮箱，第132行是管理员初始密码，这两处请自行修改。（内有说明）
+
+    //如果未安装git工具，请手动下载jsGen。
+    git clone git://github.com/zensh/jsgen.git
+    //进入jsgen目录
+    cd jsgen
+    //npm安装依赖模块，请确保依赖模块全部安装好。
+    npm install
+    //启动jsgen（或者 node app.js）
+    npm start
+
+浏览器端输入网址[http://localhost:3000/](http://localhost:3000/)即可访问。
 
 ### 用户访问URL
 

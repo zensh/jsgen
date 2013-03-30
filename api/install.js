@@ -126,13 +126,13 @@ function users() {
                 }
                 if (!doc) {
                     jsGen.dao.user.setNewUser({
-                        _id: jsGen.dao.user.convertID('Uadmin'),
-                        name: 'admin',
-                        email: 'admin@zensh.com',
-                        passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),
-                        role: 5,
-                        avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),
-                        desc: '梦造互联网 By ZENSH'
+                        _id: jsGen.dao.user.convertID('Uadmin'),  // 超级管理员的用户Uid，请勿修改
+                        name: 'admin',  // 超级管理员的用户名，请勿修改
+                        email: 'admin@zensh.com',  // 超级管理员的邮箱，请自行修改
+                        passwd: jsGen.lib.tools.SHA256('admin@zensh.com'),  // 超级管理员的初始密码，请自行修改
+                        role: 5,  // 超级管理员最高权限，请勿修改
+                        avatar: jsGen.lib.tools.gravatar('admin@zensh.com'),  // 超级管理员的gravatar头像，请自行修改
+                        desc: '梦造互联网 By ZENSH'  // 超级管理员的个人简介，请自行修改
                     }, callback);
                 }
             });
