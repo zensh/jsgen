@@ -854,6 +854,7 @@ function setArticle(req, res, dm) {
                         doc._id = articleID;
                         cache._update(doc);
                         articleCache.put(doc._id, doc);
+                        listCache.put(doc._id, doc);
                     }
                     checkTimeInterval(req, 'Ed', dm);
                     articleCache.getP(doc._id, dm.intercept(function (doc) {
