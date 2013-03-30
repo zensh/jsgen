@@ -360,7 +360,7 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         });
     });
     $scope.$watch('userOperate', function (value) {
-        if (value.Uid === 'index' || (value.Uid[0] === 'U' || value.OP === 'index')) {
+        if (value.Uid === 'index' || (value.Uid[0] === 'U' && value.OP === 'index')) {
             return;
         }
         $scope.$emit('pagination', {
