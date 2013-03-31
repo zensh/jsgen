@@ -497,7 +497,7 @@ function getArticle(req, res, dm) {
     articleCache.getP(ID, dm.intercept(function (doc) {
         if (req.session.Uid !== doc.author._id) {
             if (cache[ID].display === 1) {
-                jsGen.cache.user.getUser(doc.author._id, dm.intercept(function (user) {
+                jsGen.cache.user.getP(doc.author._id, dm.intercept(function (user) {
                     if (user.fansList.indexOf(jsGen.dao.user.convertID(req.session.Uid)) < 0) {
                         throw jsGen.Err(jsGen.lib.msg.articleDisplay1);
                     }

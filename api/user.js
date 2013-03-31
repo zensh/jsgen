@@ -39,6 +39,9 @@ userCache.getP = function (Uid, callback, convert) {
                 score: doc.score
             });
         },'id');
+        delete doc.fansList;
+        delete doc.articlesList;
+        delete doc.collectionsList;
     };
     if (doc) {
         if (convert) {
@@ -394,7 +397,7 @@ function getUser(req, res, dm) {
                 return res.sendjson(doc);
             }));
         };
-    }));
+    }), false);
 };
 
 function setUser(req, res, dm) {

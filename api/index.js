@@ -76,6 +76,7 @@ function getIndex(req, res, dm) {
     if (req.session.Uid) {
         jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
             config.user = doc;
+            console.log(config)
             return res.sendjson(config);
         }));
     } else {
