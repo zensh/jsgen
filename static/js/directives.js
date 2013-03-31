@@ -74,7 +74,7 @@ directive('ngPagination', function () {
                         '</ul>',
         link: function (scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngPagination);
-            var eventName = attr.ngTiming;
+            var eventName = attr.ngPagination;
             scope.$watch(attr.ngPagination, function ngPaginationWatchAction(value) {
                 if (!value) {
                     return;
@@ -134,7 +134,7 @@ directive('ngPagination', function () {
                         p: p
                     };
                     if (scope.now !== p) {
-                        scope.$emit('pagination', params);
+                        scope.$emit(eventName, params);
                     }
                 };
                 scope.setNum = function (num) {
