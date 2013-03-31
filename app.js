@@ -80,7 +80,6 @@ serverDm.run(function () {
                 fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
                     jsGen.config.info.nodejs = process.versions.node;
-                    console.log(jsGen.config.info);
                 }));
                 createServer();
             };

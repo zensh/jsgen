@@ -51,6 +51,7 @@ function getIndex(req, res, dm) {
         metatitle: '',
         metadesc: '',
         keywords: '',
+        date: 0,
         visitors: 0,
         users: 0,
         articles: 0,
@@ -70,23 +71,24 @@ function getIndex(req, res, dm) {
         UserNameMaxLen: 0,
         register: true,
         info: {}
-    },
-    body = union(config, jsGen.config);
-
-    body.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
+    };
+    intersect(config, jsGen.config);
+    console.log(jsGen.config);
+    console.log(config);
+    config.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
         jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
-            body.user = doc;
-            return res.sendjson(body);
+            config.user = doc;
+            return res.sendjson(config);
         }));
     } else {
-        return res.sendjson(body);
+        return res.sendjson(config);
     }
 };
 
 function getGlobal(req, res, dm) {
     var body = union(jsGen.config);
-    if (req.session.role < 5) {
+    if (req.session.role < 4) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     body.sys = {

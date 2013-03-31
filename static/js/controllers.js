@@ -1069,7 +1069,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     };
 }]).
 controller('adminCtrl', ['$scope', function ($scope) {
-    if (!($scope.global.user && $scope.global.user.role === 5)) {
+    if (!$scope.isEditor) {
         jsGen.location.path('/');
     }
     $scope.getTpl = '/static/tpl/admin-index.html';
