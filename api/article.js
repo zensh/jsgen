@@ -40,6 +40,7 @@ articleCache.getP = function (ID, callback, convert) {
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
         doc.markList = jsGen.api.user.convertUsers(doc.markList);
         doc.refer = convertRefer(doc.refer);
+        doc.comments = doc.commentsList.length;
         convertArticles(doc.commentsList.reverse(), function (err, commentsList) {
             if (commentsList) {
                 doc.commentsList = commentsList;
@@ -62,7 +63,6 @@ articleCache.getP = function (ID, callback, convert) {
         jsGen.dao.article.getArticle(_id, function (err, doc) {
             if (doc) {
                 doc._id = ID;
-                doc.comments = doc.commentsList.length;
                 that.put(ID, doc);
                 if (convert) {
                     getConvert(doc);
@@ -94,6 +94,7 @@ commentCache.getP = function (ID, callback, convert) {
         doc.opposesList = jsGen.api.user.convertUsers(doc.opposesList);
         doc.markList = jsGen.api.user.convertUsers(doc.markList);
         doc.refer = convertRefer(doc.refer);
+        doc.comments = doc.commentsList.length;
         convertArticles(doc.commentsList, function (err, commentsList) {
             if (commentsList) {
                 doc.commentsList = commentsList;
@@ -116,7 +117,6 @@ commentCache.getP = function (ID, callback, convert) {
         jsGen.dao.article.getArticle(_id, function (err, doc) {
             if (doc) {
                 doc._id = ID;
-                doc.comments = doc.commentsList.length;
                 doc = intersect(union(comment), doc);
                 that.put(ID, doc);
                 if (convert) {
@@ -799,6 +799,10 @@ function setArticle(req, res, dm) {
                     cache._update(doc);
                     commentCache.put(doc._id, doc);
                     jsGen.config.comments += 1;
+                    listCache.update(articleID, function (value) {
+                        value.comments += 1;
+                        return value;
+                    });
                     articleCache.getP(articleID, function (err, value) {
                         if (!value) {
                             return;
