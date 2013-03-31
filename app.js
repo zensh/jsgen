@@ -1,6 +1,8 @@
 var domain = require('domain'),
     http = require('http'),
-    fs = require('fs');
+    fs = require('fs'),
+    path = require('path');
+var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 
 serverDm.on('error', function (err) {
@@ -77,7 +79,7 @@ serverDm.run(function () {
                 jsGen.api.tag = require('./api/tag.js');
                 jsGen.api.collection = require('./api/collection.js');
                 jsGen.api.message = require('./api/message.js');
-                fs.readFile('package.json', 'utf8', serverDm.intercept(function (data) {
+                fs.readFile(processPath + '/package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
                     jsGen.config.info.nodejs = process.versions.node;
                 }));
