@@ -46,7 +46,6 @@ function getIndex(req, res, dm) {
         title: '',
         url: '',
         logo: '',
-        email: '',
         description: '',
         metatitle: '',
         metadesc: '',
@@ -73,8 +72,6 @@ function getIndex(req, res, dm) {
         info: {}
     };
     intersect(config, jsGen.config);
-    console.log(jsGen.config);
-    console.log(config);
     config.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
     if (req.session.Uid) {
         jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
