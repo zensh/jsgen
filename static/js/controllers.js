@@ -29,13 +29,14 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
     if ($routeParams.TAG || $routeParams.OP) checkRouteParams();
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
-        doc.ID = $routeParams.TAG || $routeParams.OP || 'latest';
+        doc.ID = $routeParams.OP || $routeParams.TAG || 'latest';
         jsGen.rootScope.loading = true;
         var result = restPath.get(doc, function () {
             jsGen.rootScope.loading = false;
             if (!result.err) {
                 if (result.tag) {
                     $scope.other.name = result.tag.tag;
+                    $scope.other._id = result.tag._id;
                 }
                 if (result.pagination) {
                     if (result.pagination.now === 1) {
@@ -76,6 +77,7 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
     });
     $scope.getList = function (s) {
         $routeParams.OP = s;
+        $routeParams.TAG = null;
         checkRouteParams();
         $scope.$emit('pagination', {
             n: 10,

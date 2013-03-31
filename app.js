@@ -144,7 +144,7 @@ serverDm.run(function () {
                     jsGen.dao.index.setGlobalConfig({
                         visitors: 1
                     });
-                    res.file('/static/index.html');
+                    res.file('/static/index_dev.html');
                 }
                 //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             });
