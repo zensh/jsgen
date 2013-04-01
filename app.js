@@ -5,10 +5,11 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 
+process.setMaxListeners(0);
 serverDm.on('error', function (err) {
     delete err.domain;
     //console.log('SevERR:******************');
-    jsGen.errlog.error(err);
+    console.error(err);
 });
 serverDm.run(function () {
     global.jsGen = {}; // 注册全局变量jsGen
@@ -81,13 +82,14 @@ serverDm.run(function () {
                 jsGen.api.message = require('./api/message.js');
                 fs.readFile(processPath + '/package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
+                    jsGen.version = jsGen.config.info.version;
                     jsGen.config.info.nodejs = process.versions.node;
+                    jsGen.config.info.rrestjs = _restConfig._version;
                 }));
                 createServer();
             };
         }));
     }).call(jsGen.config);
-
     function createServer() {
         var server = http.createServer(function (req, res) {
             var dm = domain.create();
@@ -95,7 +97,6 @@ serverDm.run(function () {
                 //jsGen.dao.db.close();
                 process.nextTick(function () {
                     dm.dispose();
-                    //console.log('dispose:' + Date.now());
                 });
             });
             //dm.add(req);
@@ -134,6 +135,7 @@ serverDm.run(function () {
                 }
             });
             dm.run(function () {
+                //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
                 if (req.path[0] === 'api') {
                     jsGen.api[req.path[1]][req.method](req, res, dm);
                     process.nextTick(function () {
@@ -148,8 +150,7 @@ serverDm.run(function () {
                     });
                     res.file('/static/index.html');
                 }
-                //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             });
-        }).listen(jsGen.conf.listenPort);
+        }).listen(jsGen.module.rrestjs.config.listenPort);
     };
 });

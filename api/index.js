@@ -4,10 +4,7 @@ var url = require('url'),
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
-    checkUserID = jsGen.lib.tools.checkUserID,
-    checkUrl = jsGen.lib.tools.checkUrl,
-    checkUserName = jsGen.lib.tools.checkUserName,
-    HmacSHA256 = jsGen.lib.tools.HmacSHA256;
+    checkUrl = jsGen.lib.tools.checkUrl;
 
 var onlineCache = {};
 function updateOnlineCache(req) {
@@ -171,7 +168,7 @@ function setGlobal(req, res, dm) {
     var setObj = union(defaultObj);
     intersect(setObj, req.apibody);
 
-    if (req.session.Uid !== 'Uadmin') {
+    if (req.session.Uid === 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (setObj.domain && !checkUrl(setObj.domain)) {

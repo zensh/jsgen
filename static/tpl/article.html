@@ -150,8 +150,7 @@
                     </a>
                     <div class="media-body">
                         <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
-                        <span>Uid:{{article.author._id}}</span>
-                        <span ng-show="article.author.role">{{article.author.role | role}}</span>
+                        <span ng-show="article.author.role">{{article.author.role | role}}</span><br />
                         <a class="btn btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
                     </div>
                 </div>

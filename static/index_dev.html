@@ -20,17 +20,29 @@
               */
             (function(a,b,c){typeof c["module"]!="undefined"&&c.module.exports?c.module.exports=b():typeof c["define"]!="undefined"&&c["define"]=="function"&&c.define.amd?define(a,b):c[a]=b()})("$script",function(){function p(a,b){for(var c=0,d=a.length;c<d;++c)if(!b(a[c]))return j;return 1}function q(a,b){p(a,function(a){return!b(a)})}function r(a,b,i){function o(a){return a.call?a():d[a]}function t(){if(!--n){d[m]=1,l&&l();for(var a in f)p(a.split("|"),o)&&!q(f[a],o)&&(f[a]=[])}}a=a[k]?a:[a];var j=b&&b.call,l=j?b:i,m=j?a.join(""):b,n=a.length;return setTimeout(function(){q(a,function(a){if(h[a])return m&&(e[m]=1),h[a]==2&&t();h[a]=1,m&&(e[m]=1),s(!c.test(a)&&g?g+a+".js":a,t)})},0),r}function s(c,d){var e=a.createElement("script"),f=j;e.onload=e.onerror=e[o]=function(){if(e[m]&&!/^c|loade/.test(e[m])||f)return;e.onload=e[o]=null,f=1,h[c]=2,d()},e.async=1,e.src=c,b.insertBefore(e,b.firstChild)}var a=document,b=a.getElementsByTagName("head")[0],c=/^https?:\/\//,d={},e={},f={},g,h={},i="string",j=!1,k="push",l="DOMContentLoaded",m="readyState",n="addEventListener",o="onreadystatechange";return!a[m]&&a[n]&&(a[n](l,function t(){a.removeEventListener(l,t,j),a[m]="complete"},j),a[m]="loading"),r.get=s,r.order=function(a,b,c){(function d(e){e=a.shift(),a.length?r(e,d):r(e,b,c)})()},r.path=function(a){g=a},r.ready=function(a,b,c){a=a[k]?a:[a];var e=[];return!q(a,function(a){d[a]||e[k](a)})&&p(a,function(a){return d[a]})?b():!function(a){f[a]=f[a]||[],f[a][k](b),c&&c(e)}(a.join("|")),r},r},this);
             $script([
-                '/static/?parse=/static/js/lib/jquery.min.js|/static/js/lib/bootstrap.js|/static/js/lib/hmac-sha256.min.js|/static/js/lib/utf8.min.js|/static/js/lib/marked.js|/static/js/lib/sanitize.js|/static/js/lib/Markdown.Editor.js|/static/js/lib/prettify.js',
-                '/static/?parse=/static/js/lib/angular.js|/static/js/lib/angular-resource.js|/static/js/lib/angular-locale_zh-hans-cn.js|/static/js/directives.js|/static/js/filters.js|/static/js/services.js|/static/js/controllers.js|/static/js/tools.js|/static/js/app.js',
+                '/static/?parse=/static/js/lib/jquery.min.js|/static/js/lib/bootstrap.js|/static/js/lib/hmac-sha256.min.js|/static/js/lib/utf8.min.js',
+                '/static/js/lib/angular.js',
+                '/static/js/lib/angular-resource.js',
+                '/static/js/lib/angular-locale_zh-hans-cn.js',
+                '/static/js/directives.js',
+                '/static/js/filters.js',
+                '/static/js/services.js',
+                '/static/js/controllers.js',
+                '/static/js/tools.js',
+                '/static/js/app.js',
+                '/static/js/lib/marked.js',
+                '/static/js/lib/sanitize.js',
+                '/static/js/lib/Markdown.Editor.js',
+                '/static/js/lib/prettify.js'
                 ], function() {
                     angular.bootstrap(document, ['jsGen']);
             });
         </script>
         <!--[if lt IE 9]>
-        <script src="/static/?parse=/js/lib/ES3extend.js|/js/lib/json3.min.js|/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
+        <script src="/static/?parse=/js/lib/json3.min.js|/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
         </script>
         <![endif]-->
-        <title ng-bind="global.title+' | '+global.title2"></title>
+        <title >{{global.title+' | '+global.title2}}</title>
         <meta http-equiv="content-type" content="text/html">
         <meta name="title" content="{{global.metatitle}}">
         <meta name="description" content="{{global.metadesc}}">
@@ -49,18 +61,18 @@
                         <span class="icon-bar"></span>
                     </a>
                     <img class="pull-left" ng-src="{{global.logo}}" />
-                    <a class="navbar-brand" href="/" ng-bind="global.title"></a>
+                    <a class="navbar-brand" href="/">{{global.title}}</a>
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
                             <li class="divider-vertical"></li>
-                            <li ng-show="isLogin"><a href="/home">我的主页</a></li>
+                            <li ng-show="isLogin"><a href="/home">主页</a></li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
+                                <a href="/tag/angularjs" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/tag/angularjs_入门教程">入门教程</a></li>
                                     <li><a href="/tag/angularjs_开发指南">开发指南</a></li>
                                     <li><a href="/tag/angularjs_API手册">API手册</a></li>
-                                    <li><a href="/tag/angularjs_文档资讯">文档资讯</a></li>
+                                    <li><a href="/tag/angularjs_技术文档">技术文档</a></li>
                                     <li class="divider"></li>
                                     <li><a href="https://github.com/angular/angular.js" target="_blank">GitHub源代码</a></li>
                                     <li><a href="http://code.angularjs.org/" target="_blank">最新下载</a></li>
@@ -80,7 +92,7 @@
                                     <li><a href="/add">发表文章</a></li>
                                     <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
                                     <li class="divider"></li>
-                                    <li ng-show="isEditor"><a ng-href="/admin">网站管理</a></li>
+                                    <li ng-show="isAdmin"><a ng-href="/admin">网站管理</a></li>
                                     <li><a ng-href="/" ng-click="logout()">退出</a></li>
                                 </ul>
                             </li>
@@ -92,12 +104,11 @@
         <div id="main" class="container" ng-view></div>
         <footer class="footer">
             <div class="container">
-                <p class="navbar-text muted">
+                <p class="navbar-text">
                     <a ng-href="{{global.url}}">{{global.title}}</a> ©2013 <span class="divider-vertical"></span> Powered by
                     <a href="https://github.com/zensh/jsgen" target="_blank">jsGen {{global.info.version}}</a>
-                    [<a href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>&nbsp;
-                    <a href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>&nbsp;
-                    <a href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>]
+                    [<a href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>,&nbsp;
+                    <a href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>]
                 </p>
             </div>
         </footer>
@@ -113,11 +124,6 @@
                     <span ng-show="timeout">[<strong ng-timing="timeout"></strong>秒后自动返回]</span>
                     <a href="#" class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
                 </div>
-            </div>
-        </div>
-        <div id="loading" ng-show="loadingOn">
-            <div class="progress progress-striped active">
-              <div class="progress-bar progress-bar-warning" style="width: 96%">拼命加载中！</div>
             </div>
         </div>
     </body>

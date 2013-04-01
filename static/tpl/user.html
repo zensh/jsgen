@@ -11,9 +11,8 @@
                 </a>
                 <div class="media-body">
                     <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></h5>
-                    <span>Uid:{{user._id}}</span>
-                    <span ng-show="user.role">{{user.role | role}}</span>
-                    <p><a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a></p>
+                    <span ng-show="user.role">{{user.role | role}}</span><br />
+                    <a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a>
                 </div>
             </div>
             <div class="inner">

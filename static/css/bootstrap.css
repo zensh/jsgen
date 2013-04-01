@@ -4997,6 +4997,10 @@ body {
 .media-list > li:hover {
     background-color: #f6f6f6;
 }
+.media-object {
+    width: 80px;
+    height: 80px;
+}
 .sidebar .media-list > li {
     border-top: 1px solid #ddd;
     padding: 5px 10px;
