@@ -62,7 +62,7 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
         });
     });
     $scope.$emit('pagination', {
-        n: 10,
+        n: 15,
         p: 1
     });
     jsGen.getList('comment', function (list) {
