@@ -282,5 +282,3 @@ module.exports = {
     setNewArticle: that.setNewArticle,
     delArticle: that.delArticle
 };
-console.log(that.convertID('A00W'));
-console.log(that.convertID('A013'));
