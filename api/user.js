@@ -511,6 +511,9 @@ function getUserInfo(req, res, dm) {
                 }
                 i -= 1;
                 if (i === -1 || list.length >= 500) {
+                    list.sort(function (a, b) {
+                        return jsGen.api.article.cache[b].updateTime - jsGen.api.article.cache[a].updateTime;
+                    });
                     jsGen.cache.pagination.put(key, list);
                     return getPagination();
                 } else {
