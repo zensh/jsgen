@@ -4845,6 +4845,9 @@ a.badge:focus {
   .hidden-phone {
     display: none !important;
   }
+  .nav.pull-right {
+    float: none;
+  }
 }
 
 .visible-print {
@@ -5045,30 +5048,11 @@ body {
     float: left;
 }
 .sidebar .panel > header {
-    border-bottom: 3px solid #ddd;
+    border-bottom: 2px solid #ddd;
     margin-bottom: 5px;
 }
 .parse-markdown > p {
     text-indent: 2em;
-}
-.tag-list {
-    display: inline-block;
-}
-.tag-list:hover,
-.tag-list:focus {
-    color: #2a6496;
-    text-decoration: none;
-}
-.tag-list fieldset {
-    margin: 5px;
-    padding: 5px;
-    border: 1px solid #ddd;
-}
-.tag-list fieldset:hover {
-    background-color: #f6f6f6;
-}
-.tag-list legend {
-    margin-bottom: 0;
 }
 #loading {
     position: fixed;

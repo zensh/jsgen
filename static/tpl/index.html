@@ -3,13 +3,13 @@
         <div class="panel">
             <ul class="nav nav-tabs">
                 <li id="view-latest" class="active" >
-                    <a href="#" ng-click="getList('latest')" data-toggle="tab">最新文章</a>
+                    <a href="#" ng-click="getList('latest')" data-toggle="tab">最新</a>
                 </li>
                 <li id="view-hots" >
-                    <a href="#" ng-click="getList('hots')" data-toggle="tab">热门文章</a>
+                    <a href="#" ng-click="getList('hots')" data-toggle="tab">热门</a>
                 </li>
                 <li id="view-update" >
-                    <a href="#" ng-click="getList('update')" data-toggle="tab">最近更新</a>
+                    <a href="#" ng-click="getList('update')" data-toggle="tab">更新</a>
                 </li>
                 <li id="view-other" ng-show="other.name">
                     <a href="#" ng-click="getList(other._id)" data-toggle="tab">{{other.name}}</a>
@@ -22,7 +22,7 @@
                         <a ng-href="{{'/'+tag._id}}" class="btn btn-small btn-info">{{tag.tag}}</a>
                     </li>
                     <li>
-                        <a href="/tag" class="btn btn-small">更多标签...</a>
+                        <a href="/tag" class="btn btn-small">更多标签…</a>
                     </li>
                 </ul>
                 <ul class="media-list">
@@ -56,7 +56,7 @@
         </div>
     </div>
     <div class="span3 sidebar">
-        <div class="panel">
+        <div class="panel hidden-phone">
             <div class="thumbnail inner text-center">
                 <img src="/static/img/angularjs.png" alt="angularjs">
                 <div class="caption">
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel">
+        <div class="panel hidden-phone">
             <div class="thumbnail inner text-center">
                 <h2><strong>{<span class="text-success">js</span><span class="text-hot">G</span><span class="text-success">en</span>}</strong></h2>
                 <div class="caption">
@@ -75,7 +75,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel">
+        <div class="panel hidden-phone">
             <header class="inner">
                 <strong class="muted">社区帮助</strong>
             </header>
@@ -88,7 +88,7 @@
                 </ol>
             </div>
         </div>
-        <div class="panel">
+        <div class="panel hidden-phone">
             <header class="inner">
                 <strong class="muted">热门评论</strong>
             </header>

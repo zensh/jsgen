@@ -27,7 +27,9 @@
             });
         </script>
         <!--[if lt IE 9]>
-        <script src="/static/?parse=/js/lib/ES3extend.js|/js/lib/json3.min.js|/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
+        <script src="/static/?parse=/js/lib/json3.min.js|/js/lib/html5shiv.min.js|/js/lib/selectivizr.min.js|/js/lib/respond.min.js">
+        </script>
+        <script src="/static/js/lib/ES3extend.js">
         </script>
         <![endif]-->
         <title ng-bind="global.title+' | '+global.title2"></title>
@@ -36,7 +38,7 @@
         <meta name="description" content="{{global.metadesc}}">
         <meta name="keywords" content="{{global.keywords}}">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
         <link rel="stylesheet" href="/static/?parse=/static/css/bootstrap.css|/static/css/prettify.css" media="screen" type="text/css">
     </head>
     <body class="ng-cloak" ng-cloak>
@@ -54,7 +56,8 @@
                         <ul class="nav">
                             <li class="divider-vertical"></li>
                             <li ng-show="isLogin"><a href="/home">我的主页</a></li>
-                            <li class="dropdown">
+                            <li ng-show="isLogin" class="visible-phone"><a href="/tag/AngularJS">AngularJS</a></li>
+                            <li class="dropdown hidden-phone">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/tag/angularjs_入门教程">入门教程</a></li>
@@ -66,17 +69,17 @@
                                     <li><a href="http://code.angularjs.org/" target="_blank">最新下载</a></li>
                                 </ul>
                             </li>
-                            <li><a href="/tag/jsgen">jsGen</a></li>
+                            <li><a href="/tag/jsGen">jsGen</a></li>
                         </ul>
                         <ul class="nav pull-right">
                             <li ng-hide="isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
                             <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
-                            <li ng-show="isLogin"><img ng-src="{{global.user.avatar}}" /></li>
+                            <li ng-show="isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" /></li>
                             <li class="dropdown" ng-show="isLogin">
                                 <a href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
-                                {{global.user.name}}[{{global.user.role | role}}] <b class="caret"></b>
+                                {{global.user.name}}[{{global.user.role | role}}] <b class="caret hidden-phone"></b>
                                 </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu hidden-phone">
                                     <li><a href="/add">发表文章</a></li>
                                     <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
                                     <li class="divider"></li>
