@@ -102,6 +102,7 @@ serverDm.run(function () {
             //dm.add(req);
             //dm.add(res);
             dm.on('error', function (err) {
+                console.log(err);
                 delete err.domain;
                 err.type = 'error';
                 try {

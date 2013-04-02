@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.2</small>
+{jsGen} <small>0.2.3</small>
 =======
 **——JavaScript Generated**
 
@@ -36,6 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 更新 (Changelog)
 
+2013/04/02 jsGen v0.2.3 修复用户名、用户邮箱大小写漏洞。
 2013/04/02 jsGen v0.2.2 修正bug，调整BootStrap视图，使网页视觉效果更明了，可开启Node.js的cluster多进程功能。
 2013/04/01 jsGen v0.2.0 大幅优化用户、文章、标签ID相关代码，代码更简洁。
 2013/03/31 jsGen v0.1.2 修正bug，添加加载进度条。
@@ -61,11 +62,11 @@ config目录下的config.js配置jsGen运行参数，包括监听端口（默认
 api目录下的install.js是jsGen运行初始化文件，设置管理员初始密码，邮箱，内有说明。
 
     git clone git://github.com/zensh/jsgen.git    //如果未安装git工具，请手动下载jsGen。
-    
+
     cd jsgen    //进入jsgen目录
-    
+
     npm install    //npm安装依赖模块，请确保依赖模块全部安装好。
-    
+
     npm start    //启动jsgen（或者 node app.js）
 
 浏览器端输入网址[http://localhost:3000/](http://localhost:3000/)即可访问。
@@ -75,9 +76,9 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
 jsGen测试版升级比较频繁，更新流程如下：
 
     git pull    //获取jsGen更新
-    
+
     npm update    //获取Node.js模块更新
-    
+
     npm start    //重启jsGen
 
     rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
@@ -118,59 +119,59 @@ jsGen测试版升级比较频繁，更新流程如下：
 
 
     /api/index    //(GET) 获取网站全局配置文件、包括站点信息、部分站点参数
-    
+
     /api/admin //(GET POST) 设置网站全局参数
-    
+
     /api/user //(GET POST) 获取已登录用户信息，包括用户个人信息和用户关注而未读的文章列表
     /api/user/index (GET POST)
-    
+
     /api/user/login //(POST) 用户登录
-    
+
     /api/user/logout //(GET) 退出登录
-    
+
     /api/user/register //(POST) 用户注册
-    
+
     /api/user/reset //(GET POST) 用户邮箱验证、申请解锁、重置密码、修改邮箱等涉及邮箱验证的操作
-    
+
     /api/user/admin //(GET POST) 用户管理相关后台接口
-    
+
     /api/user/article //(GET) 获取已登录用户（自己）的文章列表
-    
+
     /api/user/comment //(GET) 获取已登录用户（自己）的评论列表
-    
+
     /api/user/mark //(GET) 获取已登录用户（自己）的标记文章列表
-    
+
     /api/user/fans //(GET) 获取已登录用户（自己）的粉丝列表
-    
+
     /api/user/follow //(GET) 获取已登录用户（自己）的关注列表
-    
+
     /api/user/Uxxxxx //(GET POST) 获取用户Uxxxxx的用户信息，包括用户公开的个人信息和用户最新发表的文章列表
-    
+
     /api/user/Uxxxxx/article //(GET) 获取用户Uxxxxx的文章列表
-    
+
     /api/user/Uxxxxx/fans //(GET) 获取用户Uxxxxx的粉丝列表
-    
+
     /api/article //(GET POST) 获取最新文章列表，添加文章
     /api/article/index //(GET POST)
-    
+
     /api/article/admin //(GET POST) 文章管理相关后台接口
-    
+
     /api/article/comment //(GET POST) 获取热门评论、批量获取指定ID的评论
-    
+
     /api/article/latest //(GET) 获取最新文章列表（按发表时间排序）
-    
+
     /api/article/hots //(GET) 获取最热文章列表（按文章热度排序）
-    
+
     /api/article/update //(GET) 获取最近更新（按文章最后更新、最后评论时间排序）
-    
+
     /api/article/Axxx //(GET POST DELETE) 获取文章Axxx的相信内容
-    
+
     /api/article/Axxx/comment //(GET) 获取文章Axxx的更多评论
-    
+
     /api/tag //(GET POST) 获取热门标签列表
-    
+
     /api/tag/admin //(GET POST) 标签管理后台相关接口
-    
+
     /api/tag/Txxx //(GET POST) 获取标签Txxx包含的文章列表（按照发表时间排序）
 
     /api/message

@@ -67,16 +67,16 @@ cache._update = function (obj) {
     this[obj._id].name = obj.name;
     this[obj._id].email = obj.email;
     this[obj._id].avatar = obj.avatar;
-    this[obj.name] = this[obj._id];
-    this[obj.email] = this[obj._id];
+    this[obj.name.toLowerCase()] = this[obj._id];
+    this[obj.email.toLowerCase()] = this[obj._id];
     this._initTime = Date.now();
     return this;
 };
 cache._remove = function (Uid) {
     var i, that = this;
     if (this[Uid]) {
-        delete this[this[Uid].name];
-        delete this[this[Uid].email];
+        delete this[this[Uid].name.toLowerCase()];
+        delete this[this[Uid].email.toLowerCase()];
         delete this[Uid];
         this._index.splice(i = this._index.indexOf(Uid), i >= 0 ? 1 : 0);
         this._initTime = Date.now();
@@ -156,18 +156,18 @@ function adduser(userObj, callback) {
     callback = callback || jsGen.lib.tools.callbackFn;
     if (!checkEmail(userObj.email)) {
         err = jsGen.lib.msg.userEmailErr;
-    } else if (cache[userObj.email]) {
+    } else if (cache[userObj.email.toLowerCase()]) {
         err = jsGen.lib.msg.userEmailExist;
-    }
-    if (!checkUserName(userObj.name)) {
+    } else if (!checkUserName(userObj.name)) {
         err = jsGen.lib.msg.userNameErr;
-    } else if (cache[userObj.name]) {
+    } else if (cache[userObj.name.toLowerCase()]) {
         err = jsGen.lib.msg.userNameExist;
     }
     if (err) {
-        return callback(err, null);
+        return callback(jsGen.Err(err), null);
     }
     delete userObj._id;
+    userObj.email = userObj.email.toLowerCase();
     userObj.avatar = gravatar(userObj.email);
     userObj.resetDate = Date.now();
     userObj.role = 1;
@@ -196,7 +196,7 @@ function login(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.UidNone);
         }
     }
-    if (data.logname[0] ==='_' || !cache[data.logname]) {
+    if (data.logname[0] ==='_' || !cache[data.logname.toLowerCase()]) {
         if (checkEmail(data.logname)) {
             throw jsGen.Err(jsGen.lib.msg.userEmailNone);
         } else if (checkUserName(data.logname)) {
@@ -205,7 +205,7 @@ function login(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.logNameErr);
         }
     } else {
-        Uid = cache[data.logname]._id;
+        Uid = cache[data.logname.toLowerCase()]._id;
     }
     jsGen.dao.user.getAuth(Uid, dm.intercept(function (doc) {
         if (doc.locked) {
@@ -255,7 +255,6 @@ function login(req, res, dm) {
 
 function register(req, res, dm) {
     var data = req.apibody;
-
     if (!jsGen.config.register) {
         throw jsGen.Err(jsGen.lib.msg.registerClose);
     }
@@ -356,7 +355,7 @@ function getUser(req, res, dm) {
         if (!cache[Uid]) {
             throw jsGen.Err(jsGen.lib.msg.UidNone);
         }
-    } else if (checkUserName(Uid) && cache[Uid]) {
+    } else if (checkUserName(Uid) && cache[Uid.toLowerCase()]) {
         Uid = cache[Uid]._id;
         userID = jsGen.dao.user.convertID(Uid);
     } else {
@@ -416,8 +415,8 @@ function setUser(req, res, dm) {
         if (!cache[Uid]) {
             throw jsGen.Err(jsGen.lib.msg.UidNone);
         }
-    } else if (checkUserName(Uid) && cache[Uid]) {
-        Uid = cache[Uid]._id;
+    } else if (checkUserName(Uid) && cache[Uid.toLowerCase()]) {
+        Uid = cache[Uid.toLowerCase()]._id;
         userID = jsGen.dao.user.convertID(Uid);
     } else {
         throw jsGen.Err(jsGen.lib.msg.UidNone);
@@ -585,7 +584,7 @@ function editUser(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.userNameErr);
         } else if (userObj.name === cache[req.session.Uid].name) {
             delete userObj.name;
-        } else if (cache[userObj.name]) {
+        } else if (cache[userObj.name.toLowerCase()]) {
             throw jsGen.Err(jsGen.lib.msg.userNameExist);
         }
     }
@@ -688,9 +687,9 @@ function editUsers(req, res, dm) {
         if (userObj.email) {
             if (!checkEmail(userObj.email)) {
                 throw jsGen.Err(jsGen.lib.msg.userEmailErr);
-            } else if (userObj.email === cache[req.session.Uid].email) {
+            } else if (userObj.email.toLowerCase() === cache[req.session.Uid].email.toLowerCase()) {
                 delete userObj.email;
-            } else if (cache[userObj.email]) {
+            } else if (cache[userObj.email.toLowerCase()]) {
                 throw jsGen.Err(jsGen.lib.msg.userEmailExist);
             }
         }
@@ -723,7 +722,7 @@ function getReset(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.resetInvalid);
     }
     if (resetObj.r === 'email') {
-        resetObj.e = req.apibody.email;
+        resetObj.e = req.apibody.email.toLowerCase();
         if (!req.session.Uid) {
             throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
         }
@@ -735,13 +734,21 @@ function getReset(req, res, dm) {
         }
         resetObj.u = jsGen.dao.user.convertID(req.session.Uid);
     } else {
-        if ((checkUserID(req.apibody.name) || checkUserName(req.apibody.name)) && cache[req.apibody.name]) {
-            resetObj.u = jsGen.dao.user.convertID(cache[req.apibody.name]._id);
-            resetObj.e = cache[req.apibody.name].email;
+        if (checkUserID(req.apibody.name)) {
+            var user = cache[jsGen.dao.user.convertID(req.apibody.name)];
+            if (!user) {
+                throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+            }
+            resetObj.u = req.apibody.name;
+            resetObj.e = user.email;
+        } else if (checkUserName(req.apibody.name) && cache[req.apibody.name.toLowerCase()]) {
+            var user = cache[req.apibody.name.toLowerCase()];
+            resetObj.u = jsGen.dao.user.convertID(user._id);
+            resetObj.e = user.email;
         } else {
             throw jsGen.Err(jsGen.lib.msg.resetInvalid);
         }
-        if (req.apibody.email !== resetObj.e) {
+        if (req.apibody.email.toLowerCase() !== resetObj.e) {
             throw jsGen.Err(jsGen.lib.msg.resetInvalid);
         }
     }
@@ -782,7 +789,7 @@ function resetUser(req, res, dm) {
                         userObj.role = 2;
                         break;
                     case 'email':
-                        userObj.email = reset.e;
+                        userObj.email = reset.e.toLowerCase();
                         break;
                     case 'passwd':
                         userObj.passwd = SHA256(reset.e);
