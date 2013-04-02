@@ -4,23 +4,20 @@ var domain = require('domain'),
     path = require('path');
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
+global.jsGen = {}; // 注册全局变量jsGen
 
-process.setMaxListeners(0);
 serverDm.on('error', function (err) {
     delete err.domain;
     //console.log('SevERR:******************');
-    console.error(err);
+    jsGen.errlog.error(err);
 });
 serverDm.run(function () {
-    global.jsGen = {}; // 注册全局变量jsGen
     jsGen.conf = module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
-
     jsGen.module = {};
     jsGen.module.rrestjs = require('rrestjs');
     jsGen.module.marked = require('marked');
     jsGen.module.mongoskin = require('mongoskin');
     jsGen.module.nodemailer = require('nodemailer');
-    //jsGen.module.qiniu = require('qiniu');
     jsGen.module.xss = require('xss');
     jsGen.errlog = jsGen.module.rrestjs.restlog;
     jsGen.lib = {};
@@ -90,68 +87,69 @@ serverDm.run(function () {
             };
         }));
     }).call(jsGen.config);
-    function createServer() {
-        var server = http.createServer(function (req, res) {
-            var dm = domain.create();
-            res.on('finish', function () {
-                //jsGen.dao.db.close();
-                process.nextTick(function () {
-                    dm.dispose();
-                });
-            });
-            //dm.add(req);
-            //dm.add(res);
-            dm.on('error', function (err) {
-                console.log(err);
-                delete err.domain;
-                err.type = 'error';
-                try {
-                    res.on('finish', function () {
-                        //jsGen.dao.db.close();
-                        process.nextTick(function () {
-                            dm.dispose();
-                        });
-                    });
-                    if (err.hasOwnProperty('name')) {
-                        res.sendjson({
-                            err: err
-                        });
-                    } else {
-                        res.sendjson({
-                            err: {
-                                name: '请求错误',
-                                message: '对不起，请求出错了！',
-                                type: 'error',
-                                url: '/'
-                            }
-                        });
-                        //console.log('ReqErr:******************');
-                        jsGen.errlog.error(err);
-                    }
-                } catch (err) {
-                    delete err.domain;
-                    //console.log('CatchERR:******************');
-                    jsGen.errlog.error(err);
-                    dm.dispose();
-                }
-            });
-            dm.run(function () {
-                //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
-                if (req.path[0] === 'api') {
-                    jsGen.api[req.path[1]][req.method](req, res, dm);
-                    process.nextTick(function () {
-                        jsGen.api.index.updateOnlineCache(req);
-                    });
-                } else if (jsGen.robot.reg.test(req.useragent)) {
-                    jsGen.api.article.robot(req, res, dm);
-                } else {
-                    jsGen.config.visitors += 1;
-                    jsGen.dao.index.setGlobalConfig({
-                        visitors: 1
-                    });
-                    res.file('/static/index.html');
-                }
-            });
-        }).listen(jsGen.module.rrestjs.config.listenPort);
-    };
 });
+
+function createServer() {
+    var server = http.createServer(function (req, res) {
+        var dm = domain.create();
+        // res.on('finish', function () {
+        //     //jsGen.dao.db.close();
+        //     process.nextTick(function () {
+        //         dm.dispose();
+        //     });
+        // });
+        //dm.add(req);
+        //dm.add(res);
+        dm.on('error', function (err) {
+            console.log(err);
+            delete err.domain;
+            err.type = 'error';
+            try {
+                res.on('finish', function () {
+                    //jsGen.dao.db.close();
+                    process.nextTick(function () {
+                        dm.dispose();
+                    });
+                });
+                if (err.hasOwnProperty('name')) {
+                    res.sendjson({
+                        err: err
+                    });
+                } else {
+                    //console.log('ReqErr:******************');
+                    jsGen.errlog.error(err);
+                    res.sendjson({
+                        err: {
+                            name: '请求错误',
+                            message: '对不起，请求出错了！',
+                            type: 'error',
+                            url: '/'
+                        }
+                    });
+                }
+            } catch (err) {
+                delete err.domain;
+                //console.log('CatchERR:******************');
+                jsGen.errlog.error(err);
+                dm.dispose();
+            }
+        });
+        dm.run(function () {
+            //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
+            if (req.path[0] === 'api') {
+                jsGen.api[req.path[1]][req.method](req, res, dm);
+                process.nextTick(function () {
+                    jsGen.api.index.updateOnlineCache(req);
+                });
+            } else if (jsGen.robot.reg.test(req.useragent)) {
+                jsGen.api.article.robot(req, res, dm);
+            } else {
+                jsGen.config.visitors += 1;
+                jsGen.dao.index.setGlobalConfig({
+                    visitors: 1
+                });
+                res.file('/static/index.html');
+            }
+        });
+    }).listen(jsGen.module.rrestjs.config.listenPort);
+};

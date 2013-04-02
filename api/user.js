@@ -843,8 +843,8 @@ function getArticles(req, res, dm) {
                         commentsList.push(user.articlesList[i]);
                     }
                 };
-                jsGen.cache.pagination.put(userID + 'article', articlesList.reverse());
-                jsGen.cache.pagination.put(userID + 'comment', commentsList.reverse());
+                jsGen.cache.pagination.put(userID + 'article', articlesList);
+                jsGen.cache.pagination.put(userID + 'comment', commentsList);
                 list = jsGen.cache.pagination.get(key);
                 getPagination();
             }
