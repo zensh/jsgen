@@ -13,7 +13,7 @@
                 <i class="btn btn-mini btn-info pull-right" title="热度">{{article.hots}}</i>
                 </h5>
             </header>
-            <section class="media-content" ng-parse-markdown="article.content"></section>
+            <section class="media-content" ng-parse-markdown="article.content" ng-class="article.read"></section>
             <footer>
                 <ul class="list-inline muted">
                     <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
