@@ -96,11 +96,11 @@
         <footer class="footer">
             <div class="container">
                 <p class="navbar-text muted">
-                    <a ng-href="{{global.url}}">{{global.title}}</a> ©2013 <span class="divider-vertical"></span> Powered by
-                    <a href="https://github.com/zensh/jsgen" target="_blank">jsGen {{global.info.version}}</a>
-                    [<a href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>&nbsp;
-                    <a href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>&nbsp;
-                    <a href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>]
+                    <a class="muted" ng-href="{{global.url}}" ng-bind="global.title"></a> ©2013 Powered by
+                    <a href="https://github.com/zensh/jsgen" target="_blank" ng-bind="'jsGen '+global.info.version"></a>
+                    [<a class="muted" href="http://angularjs.org" target="_blank" ng-bind="'AngularJS '+global.info.angularjs"></a>&nbsp;
+                    <a class="muted" href="http://nodejs.org" target="_blank" ng-bind="'Node.js '+global.info.nodejs"></a>&nbsp;
+                    <a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank" ng-bind="'rrestjs '+global.info.rrestjs"></a>]
                 </p>
             </div>
         </footer>

@@ -299,7 +299,7 @@ textarea {
 }
 
 a {
-  color: #428bca;
+  color: #0066cc;
   text-decoration: none;
 }
 
@@ -3150,12 +3150,11 @@ button.close {
 .navbar-brand {
   display: block;
   max-width: 200px;
-  padding: 7px 15px;
   margin-right: auto;
   margin-left: auto;
   font-size: 18px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 50px;
   color: #777777;
   text-align: center;
 }
@@ -3250,37 +3249,37 @@ button.close {
 }
 
 .navbar-inverse {
-  background-color: #222222;
+  background-color: #222;
 }
 
 .navbar-inverse .navbar-brand {
-  color: #999999;
+  color: #ddd;
 }
 
 .navbar-inverse .navbar-brand:hover,
 .navbar-inverse .navbar-brand:focus {
-  color: #ffffff;
+  color: #fff;
   background-color: transparent;
 }
 
 .navbar-inverse .navbar-text {
-  color: #999999;
+  color: #ddd;
 }
 
 .navbar-inverse .nav > li > a {
-  color: #999999;
+  color: #ddd;
 }
 
 .navbar-inverse .nav > li > a:hover,
 .navbar-inverse .nav > li > a:focus {
-  color: #ffffff;
+  color: #fff;
   background-color: transparent;
 }
 
 .navbar-inverse .nav > .active > a,
 .navbar-inverse .nav > .active > a:hover,
 .navbar-inverse .nav > .active > a:focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #080808;
 }
 
@@ -3340,9 +3339,7 @@ button.close {
   }
   .navbar-brand {
     float: left;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    margin-left: -10px;
+    margin-left: 10px;
   }
   .navbar .nav {
     float: left;
