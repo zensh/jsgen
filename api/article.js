@@ -409,11 +409,11 @@ function filterArticle(articleObj, callback) {
     intersect(newObj, articleObj);
     newObj.title = filterTitle(newObj.title);
     if (!newObj.title) {
-        return callback(jsGen.lib.msg.titleMinErr, null);
+        return callback(jsGen.Err(jsGen.lib.msg.titleMinErr), null);
     }
     newObj.content = filterContent(newObj.content);
     if (!newObj.content) {
-        return callback(jsGen.lib.msg.articleMinErr, null);
+        return callback(jsGen.Err(jsGen.lib.msg.articleMinErr), null);
     }
     if (newObj.cover && !checkUrl(newObj.cover)) {
         delete newObj.cover;
