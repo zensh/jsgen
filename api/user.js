@@ -25,10 +25,10 @@ userCache.getP = function (Uid, callback, convert) {
     }
 
     function getConvert(doc) {
+        calcuScore(doc);
         doc._id = jsGen.dao.user.convertID(Uid);
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.followList = convertUsers(doc.followList, 'Uid');
-        calcuScore(doc);
         jsGen.dao.user.setUserInfo({
             _id: Uid,
             score: doc.score
@@ -147,6 +147,7 @@ function calcuScore(user) {
 function setCache(obj) {
     cache._remove(obj._id);
     cache._update(obj);
+    obj = intersect(union(UserPrivateTpl), obj);
     userCache.put(obj._id, obj);
 };
 
@@ -172,9 +173,7 @@ function adduser(userObj, callback) {
     userObj.role = 1;
     jsGen.dao.user.setNewUser(userObj, function (err, doc) {
         if (doc) {
-            doc = intersect(union(UserPrivateTpl), doc);
-            cache._update(doc);
-            userCache.put(doc._id, doc);
+            setCache(doc);
             jsGen.config.users += 1;
         }
         return callback(err, doc);
@@ -638,13 +637,10 @@ function editUser(req, res, dm) {
     function daoExec() {
         jsGen.dao.user.setUserInfo(userObj, dm.intercept(function (doc) {
             if (doc) {
-                body = union(UserPrivateTpl);
-                body = intersect(body, doc);
-                setCache(body);
-                var tagsList = jsGen.api.tag.convertTags(body.tagsList);
-                body = intersect(defaultObj, body);
-                body.tagsList = tagsList;
-                return res.sendjson(body);
+                setCache(doc);
+                userCache.getP(req.session.Uid, dm.intercept(function (user) {
+                    return res.sendjson(user);
+                }));
             }
         }));
     };
@@ -798,7 +794,6 @@ function resetUser(req, res, dm) {
                 userObj.resetKey = '';
                 jsGen.dao.user.setUserInfo(userObj, dm.intercept(function (user) {
                     if (user) {
-                        user = intersect(union(UserPrivateTpl), user);
                         setCache(user);
                         req.session.Uid = user._id;
                         req.session.role = user.role;

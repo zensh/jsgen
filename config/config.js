@@ -22,7 +22,7 @@ module.exports = {
 	staticParseMaxNumber:15,//整合压缩css或js文件的最大上限，建议不要超过15
 	uploadFolder:'/tmp/upload', //文件上传的临时目录
 	postLimit:1024*1024*3,//限制上传的postbody大小，单位byte
-	connectTimeout:1000*60,//限制客户端连接的时间，false为永远不超时，1000表示客户端和服务端1秒内没活跃则自动切断客户端连接
+	connectTimeout:false,//限制客户端连接的时间，false为永远不超时，1000表示客户端和服务端1秒内没活跃则自动切断客户端连接
 	manualRouter:false,//手动路由，可以在这里设置手动路由的对象，详细见manualRouter.js
 	autoRouter:false,//自动路由，如果为false则表示关闭，如果为'/server'，则表示默认去server里寻找文件及方法，例如用户访问/user/face ，去回去server文件下找到user.js执行face的方法传入req,res对象
 //cluster配置
@@ -63,7 +63,7 @@ module.exports = {
 	tempSet:'ejs', //使用哪种页面模版：jade或者ejs
 	tempFolder :'/static/tpl', //默认读取模版的根目录
 	tempHtmlCache:false, //是否开启模版的html缓存，当输出模版需要大量数据库或缓存I/O操作，且实时性要求不高时可以使用
-	tempCacheTime:1000*60*60,//模版缓存时间
+	tempCacheTime:0,//模版缓存时间
 	tempCacheFolder:'/tmp/tpl', //模版缓存 存放目录
 //mongodb 配置
 	isMongodb:true, //是否开启mongodb支持，注意：如果使用数据库存储session，这里必须开启
