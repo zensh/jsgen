@@ -500,38 +500,30 @@ function getUserInfo(req, res, dm) {
         p = +p;
         list = jsGen.cache.pagination.get(key);
         if (!list || p === 1) {
-            var articleList = [];
+            var i = jsGen.api.article.cache._index.length - 1;
             list = [];
-            for (var i = jsGen.api.article.cache._index.length - 1; i >= 0; i--) {
-                if (jsGen.api.article.cache[jsGen.api.article.cache._index[i]].date > user.readtimestamp) {
-                    articleList.push(jsGen.api.article.cache._index[i]);
-                } else {
-                    break;
-                }
-            };
             checkList();
 
             function checkList() {
-                var ID;
-                if (articleList.length === 0) {
-                    list.reverse();
-                    jsGen.cache.pagination.put(key, list);
-                    return getPagination();
-                }
-                ID = articleList.pop();
+                var ID = jsGen.api.article.cache._index[i];
                 if (!ID) {
                     return checkList();
                 }
-
-                jsGen.cache.list.getP(ID, dm.intercept(function (article) {
-                    var checkTag = user.tagsList.some(function (x) {
-                        if (article.tagsList.indexOf(x) >= 0) return true;
-                    });
-                    if (user.followList.indexOf(article.author) >= 0 || checkTag) {
-                        list.push(ID);
-                    }
-                    checkList();
-                }), false);
+                i -= 1;
+                if (i === -1 || list.length >= 500) {
+                    jsGen.cache.pagination.put(key, list);
+                    return getPagination();
+                } else {
+                    jsGen.cache.list.getP(ID, dm.intercept(function (article) {
+                        var checkTag = user.tagsList.some(function (x) {
+                            if (article.tagsList.indexOf(x) >= 0) return true;
+                        });
+                        if (checkTag || user.followList.indexOf(article.author) >= 0) {
+                            list.push(ID);
+                        }
+                        return checkList();
+                    }), false);
+                }
             };
         } else {
             getPagination();
@@ -540,6 +532,7 @@ function getUserInfo(req, res, dm) {
         function getPagination() {
             pagination(req, list, jsGen.cache.list, dm.intercept(function (doc) {
                 var now = Date.now();
+                doc.readtimestamp = user.readtimestamp;
                 if (p === 1) {
                     jsGen.dao.user.setUserInfo({
                         _id: req.session.Uid,

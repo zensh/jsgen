@@ -1,13 +1,13 @@
+<header class="page-header" ng-show="help">
+    <h4>{{help.title}}</h4>
+    <p>{{help.content}}</p>
+</header>
 <div ng-controller="userArticleCtrl">
-    <div class="help inner" ng-show="help">
-        <h4>{{help.title}}</h4>
-        <p>{{help.content}}</p>
-    </div>
     <ul class="media-list">
         <li class="media" ng-repeat="article in data">
           <div class="media-body" id="{{article._id}}">
             <header class="media-heading">
-                <h5><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
+                <h5><a ng-href="{{'/'+article._id}}" ng-class="article.read">{{article.title}}</a>
                 <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
                 <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
                 <i class="btn btn-mini btn-info pull-right" title="热度">{{article.hots}}</i>

@@ -232,9 +232,25 @@ controller('homeCtrl', ['$scope', function ($scope) {
             $scope.userOperate.Uid = operate;
         }
     };
+    $scope.checkRead = function (articleList, readtimestamp) {
+        var newArticle = 0;
+        for (var i = articleList.length - 1; i >= 0; i--) {
+            if (articleList[i].updateTime < readtimestamp) {
+                articleList[i].read = 'muted';
+            } else {
+                newArticle += 1;
+            }
+        };
+        return newArticle;
+    };
+    $scope.help = {
+        title: '关注更新',
+        content: '这里显示您关注的标签或用户的最新文章。'
+    };
     $scope.user = $scope.global.user;
     jsGen.rootScope.loading = true;
     var result = jsGen.rest.user.get({}, function () {
+        var newArticle = 0;
         jsGen.rootScope.loading = false;
         if (result.err) {
             jsGen.rootScope.msg = result.err;
@@ -244,13 +260,13 @@ controller('homeCtrl', ['$scope', function ($scope) {
             $scope.global.user = result.user;
             $scope.user = $scope.global.user;
         }
-        if (result.data.length === 0) {
-            $scope.help = {
-                title: '暂无更新',
-                content: '这里显示您关注的标签或用户的最新文章。'
-            };
+        if (result.readtimestamp) {
+            newArticle = $scope.checkRead(result.data, result.readtimestamp);
+        }
+        if (newArticle === 0) {
+            $scope.help.title = '暂无更新，阅读时间线：' + jsGen.filter('date')(result.readtimestamp, 'yyyy-MM-dd HH:mm');
         } else {
-            $scope.help = null;
+            $scope.help.title = newArticle + '更新，阅读时间线：' + jsGen.filter('date')(result.readtimestamp, 'yyyy-MM-dd HH:mm');
         }
         $scope.data = result.data;
         $scope.pagination = result.pagination;
@@ -349,6 +365,9 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
                 result.err.url = '/';
                 jsGen.rootScope.msg = result.err;
                 return;
+            }
+            if ($scope.checkRead && result.readtimestamp) {
+                $scope.checkRead(result.data, result.readtimestamp);
             }
             if (result.pagination) {
                 if (result.pagination.now === 1) {
