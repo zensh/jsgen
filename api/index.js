@@ -13,7 +13,7 @@ function updateOnlineCache(req) {
         online = 0;
     if (req.session.Uid) {
         delete onlineCache[req.session._id];
-        onlineCache[req.session.Uid] = now;
+        onlineCache['U' + req.session.Uid] = now;
     } else {
         onlineCache[req.session._id] = now;
     }
