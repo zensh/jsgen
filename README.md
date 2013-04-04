@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.4</small>
+{jsGen} <small>0.2.5</small>
 =======
 **——JavaScript Generated**
 

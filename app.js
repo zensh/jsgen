@@ -135,9 +135,9 @@ function createServer() {
             }
         });
         dm.run(function () {
-            //console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
+            console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             if (req.path[0] === 'api') {
-                jsGen.api[req.path[1]][req.method](req, res, dm);
+                jsGen.api[req.path[1]][req.method.toUpperCase()](req, res, dm);
                 process.nextTick(function () {
                     jsGen.api.index.updateOnlineCache(req);
                 });

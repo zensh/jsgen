@@ -108,8 +108,7 @@ function setTag(tagObj, callback) {
     if (setKey === 'tag') {
         if (tagObj.tag === cache[tagObj._id].tag) {
             return callback(null, null);
-        }
-        if (cache[tagObj.tag.toLowerCase()] && cache[tagObj.tag.toLowerCase()]._id !== tagObj._id) {
+        } else if (cache[tagObj.tag.toLowerCase()] && cache[tagObj.tag.toLowerCase()]._id !== tagObj._id) {
             var toID = cache[tagObj.tag.toLowerCase()]._id;
             tagCache.getP(tagObj._id, function (err, doc) {
                 if (err) {
@@ -243,9 +242,8 @@ function filterTags(tagArray, callback) {
         if (!tag) {
             return next();
         }
-        tag = tag.toLowerCase();
-        if (cache[tag]) {
-            tags.push(cache[tag]._id);
+        if (cache[tag.toLowerCase()]) {
+            tags.push(cache[tag.toLowerCase()]._id);
             return next();
         } else {
             jsGen.dao.tag.setNewTag({
@@ -395,6 +393,7 @@ function editTags(req, res, dm) {
             return next();
         }
         tagObj = intersect(union(defaultObj), tagObj);
+        tagObj._id = jsGen.dao.tag.convertID(tagObj._id);
         setTag(tagObj, dm.intercept(function (doc) {
             if (doc) {
                 doc._id = jsGen.dao.tag.convertID(doc._id);

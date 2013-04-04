@@ -206,13 +206,16 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         }
     });
     $rootScope.$watch('msg', function (msg) {
-        if (msg && (msg.name || msg.message)) {
+        var dom;
+        if ($) {
+            dom = $('#msg-modal');
+        }
+        if (dom && dom.modal && msg && (msg.name || msg.message)) {
             if (msg.type === 'error') {
                 $rootScope.msgmodal = 'text-error';
             } else {
                 $rootScope.msgmodal = 'text-success';
             }
-            var dom = angular.element(document.getElementById('msg-modal'));
             dom.modal('show');
             $rootScope.timeout = 5;
             $rootScope.$on('timeout', function (event) {
