@@ -140,7 +140,7 @@ function calcuScore(user) {
     user.score += jsGen.config.UsersScore[2] * (user.follow || 0);
     user.score += jsGen.config.UsersScore[3] * (user.fans || 0);
     user.score += jsGen.config.UsersScore[5] * Math.floor((Date.now() - user.date) / 86400000);
-    user.score =  Math.floor(user.score);
+    user.score =  Math.round(user.score);
     cache._update(user);
 };
 

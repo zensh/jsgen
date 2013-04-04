@@ -380,6 +380,7 @@ function calcuHots(doc) {
     doc.hots += jsGen.config.ArticleHots[2] * (doc.commentsList ? doc.commentsList.length : 0);
     doc.hots += jsGen.config.ArticleHots[3] * (doc.markList ? doc.markList.length : 0);
     doc.hots += jsGen.config.ArticleHots[4] * (doc.status === 2 ? 1 : 0);
+    doc.hots = Math.round(doc.hots);
     cache._update(doc);
 };
 
