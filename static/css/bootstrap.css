@@ -3095,8 +3095,8 @@ button.close {
   clear: both;
 }
 
-.navbar .nav {
-  margin-top: 15px;
+.navbar .nav > li {
+  line-height: 50px;
 }
 
 .navbar .nav > li > a {
@@ -4860,7 +4860,7 @@ a.badge:focus {
   }
 }
 .nav img {
-    height: 50px;
+    height: 40px;
 }
 .footer {
     text-align: center;

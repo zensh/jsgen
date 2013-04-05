@@ -73,7 +73,7 @@
                         <ul class="nav pull-right">
                             <li ng-hide="isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
                             <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
-                            <li ng-show="isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" /></li>
+                            <li ng-show="isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" class="img-rounded"/></li>
                             <li class="dropdown" ng-show="isLogin">
                                 <a href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
                                 {{global.user.name}}[{{global.user.role | role}}] <b class="caret hidden-phone"></b>
