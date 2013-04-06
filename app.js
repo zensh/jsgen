@@ -58,6 +58,7 @@ serverDm.run(function () {
                 jsGen.cache = {};
                 jsGen.cache.pagination = new jsGen.lib.CacheTL(doc.paginationCache[0] * 1000, doc.paginationCache[1]);
                 jsGen.cache.timeInterval = new jsGen.lib.CacheTL(doc.TimeInterval * 1000, 0, true);
+                jsGen.cache.online = new jsGen.lib.CacheTL(900000, 0, true);
                 jsGen.cache.user = new jsGen.lib.CacheLRU(doc.userCache);
                 jsGen.cache.article = new jsGen.lib.CacheLRU(doc.articleCache);
                 jsGen.cache.comment = new jsGen.lib.CacheLRU(doc.commentCache);

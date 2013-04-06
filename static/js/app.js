@@ -171,6 +171,14 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         });
     };
     $rootScope.loading = true;
+    (function getServTime() {
+        var result = jsGen.rest.index.get({OP: 'time'}, function () {
+            if (result.time) {
+                $rootScope.servTime = result.time;
+            }
+        });
+        $timeout(getServTime, 300000);
+    })();
     $rootScope.global = jsGen.rest.index.get({}, function () {
         $rootScope.loading = false;
         $rootScope.checkUser();

@@ -4,34 +4,33 @@ var url = require('url'),
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
-    checkUrl = jsGen.lib.tools.checkUrl;
+    checkUrl = jsGen.lib.tools.checkUrl,
+    onlineCache = jsGen.cache.online;
 
-var onlineCache = {};
 function updateOnlineCache(req) {
-    var now = Date.now(),
-        users = 0,
-        online = 0;
+    var now = Date.now();
+
     if (req.session.Uid) {
-        delete onlineCache[req.session._id];
-        onlineCache['U' + req.session.Uid] = now;
-    } else {
-        onlineCache[req.session._id] = now;
+        onlineCache.remove(req.session._restsid).put('U' + req.session.Uid);
+    } else if (req.session._restsid) {
+        onlineCache.put(req.session._restsid);
     }
-    for (var key in onlineCache) {
-        if ((now - onlineCache[key]) > 600000) {
-            delete onlineCache[key];
-        } else {
-            online += 1;
-            if (key[0] === 'U') users += 1;
+    jsGen.config.onlineNum = onlineCache.linkedList.length;
+    jsGen.config.onlineUsers = (function () {
+        var i = 0, user = onlineCache.linkedList.head;
+        while (user && user.key) {
+            if (user.key[0] === 'U') {
+                i += 1;
+            }
+            user = user.p;
         }
-    }
-    jsGen.config.onlineNum = online;
-    jsGen.config.onlineUsers = users;
-    if (online > jsGen.config.maxOnlineNum) {
-        jsGen.config.maxOnlineNum = online;
+        return i;
+    }());
+    if (jsGen.config.onlineNum > jsGen.config.maxOnlineNum) {
+        jsGen.config.maxOnlineNum = jsGen.config.onlineNum;
         jsGen.config.maxOnlineTime = now;
         jsGen.dao.index.setGlobalConfig({
-            maxOnlineNum: online,
+            maxOnlineNum: jsGen.config.onlineNum,
             maxOnlineTime: now
         });
     }
@@ -78,6 +77,12 @@ function getIndex(req, res, dm) {
     } else {
         return res.sendjson(config);
     }
+};
+
+function getServTime(req, res, dm) {
+    return res.sendjson({
+        time: Date.now()
+    });
 };
 
 function getGlobal(req, res, dm) {
@@ -244,6 +249,8 @@ function setGlobal(req, res, dm) {
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
+        case 'time':
+            return getServTime(req, res, dm);
         case 'admin':
             return getGlobal(req, res, dm);
         default:
