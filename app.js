@@ -149,6 +149,7 @@ function createServer() {
                     visitors: 1
                 });
                 res.file('/static/index.html');
+                //res.file('/static/index_dev.html');
             }
         });
     }).listen(jsGen.module.rrestjs.config.listenPort);

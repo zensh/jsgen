@@ -157,13 +157,13 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
-    var i = null;
+    var i, that = this;
 
     if (!this[obj._id]) {
         this[obj._id] = {
             status: -1,
             updateTime: 0,
-            hots: -1
+            hots: 0
         };
     }
     if (obj.display < 2) {
@@ -173,34 +173,42 @@ cache._update = function (obj) {
                 this._initTime = Date.now();
             }
             if (obj.updateTime > this[obj._id].updateTime) {
-                updateList(obj);
+                process.nextTick(function () {
+                    updateList(obj);
+                });
             }
             if (obj.hots > this[obj._id].hots) {
-                hotsList(obj);
+                process.nextTick(function () {
+                    hotsList(obj);
+                });
             }
         } else if (obj.hots > this[obj._id].hots) {
-            hotCommentsList(obj);
+            process.nextTick(function () {
+                hotCommentsList(obj);
+            });
         }
     } else {
         this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-    }
-    if (obj.display > 2) {
-        jsGen.cache.updateList.splice(i = jsGen.cache.updateList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-        if (i >= 0) {
-            this._initTime = Date.now();
-        }
-        jsGen.cache.hotsList.splice(i = jsGen.cache.hotsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-        jsGen.cache.hotCommentsList.splice(i = jsGen.cache.hotCommentsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
     }
     this[obj._id].display = obj.display;
     this[obj._id].status = obj.status;
     this[obj._id].updateTime = obj.updateTime;
     this[obj._id].date = obj.date;
     this[obj._id].hots = obj.hots;
-    if (obj.status === 2) {
-        this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-        this._index.push(obj._id);
-    }
+    process.nextTick(function () {
+        if (obj.status === 2) {
+            this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+            this._index.push(obj._id);
+        }
+        if (obj.display > 2) {
+            jsGen.cache.updateList.splice(i = jsGen.cache.updateList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+            if (i >= 0) {
+                this._initTime = Date.now();
+            }
+            jsGen.cache.hotsList.splice(i = jsGen.cache.hotsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+            jsGen.cache.hotCommentsList.splice(i = jsGen.cache.hotCommentsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+        }
+    });
     return this;
 };
 cache._remove = function (ID) {
@@ -653,7 +661,6 @@ function getHots(req, res, dm) {
     p = req.getparam.p || req.getparam.page || 1,
         n = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.hotsList), 'base64');
-
     p = +p;
     if (n > 0) {
         if (n > 20) {
@@ -739,7 +746,7 @@ function addArticle(req, res, dm) {
                 articleCache.put(doc._id, doc);
                 jsGen.config.articles += 1;
             }
-            checkTimeInterval(req, 'Ad', dm);
+            checkTimeInterval(req, 'Ad', true);
             articleCache.getP(doc._id, dm.intercept(function (doc) {
                 return res.sendjson(doc);
             }));
@@ -847,7 +854,7 @@ function setArticle(req, res, dm) {
                         }, false);
                     }
                 }
-                checkTimeInterval(req, 'Ad', dm);
+                checkTimeInterval(req, 'Ad', true);
                 commentCache.getP(doc._id, dm.intercept(function (doc) {
                     return res.sendjson(doc);
                 }));
@@ -873,7 +880,7 @@ function setArticle(req, res, dm) {
                         doc2.comments = doc.commentsList.length;
                         listCache.put(doc._id, doc2);
                     }
-                    checkTimeInterval(req, 'Ed', dm);
+                    checkTimeInterval(req, 'Ed', true);
                     articleCache.getP(doc._id, dm.intercept(function (doc) {
                         return res.sendjson(doc);
                     }));
@@ -905,6 +912,7 @@ function setArticle(req, res, dm) {
             } else {
                 doc.markList.splice(index, index >= 0 ? 1 : 0);
             }
+            calcuHots(doc);
             articleCache.put(ID, doc);
             listCache.update(ID, function (value) {
                 value.markList = doc.markList;
@@ -923,7 +931,7 @@ function setArticle(req, res, dm) {
                 }
                 return value;
             });
-            checkTimeInterval(req, 'Ma', dm);
+            checkTimeInterval(req, 'Ma', true);
             return res.sendjson({
                 save: 'Ok!'
             });
@@ -957,6 +965,7 @@ function setArticle(req, res, dm) {
             } else {
                 doc.favorsList.splice(index, index >= 0 ? 1 : 0);
             }
+            calcuHots(doc);
             articleCache.put(ID, doc);
             listCache.update(ID, function (value) {
                 value.favorsList = doc.favorsList;
@@ -966,7 +975,7 @@ function setArticle(req, res, dm) {
                 value.favorsList = doc.favorsList;
                 return value;
             });
-            checkTimeInterval(req, 'Fa', dm);
+            checkTimeInterval(req, 'Fa', true);
             return res.sendjson({
                 save: 'Ok!'
             });
@@ -1000,6 +1009,7 @@ function setArticle(req, res, dm) {
             } else {
                 doc.opposesList.splice(index, index >= 0 ? 1 : 0);
             }
+            calcuHots(doc);
             articleCache.put(ID, doc);
             listCache.update(ID, function (value) {
                 value.opposesList = doc.opposesList;
@@ -1009,7 +1019,7 @@ function setArticle(req, res, dm) {
                 value.opposesList = doc.opposesList;
                 return value;
             });
-            checkTimeInterval(req, 'Op', dm);
+            checkTimeInterval(req, 'Op', true);
             return res.sendjson({
                 save: 'Ok!'
             });

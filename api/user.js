@@ -263,7 +263,7 @@ function register(req, res, dm) {
     }
     adduser(data, dm.intercept(function (doc) {
         if (doc) {
-            checkTimeInterval(req, 'Re', dm);
+            checkTimeInterval(req, 'Re', true);
             req.session.Uid = doc._id;
             req.session.role = doc.role;
             doc._id = jsGen.dao.user.convertID(doc._id);
@@ -464,7 +464,7 @@ function setUser(req, res, dm) {
                 }
                 return value;
             });
-            checkTimeInterval(req, 'Fo', dm);
+            checkTimeInterval(req, 'Fo', true);
             return res.sendjson({
                 follow: follow
             });
