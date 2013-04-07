@@ -523,7 +523,7 @@ function getUserInfo(req, res, dm) {
                         var checkTag = user.tagsList.some(function (x) {
                             if (article.tagsList.indexOf(x) >= 0) return true;
                         });
-                        if (checkTag || user.followList.indexOf(article.author) >= 0) {
+                        if (checkTag || req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0) {
                             list.push(ID);
                         }
                         return checkList();

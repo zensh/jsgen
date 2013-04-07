@@ -7,6 +7,7 @@ controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParam
     $scope.other = {};
     $scope.data = null;
     $scope.pagination = null;
+    $scope.global.title2 = $scope.global.description;
 
     function checkRouteParams() {
         if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
@@ -657,7 +658,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             jsGen.cache.article.put(x._id, x);
         });
         checkArticleIs(article);
-        jsGen.rootScope.global.title2 = article.title;
+        $scope.global.title2 = article.title;
         $scope.article = article;
         if (article.pagination) {
             $scope.pagination = article.pagination;
