@@ -157,10 +157,9 @@ var cache = {
     _index: []
 };
 cache._update = function (obj) {
-    var i, that = this;
-
-    if (!this[obj._id]) {
-        this[obj._id] = {
+    var that = this, ID = obj._id;
+    if (!this[ID]) {
+        this[ID] = {
             status: -1,
             updateTime: 0,
             hots: 0
@@ -168,53 +167,70 @@ cache._update = function (obj) {
     }
     if (obj.display < 2) {
         if (obj.status > -1) {
-            if (this[obj._id].status === -1) {
-                this._index.push(obj._id);
+            if (this[ID].status === -1) {
+                this._index.push(ID);
                 this._initTime = Date.now();
             }
-            if (obj.updateTime > this[obj._id].updateTime) {
+            if (obj.updateTime > this[ID].updateTime) {
                 process.nextTick(function () {
-                    updateList(obj);
+                    updateList(that[ID]);
                 });
             }
-            if (obj.hots > this[obj._id].hots) {
+            if (obj.hots > this[ID].hots) {
                 process.nextTick(function () {
-                    hotsList(obj);
+                    hotsList(that[ID]);
                 });
             }
-        } else if (obj.hots > this[obj._id].hots) {
+        } else if (obj.hots > this[ID].hots) {
             process.nextTick(function () {
-                hotCommentsList(obj);
+                hotCommentsList(that[ID]);
             });
         }
     } else {
-        this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+        var i = this._index.lastIndexOf(ID);
+        if (i >= 0) {
+            this._index.splice(i, 1);
+        }
     }
-    this[obj._id].display = obj.display;
-    this[obj._id].status = obj.status;
-    this[obj._id].updateTime = obj.updateTime;
-    this[obj._id].date = obj.date;
-    this[obj._id].hots = obj.hots;
+    this[ID]._id = obj._id;
+    this[ID].display = obj.display;
+    this[ID].status = obj.status;
+    this[ID].updateTime = obj.updateTime;
+    this[ID].date = obj.date;
+    this[ID].hots = obj.hots;
     process.nextTick(function () {
+        var i = -1;
         if (obj.status === 2) {
-            this._index.splice(i = this._index.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-            this._index.push(obj._id);
+            i = that._index.lastIndexOf(ID);
+            if (i >= 0) {
+                that._index.splice(i, 1);
+            }
+            that._index.push(ID);
         }
         if (obj.display > 2) {
-            jsGen.cache.updateList.splice(i = jsGen.cache.updateList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+            i = jsGen.cache.updateList.lastIndexOf(ID);
             if (i >= 0) {
-                this._initTime = Date.now();
+                jsGen.cache.updateList.splice(i, 1);
+                that._initTime = Date.now();
             }
-            jsGen.cache.hotsList.splice(i = jsGen.cache.hotsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
-            jsGen.cache.hotCommentsList.splice(i = jsGen.cache.hotCommentsList.lastIndexOf(obj._id), i >= 0 ? 1 : 0);
+            i = jsGen.cache.hotsList.lastIndexOf(ID);
+            if (i >= 0) {
+                jsGen.cache.hotsList.splice(i, 1);
+            }
+            i = jsGen.cache.hotCommentsList.lastIndexOf(ID);
+            if (i >= 0) {
+                jsGen.cache.hotCommentsList.splice(i, 1);
+            }
         }
     });
     return this;
 };
 cache._remove = function (ID) {
-    var i;
+    var i= this._index.indexOf(ID);
     delete this[ID];
-    this._index.splice(i = this._index.indexOf(ID), i >= 0 ? 1 : 0);
+    if (i >= 0) {
+        this._index.splice(i, 1);
+    }
     this._initTime = Date.now();
     return this;
 };
@@ -238,71 +254,81 @@ cache._remove = function (ID) {
 }).call(cache);
 
 function updateList(article) {
-    var x = 0;
-    for (var i = jsGen.cache.updateList.length - 1; i >= 0; i--) {
-        if (jsGen.cache.updateList[i] === article._id) {
-            jsGen.cache.updateList.splice(i, 1);
+    var ID = jsGen.cache.updateList[0], articleID = article._id, list = [];
+    if (jsGen.cache.updateList.length===0 || !ID || article.updateTime > cache[ID].updateTime) {
+        list.push(articleID);
+        articleID = 0;
+    }
+    for (var i = 0, len = jsGen.cache.updateList.length < 500 ? jsGen.cache.updateList.length : 500; i < len; i++) {
+        ID = jsGen.cache.updateList[i];
+        if (!ID || ID === article._id) {
             continue;
+        } else if (article.updateTime > cache[ID].updateTime) {
+            if (articleID) {
+                list.push(articleID);
+                articleID = 0;
+            }
+            list.push(ID);
+        } else {
+            list.push(ID);
         }
-        if (x === 0 && jsGen.cache.updateList[i] && article.updateTime < cache[jsGen.cache.updateList[i]].updateTime) {
-            x = i + 1;
-            jsGen.cache.updateList.splice(x, 0, article._id);
-        }
     }
-    if (x === 0) {
-        jsGen.cache.updateList.unshift(article._id);
-    }
-    if (jsGen.cache.updateList.length > 500) {
-        jsGen.cache.updateList.length = 500;
-    }
+    jsGen.cache.updateList = list;
+    return;
 };
 
 function hotsList(article) {
-    var x = 0,
-        now = Date.now();
+    var  ID = jsGen.cache.hotsList[0], articleID = article._id, list = [], now = Date.now();
     if (now - article.updateTime > 604800000) {
         return;
     }
-    for (var i = jsGen.cache.hotsList.length - 1; i >= 0; i--) {
-        if (now - cache[jsGen.cache.hotsList[i]].updateTime > 604800000 || jsGen.cache.hotsList[i] === article._id) {
-            jsGen.cache.hotsList.splice(i, 1);
+    if (jsGen.cache.hotsList.length===0 || !ID || article.hots > cache[ID].hots) {
+        list.push(articleID);
+        articleID = 0;
+    }
+    for (var i = 0, len = jsGen.cache.hotsList.length < 100 ? jsGen.cache.hotsList.length : 100; i < len; i++) {
+        ID = jsGen.cache.hotsList[i];
+        if (!ID || ID === article._id || now - cache[ID].updateTime > 604800000) {
             continue;
+        } else if (article.hots > cache[ID].hots) {
+            if (articleID) {
+                list.push(articleID);
+                articleID = 0;
+            }
+            list.push(ID);
+        } else {
+            list.push(ID);
         }
-        if (x === 0 && jsGen.cache.hotsList[i] && article.hots < cache[jsGen.cache.hotsList[i]].hots) {
-            x = i + 1;
-            jsGen.cache.hotsList.splice(x, 0, article._id);
-        }
     }
-    if (x === 0) {
-        jsGen.cache.hotsList.unshift(article._id);
-    }
-    if (jsGen.cache.hotsList.length > 100) {
-        jsGen.cache.hotsList.length = 100;
-    }
+    jsGen.cache.hotsList = list;
+    return;
 };
 
 function hotCommentsList(article) {
-    var x = 0,
-        now = Date.now();
+    var  ID = jsGen.cache.hotCommentsList[0], articleID = article._id, list = [], now = Date.now();
     if (now - article.updateTime > 604800000) {
         return;
     }
-    for (var i = jsGen.cache.hotCommentsList.length - 1; i >= 0; i--) {
-        if (now - cache[jsGen.cache.hotCommentsList[i]].updateTime > 604800000 || jsGen.cache.hotCommentsList[i] === article._id) {
-            jsGen.cache.hotCommentsList.splice(i, 1);
+    if (jsGen.cache.hotCommentsList.length===0 || !ID || article.updateTime > cache[ID].updateTime) {
+        list.push(articleID);
+        articleID = 0;
+    }
+    for (var i = 0, len = jsGen.cache.hotCommentsList.length < 100 ? jsGen.cache.hotCommentsList.length : 100; i < len; i++) {
+        ID = jsGen.cache.hotCommentsList[i];
+        if (!ID || ID === article._id || now - cache[ID].updateTime > 604800000) {
             continue;
+        } else if (article.updateTime > cache[ID].updateTime) {
+            if (articleID) {
+                list.push(articleID);
+                articleID = 0;
+            }
+            list.push(ID);
+        } else {
+            list.push(ID);
         }
-        if (x === 0 && jsGen.cache.hotCommentsList[i] && article.hots < cache[jsGen.cache.hotCommentsList[i]].hots) {
-            x = i + 1;
-            jsGen.cache.hotCommentsList.splice(x, 0, article._id);
-        }
     }
-    if (x === 0) {
-        jsGen.cache.hotCommentsList.unshift(article._id);
-    }
-    if (jsGen.cache.hotCommentsList.length > 50) {
-        jsGen.cache.hotCommentsList.length = 50;
-    }
+    jsGen.cache.hotCommentsList = list;
+    return;
 };
 
 function convertArticleID(IDArray) {
@@ -909,8 +935,8 @@ function setArticle(req, res, dm) {
             });
             if (mark) {
                 doc.markList.push(req.session.Uid);
-            } else {
-                doc.markList.splice(index, index >= 0 ? 1 : 0);
+            } else if (index >= 0) {
+                doc.markList.splice(index, 1);
             }
             calcuHots(doc);
             articleCache.put(ID, doc);
@@ -923,11 +949,11 @@ function setArticle(req, res, dm) {
                 return value;
             });
             jsGen.cache.user.update(req.session.Uid, function (value) {
-                var i;
+                var i = value.markList.indexOf(ID);
                 if (mark) {
                     value.markList.push(ID);
-                } else {
-                    value.markList.splice(i = value.markList.indexOf(ID), i >= 0 ? 1 : 0);
+                } else if (i >=0) {
+                    value.markList.splice(i, 1);
                 }
                 return value;
             });
@@ -962,8 +988,8 @@ function setArticle(req, res, dm) {
                     });
                 }
                 doc.favorsList.push(req.session.Uid);
-            } else {
-                doc.favorsList.splice(index, index >= 0 ? 1 : 0);
+            } else if (index >= 0) {
+                doc.favorsList.splice(index, 1);
             }
             calcuHots(doc);
             articleCache.put(ID, doc);
@@ -1006,8 +1032,8 @@ function setArticle(req, res, dm) {
                     });
                 }
                 doc.opposesList.push(req.session.Uid);
-            } else {
-                doc.opposesList.splice(index, index >= 0 ? 1 : 0);
+            } else if (index >= 0) {
+                doc.opposesList.splice(index, 1);
             }
             calcuHots(doc);
             articleCache.put(ID, doc);
@@ -1095,8 +1121,10 @@ function deleteArticle(req, res, dm) {
         cache._update(setObj);
         jsGen.dao.article.setArticle(setObj);
         jsGen.cache.user.update(req.session.Uid, function (user) {
-            var i;
-            user.articlesList.splice(i = user.articlesList.lastIndexOf(ID), i >= 0 ? 1 : 0);
+            var i = user.articlesList.lastIndexOf(ID);
+            if (i >= 0) {
+                user.articlesList.splice(i, 1);
+            }
             return user;
         });
         jsGen.dao.user.setArticle({

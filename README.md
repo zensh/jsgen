@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.6</small>
+{jsGen} <small>0.2.7</small>
 =======
 **——JavaScript Generated**
 
@@ -36,6 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 更新 (Changelog)
 
+ + 2013/04/07 jsGen v0.2.7 修复process.nextTick引起的bug（导致进程退出），优化热门文章统计、热门评论统计、最近更新统计。
  + 2013/04/07 jsGen v0.2.6 优化cacheTL，优化在线用户统计。
  + 2013/04/03 jsGen v0.2.5 修复cacheTL的bug（该Bug可能导致获取后台信息出错）。
  + 2013/04/02 jsGen v0.2.4 完善用户个人主页，显示阅读时间线、更新文章和已阅读文章列表。

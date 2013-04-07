@@ -73,12 +73,14 @@ cache._update = function (obj) {
     return this;
 };
 cache._remove = function (Uid) {
-    var i, that = this;
+    var i = this._index.indexOf(Uid), that = this;
     if (this[Uid]) {
         delete this[this[Uid].name.toLowerCase()];
         delete this[this[Uid].email.toLowerCase()];
         delete this[Uid];
-        this._index.splice(i = this._index.indexOf(Uid), i >= 0 ? 1 : 0);
+        if (i >= 0) {
+            this._index.splice(i, 1);
+        }
         this._initTime = Date.now();
     }
     return this;
@@ -447,20 +449,20 @@ function setUser(req, res, dm) {
                 fansList: follow ? req.session.Uid : -req.session.Uid
             });
             userCache.update(Uid, function (value) {
-                var i;
+                var i = value.fansList.indexOf(req.session.Uid);
                 if (follow) {
                     value.fansList.push(req.session.Uid);
-                } else {
-                    value.fansList.splice(i = value.fansList.indexOf(req.session.Uid), i >= 0 ? 1 : 0);
+                } else if (i >= 0) {
+                    value.fansList.splice(i, 1);
                 }
                 return value;
             });
             userCache.update(req.session.Uid, function (value) {
-                var i;
+                var i = value.followList.indexOf(Uid);
                 if (follow) {
                     value.followList.push(Uid);
-                } else {
-                    value.followList.splice(i = value.followList.indexOf(Uid), i >= 0 ? 1 : 0);
+                } else if (i >= 0) {
+                    value.followList.splice(i, 1);
                 }
                 return value;
             });
