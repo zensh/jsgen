@@ -118,6 +118,7 @@ function createServer() {
                     });
                 } else {
                     //console.log('ReqErr:******************');
+                    console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
                     jsGen.errlog.error(err);
                     res.sendjson({
                         err: {
@@ -136,7 +137,6 @@ function createServer() {
             }
         });
         dm.run(function () {
-            console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
             if (req.path[0] === 'api') {
                 jsGen.api[req.path[1]][req.method.toUpperCase()](req, res, dm);
                 process.nextTick(function () {

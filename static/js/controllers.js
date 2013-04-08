@@ -1008,7 +1008,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     $scope.$watch('title', function (title) {
         if (typeof title !== 'string') {
             $scope.titleBytes = 0;
-            return;
+            title = '';
         }
         $scope.titleBytes = jsGen.filter('length')(title);
         while ($scope.titleBytes > $scope.global.TitleMaxLen) {

@@ -199,7 +199,7 @@ cache._update = function (obj) {
     this[ID].date = obj.date;
     this[ID].hots = obj.hots;
     process.nextTick(function () {
-        var i = -1;
+        var i = -1, obj = that[ID];
         if (obj.status === 2) {
             i = that._index.lastIndexOf(ID);
             if (i >= 0) {
@@ -509,7 +509,7 @@ function getArticle(req, res, dm) {
         ID = jsGen.dao.article.convertID(ID);
     }
     if (typeof ID !== 'number' || !cache[ID]) {
-        throw jsGen.Err(jsGen.lib.msg.articleNone);
+        throw jsGen.Err(jsGen.lib.msg.articleNone + ':' + req.path[2] + '/' +ID);
     }
     if (cache[ID].display > 0 && !req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
