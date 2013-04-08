@@ -737,7 +737,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
     $scope.$watch('content', function (content) {
         if (typeof content !== 'string') {
             $scope.contentBytes = 0;
-            return;
+            content = '';
         }
         $scope.contentBytes = jsGen.filter('length')(content);
         if ($scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) {
@@ -745,6 +745,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         } else {
             $scope.editSave = false;
         }
+        $scope.content = content;
     });
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
@@ -938,7 +939,7 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
             return;
         }
         var data = {};
-        data.content = jsGen.sanitize($scope.content);
+        data.content = document.getElementById('wmd-input').value;
         data.title = $scope.title;
         data.refer = $scope.refer;
         jsGen.rootScope.loading = true;
@@ -1028,7 +1029,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
     $scope.$watch('content', function (content) {
         if (typeof content !== 'string') {
             $scope.contentBytes = 0;
-            return;
+            content = '';
         }
         $scope.contentBytes = jsGen.filter('length')(content);
         if ($scope.titleBytes >= $scope.global.TitleMinLen && $scope.titleBytes <= $scope.global.TitleMaxLen && $scope.contentBytes >= $scope.global.ContentMinLen && $scope.contentBytes <= $scope.global.ContentMaxLen) {
@@ -1036,6 +1037,7 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         } else {
             $scope.editSave = false;
         }
+        $scope.content = content;
     });
     $scope.$watch('tagsList', function (tagsList) {
         if (tagsList.length > $scope.global.ArticleTagsMax) {
@@ -1067,7 +1069,8 @@ controller('articleEditorCtrl', ['$scope', '$routeParams', function ($scope, $ro
         }
         var data = {};
         var parameter = {};
-        data.content = $scope.content;
+        //data.content = $scope.content;
+        data.content = document.getElementById('wmd-input').value;
         data.title = jsGen.sanitize($scope.title.trim(), 0);
         data.tagsList = $scope.tagsList;
         data.refer = $scope.refer;

@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.7</small>
+{jsGen} <small>0.2.8</small>
 =======
 **——JavaScript Generated**
 
@@ -36,6 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 更新 (Changelog)
 
+ + 2013/04/09 jsGen v0.2.8 修复文章编辑器Bug。
  + 2013/04/07 jsGen v0.2.7 修复process.nextTick引起的bug（导致进程退出），优化热门文章统计、热门评论统计、最近更新统计。
  + 2013/04/07 jsGen v0.2.6 优化cacheTL，优化在线用户统计。
  + 2013/04/03 jsGen v0.2.5 修复cacheTL的bug（该Bug可能导致获取后台信息出错）。
@@ -69,6 +70,7 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
 
     cd jsgen    //进入jsgen目录
 
+    npm install node-gyp    //windows需要先运行此命令，linux不需要，另外windows请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
     npm install    //npm安装依赖模块，请确保依赖模块全部安装好。
 
     npm start    //启动jsgen（或者 node app.js）
