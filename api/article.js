@@ -509,6 +509,8 @@ function getArticle(req, res, dm) {
         ID = jsGen.dao.article.convertID(ID);
     }
     if (typeof ID !== 'number' || !cache[ID]) {
+        console.log(jsGen.lib.msg.articleNone + ':' + req.path[2] + '/' +ID);
+        console.log(cache[ID]);
         throw jsGen.Err(jsGen.lib.msg.articleNone + ':' + req.path[2] + '/' +ID);
     }
     if (cache[ID].display > 0 && !req.session.Uid) {
