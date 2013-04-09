@@ -139,9 +139,7 @@ function createServer() {
         dm.run(function () {
             if (req.path[0] === 'api') {
                 jsGen.api[req.path[1]][req.method.toUpperCase()](req, res, dm);
-                process.nextTick(function () {
-                    jsGen.api.index.updateOnlineCache(req);
-                });
+                jsGen.api.index.updateOnlineCache(req);
             } else if (jsGen.robot.reg.test(req.useragent)) {
                 jsGen.api.article.robot(req, res, dm);
             } else {

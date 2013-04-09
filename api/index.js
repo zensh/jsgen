@@ -12,7 +12,7 @@ function updateOnlineCache(req) {
 
     if (req.session.Uid) {
         onlineCache.remove(req.session._restsid).put('U' + req.session.Uid);
-    } else if (req.session._restsid) {
+    } else {
         onlineCache.put(req.session._restsid);
     }
     jsGen.config.onlineNum = onlineCache.linkedList.length;
