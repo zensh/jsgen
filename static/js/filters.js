@@ -107,6 +107,9 @@ filter('length', function () {
 }).
 filter('cutText', function () {
     return function (text, len) {
+        if (typeof text !== 'string') {
+            return text;
+        }
         var bytes = utf8.stringToBytes(text);
         len = len || 0;
         if (bytes.length > len) {

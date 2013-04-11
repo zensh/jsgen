@@ -172,19 +172,13 @@ cache._update = function (obj) {
                 this._initTime = Date.now();
             }
             if (obj.updateTime > this[ID].updateTime) {
-                process.nextTick(function () {
-                    updateList(that[ID]);
-                });
+                setImmediate(updateList, that[ID]);
             }
             if (obj.hots > this[ID].hots) {
-                process.nextTick(function () {
-                    hotsList(that[ID]);
-                });
+                setImmediate(hotsList, that[ID]);
             }
         } else if (obj.hots > this[ID].hots) {
-            process.nextTick(function () {
-                hotCommentsList(that[ID]);
-            });
+            setImmediate(hotCommentsList, that[ID]);
         }
     } else {
         var i = this._index.lastIndexOf(ID);
@@ -198,7 +192,7 @@ cache._update = function (obj) {
     this[ID].updateTime = obj.updateTime;
     this[ID].date = obj.date;
     this[ID].hots = obj.hots;
-    process.nextTick(function () {
+    setImmediate(function () {
         var i = -1, obj = that[ID];
         if (obj.status === 2) {
             i = that._index.lastIndexOf(ID);
@@ -506,12 +500,10 @@ function getArticle(req, res, dm) {
         p = req.getparam.p || req.getparam.page || 1;
 
     if (checkID(ID, 'A')) {
-        ID = jsGen.dao.article.convertID(ID);
+        ID = +jsGen.dao.article.convertID(ID);
     }
     if (typeof ID !== 'number' || !cache[ID]) {
-        console.log(jsGen.lib.msg.articleNone + ':' + req.path[2] + '/' +ID);
-        console.log(cache[ID]);
-        throw jsGen.Err(jsGen.lib.msg.articleNone + ':' + req.path[2] + '/' +ID);
+        throw jsGen.Err(jsGen.lib.msg.articleNone);
     }
     if (cache[ID].display > 0 && !req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
