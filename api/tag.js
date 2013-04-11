@@ -265,7 +265,7 @@ function getTag(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
     if (checkID(tag, 'T')) {
-        +tag = jsGen.dao.tag.convertID(tag);
+        tag = +jsGen.dao.tag.convertID(tag);
     }
     if (typeof tag === 'string') {
         tag = tag.toLowerCase();
