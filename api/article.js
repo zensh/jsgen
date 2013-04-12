@@ -266,6 +266,9 @@ function updateList(article) {
             list.push(ID);
         }
     }
+    if (articleID > 0) {
+        list.push(articleID);
+    }
     jsGen.cache.updateList = list;
     return;
 };
@@ -291,6 +294,9 @@ function hotsList(article) {
             list.push(ID);
         }
     }
+    if (articleID > 0) {
+        list.push(articleID);
+    }
     jsGen.cache.hotsList = list;
     return;
 };
@@ -300,7 +306,7 @@ function hotCommentsList(article) {
     if (now - article.updateTime > 604800000) {
         return;
     }
-    if (jsGen.cache.hotCommentsList.length===0 || !ID || article.updateTime > cache[ID].updateTime) {
+    if (jsGen.cache.hotCommentsList.length===0 || !ID || article.hots > cache[ID].hots) {
         list.push(articleID);
         articleID = 0;
     }
@@ -308,13 +314,16 @@ function hotCommentsList(article) {
         ID = jsGen.cache.hotCommentsList[i];
         if (!ID || ID === article._id || now - cache[ID].updateTime > 604800000) {
             continue;
-        } else if (articleID > 0 && article.updateTime > cache[ID].updateTime) {
+        } else if (articleID > 0 && article.hots > cache[ID].hots) {
             list.push(articleID);
             list.push(ID);
             articleID = 0;
         } else {
             list.push(ID);
         }
+    }
+    if (articleID > 0) {
+        list.push(articleID);
     }
     jsGen.cache.hotCommentsList = list;
     return;
