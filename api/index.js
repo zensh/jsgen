@@ -9,7 +9,9 @@ var url = require('url'),
 
 function updateOnlineCache(req) {
     var now = Date.now();
-
+    if (!req.session._restsid) {
+        return;
+    }
     if (req.session.Uid) {
         onlineCache.remove(req.session._restsid).put('U' + req.session.Uid);
     } else {

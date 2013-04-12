@@ -277,7 +277,7 @@ function hotsList(article) {
     if (now - article.updateTime > 604800000) {
         return;
     }
-    if (jsGen.cache.hotsList.length===0 || !ID || article.hots > cache[ID].hots) {
+    if (jsGen.cache.hotsList.length === 0 || !ID || article.hots > cache[ID].hots) {
         list.push(articleID);
         articleID = 0;
     }
@@ -285,12 +285,10 @@ function hotsList(article) {
         ID = jsGen.cache.hotsList[i];
         if (!ID || ID === article._id || now - cache[ID].updateTime > 604800000) {
             continue;
-        } else if (article.hots > cache[ID].hots) {
-            if (articleID) {
-                list.push(articleID);
-                articleID = 0;
-            }
+        } else if (articleID > 0 && article.hots > cache[ID].hots) {
+            list.push(articleID);
             list.push(ID);
+            articleID = 0;
         } else {
             list.push(ID);
         }
