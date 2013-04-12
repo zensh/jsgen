@@ -258,12 +258,10 @@ function updateList(article) {
         ID = jsGen.cache.updateList[i];
         if (!ID || ID === article._id) {
             continue;
-        } else if (article.updateTime > cache[ID].updateTime) {
-            if (articleID) {
-                list.push(articleID);
-                articleID = 0;
-            }
+        } else if (articleID > 0 && article.updateTime > cache[ID].updateTime) {
+            list.push(articleID);
             list.push(ID);
+            articleID = 0;
         } else {
             list.push(ID);
         }
@@ -310,12 +308,10 @@ function hotCommentsList(article) {
         ID = jsGen.cache.hotCommentsList[i];
         if (!ID || ID === article._id || now - cache[ID].updateTime > 604800000) {
             continue;
-        } else if (article.updateTime > cache[ID].updateTime) {
-            if (articleID) {
-                list.push(articleID);
-                articleID = 0;
-            }
+        } else if (articleID > 0 && article.updateTime > cache[ID].updateTime) {
+            list.push(articleID);
             list.push(ID);
+            articleID = 0;
         } else {
             list.push(ID);
         }
