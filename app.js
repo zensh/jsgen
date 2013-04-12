@@ -137,7 +137,7 @@ function createServer() {
             }
         });
         dm.run(function () {
-            if (req.path[0] === 'api') {
+            if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
                 jsGen.api[req.path[1]][req.method.toUpperCase()](req, res, dm);
                 jsGen.api.index.updateOnlineCache(req);
             } else if (jsGen.robot.reg.test(req.useragent)) {

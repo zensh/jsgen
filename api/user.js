@@ -54,10 +54,11 @@ userCache.getP = function (Uid, callback, convert) {
     });
 };
 
-var cache = {
+jsGen.cache.userAll = {
     _initTime: 0,
     _index: []
 };
+var cache = jsGen.cache.userAll;
 cache._update = function (obj) {
     if (!this[obj._id]) {
         this[obj._id] = {};

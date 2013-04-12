@@ -22,10 +22,11 @@ tagCache.getP = function (ID, callback) {
     }
 };
 
-var cache = {
+jsGen.cache.tagAll = {
     _initTime: 0,
     _index: []
 };
+var cache = jsGen.cache.tagAll;
 cache._update = function (obj) {
     var that = this;
     if (!this[obj._id]) {
@@ -265,7 +266,7 @@ function getTag(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
     if (checkID(tag, 'T')) {
-        tag = +jsGen.dao.tag.convertID(tag);
+        tag = jsGen.dao.tag.convertID(tag);
     }
     if (typeof tag === 'string') {
         tag = tag.toLowerCase();

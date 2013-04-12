@@ -152,14 +152,16 @@ listCache.getP = function (ID, callback, convert) {
     }
 };
 
-var cache = {
+jsGen.cache.articleAll = {
     _initTime: 0,
     _index: []
 };
+var cache = jsGen.cache.articleAll;
 cache._update = function (obj) {
-    var that = this, ID = obj._id;
+    var ID = obj._id;
     if (!this[ID]) {
         this[ID] = {
+            _id: ID,
             status: -1,
             updateTime: 0,
             hots: 0
@@ -172,13 +174,13 @@ cache._update = function (obj) {
                 this._initTime = Date.now();
             }
             if (obj.updateTime > this[ID].updateTime) {
-                setImmediate(updateList, that[ID]);
+                setImmediate(updateList, this[ID]);
             }
             if (obj.hots > this[ID].hots) {
-                setImmediate(hotsList, that[ID]);
+                setImmediate(hotsList, this[ID]);
             }
         } else if (obj.hots > this[ID].hots) {
-            setImmediate(hotCommentsList, that[ID]);
+            setImmediate(hotCommentsList, this[ID]);
         }
     } else {
         var i = this._index.lastIndexOf(ID);
@@ -192,31 +194,30 @@ cache._update = function (obj) {
     this[ID].updateTime = obj.updateTime;
     this[ID].date = obj.date;
     this[ID].hots = obj.hots;
-    setImmediate(function () {
-        var i = -1, obj = that[ID];
-        if (obj.status === 2) {
-            i = that._index.lastIndexOf(ID);
-            if (i >= 0) {
-                that._index.splice(i, 1);
-            }
-            that._index.push(ID);
+
+    var i = -1;
+    if (obj.status === 2) {
+        i = this._index.lastIndexOf(ID);
+        if (i >= 0) {
+            this._index.splice(i, 1);
         }
-        if (obj.display > 2) {
-            i = jsGen.cache.updateList.lastIndexOf(ID);
-            if (i >= 0) {
-                jsGen.cache.updateList.splice(i, 1);
-                that._initTime = Date.now();
-            }
-            i = jsGen.cache.hotsList.lastIndexOf(ID);
-            if (i >= 0) {
-                jsGen.cache.hotsList.splice(i, 1);
-            }
-            i = jsGen.cache.hotCommentsList.lastIndexOf(ID);
-            if (i >= 0) {
-                jsGen.cache.hotCommentsList.splice(i, 1);
-            }
+        this._index.push(ID);
+    }
+    if (obj.display > 2) {
+        i = jsGen.cache.updateList.lastIndexOf(ID);
+        if (i >= 0) {
+            jsGen.cache.updateList.splice(i, 1);
+            this._initTime = Date.now();
         }
-    });
+        i = jsGen.cache.hotsList.lastIndexOf(ID);
+        if (i >= 0) {
+            jsGen.cache.hotsList.splice(i, 1);
+        }
+        i = jsGen.cache.hotCommentsList.lastIndexOf(ID);
+        if (i >= 0) {
+            jsGen.cache.hotCommentsList.splice(i, 1);
+        }
+    }
     return this;
 };
 cache._remove = function (ID) {

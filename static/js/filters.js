@@ -110,6 +110,7 @@ filter('cutText', function () {
         if (typeof text !== 'string') {
             return text;
         }
+        text = text.replace(/\s+/g, ' ');
         var bytes = utf8.stringToBytes(text);
         len = len || 0;
         if (bytes.length > len) {
