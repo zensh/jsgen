@@ -29,11 +29,11 @@
                     <li class="media" ng-repeat="article in data">
                       <div class="media-body" id="{{article._id}}">
                         <header class="media-heading">
-                            <h5><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
+                            <h4><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
                             <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
                             <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
                             <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
-                            </h5>
+                            </h4>
                         </header>
                         <section class="media-content" ng-parse-markdown="article.content"></section>
                         <footer>
@@ -51,9 +51,9 @@
                       </div>
                     </li>
                 </ul>
-                <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
             </div>
         </div>
+        <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
     </div>
     <div class="span3 sidebar">
         <div class="panel hidden-phone">

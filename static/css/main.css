@@ -5,6 +5,20 @@
  * https://github.com/zensh/jsgen
  *
  */
+ body {
+  font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-size: 1.4rem;
+}
+
+body,
+input,
+button,
+select,
+textarea {
+  font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
 .nav img {
     height: 40px;
 }
