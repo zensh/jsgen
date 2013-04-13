@@ -504,7 +504,7 @@ function getArticle(req, res, dm) {
         p = req.getparam.p || req.getparam.page || 1;
 
     if (checkID(ID, 'A')) {
-        ID = +jsGen.dao.article.convertID(ID);
+        ID = jsGen.dao.article.convertID(ID);
     }
     if (typeof ID !== 'number' || !cache[ID]) {
         throw jsGen.Err(jsGen.lib.msg.articleNone);

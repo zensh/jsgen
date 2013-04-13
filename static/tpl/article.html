@@ -2,7 +2,7 @@
     <div class="span9">
         <article class="panel" id="{{article._id}}">
             <header class="page-header">
-                <h4>{{article.title}}</h4>
+                <h2>{{article.title}}</h2>
                 <ul class="list-inline">
                     <li ng-show="article.refer">引文:<a ng-href="{{article.refer.url}}">{{article.refer.url | cutText:25}}</a></li>
                     <li>发表:{{article.date | formatDate}}</li>

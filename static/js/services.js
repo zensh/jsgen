@@ -82,8 +82,7 @@ factory('MdEditor', ['MdParse', 'sanitize', function (MdParse, sanitize) {
         }, idPostfix);
         var element = angular.element(document.getElementById('wmd-preview' + idPostfix));
         editor.hooks.chain('onPreviewRefresh', function () {
-            element.children('pre').addClass('prettyprint'); // linenums have bug!
-            element.children('code').addClass('prettyprint');
+            element.find('pre').addClass('prettyprint'); // linenums have bug!
             prettyPrint();
         });
         return editor;

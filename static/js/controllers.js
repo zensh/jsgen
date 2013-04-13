@@ -763,6 +763,9 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         });
     });
     $scope.getComments = function (idArray, to) {
+        if (idArray.length === 0) {
+            return;
+        }
         $scope.referComments = [];
         var dom = angular.element(document.getElementById(to._id));
         var refer = angular.element(document.getElementById('refer-comments'));

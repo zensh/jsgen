@@ -12,8 +12,7 @@ directive('ngParseMarkdown', ['MdParse', 'sanitize', function (MdParse, sanitize
             value = MdParse(value);
             value = sanitize(value);
             element.html(value);
-            element.children('pre').addClass('prettyprint'); // linenums have bug!
-            element.children('code').addClass('prettyprint');
+            element.find('pre').addClass('prettyprint'); // linenums have bug!
             element.find('a').attr('target', function () {
                 if (this.host !== location.host) {
                     return '_blank';
