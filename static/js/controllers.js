@@ -420,89 +420,6 @@ controller('userArticleCtrl', ['$scope', function ($scope) {
         });
     };
 }]).
-controller('userAdminCtrl', ['$scope', function ($scope) {
-    var originData = {};
-    $scope.roleArray = [0, 1, 2, 3, 4, 5];
-    $scope.editEmail = false;
-    $scope.editRole = false;
-    $scope.editSave = false;
-    $scope.pagination = {
-        now: 1,
-        total: 1,
-        num: 20,
-        nums: [20, 50, 100]
-    };
-    $scope.$on('pagination', function (event, doc) {
-        event.stopPropagation();
-        doc.Uid = 'admin';
-        jsGen.rootScope.loading = true;
-        var result = jsGen.rest.user.get(doc, function () {
-            jsGen.rootScope.loading = false;
-            if (!result.err) {
-                $scope.data = result.data;
-                originData = jsGen.union($scope.data);
-                jsGen.union($scope.pagination, result.pagination);
-            } else {
-                jsGen.rootScope.msg = result.err;
-            }
-        });
-    });
-    $scope.$emit('pagination', {
-        n: $scope.pagination.num,
-        p: $scope.pagination.now
-    });
-    $scope.$watch(function () {
-        if (angular.equals($scope.data, originData)) {
-            $scope.editSave = false;
-        } else {
-            $scope.editSave = true;
-        }
-    });
-    $scope.reset = function () {
-        $scope.data = jsGen.union(originData);
-        $scope.editEmail = false;
-        $scope.editRole = false;
-        $scope.editSave = false;
-    };
-    $scope.submit = function () {
-        var defaultObj = [{
-            _id: '',
-            email: '',
-            locked: false,
-            role: 0
-        }];
-        $scope.editEmail = false;
-        $scope.editRole = false;
-        $scope.editSave = false;
-        var data = jsGen.union($scope.data);
-        originData = jsGen.intersect(jsGen.union(defaultObj), originData);
-        data = jsGen.intersect(jsGen.union(defaultObj), data);
-        angular.forEach(data, function (value, key) {
-            if (angular.equals(value, originData[key])) {
-                delete data[key];
-            }
-        });
-        jsGen.complement(data, originData, [{
-            _id: ''
-        }]);
-        jsGen.rootScope.loading = true;
-        var result = jsGen.rest.user.save({Uid: 'admin'}, {
-            data: data
-        }, function () {
-            jsGen.rootScope.loading = false;
-            if (!result.err) {
-                $scope.data = jsGen.union(result.data);
-                originData = jsGen.union(result.data);
-                jsGen.rootScope.msg = {
-                    name: '请求成功',
-                    message: '修改成功！'
-                };
-            } else {
-                jsGen.rootScope.msg = result.err;
-            }
-        });
-    };
-}]).
 controller('userEditCtrl', ['$scope', function ($scope) {
     var originData = {},
     tagsArray = [];
@@ -1105,6 +1022,89 @@ controller('adminCtrl', ['$scope', function ($scope) {
         $scope.getTpl = '/static/tpl/' + tpl;
     };
 }]).
+controller('adminUserCtrl', ['$scope', function ($scope) {
+    var originData = {};
+    $scope.roleArray = [0, 1, 2, 3, 4, 5];
+    $scope.editEmail = false;
+    $scope.editRole = false;
+    $scope.editSave = false;
+    $scope.pagination = {
+        now: 1,
+        total: 1,
+        num: 20,
+        nums: [20, 50, 100]
+    };
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        doc.Uid = 'admin';
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.user.get(doc, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = result.data;
+                originData = jsGen.union($scope.data);
+                jsGen.union($scope.pagination, result.pagination);
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    });
+    $scope.$emit('pagination', {
+        n: $scope.pagination.num,
+        p: $scope.pagination.now
+    });
+    $scope.$watch(function () {
+        if (angular.equals($scope.data, originData)) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
+    });
+    $scope.reset = function () {
+        $scope.data = jsGen.union(originData);
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
+    };
+    $scope.submit = function () {
+        var defaultObj = [{
+            _id: '',
+            email: '',
+            locked: false,
+            role: 0
+        }];
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
+        var data = jsGen.union($scope.data);
+        originData = jsGen.intersect(jsGen.union(defaultObj), originData);
+        data = jsGen.intersect(jsGen.union(defaultObj), data);
+        angular.forEach(data, function (value, key) {
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
+        });
+        jsGen.complement(data, originData, [{
+            _id: ''
+        }]);
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.user.save({Uid: 'admin'}, {
+            data: data
+        }, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = jsGen.union(result.data);
+                originData = jsGen.union(result.data);
+                jsGen.rootScope.msg = {
+                    name: '请求成功',
+                    message: '修改成功！'
+                };
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    };
+}]).
 controller('adminTagCtrl', ['$scope', function ($scope) {
     var originData = {};
     $scope.data = null;
@@ -1183,6 +1183,89 @@ controller('adminTagCtrl', ['$scope', function ($scope) {
         jsGen.digestArray(data);
         jsGen.rootScope.loading = true;
         var result = jsGen.rest.tag.save({ID: 'admin'}, {
+            data: data
+        }, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = jsGen.union(result.data);
+                originData = jsGen.union(result.data);
+                jsGen.rootScope.msg = {
+                    name: '请求成功',
+                    message: '修改成功！'
+                };
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    };
+}]).
+controller('adminArticleCtrl', ['$scope', function ($scope) {
+    var originData = {};
+    $scope.roleArray = [0, 1, 2, 3, 4, 5];
+    $scope.editEmail = false;
+    $scope.editRole = false;
+    $scope.editSave = false;
+    $scope.pagination = {
+        now: 1,
+        total: 1,
+        num: 20,
+        nums: [20, 50, 100]
+    };
+    $scope.$on('pagination', function (event, doc) {
+        event.stopPropagation();
+        doc.Uid = 'admin';
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.user.get(doc, function () {
+            jsGen.rootScope.loading = false;
+            if (!result.err) {
+                $scope.data = result.data;
+                originData = jsGen.union($scope.data);
+                jsGen.union($scope.pagination, result.pagination);
+            } else {
+                jsGen.rootScope.msg = result.err;
+            }
+        });
+    });
+    $scope.$emit('pagination', {
+        n: $scope.pagination.num,
+        p: $scope.pagination.now
+    });
+    $scope.$watch(function () {
+        if (angular.equals($scope.data, originData)) {
+            $scope.editSave = false;
+        } else {
+            $scope.editSave = true;
+        }
+    });
+    $scope.reset = function () {
+        $scope.data = jsGen.union(originData);
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
+    };
+    $scope.submit = function () {
+        var defaultObj = [{
+            _id: '',
+            email: '',
+            locked: false,
+            role: 0
+        }];
+        $scope.editEmail = false;
+        $scope.editRole = false;
+        $scope.editSave = false;
+        var data = jsGen.union($scope.data);
+        originData = jsGen.intersect(jsGen.union(defaultObj), originData);
+        data = jsGen.intersect(jsGen.union(defaultObj), data);
+        angular.forEach(data, function (value, key) {
+            if (angular.equals(value, originData[key])) {
+                delete data[key];
+            }
+        });
+        jsGen.complement(data, originData, [{
+            _id: ''
+        }]);
+        jsGen.rootScope.loading = true;
+        var result = jsGen.rest.user.save({Uid: 'admin'}, {
             data: data
         }, function () {
             jsGen.rootScope.loading = false;
