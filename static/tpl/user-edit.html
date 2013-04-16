@@ -91,10 +91,7 @@
         </div>
         <div class="control-group">
             <div class="controls" ng-show="editSave">
-                <button class="btn btn-primary" ng-click="submit()" ng-disabled="userEdit.email.$error.email
-                                            || checkResult
-                                            || register.password.$error.minlength
-                                            || register.password.$error.maxlength">保存</button>
+                <button class="btn btn-primary" ng-click="submit()" ng-disabled="!userEdit.$valid || checkResult">保存</button>
                 <button class="btn btn-success" ng-click="reset()">重置</button>
             </div>
         </div>

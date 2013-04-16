@@ -555,6 +555,7 @@ var that = jsGen.dao.db.bind('users', {
         newUser = union(user, newUser);
         newUser.date = Date.now();
         newUser.lastLoginDate = newUser.date;
+        newUser.readtimestamp = newUser.date;
 
         that.getLatestId(function (err, doc) {
             if (err) {

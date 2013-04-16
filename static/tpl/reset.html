@@ -27,8 +27,7 @@
             </div>
             <div class="control-group">
               <div class="controls">
-                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.name.$error.required
-                                        || login.email.$error.required || login.email.$error.email">提  交</button>
+                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="reset.$error.required || !reset.$valid">提  交</button>
                 </div>
             </div>
         </form>

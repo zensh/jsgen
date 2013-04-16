@@ -60,12 +60,8 @@
             </div>
             <div class="control-group">
               <div class="controls">
-                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="register.name.$error.required
-                                        || register.email.$error.required
-                                        || register.email.$error.email
-                                        || register.password.$error.required
-                                        || register.password.$error.minlength
-                                        || register.password.$error.maxlength
+                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="register.$error.required
+                                        || !register.$valid
                                         || (name | checkName)
                                         || checkResult">注 册</button>
                 </div>

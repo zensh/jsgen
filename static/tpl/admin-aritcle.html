@@ -1,0 +1,25 @@
+<section class="clearfix" ng-controller="adminArticleCtrl">
+    <div class="page-header">
+        <h4>文章评论批量管理</h4>
+    </div>
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="user in data | orderBy:predicate:reverse">
+
+            </tr>
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+    <div class="pull-left" ng-pagination="pagination">
+    </div>
+    <div class="pull-right" ng-show="editSave">
+        <button class="btn btn-primary" ng-click="submit()">保存</button>
+        <button class="btn btn-success" ng-click="reset()">重置</button>
+    </div>
+</section>

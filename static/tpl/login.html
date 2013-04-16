@@ -10,9 +10,6 @@
                     <div class="controls">
                         <input class="input-block-level" type="text" placeholder="name or Email or Uid"
                         name="name" ng-model="logname" required/>
-                        <span class="text-error help-inline" ng-show="login.name.$error.required">
-                            请输入用户名、Email或Uid!
-                        </span>
                     </div>
                 </div>
                 <div class="control-group">
@@ -20,15 +17,11 @@
                   <div class="controls">
                     <input class="input-block-level" type="password" placeholder="password"
                     name="password" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
-                    <span class="text-error help-inline" ng-show="login.password.$error.required">
-                        请输入密码!
-                    </span>
                     </div>
                 </div>
                 <div class="control-group">
                   <div class="controls">
-                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.name.$error.required
-                                        || login.password.$error.required">登  录</button>
+                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.$error.required">登  录</button>
                     <a ng-show="userReset" ng-href="{{'/reset/'+userReset}}" class="btn btn-warning">{{resetName}}</a>
                     </div>
                 </div>

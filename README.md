@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.10</small>
+{jsGen} <small>0.2.11</small>
 =======
 **——JavaScript Generated**
 
@@ -36,6 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 更新 (Changelog)
 
+ + 2013/04/13 jsGen v0.2.11 调整代码。
  + 2013/04/13 jsGen v0.2.10 视觉调整。
  + 2013/04/13 jsGen v0.2.9 修复热门文章、热门评论bug，优化代码，暂停使用Cluster。
  + 2013/04/09 jsGen v0.2.8 修复文章编辑器Bug。
