@@ -48,12 +48,13 @@
                 '/static/js/lib/marked.js',
                 '/static/js/lib/sanitize.js',
                 '/static/js/lib/Markdown.Editor.js',
-                '/static/js/lib/prettify.min.js'
+                '/static/js/lib/prettify.min.js',
+                '/static/js/lib/xss.js'
                 ], function() {
                     angular.bootstrap(document, ['jsGen']);
             });
         </script>
-        <title ng-bind="global.title2+' | '+global.title"></title>
+        <title ng-bind="global.title2+' | '+global.title">AngularJS中文社区</title>
         <meta http-equiv="content-type" content="text/html">
         <meta name="title" content="{{global.metatitle}}">
         <meta name="description" content="{{global.metadesc}}">

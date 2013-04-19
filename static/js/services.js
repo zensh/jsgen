@@ -69,7 +69,7 @@ factory('sanitize', function () {
         var outerDOM = document.createElement('div');
         innerDOM.innerHTML = html;
         outerDOM.appendChild(san.clean_node(innerDOM));
-        return outerDOM.innerHTML;
+        return filterXSS(outerDOM.innerHTML);
     };
 }).
 factory('MdEditor', ['MdParse', 'sanitize', function (MdParse, sanitize) {

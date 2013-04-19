@@ -20,3 +20,4 @@ config/config.js
 tmp/
 
 npm-debug.log
+.DS_Store
