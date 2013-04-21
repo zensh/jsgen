@@ -45,8 +45,7 @@
                     文章标签
                 </label>
                 <span class="text-warning">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
-                <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/"
-                class="input-block-level" />
+                <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" class="input-block-level" />
                 <div class="btn-toolbar">
                     <span>热门标签：</span>
                     <span ng-repeat="tag in global.tagsList">

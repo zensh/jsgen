@@ -171,14 +171,18 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         });
     };
     $rootScope.loading = true;
-    (function getServTime() {
+    function getServTime() {
         var result = jsGen.rest.index.get({OP: 'time'}, function () {
-            if (result.time) {
-                $rootScope.servTime = result.time;
+            if (result.timestamp) {
+                $rootScope.global.timestamp = result.timestamp;
             }
+            // if (result.version) {
+            //     var version = document.getElementsByTagName("meta")[0];
+            //     console.log(version);
+            // }
         });
         $timeout(getServTime, 300000);
-    })();
+    };
     $rootScope.global = jsGen.rest.index.get({}, function () {
         $rootScope.loading = false;
         $rootScope.checkUser();

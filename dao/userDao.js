@@ -91,14 +91,11 @@ var that = jsGen.dao.db.bind('users', {
             _id: _id
         }, {
             fields: {
-                name: 1,
-                email: 1,
                 passwd: 1,
                 resetKey: 1,
                 resetDate: 1,
                 loginAttempts: 1,
-                locked: 1,
-                role: 1
+                locked: 1
             }
         }, callback);
     },

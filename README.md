@@ -1,4 +1,4 @@
-{jsGen} <small>0.2.12</small>
+{jsGen} <small>0.3.0</small>
 =======
 **——JavaScript Generated**
 
@@ -36,7 +36,7 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 ### 更新 (Changelog)
 
- + 2013/04/19 jsGen v0.2.12 添加xss过滤。
+ + 2013/04/21 jsGen v0.3.0 服务器端增加用户自动登录功能，用户邮箱手动验证。客户端AngularJS应用更新jQuery、Bootstrap至最新版，优化UI。
  + 2013/04/13 jsGen v0.2.11 调整代码，升级AngularJS到1.0.6。
  + 2013/04/13 jsGen v0.2.10 视觉调整。
  + 2013/04/13 jsGen v0.2.9 修复热门文章、热门评论bug，优化代码，暂停使用Cluster。

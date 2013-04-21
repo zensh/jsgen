@@ -38,6 +38,13 @@ a {
   .form-horizontal.form-min .control-group > .controls {
     margin-left: 80px;
   }
+  select,
+  input {
+    width: 33.33333333333333%;
+  }
+  .input-block-level {
+    width: 100%;
+  }
 }
 [class*="col-span-"],
 [class*="col-small-"] {
@@ -284,4 +291,7 @@ a {
 .sina {
     display: inline-block;
     margin-left: 10px;
+}
+.modal {
+  overflow-y: auto;
 }

@@ -71,11 +71,31 @@ function getIndex(req, res, dm) {
     };
     intersect(config, jsGen.config);
     config.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
+    config.timestamp = Date.now();
     if (req.session.Uid) {
         jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
             config.user = doc;
             return res.sendjson(config);
         }));
+    } else if (req.cookie.autologin) {
+        jsGen.api.user.cookieLogin(req.cookie.autologin, function (Uid) {
+            if (Uid) {
+                jsGen.cache.user.getP(Uid, dm.intercept(function (doc) {
+                    req.session.Uid = Uid;
+                    req.session.role = doc.role;
+                    req.session.logauto = true;
+                    jsGen.api.user.cookieLoginUpdate(Uid, function (cookie) {
+                        if (cookie) {
+                            res.cookie('autologin', cookie, {maxAge:259200000, path:'/', httpOnly:true});
+                        }
+                        config.user = doc;
+                        return res.sendjson(config);
+                    });
+                }));
+            } else {
+                return res.sendjson(config);
+            }
+        });
     } else {
         return res.sendjson(config);
     }
@@ -83,7 +103,8 @@ function getIndex(req, res, dm) {
 
 function getServTime(req, res, dm) {
     return res.sendjson({
-        time: Date.now()
+        timestamp: Date.now(),
+        version: jsGen.version
     });
 };
 

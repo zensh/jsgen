@@ -21,6 +21,9 @@
                 </div>
                 <div class="control-group">
                   <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="logauto">3天内自动登录
+                    </label>
                     <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.$error.required">登  录</button>
                     <a ng-show="userReset" ng-href="{{'/reset/'+userReset}}" class="btn btn-warning">{{resetName}}</a>
                     </div>

@@ -139,11 +139,15 @@ controller('tagCtrl', ['$scope', function ($scope) {
 controller('userLoginCtrl', ['$scope', function ($scope) {
     $scope.userReset = undefined;
     $scope.resetName = undefined;
+    $scope.logauto = true;
     $scope.submit = function () {
         var data = {}, result;
         data.logname = $scope.logname;
+        data.logauto = $scope.logauto;
+        data.logtime = Date.now();
+        data.logtime = Math.max(data.logtime, $scope.global.timestamp);
         data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
-        data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname).toString();
+        data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname + ':' + data.logtime).toString();
         jsGen.rootScope.loading = true;
         result = jsGen.rest.user.save({Uid: 'login'}, data, function () {
             jsGen.rootScope.loading = false;
@@ -466,6 +470,20 @@ controller('userEditCtrl', ['$scope', function ($scope) {
     $scope.reset = function () {
         $scope.user = jsGen.union(originData);
         $scope.editSave = false;
+    };
+    $scope.verifyEmail = function () {
+        jsGen.rootScope.loading = true;
+        var verify = jsGen.rest.user.save({Uid: 'reset'}, {
+            request: 'role'
+        }, function () {
+            jsGen.rootScope.loading = false;
+            if (!verify.err) {
+                verify.name = '请求成功';
+                jsGen.rootScope.msg = verify;
+            } else {
+                jsGen.rootScope.msg = verify.err;
+            }
+        });
     };
     $scope.submit = function () {
         var result, changeEmail,

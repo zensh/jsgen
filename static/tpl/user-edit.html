@@ -28,8 +28,9 @@
             </label>
             <div class="controls">
                 <input type="email" name="email" ng-model="user.email" />
-                <span class="text-info" ng-hide="userEdit.email.$error.email">修改邮箱需通过邮箱验证后才保存修改</span>
+                <button type="button" class="btn btn-mini btn-info"  ng-click="verifyEmail()">重发验证邮件</button>
                 <span class="text-danger" ng-show="userEdit.email.$error.email">无效的Email!</span>
+                <br /><span class="text-info" ng-hide="userEdit.email.$error.email">修改邮箱需通过邮箱验证后才保存修改</span>
             </div>
         </div>
         <div class="control-group">
@@ -46,9 +47,9 @@
             用户标签：
             </label>
             <div class="controls">
-                <textarea name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/" class="input-block-level">
+                <textarea name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/">
                 </textarea>
-                <div class="well well-small">
+                <div class="btn-toolbar">
                     <ul class="list-inline">
                         <span>热门标签：</span>
                         <li ng-repeat="tag in global.tagsList">
@@ -63,7 +64,7 @@
             个人简介：
             </label>
             <div class="controls">
-                <textarea ng-model="user.desc" class="input-block-level">
+                <textarea ng-model="user.desc">
                 </textarea>
                 <span class="text-warning">
                     [ {{global.SummaryMaxLen}} 字节以内，当前 {{descBytes}} 字节]
