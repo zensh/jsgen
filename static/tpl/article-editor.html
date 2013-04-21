@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="span6">
+    <div class="col-span-6">
         <div class="panel inner">
             <div class="page-header">
                 <h4>{{previewTitle}}</h4>
@@ -10,7 +10,7 @@
             </div>
         </div>
     </div>
-    <div class="span6">
+    <div class="col-span-6">
         <div class="panel inner">
             <div class="page-header">
                 <h4>添加/编辑文章</h4>
@@ -47,15 +47,13 @@
                 <span class="text-warning">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
                 <input type="text" name="tagsList" ng-model="tagsList" ng-list="/[,，\s]/"
                 class="input-block-level" />
-                <div class="well well-small">
-                    <ul class="list-inline">
-                        <span>热门标签：</span>
-                        <li ng-repeat="tag in global.tagsList">
-                            <a href="#" ng-click="getTag(tag)" class="btn btn-mini">{{tag.tag}}</a>
-                        </li>
-                    </ul>
+                <div class="btn-toolbar">
+                    <span>热门标签：</span>
+                    <span ng-repeat="tag in global.tagsList">
+                        <a href="#" ng-click="getTag(tag)" class="btn btn-mini">{{tag.tag}}</a>
+                    </span>
                 </div>
-                <div class="btn-toolbar well well-small">
+                <div class="btn-toolbar">
                     <div class="btn-group">
                         <button type="button" ng-click="submit()" class="btn btn-primary" ng-disabled="!editSave">提    交</button>
                     </div>

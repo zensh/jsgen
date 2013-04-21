@@ -9,7 +9,7 @@
                 <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     <a href="#" ng-click="followMe(user)" class="btn btn-small btn-success" ng-hide="user.isMe">{{user.isFollow | follow}}</a>
                 </h5>
-                <ul class="list-inline muted">
+                <ul class="list-inline text-muted">
                     <li ng-show="user._id">
                         Uid：{{user._id}}
                     </li>
@@ -34,7 +34,7 @@
                     <li ng-show="user.collections">
                         合集：{{user.collections}}
                     </li>
-                    <li ng-show="user.date" class="muted">
+                    <li ng-show="user.date" class="text-muted">
                         {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
                     </li>
                 </ul>

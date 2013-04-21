@@ -1,9 +1,9 @@
 <div class="row">
-    <div class="span9">
+    <div class="col-span-9">
         <div class="panel" ng-include src="getTpl">
         </div>
     </div>
-    <div class="span3 sidebar">
+    <div class="col-span-3 sidebar">
         <div class="panel">
             <div class="media inner">
                 <a class="pull-left" ng-href="{{'/'+user._id}}">
@@ -18,30 +18,30 @@
             <div class="inner">
                 <ul class="list-inline">
                     <li ng-show="user.email">
-                        <span class="muted">Email：</span>{{user.email}}
+                        <span class="text-muted">Email：</span>{{user.email}}
                     </li>
                     <li ng-show="user.sex">
-                        <span class="muted">性别：</span>{{user.sex | sex}}
+                        <span class="text-muted">性别：</span>{{user.sex | sex}}
                     </li>
                     <li ng-show="user.score">
-                        <span class="muted">积分：</span>{{user.score}}
+                        <span class="text-muted">积分：</span>{{user.score}}
                     </li>
                     <li ng-show="user.fans">
-                        <span class="muted">粉丝：</span>{{user.fans}}
+                        <span class="text-muted">粉丝：</span>{{user.fans}}
                     </li>
                     <li ng-show="user.follow">
-                        <span class="muted">关注：</span>{{user.follow}}
+                        <span class="text-muted">关注：</span>{{user.follow}}
                     </li>
                     <li ng-show="user.collect">
-                        <span class="muted">收藏：</span>{{user.collect}}
+                        <span class="text-muted">收藏：</span>{{user.collect}}
                     </li>
                     <li ng-show="user.articles">
-                        <span class="muted">文章/评论：</span>{{user.articles}}
+                        <span class="text-muted">文章/评论：</span>{{user.articles}}
                     </li>
                     <li ng-show="user.collections">
-                        <span class="muted">合集：</span>{{user.collections}}
+                        <span class="text-muted">合集：</span>{{user.collections}}
                     </li>
-                    <li ng-show="user.date" class="muted">
+                    <li ng-show="user.date" class="text-muted">
                         {{user.date | formatDate}}注册，{{user.lastLoginDate | formatDate}}最后登录
                     </li>
                 </ul>
@@ -60,7 +60,7 @@
             </div>
         </div>
         <div class="panel">
-            <ul class="nav nav-list text-center inner" ng-show="isMe">
+            <ul class="nav nav-list text-center" ng-show="isMe">
                 <li>
                     <a href="#" ng-click="setTpl('user-list.html', 'follow')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
                 </li>
@@ -86,7 +86,7 @@
                     <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
-            <ul class="nav nav-list text-center inner" ng-hide="isMe">
+            <ul class="nav nav-list text-center" ng-hide="isMe">
                 <li>
                     <a href="#" ng-click="setTpl('user-article.html', 'article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
                 </li>

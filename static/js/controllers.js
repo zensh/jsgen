@@ -3,31 +3,31 @@
 /* Controllers */
 angular.module('jsGen.controllers', []).
 controller('indexCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
-    var viewID, restPath = jsGen.rest.article;
+    var restPath = jsGen.rest.article;
     $scope.other = {};
     $scope.data = null;
     $scope.pagination = null;
     $scope.global.title2 = $scope.global.description;
 
     function checkRouteParams() {
+        var viewID = 'latest';
         if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
             restPath = jsGen.rest.tag;
             $scope.other._id = $routeParams.OP;
             $scope.other.name = $routeParams.TAG;
-            viewID = 'view-other';
+            viewID = 'other';
         } else {
             restPath = jsGen.rest.article;
             if ($routeParams.OP !== 'hots' && $routeParams.OP !== 'update') {
                 $routeParams.OP = 'latest';
             }
-            viewID = 'view-' + $routeParams.OP;
+            viewID = $routeParams.OP;
         }
         var element = angular.element(document.getElementById(viewID));
-        element.parent().children().removeClass('active');
         element.addClass('active');
     };
 
-    if ($routeParams.TAG || $routeParams.OP) checkRouteParams();
+    checkRouteParams();
     $scope.$on('pagination', function (event, doc) {
         event.stopPropagation();
         doc.ID = $routeParams.OP || $routeParams.TAG || 'latest';

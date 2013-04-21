@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="span4">
+    <div class="col-span-4">
         <div class="panel-transparent inner">
         <div class="page-header">
             <h4>用户注册</h4>
@@ -10,10 +10,10 @@
                 <div class="controls">
                     <input class="input-block-level" type="text" placeholder="name" name="name"
                     ng-model="name" required/>
-                    <span class="text-error" ng-show="register.name.$error.required">
+                    <span class="text-danger" ng-show="register.name.$error.required">
                         请输入用户名!
                     </span>
-                    <span class="text-error" ng-show="!register.name.$error.required && (name | checkName)">
+                    <span class="text-danger" ng-show="!register.name.$error.required && (name | checkName)">
                         {{name | checkName}}
                     </span>
                 </div>
@@ -23,10 +23,10 @@
               <div class="controls">
                     <input class="input-block-level" type="email" placeholder="email" name="email"
                     ng-model="email" required/>
-                    <span class="text-error" ng-show="register.email.$error.required">
+                    <span class="text-danger" ng-show="register.email.$error.required">
                         请输入Email!
                     </span>
-                    <span class="text-error" ng-show="register.email.$error.email">
+                    <span class="text-danger" ng-show="register.email.$error.email">
                         无效的Email!
                     </span>
                 </div>
@@ -36,13 +36,13 @@
               <div class="controls">
                     <input class="input-block-level" type="password" placeholder="password"
                     name="password" ng-model="passwd" ng-minlength="6" ng-maxlength="20" required/>
-                    <span class="text-error" ng-show="register.password.$error.required">
+                    <span class="text-danger" ng-show="register.password.$error.required">
                         请输入密码!
                     </span>
-                    <span class="text-error" ng-show="register.password.$error.minlength">
+                    <span class="text-danger" ng-show="register.password.$error.minlength">
                         密码太短!
                     </span>
-                    <span class="text-error" ng-show="register.password.$error.maxlength">
+                    <span class="text-danger" ng-show="register.password.$error.maxlength">
                         密码太长!
                     </span>
                 </div>
@@ -52,8 +52,8 @@
               <div class="controls">
                     <input class="input-block-level" type="password" name="password2" ng-model="passwd2" ng-change="checkPwd()"
                     required/>
-                    <span class="text-error" ng-show="register.password2.$error.required">再次输入密码</span>
-                    <span class="text-error" ng-show="checkResult">
+                    <span class="text-danger" ng-show="register.password2.$error.required">再次输入密码</span>
+                    <span class="text-danger" ng-show="checkResult">
                         密码不一致！
                     </span>
                 </div>
@@ -69,6 +69,6 @@
         </form>
     </div>
     </div>
-    <div class="span8">
+    <div class="col-span-8">
     </div>
 </div>

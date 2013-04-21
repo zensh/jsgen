@@ -1,4 +1,4 @@
-<section ng-controller="userEditCtrl">
+<section class="inner" ng-controller="userEditCtrl">
     <div class="page-header">
         <h4>用户设置</h4>
     </div>
@@ -9,7 +9,7 @@
             </label>
             <div class="controls">
                 <input type="url" name="avatar" ng-model="user.avatar" class="input-block-level"/>
-                <span class="text-error" ng-show="userEdit.avatar.$error.url">无效的URL地址！</span>
+                <span class="text-danger" ng-show="userEdit.avatar.$error.url">无效的URL地址！</span>
                 <img class="width-50" ng-src="{{user.avatar}}" />
             </div>
         </div>
@@ -19,7 +19,7 @@
             </label>
             <div class="controls">
                 <input type="text" name="name" ng-model="user.name" />
-                <span class="text-error" ng-show="(user.name | checkName)">{{user.name | checkName}}</span>
+                <span class="text-danger" ng-show="(user.name | checkName)">{{user.name | checkName}}</span>
             </div>
         </div>
         <div class="control-group">
@@ -29,7 +29,7 @@
             <div class="controls">
                 <input type="email" name="email" ng-model="user.email" />
                 <span class="text-info" ng-hide="userEdit.email.$error.email">修改邮箱需通过邮箱验证后才保存修改</span>
-                <span class="text-error" ng-show="userEdit.email.$error.email">无效的Email!</span>
+                <span class="text-danger" ng-show="userEdit.email.$error.email">无效的Email!</span>
             </div>
         </div>
         <div class="control-group">
@@ -76,8 +76,8 @@
             </label>
             <div class="controls">
                 <input type="password" name="password" ng-model="passwd" ng-minlength="6" ng-maxlength="20"/>
-                <span class="text-error" ng-show="userEdit.password.$error.minlength">密码太短!</span>
-                <span class="text-error" ng-show="userEdit.password.$error.maxlength">密码太长!</span>
+                <span class="text-danger" ng-show="userEdit.password.$error.minlength">密码太短!</span>
+                <span class="text-danger" ng-show="userEdit.password.$error.maxlength">密码太长!</span>
             </div>
         </div>
         <div class="control-group">
@@ -86,7 +86,7 @@
             </label>
             <div class="controls">
                 <input type="password" name="password2" ng-model="passwd2"/>
-                <span class="text-error" ng-show="checkResult">密码不一致！</span>
+                <span class="text-danger" ng-show="checkResult">密码不一致！</span>
             </div>
         </div>
         <div class="control-group">

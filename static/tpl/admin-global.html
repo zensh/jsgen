@@ -1,4 +1,4 @@
-<section class="clearfix" ng-controller="adminGlobalCtrl">
+<section class="clearfix inner" ng-controller="adminGlobalCtrl">
     <div class="page-header">
             <h4>网站设置</h4>
     </div>
@@ -35,7 +35,7 @@
                     </label>
                     <div class="controls">
                     <input type="url" name="url" ng-model="global.url" />
-                    <span class="text-error" ng-show="globalEdit.url.$error.url">
+                    <span class="text-danger" ng-show="globalEdit.url.$error.url">
                     无效的URL地址！
                     </span>
                     </div>
@@ -55,7 +55,7 @@
                     </label>
                     <div class="controls">
                     <input type="email" name="email" ng-model="global.email" />
-                    <span class="text-error" ng-show="globalEdit.email.$error.email">无效的Email!</span>
+                    <span class="text-danger" ng-show="globalEdit.email.$error.email">无效的Email!</span>
                     </div>
                 </div>
                 <div class="control-group">
@@ -64,7 +64,7 @@
                     </label>
                     <div class="controls">
                     <input type="text" name="title" ng-model="global.title" ng-maxlength="20"/>
-                    <span class="text-error" ng-show="globalEdit.title.$error.maxlength">
+                    <span class="text-danger" ng-show="globalEdit.title.$error.maxlength">
                     网站名称不能超过20个字符!
                     </span>
                     </div>

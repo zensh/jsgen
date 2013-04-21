@@ -33,23 +33,23 @@
             (function(a,b,c){typeof c["module"]!="undefined"&&c.module.exports?c.module.exports=b():typeof c["define"]!="undefined"&&c["define"]=="function"&&c.define.amd?define(a,b):c[a]=b()})("$script",function(){function p(a,b){for(var c=0,d=a.length;c<d;++c)if(!b(a[c]))return j;return 1}function q(a,b){p(a,function(a){return!b(a)})}function r(a,b,i){function o(a){return a.call?a():d[a]}function t(){if(!--n){d[m]=1,l&&l();for(var a in f)p(a.split("|"),o)&&!q(f[a],o)&&(f[a]=[])}}a=a[k]?a:[a];var j=b&&b.call,l=j?b:i,m=j?a.join(""):b,n=a.length;return setTimeout(function(){q(a,function(a){if(h[a])return m&&(e[m]=1),h[a]==2&&t();h[a]=1,m&&(e[m]=1),s(!c.test(a)&&g?g+a+".js":a,t)})},0),r}function s(c,d){var e=a.createElement("script"),f=j;e.onload=e.onerror=e[o]=function(){if(e[m]&&!/^c|loade/.test(e[m])||f)return;e.onload=e[o]=null,f=1,h[c]=2,d()},e.async=1,e.src=c,b.insertBefore(e,b.firstChild)}var a=document,b=a.getElementsByTagName("head")[0],c=/^https?:\/\//,d={},e={},f={},g,h={},i="string",j=!1,k="push",l="DOMContentLoaded",m="readyState",n="addEventListener",o="onreadystatechange";return!a[m]&&a[n]&&(a[n](l,function t(){a.removeEventListener(l,t,j),a[m]="complete"},j),a[m]="loading"),r.get=s,r.order=function(a,b,c){(function d(e){e=a.shift(),a.length?r(e,d):r(e,b,c)})()},r.path=function(a){g=a},r.ready=function(a,b,c){a=a[k]?a:[a];var e=[];return!q(a,function(a){d[a]||e[k](a)})&&p(a,function(a){return d[a]})?b():!function(a){f[a]=f[a]||[],f[a][k](b),c&&c(e)}(a.join("|")),r},r},this);
             $script([
                 '/static/js/lib/jquery.min.js',
-                '/static/js/lib/bootstrap.js',
                 '/static/js/lib/hmac-sha256.min.js',
                 '/static/js/lib/utf8.min.js',
                 '/static/js/lib/angular.js',
                 '/static/js/lib/angular-resource.min.js',
                 '/static/js/lib/angular-locale_zh-hans-cn.js',
+                '/static/js/lib/marked.js',
+                '/static/js/lib/sanitize.js',
+                '/static/js/lib/Markdown.Editor.js',
+                '/static/js/lib/prettify.min.js',
+                '/static/js/lib/xss.js',
+                '/static/js/lib/bootstrap.js',
                 '/static/js/directives.js',
                 '/static/js/filters.js',
                 '/static/js/services.js',
                 '/static/js/controllers.js',
                 '/static/js/tools.js',
-                '/static/js/app.js',
-                '/static/js/lib/marked.js',
-                '/static/js/lib/sanitize.js',
-                '/static/js/lib/Markdown.Editor.js',
-                '/static/js/lib/prettify.min.js',
-                '/static/js/lib/xss.js'
+                '/static/js/app.js'
                 ], function() {
                     angular.bootstrap(document, ['jsGen']);
             });
@@ -60,7 +60,7 @@
         <meta name="description" content="{{global.metadesc}}">
         <meta name="keywords" content="{{global.keywords}}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-        <link rel="stylesheet" href="/static/?parse=/static/css/bootstrap.css|/static/css/prettify.css|/static/css/main.css" media="screen" type="text/css">
+        <link rel="stylesheet" href="/static/?parse=/static/css/bootstrap.css|/static/css/prettify.css|/static/css/main.css&version=0.2.11" media="screen" type="text/css">
     </head>
     <body class="ng-cloak" ng-cloak>
         <header>
@@ -75,7 +75,6 @@
                     <a class="navbar-brand" href="/" ng-bind="global.title"></a>
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
-                            <li class="divider-vertical"></li>
                             <li ng-show="isLogin"><a href="/home">我的主页</a></li>
                             <li ng-show="isLogin" class="visible-phone"><a href="/tag/AngularJS">AngularJS</a></li>
                             <li class="dropdown hidden-phone">
@@ -116,12 +115,12 @@
         <div id="main" class="container" ng-view></div>
         <footer class="footer">
             <div class="container">
-                <p class="navbar-text muted">
-                    <a class="muted" ng-href="{{global.url}}" ng-bind="global.title"></a> ©2013 Powered by
+                <p class="navbar-text text-muted">
+                    <a class="text-muted" ng-href="{{global.url}}" ng-bind="global.title"></a> ©2013 Powered by
                     <a href="https://github.com/zensh/jsgen" target="_blank" ng-bind="'jsGen '+global.info.version"></a>
-                    [<a class="muted" href="http://angularjs.org" target="_blank" ng-bind="'AngularJS '+global.info.angularjs"></a>&nbsp;
-                    <a class="muted" href="http://nodejs.org" target="_blank" ng-bind="'Node.js '+global.info.nodejs"></a>&nbsp;
-                    <a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank" ng-bind="'rrestjs '+global.info.rrestjs"></a>]
+                    [<a class="text-muted" href="http://angularjs.org" target="_blank" ng-bind="'AngularJS '+global.info.angularjs"></a>&nbsp;
+                    <a class="text-muted" href="http://nodejs.org" target="_blank" ng-bind="'Node.js '+global.info.nodejs"></a>&nbsp;
+                    <a class="text-muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank" ng-bind="'rrestjs '+global.info.rrestjs"></a>]
                 </p>
             </div>
         </footer>

@@ -1,10 +1,10 @@
 <div class="row">
-    <div class="span9">
+    <div class="col-span-9">
         <div class="panel">
-            <header class="page-header">
+            <header class="page-header inner">
                 <h4>热门标签</h4>
             </header>
-            <section>
+            <section class="inner">
                 <ul class="list-inline">
                     <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
                         <a class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
@@ -15,11 +15,9 @@
         </div>
         <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
     </div>
-    <div class="span3 sidebar hidden-phone">
+    <div class="col-span-3 sidebar hidden-phone">
         <div class="panel">
-            <header class="inner">
-                <strong class="muted">最新文章</strong>
-            </header>
+            <header class="panel-heading text-muted">最新文章</header>
             <ul class="media-list inner">
                 <li class="media" ng-repeat="article in latestArticles">
                   <div class="media-body" id="{{article._id}}">
@@ -29,9 +27,7 @@
             </ul>
         </div>
         <div class="panel hidden-phone">
-            <header class="inner">
-                <strong class="muted">热门文章</strong>
-            </header>
+            <header class="panel-heading text-muted">热门文章</header>
             <ul class="media-list inner">
                 <li class="media" ng-repeat="article in hotArticles">
                   <div class="media-body" id="{{article._id}}">
@@ -42,18 +38,14 @@
             </ul>
         </div>
         <div class="panel">
-            <header class="inner">
-                <strong class="muted">赞助链接</strong>
-            </header>
+            <header class="panel-heading text-muted">赞助链接</header>
             <div class="inner">
             </div>
         </div>
         <div class="panel">
-            <header class="inner">
-                <strong class="muted">网站状态</strong>
-            </header>
+            <header class="panel-heading text-muted">网站状态</header>
             <div class="inner">
-                <ul class="list-inline inner">
+                <ul class="list-inline">
                   <li>访问总数：{{global.visitors}}</li>
                   <li>文章总数：{{global.articles}}</li>
                   <li>评论总数：{{global.comments}}</li>

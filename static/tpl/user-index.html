@@ -1,4 +1,4 @@
-<header class="page-header" ng-show="help">
+<header class="page-header inner" ng-show="help">
     <h4>{{help.title}}</h4>
     <p>{{help.content}}</p>
 </header>
@@ -15,7 +15,7 @@
             </header>
             <section class="media-content" ng-parse-markdown="article.content" ng-class="article.read"></section>
             <footer>
-                <ul class="list-inline muted">
+                <ul class="list-inline text-muted">
                     <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
                     {{article.date | formatDate}}发表</li>
                     <li>{{article.visitors}}次访问</li>

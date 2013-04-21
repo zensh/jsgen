@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="span4">
+    <div class="col-span-4">
         <div class="panel-transparent inner">
         <div class="page-header">
             <h4>{{header}}</h4>
@@ -10,7 +10,7 @@
                 <div class="controls">
                     <input class="input-block-level" type="text" placeholder="name or Uid"
                     name="name" ng-model="name" required/>
-                    <span class="text-error help-inline" ng-show="reset.name.$error.required">
+                    <span class="text-danger help-inline" ng-show="reset.name.$error.required">
                         请输入用户名或Uid!
                     </span>
                 </div>
@@ -20,7 +20,7 @@
               <div class="controls">
                     <input class="input-block-level" type="email" placeholder="Email"
                     name="email" ng-model="email" required/>
-                    <span class="text-error help-inline" ng-show="reset.email.$error.required">
+                    <span class="text-danger help-inline" ng-show="reset.email.$error.required">
                         请输入Email!
                     </span>
                 </div>
@@ -33,6 +33,6 @@
         </form>
     </div>
     </div>
-    <div class="span8">
+    <div class="col-span-8">
     </div>
 </div>

@@ -145,4 +145,20 @@ directive('ngPagination', function () {
             }, true);
         }
     };
+}).
+directive('ngTabActive', function () {
+    //<ul>
+    //<li ng-tab-active="className"></li>
+    //<li ng-tab-active="className"></li>
+    //</ul>
+    // 点击li元素时，该元素将赋予className类，并移除其它兄弟元素的className类
+    return {
+        link: function (scope, element, attr) {
+            var className = attr.ngTabActive;
+            element.bind('click', function () {
+                element.parent().children().removeClass(className);
+                element.addClass(className);
+            });
+        }
+    };
 });

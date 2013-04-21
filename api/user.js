@@ -183,49 +183,45 @@ function adduser(userObj, callback) {
     });
 };
 
-function logout(req, res, dm) {
-    req.delsession();
-    return res.sendjson({
-        logout: true
-    });
-};
-
-function login(req, res, dm) {
-    var Uid, data = req.apibody;
-
-    if (checkUserID(data.logname)) {
-        Uid = jsGen.dao.user.convertID(data.logname);
+function userLogin(loginData, callback) {
+    var Uid;
+    callback = callback || jsGen.lib.tools.callbackFn;
+    console.log(loginData);
+    if (checkUserID(loginData.logname)) {
+        Uid = jsGen.dao.user.convertID(loginData.logname);
         if (!cache[Uid]) {
-            throw jsGen.Err(jsGen.lib.msg.UidNone);
+            return callback(jsGen.Err(jsGen.lib.msg.UidNone));
         }
     }
-    if (data.logname[0] ==='_' || !cache[data.logname.toLowerCase()]) {
-        if (checkEmail(data.logname)) {
-            throw jsGen.Err(jsGen.lib.msg.userEmailNone);
-        } else if (checkUserName(data.logname)) {
-            throw jsGen.Err(jsGen.lib.msg.userNameNone);
+    if (loginData.logname[0] ==='_' || !cache[loginData.logname.toLowerCase()]) {
+        if (checkEmail(loginData.logname)) {
+            return callback(jsGen.Err(jsGen.lib.msg.userEmailNone));
+        } else if (checkUserName(loginData.logname)) {
+            return callback(jsGen.Err(jsGen.lib.msg.userNameNone));
         } else {
-            throw jsGen.Err(jsGen.lib.msg.logNameErr);
+            return callback(jsGen.Err(jsGen.lib.msg.logNameErr));
         }
     } else {
-        Uid = cache[data.logname.toLowerCase()]._id;
+        Uid = cache[loginData.logname.toLowerCase()]._id;
     }
-    jsGen.dao.user.getAuth(Uid, dm.intercept(function (doc) {
-        if (doc.locked) {
-            throw jsGen.Err(jsGen.lib.msg.userLocked, 'locked');
+    jsGen.dao.user.getAuth(Uid, function (err, doc) {
+        if (err) {
+            return callback(jsGen.Err(jsGen.lib.msg.dbErr));
+        } else if (doc.locked) {
+            return callback(jsGen.Err(jsGen.lib.msg.userLocked, 'locked'));
         } else if (doc.loginAttempts >= 5) {
             jsGen.dao.user.setUserInfo({
                 _id: Uid,
                 locked: true
-            }, dm.intercept(function (doc) {
+            }, function (err, doc) {
                 jsGen.dao.user.setLoginAttempt({
                     _id: Uid,
                     loginAttempts: 0
                 });
-            }));
-            throw jsGen.Err(jsGen.lib.msg.loginAttempts);
+            });
+            return callback(jsGen.Err(jsGen.lib.msg.loginAttempts));
         }
-        if (data.logpwd === HmacSHA256(doc.passwd, data.logname)) {
+        if (loginData.logpwd === HmacSHA256(doc.passwd, loginData.logname)) {
             if (doc.loginAttempts > 0) {
                 jsGen.dao.user.setLoginAttempt({
                     _id: Uid,
@@ -241,19 +237,41 @@ function login(req, res, dm) {
                     ip: req.ip
                 }
             });
-            userCache.getP(Uid, dm.intercept(function (doc) {
-                req.session.Uid = Uid;
-                req.session.role = doc.role;
-                return res.sendjson(doc);
-            }));
+            return callback(null, Uid);
         } else {
             jsGen.dao.user.setLoginAttempt({
                 _id: Uid,
                 loginAttempts: 1
             });
-            throw jsGen.Err(jsGen.lib.msg.userPasswd, 'passwd');
+            return callback(jsGen.Err(jsGen.lib.msg.userPasswd, 'passwd'));
         }
-    }));
+    });
+};
+
+function logout(req, res, dm) {
+    req.delsession();
+    return res.sendjson({
+        logout: true
+    });
+};
+
+function login(req, res, dm) {
+    var Uid, data = req.apibody;
+    if (typeof req.apibody !== 'object') {
+        throw jsGen.Err(jsGen.lib.msg.requestDataErr);
+    } else {
+        userLogin(req.apibody, function (err, Uid) {
+            if (err) {
+                throw err;
+            } else {
+                userCache.getP(Uid, dm.intercept(function (doc) {
+                    req.session.Uid = Uid;
+                    req.session.role = doc.role;
+                    return res.sendjson(doc);
+                }));
+            }
+        });
+    }
 };
 
 function register(req, res, dm) {

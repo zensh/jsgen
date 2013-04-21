@@ -1,18 +1,18 @@
 <div class="row">
-    <div class="span9">
+    <div class="col-span-9">
         <div class="panel">
             <ul class="nav nav-tabs">
-                <li id="view-latest" class="active" >
-                    <a href="#" ng-click="getList('latest')" data-toggle="tab">最新</a>
+                <li id="latest">
+                    <a href="/latest" title="最新文章">最新</a>
                 </li>
-                <li id="view-hots" >
-                    <a href="#" ng-click="getList('hots')" data-toggle="tab">热门</a>
+                <li id="hots">
+                    <a href="/hots" title="热门文章">热门</a>
                 </li>
-                <li id="view-update" >
-                    <a href="#" ng-click="getList('update')" data-toggle="tab">更新</a>
+                <li id="update">
+                    <a href="/update" title="最近更新文章">更新</a>
                 </li>
-                <li id="view-other" ng-show="other.name">
-                    <a href="#" ng-click="getList(other._id)" data-toggle="tab">{{other.name}}</a>
+                <li id="other" ng-show="other.name">
+                    <a href="#" ng-click="getList(other._id)">{{other.name}}</a>
                 </li>
                 <a href="/add" class="btn btn-success pull-right" ng-show="isLogin">发表文章</a>
             </ul>
@@ -32,12 +32,12 @@
                             <h4><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
                             <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
                             <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
-                            <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
+                            <i class="label pull-right" title="热度">{{article.hots}}</i>
                             </h4>
                         </header>
                         <section class="media-content" ng-parse-markdown="article.content"></section>
                         <footer>
-                            <ul class="list-inline muted">
+                            <ul class="list-inline text-muted">
                                 <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
                                 {{article.date | formatDate}}发表</li>
                                 <li>{{article.visitors}}次访问</li>
@@ -55,30 +55,31 @@
         </div>
         <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
     </div>
-    <div class="span3 sidebar">
-        <div class="panel hidden-phone">
+    <div class="col-span-3 sidebar">
+        <div class="panel">
             <div class="thumbnail inner text-center">
                 <img src="/static/img/angularjs.png" alt="angularjs">
                 <div class="caption">
                 <h5 class="text-left">使用超动感HTML &amp; JS开发WEB应用！</h5>
-                <p><a href="https://github.com/angular/angular.js" class="btn btn-info" target="_blank">GitHub开源</a>
-                    <a href="http://code.angularjs.org/" class="btn btn-info" target="_blank">最新下载</a></p>
+                    <a href="https://github.com/angular/angular.js" class="btn btn-info" target="_blank">GitHub</a>
+                    <a href="http://weibo.com/angularjs/" class="sina" target="_blank">
+                        <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>
                 </div>
             </div>
         </div>
-        <div class="panel hidden-phone">
+        <div class="panel">
             <div class="thumbnail inner text-center">
                 <h2><strong>{<span class="text-success">js</span><span class="text-hot">G</span><span class="text-success">en</span>}</strong></h2>
                 <div class="caption">
                 <h5 class="text text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</h5>
-                <p><a href="https://github.com/zensh/jsgen" class="btn btn-info" target="_blank">GitHub开源</a></p>
+                    <a href="https://github.com/zensh/jsgen" class="btn btn-info" target="_blank">GitHub</a>
+                    <a href="http://weibo.com/zensh" class="sina" target="_blank">
+                        <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>
                 </div>
             </div>
         </div>
         <div class="panel hidden-phone">
-            <header class="inner">
-                <strong class="muted">社区帮助</strong>
-            </header>
+            <header class="panel-heading text-muted">社区帮助</header>
             <div class="inner">
                 <ol>
                     <li>本社区网站不支持IE8以下的浏览器，推荐使用谷歌Chrome。</li>
@@ -89,9 +90,7 @@
             </div>
         </div>
         <div class="panel hidden-phone">
-            <header class="inner">
-                <strong class="muted">热门评论</strong>
-            </header>
+            <header class="panel-heading text-muted">热门评论</header>
             <ul class="media-list inner">
                 <li class="media" ng-repeat="comment in hotComments">
                   <div class="media-body" id="{{comment._id}}">
@@ -106,18 +105,14 @@
             </ul>
         </div>
         <div class="panel">
-            <header class="inner">
-                <strong class="muted">赞助链接</strong>
-            </header>
+            <header class="panel-heading text-muted">赞助链接</header>
             <div class="inner">
             </div>
         </div>
         <div class="panel">
-            <header class="inner">
-                <strong class="muted">网站状态</strong>
-            </header>
+            <header class="panel-heading text-muted">网站状态</header>
             <div class="inner">
-                <ul class="list-inline inner">
+                <ul class="list-inline">
                   <li>访问总数：{{global.visitors}}</li>
                   <li>文章总数：{{global.articles}}</li>
                   <li>评论总数：{{global.comments}}</li>

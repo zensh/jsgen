@@ -52,7 +52,6 @@
                     <a class="navbar-brand" href="/" ng-bind="global.title"></a>
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
-                            <li class="divider-vertical"></li>
                             <li ng-show="isLogin"><a href="/home">我的主页</a></li>
                             <li><a href="/tag/JavaScript">JavaScript</a></li>
                             <li class="visible-phone"><a href="/tag/AngularJS">AngularJS</a></li>
@@ -95,12 +94,12 @@
         <div id="main" class="container" ng-view></div>
         <footer class="footer">
             <div class="container">
-                <p class="navbar-text muted">
-                    <a class="muted" ng-href="{{global.url}}" ng-bind="global.title"></a> ©2013 Powered by
+                <p class="navbar-text text-muted">
+                    <a class="text-muted" ng-href="{{global.url}}" ng-bind="global.title"></a> ©2013 Powered by
                     <a href="https://github.com/zensh/jsgen" target="_blank" ng-bind="'jsGen '+global.info.version"></a>
-                    [<a class="muted" href="http://angularjs.org" target="_blank" ng-bind="'AngularJS '+global.info.angularjs"></a>&nbsp;
-                    <a class="muted" href="http://nodejs.org" target="_blank" ng-bind="'Node.js '+global.info.nodejs"></a>&nbsp;
-                    <a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank" ng-bind="'rrestjs '+global.info.rrestjs"></a>]
+                    [<a class="text-muted" href="http://angularjs.org" target="_blank" ng-bind="'AngularJS '+global.info.angularjs"></a>&nbsp;
+                    <a class="text-muted" href="http://nodejs.org" target="_blank" ng-bind="'Node.js '+global.info.nodejs"></a>&nbsp;
+                    <a class="text-muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank" ng-bind="'rrestjs '+global.info.rrestjs"></a>]
                 </p>
             </div>
         </footer>
