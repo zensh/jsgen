@@ -8,9 +8,111 @@
 
 jsGen是用纯JavaScript编写的新一代开源社区网站系统，主要用于搭建SNS类型的专业社区，对客户端AngularJS应用稍作修改也可变成多用户博客系统、论坛或者CMS内容管理系统。
 
-jsGen基于NodeJS编写服务器端程序，提供静态文件响应和REST API接口服务;基于AngularJS编写浏览器端应用，构建交互式网页UI视图;基于MongoDB编写数据存储系统。
+Node.js provide REST API server, AngularJS web app gets data from server and generate the view to user.
 
-jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先响应由AngularJS编写的Web应用，这个应用是由html模板、js和css静态文件组成。客户端获取到AngularJS应用后，再由AngularJS与后台的NodeJS服务器API接口通信，根据用户请求交换数据，这些数据是纯粹json数据包，AngularJS获取到json数据包编译成相关页面展现给用户。因此，用户进入网站时，只需在首次载入视图模板（html、js、css），其后的所有请求都是纯json数据交换，不再包含html代码，大大减少了数据流量。
+jsGen基于NodeJS编写服务器端程序，提供静态文件响应和REST API接口服务。基于AngularJS编写浏览器端应用，构建交互式网页UI视图;基于MongoDB编写数据存储系统。
+
+#### 安装 (Installation)
+
+**Dependencies: Node.js 0.10.x and mongoDB 2.4.x.**
+
+**系统需要Node.js 0.10.x和mongoDB 2.4.x**
+
+config目录下的config.js配置jsGen运行参数，包括监听端口（默认3000）、数据库等，内有说明。
+
+api目录下的install.js是jsGen运行初始化文件，设置管理员初始密码，邮箱，内有说明。
+
+    git clone git://github.com/zensh/jsgen.git
+    cd jsgen
+    npm install node-gyp    //windows需要先运行此命令，linux不需要
+                                           //另外windows请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
+    npm install                     //npm安装依赖模块，请确保依赖模块全部安装好。
+    npm start                       //启动jsgen（或者 node app.js）
+
+浏览器端输入网址[http://localhost:3000/](http://localhost:3000/)即可访问。
+
+Administrator username: **admin** password: **admin@zensh.com** ，You can change it after login.
+
+管理员用户名: **admin** 密码: **admin@zensh.com** ，你可以在后台修改。
+
+#### 升级 (Update)
+
+    git pull                   //获取jsGen更新
+    npm update          //获取Node.js模块更新
+    npm start              //重启jsGen
+    rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
+
+### 更新 (Changelog)
+
+ + 2013/04/21 jsGen v0.3.0 服务器端增加用户自动登录功能，用户邮箱手动验证。客户端AngularJS应用更新jQuery、Bootstrap至最新版，优化UI。
+ + 2013/04/13 jsGen v0.2.11 调整代码，升级AngularJS到1.0.6。
+ + 2013/04/13 jsGen v0.2.10 视觉调整。
+ + 2013/04/13 jsGen v0.2.9 修复热门文章、热门评论bug，优化代码，暂停使用Cluster。
+ + 2013/04/09 jsGen v0.2.8 修复文章编辑器Bug。
+ + 2013/04/07 jsGen v0.2.7 修复process.nextTick引起的bug（导致进程退出），优化热门文章统计、热门评论统计、最近更新统计。
+ + 2013/04/07 jsGen v0.2.6 优化cacheTL，优化在线用户统计。
+ + 2013/04/03 jsGen v0.2.5 修复cacheTL的bug（该Bug可能导致获取后台信息出错）。
+ + 2013/04/02 jsGen v0.2.4 完善用户个人主页，显示阅读时间线、更新文章和已阅读文章列表。
+ + 2013/04/02 jsGen v0.2.3 修复用户名、用户邮箱大小写漏洞。
+ + 2013/04/02 jsGen v0.2.2 修正bug，调整BootStrap视图，使网页视觉效果更明了，可开启Node.js的cluster多进程功能。
+ + 2013/04/01 jsGen v0.2.0 大幅优化用户、文章、标签ID相关代码，代码更简洁。
+ + 2013/03/31 jsGen v0.1.2 修正bug，添加加载进度条。
+ + 2013/03/30 jsGen v0.1.1 修正几个bug，添加forever启动脚本。
+ + 2013/03/29 jsGen v0.1.0 测试版发布。
+
+### 目录和文件 (menus and files)
+
+    +api    // 服务器端API目录
+        -article.js    // 文章和评论系统API接口
+        -collection.js    // 合集系统API接口
+        -index.js    // 网站全局信息API接口
+        -install.js    // 初始化安装程序
+        -message.js    // 站内信息系统API接口
+        -tag.js    // 标签系统API接口
+        -user.js    // 用户系统API
+    +config
+        -config.js    // 网站配置文件
+    +dao    // MongoDB数据库访问层
+        -articleDao.js    // 文章评论访问接口
+        -collectionDao.js    // 合集系统访问接口
+        -indexDao.js    // 网站全局信息访问接口
+        -messageDao.js    // 站内信息系统访问接口
+        -mongoDao.js    // MongoDB访问接口
+        -tagDao.js    // 标签系统访问接口
+        -userDao.js    // 用户系统访问接口
+    +lib    // 通用工具模块
+        -anyBaseConverter.js    // 通用进制转换器
+        -cacheLRU.js    // LRU缓存模块
+        -cacheTL.js     // TL缓存模块
+        -email.js    // SMTP Email模块
+        -json.js    // 数据库格式模板
+        -msg.js    // 程序信息
+        -tools.js    // 其它通用工具函数
+    +mylogs    // 日志目录，网站运行后产生内容
+    +node_modules    // Node.js模块目录，npm install后产生内容
+    +static    // 浏览器端AngularJS WEB应用
+        +css
+        +fonts
+        +img
+        +js
+            +lib    // AngularJS、jQuery等js模块
+            -app.js    // 路由及初始化js模块
+            -controllers.js    // 控制器js模块
+            -directives.js    // 指令js模块
+            -filters.js    // 过滤器js模块
+            -services.js    // 通用服务js模块
+            -tools.js    // 工具函数js模块
+        +md    // MarkDown文档
+        +tpl    // html模板
+        -favicon.ico
+        -index.html    // AngularJS WEB应用入口文件
+        -index_dev.html  // 开发模式入口文件，未压缩js，方便调试
+    +tmp    // 缓存目录
+        +static    //  压缩js、css缓存目录，必须
+        +tpl    // html模板文件缓存目录
+        +upload    // 上传文件缓存目录
+    -app.js    // Node.js入口文件
+    -package.json    // jsGen信息文件
 
 ### 特点 (Features)
 
@@ -34,24 +136,6 @@ jsGen基本原理：客户端浏览器发起访问请求后，NodeJS服务器先
 
 10. **Robot SEO系统**，由于AngularJS网页内容在客户端动态生成，对搜索引擎robot天生免疫。jsGen针对robot访问，在服务器端动态生成robot专属html页面。搜索引擎Robot名称可在管理后台添加。
 
-### 更新 (Changelog)
-
- + 2013/04/21 jsGen v0.3.0 服务器端增加用户自动登录功能，用户邮箱手动验证。客户端AngularJS应用更新jQuery、Bootstrap至最新版，优化UI。
- + 2013/04/13 jsGen v0.2.11 调整代码，升级AngularJS到1.0.6。
- + 2013/04/13 jsGen v0.2.10 视觉调整。
- + 2013/04/13 jsGen v0.2.9 修复热门文章、热门评论bug，优化代码，暂停使用Cluster。
- + 2013/04/09 jsGen v0.2.8 修复文章编辑器Bug。
- + 2013/04/07 jsGen v0.2.7 修复process.nextTick引起的bug（导致进程退出），优化热门文章统计、热门评论统计、最近更新统计。
- + 2013/04/07 jsGen v0.2.6 优化cacheTL，优化在线用户统计。
- + 2013/04/03 jsGen v0.2.5 修复cacheTL的bug（该Bug可能导致获取后台信息出错）。
- + 2013/04/02 jsGen v0.2.4 完善用户个人主页，显示阅读时间线、更新文章和已阅读文章列表。
- + 2013/04/02 jsGen v0.2.3 修复用户名、用户邮箱大小写漏洞。
- + 2013/04/02 jsGen v0.2.2 修正bug，调整BootStrap视图，使网页视觉效果更明了，可开启Node.js的cluster多进程功能。
- + 2013/04/01 jsGen v0.2.0 大幅优化用户、文章、标签ID相关代码，代码更简洁。
- + 2013/03/31 jsGen v0.1.2 修正bug，添加加载进度条。
- + 2013/03/30 jsGen v0.1.1 修正几个bug，添加forever启动脚本。
- + 2013/03/29 jsGen v0.1.0 测试版发布。
-
 ### 说明 (Annotation)
 
 **jsGen** 是为[AngularJS中文社区][2]开发的网站系统，测试版已经上线，还请大家温柔测试，积极反馈Bug。
@@ -60,133 +144,9 @@ AngularJS中文社区改版之后，致力于形成一个以AngularJS为主，WE
 
 由于jsGen全新的构架设计未经验证，测试版可能出现各种bug，希望大家能积极评测反馈。jsGen代码将会持续优化，并完善相关代码解释说明文档。对于JS新手来说，这也许是个好的学习实例。
 
-非常感谢[GitHub][3]和在GitHub上贡献开源代码的[Node.js][4]、[AngularJS][5]、[MongoDB][6]、[Bootstrap][7]以及其他JavsScript插件的伟大码农们，还有国内码农贡献的[rrestjs][8]、[mongoskin][9]、[xss][10]等，是你们的贡献，让jsGen得以成型。jsGen也是开源免费（MIT协议）。
+非常感谢[GitHub][3]和在GitHub上贡献开源代码的[Node.js][4]、[AngularJS][5]、[MongoDB][6]、[Bootstrap][7]以及其他JavsScript插件的伟大码农们，还有国内码农贡献的[rrestjs][8]、[mongoskin][9]、[xss][10]等，是你们的贡献，让jsGen得以成型。jsGen也是开源免费。
 
-### 安装 (Installation)
-
-系统需要Node.js 0.10.x和mongoDB 2.4.x。
-
-config目录下的config.js配置jsGen运行参数，包括监听端口（默认3000）、数据库等，内有说明。
-
-api目录下的install.js是jsGen运行初始化文件，设置管理员初始密码，邮箱，内有说明。
-
-    git clone git://github.com/zensh/jsgen.git    //如果未安装git工具，请手动下载jsGen。
-
-    cd jsgen    //进入jsgen目录
-
-    npm install node-gyp    //windows需要先运行此命令，linux不需要，另外windows请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
-    npm install    //npm安装依赖模块，请确保依赖模块全部安装好。
-
-    npm start    //启动jsgen（或者 node app.js）
-
-浏览器端输入网址[http://localhost:3000/](http://localhost:3000/)即可访问。
-
-**更新：**
-
-jsGen测试版升级比较频繁，更新流程如下：
-
-    git pull    //获取jsGen更新
-
-    npm update    //获取Node.js模块更新
-
-    npm start    //重启jsGen
-
-    rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
-
-### 用户访问URL
-
-用户访问URL路由逻辑完全由前端AngularJS应用决定，见`/static/js/app.js`。
-
-    /    //网站首页
-
-    /login    //登录页
-
-    /register    //注册页
-
-    /home    //登录用户首页
-
-    /admin    //管理员后台
-
-    /add    //添加文章页
-
-    /tag    //标签聚合页
-
-    /reset/xxx    //重置密码、解锁请求页
-
-    /Uxxxxx    //用户个人主页，Uxxxxx为用户唯一标志ID
-
-    /Axxx/edit    //文章编辑页
-
-    /Axxx    //文章展示页,Axxx为文章、评论唯一标志ID，评论在文章下部展现，当然也可像文章一样独立展现。
-
-    /Txxx    //标签相关文章列表,Txxx为标签唯一标志ID
-
-    /Cxxx    //合集展示页
-
-### REST API接口
-
-**API接口URL一般支持GET、POST、DELETE请求方法，GET、POST采用JSON作为数据交换格式**
-
-
-    /api/index    //(GET) 获取网站全局配置文件、包括站点信息、部分站点参数
-
-    /api/admin //(GET POST) 设置网站全局参数
-
-    /api/user //(GET POST) 获取已登录用户信息，包括用户个人信息和用户关注而未读的文章列表
-    /api/user/index (GET POST)
-
-    /api/user/login //(POST) 用户登录
-
-    /api/user/logout //(GET) 退出登录
-
-    /api/user/register //(POST) 用户注册
-
-    /api/user/reset //(GET POST) 用户邮箱验证、申请解锁、重置密码、修改邮箱等涉及邮箱验证的操作
-
-    /api/user/admin //(GET POST) 用户管理相关后台接口
-
-    /api/user/article //(GET) 获取已登录用户（自己）的文章列表
-
-    /api/user/comment //(GET) 获取已登录用户（自己）的评论列表
-
-    /api/user/mark //(GET) 获取已登录用户（自己）的标记文章列表
-
-    /api/user/fans //(GET) 获取已登录用户（自己）的粉丝列表
-
-    /api/user/follow //(GET) 获取已登录用户（自己）的关注列表
-
-    /api/user/Uxxxxx //(GET POST) 获取用户Uxxxxx的用户信息，包括用户公开的个人信息和用户最新发表的文章列表
-
-    /api/user/Uxxxxx/article //(GET) 获取用户Uxxxxx的文章列表
-
-    /api/user/Uxxxxx/fans //(GET) 获取用户Uxxxxx的粉丝列表
-
-    /api/article //(GET POST) 获取最新文章列表，添加文章
-    /api/article/index //(GET POST)
-
-    /api/article/admin //(GET POST) 文章管理相关后台接口
-
-    /api/article/comment //(GET POST) 获取热门评论、批量获取指定ID的评论
-
-    /api/article/latest //(GET) 获取最新文章列表（按发表时间排序）
-
-    /api/article/hots //(GET) 获取最热文章列表（按文章热度排序）
-
-    /api/article/update //(GET) 获取最近更新（按文章最后更新、最后评论时间排序）
-
-    /api/article/Axxx //(GET POST DELETE) 获取文章Axxx的相信内容
-
-    /api/article/Axxx/comment //(GET) 获取文章Axxx的更多评论
-
-    /api/tag //(GET POST) 获取热门标签列表
-
-    /api/tag/admin //(GET POST) 标签管理后台相关接口
-
-    /api/tag/Txxx //(GET POST) 获取标签Txxx包含的文章列表（按照发表时间排序）
-
-    /api/message
-
-    /api/collection
+### MIT 协议
 
 
   [1]: https://github.com/zensh/jsgen
