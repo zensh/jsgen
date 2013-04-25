@@ -1,6 +1,8 @@
-{jsGen} <small>0.3.0</small>
+{jsGen} <small>0.3.1</small>
 =======
 **——JavaScript Generated**
+
+### 在线演示及交流社区：[AngularJS中文社区][2]
 
 ### 简介 (Introduction)
 
@@ -25,7 +27,7 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
     git clone git://github.com/zensh/jsgen.git
     cd jsgen
     npm install node-gyp    //windows需要先运行此命令，linux不需要
-                                           //另外windows请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
+                                           //请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
     npm install                     //npm安装依赖模块，请确保依赖模块全部安装好。
     npm start                       //启动jsgen（或者 node app.js）
 
@@ -44,6 +46,7 @@ Administrator username: **admin** password: **admin@zensh.com** ，You can chang
 
 ### 更新 (Changelog)
 
+ + 2013/04/25 jsGen v0.3.1 浏览器端AngularJS应用自动更新功能。
  + 2013/04/21 jsGen v0.3.0 服务器端增加用户自动登录功能，用户邮箱手动验证。客户端AngularJS应用更新jQuery、Bootstrap至最新版，优化UI。
  + 2013/04/13 jsGen v0.2.11 调整代码，升级AngularJS到1.0.6。
  + 2013/04/13 jsGen v0.2.10 视觉调整。

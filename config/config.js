@@ -17,7 +17,7 @@ module.exports = {
 	staticFolder:'/static',  //自动响应静态文件的根目录，比如  http://rrestjs.com/static/rrest.jpg 将返回 baseDir+'/static/rrest.jpg'
 	staticParse:true,//是否开启静态文件压缩整合功能
     staticParseName:'parse',//压缩整合功能的名称，例如用户可以'/static/?parse=/index.body.css|/index.user.css|/user.face.css'压缩整合成一个css响应给客户端
-	staticParseCacheTime:1000*60*60*24,//压缩整合缓存时间，1小时
+	staticParseCacheTime:1000*60*60,//压缩整合缓存时间，1小时
 	staticParseCacheFolder:'/tmp/static',//缓存整合功能的缓存文件夹
 	staticParseMaxNumber:15,//整合压缩css或js文件的最大上限，建议不要超过15
 	uploadFolder:'/tmp/upload', //文件上传的临时目录
@@ -45,11 +45,11 @@ module.exports = {
 	isSession:true, //是否开启session，开启会影响性能。
 	syncSession:false,//当多进程时是否开启session同步，开启会影响性能。
 	sessionName:'Sid', //保存session id 的cookie 的name
-	sessionExpire:1000*60*20, //false表示会话session，否则填入1000*60，表示session有效1分钟
+	sessionExpire:1000*60*10, //false表示会话session，否则填入1000*60，表示session有效1分钟
 	clearSessionSetInteval:1000*60*60, //自动清理垃圾session时间，建设设置为1小时
-	clearSessionTime:1000*60*60*24*3,//会话session超时，建议设置为1天
+	clearSessionTime:1000*60*60*24,//会话session超时，建议设置为1天
 //session内存存储
-	sessionDbStore:true,//是否使用mongodb数据库存储session，如果设置为true，则不需要同步session
+	sessionDbStore:false,//是否使用mongodb数据库存储session，如果设置为true，则不需要同步session
 //deflate和gzip配置
 	isZlib:true, //是否开启delate和gizp压缩，大并发压缩虽然可以减少传输字节数，但是会影响性能
 	ZlibArray:['text/plain', 'application/javascript', 'text/css', 'application/xml', 'text/html'], //只压缩数组中的content-type响应

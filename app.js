@@ -1,14 +1,15 @@
 var domain = require('domain'),
     http = require('http'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    zlib = require('zlib');
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
+jsGen.version = '0.3.1';
 
 serverDm.on('error', function (err) {
     delete err.domain;
-    //console.log('SevERR:******************');
     jsGen.errlog.error(err);
 });
 serverDm.run(function () {
@@ -80,7 +81,7 @@ serverDm.run(function () {
                 jsGen.api.message = require('./api/message.js');
                 fs.readFile(processPath + '/package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
-                    jsGen.version = jsGen.config.info.version;
+                    jsGen.config.info.version = jsGen.version;
                     jsGen.config.info.nodejs = process.versions.node;
                     jsGen.config.info.rrestjs = _restConfig._version;
                 }));
@@ -93,14 +94,6 @@ serverDm.run(function () {
 function createServer() {
     var server = http.createServer(function (req, res) {
         var dm = domain.create();
-        // res.on('finish', function () {
-        //     //jsGen.dao.db.close();
-        //     process.nextTick(function () {
-        //         dm.dispose();
-        //     });
-        // });
-        //dm.add(req);
-        //dm.add(res);
         dm.on('error', function (err) {
             console.log(err);
             delete err.domain;
@@ -149,8 +142,15 @@ function createServer() {
                 jsGen.dao.index.setGlobalConfig({
                     visitors: 1
                 });
-                res.file('/static/index.html');
-                //res.file('/static/index_dev.html');
+                res.setHeader("Content-Type", "text/html");
+                if (jsGen.indexTpl) {
+                    res.send(jsGen.indexTpl);
+                } else {
+                    fs.readFile(processPath + '/static/index_dev.html', 'utf8', serverDm.intercept(function (data) {
+                        jsGen.indexTpl = data.replace(/_jsGenVersion_/g, jsGen.version);
+                        res.send(jsGen.indexTpl);
+                    }));
+                }
             }
         });
     }).listen(jsGen.module.rrestjs.config.listenPort);

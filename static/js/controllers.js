@@ -230,9 +230,9 @@ controller('homeCtrl', ['$scope', function ($scope) {
     $scope.isMe = true;
     $scope.help = null;
     $scope.userOperate = {Uid: 'index', OP: 'index'};
-    $scope.getTpl = '/static/tpl/user-index.html';
+    $scope.getTpl = jsGen.newVersion('/static/tpl/user-index.html');
     $scope.setTpl = function (tpl, operate) {
-        $scope.getTpl = '/static/tpl/' + tpl;
+        $scope.getTpl = jsGen.newVersion('/static/tpl/' + tpl);
         if (operate) {
             $scope.userOperate.Uid = operate;
         }
@@ -291,9 +291,9 @@ controller('userCtrl', ['$scope', '$routeParams', function ($scope, $routeParams
         Uid = 'U' + $routeParams.ID;
     }
     $scope.userOperate = {Uid: Uid, OP: 'index'};
-    $scope.getTpl = '/static/tpl/user-article.html';
+    $scope.getTpl = jsGen.newVersion('/static/tpl/user-article.html');
     $scope.setTpl = function (tpl, operate) {
-        $scope.getTpl = '/static/tpl/' + tpl;
+        $scope.getTpl = jsGen.newVersion('/static/tpl/' + tpl);
         if (operate) {
             $scope.userOperate.OP = operate;
         }
@@ -1035,9 +1035,9 @@ controller('adminCtrl', ['$scope', function ($scope) {
     if (!$scope.isEditor) {
         jsGen.location.path('/');
     }
-    $scope.getTpl = '/static/tpl/admin-index.html';
+    $scope.getTpl = jsGen.newVersion('/static/tpl/admin-index.html');
     $scope.setTpl = function (tpl) {
-        $scope.getTpl = '/static/tpl/' + tpl;
+        $scope.getTpl = jsGen.newVersion('/static/tpl/' + tpl);
     };
 }]).
 controller('adminUserCtrl', ['$scope', function ($scope) {

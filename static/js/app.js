@@ -1,68 +1,79 @@
 'use strict';
+// 注册全局变量jsGen
+window.jsGen = jsGen || {};
 
 angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools']).
-config(['$routeProvider', '$locationProvider',
+provider('newVersion', function () {
+    var get = function (url) {
+        return url + '?v=' + (jsGen.version || '');
+    };
+    this.$get = function () {
+        return get;
+    };
+    this.get = get;
+}).
+config(['$routeProvider', '$locationProvider', 'newVersionProvider',
 
-function ($routeProvider, $locationProvider) {
+function ($routeProvider, $locationProvider, newVersionProvider) {
     $routeProvider.
     when('/', {
-        templateUrl: '/static/tpl/index.html',
+        templateUrl: newVersionProvider.get('/static/tpl/index.html'),
         controller: 'indexCtrl'
     }).
     when('/login', {
-        templateUrl: '/static/tpl/login.html',
+        templateUrl: newVersionProvider.get('/static/tpl/login.html'),
         controller: 'userLoginCtrl'
     }).
     when('/register', {
-        templateUrl: '/static/tpl/register.html',
+        templateUrl: newVersionProvider.get('/static/tpl/register.html'),
         controller: 'userRegisterCtrl'
     }).
     when('/home', {
-        templateUrl: '/static/tpl/user.html',
+        templateUrl: newVersionProvider.get('/static/tpl/user.html'),
         controller: 'homeCtrl'
     }).
     when('/admin', {
-        templateUrl: '/static/tpl/admin.html',
+        templateUrl: newVersionProvider.get('/static/tpl/admin.html'),
         controller: 'adminCtrl'
     }).
     when('/add', {
-        templateUrl: '/static/tpl/article-editor.html',
+        templateUrl: newVersionProvider.get('/static/tpl/article-editor.html'),
         controller: 'articleEditorCtrl'
     }).
     when('/tag', {
-        templateUrl: '/static/tpl/tag.html',
+        templateUrl: newVersionProvider.get('/static/tpl/tag.html'),
         controller: 'tagCtrl'
     }).
     when('/reset/:RE', {
-        templateUrl: '/static/tpl/reset.html',
+        templateUrl: newVersionProvider.get('/static/tpl/reset.html'),
         controller: 'userResetCtrl'
     }).
     when('/U:ID', {
-        templateUrl: '/static/tpl/user.html',
+        templateUrl: newVersionProvider.get('/static/tpl/user.html'),
         controller: 'userCtrl'
     }).
     when('/user/:UID', {
-        templateUrl: '/static/tpl/user.html',
+        templateUrl: newVersionProvider.get('/static/tpl/user.html'),
         controller: 'userCtrl'
     }).
     when('/A:ID/edit', {
-        templateUrl: '/static/tpl/article-editor.html',
+        templateUrl: newVersionProvider.get('/static/tpl/article-editor.html'),
         controller: 'articleEditorCtrl'
     }).
     when('/A:ID', {
-        templateUrl: '/static/tpl/article.html',
+        templateUrl: newVersionProvider.get('/static/tpl/article.html'),
         controller: 'articleCtrl'
     }).
     when('/C:ID', {
-        templateUrl: '/static/tpl/collection.html',
+        templateUrl: newVersionProvider.get('/static/tpl/collection.html'),
         controller: 'collectionCtrl'
     }).
     when('/tag/:TAG', {
-        templateUrl: '/static/tpl/index.html',
+        templateUrl: newVersionProvider.get('/static/tpl/index.html'),
         controller: 'indexCtrl'
     }).
     when('/:OP', {
-        templateUrl: '/static/tpl/index.html',
+        templateUrl: newVersionProvider.get('/static/tpl/index.html'),
         controller: 'indexCtrl'
     }).
     otherwise({
@@ -70,11 +81,9 @@ function ($routeProvider, $locationProvider) {
     });
     $locationProvider.html5Mode(true);
 }]).
-run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'tools', 'cache', 'rest', 'sanitize',
+run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'newVersion', 'tools', 'cache', 'rest', 'sanitize',
     'MdParse', 'MdEditor', 'getArticle', 'getUser', 'getList', 'getMarkdown', function ($rootScope, $http, $location, $timeout, $filter,
-    $anchorScroll, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getUser, getList, getMarkdown) {
-    // 注册全局变量jsGen
-    window.jsGen = {};
+$anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getArticle, getUser, getList, getMarkdown) {
 
     jsGen = tools(jsGen); //添加jsGen系列工具函数
     jsGen.http = $http;
@@ -82,6 +91,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     jsGen.timeout = $timeout;
     jsGen.filter = $filter;
     jsGen.anchorScroll = $anchorScroll;
+    jsGen.newVersion = newVersion;
     jsGen.cache = cache;
     jsGen.rest = rest;
     jsGen.sanitize = sanitize;
@@ -171,8 +181,11 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
         });
     };
     $rootScope.loading = true;
+
     function getServTime() {
-        var result = jsGen.rest.index.get({OP: 'time'}, function () {
+        var result = jsGen.rest.index.get({
+            OP: 'time'
+        }, function () {
             if (result.timestamp) {
                 $rootScope.global.timestamp = result.timestamp;
             }
@@ -211,7 +224,7 @@ run(['$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll',
     $rootScope.$watch('loading', function (value) {
         if (value) {
             $timeout(function () {
-                    $rootScope.loadingOn = $rootScope.loading;
+                $rootScope.loadingOn = $rootScope.loading;
             }, 1000);
         } else {
             $rootScope.loadingOn = false;
