@@ -18,7 +18,7 @@
                     </span>
                 </div>
             </header>
-            <section class="inner" ng-parse-markdown="article.content">
+            <section class="inner" gen-parse-markdown="article.content">
             </section>
             <footer class="page-footer inner">
                 <div class="pull-right">
@@ -58,7 +58,7 @@
                 <h5>{{replyTitle}}</h5>
                 <div id="wmd-preview" class="well wmd-preview" ng-show="wmdShow=='preview'">
                 </div>
-                <div class="well wmd-preview" ng-show="wmdShow=='help'" ng-parse-markdown="markdownHelp">
+                <div class="well wmd-preview" ng-show="wmdShow=='help'" gen-parse-markdown="markdownHelp">
                 </div>
                 <form name="addArticle" ng-show="wmdShow=='edit'">
                     <div id="wmd-button-bar">
@@ -69,20 +69,20 @@
                     <textarea class="wmd-input" id="wmd-input" ng-model="content" rows="6"
                     required>
                     </textarea>
-                    <div class="btn-toolbar pull-right">
-                        <div class="btn-group">
-                            <a class="btn btn-small btn-success" ng-click="wmdHelp('preview')">文章预览</a>
-                            <a class="btn btn-small btn-success" ng-click="wmdHelp('edit')" ng-hide="wmdShow=='edit'">编辑文章</a>
-                            <a class="btn btn-small btn-info" ng-click="wmdHelp('help')">Markdown语法</a>
-                        </div>
-                        <div class="btn-group">
-                            <a ng-click="reply(article)" class="btn btn-small btn-primary" ng-show="replyToComment">取消</a>
-                        </div>
-                        <div class="btn-group">
-                            <a ng-click="submit()" class="btn btn-small btn-primary" ng-disabled="!editSave">提    交</a>
-                        </div>
-                    </div>
                 </form>
+                <div class="btn-toolbar pull-right">
+                    <div class="btn-group">
+                        <a class="btn btn-small btn-success" ng-click="wmdHelp('preview')">文章预览</a>
+                        <a class="btn btn-small btn-success" ng-click="wmdHelp('edit')" ng-hide="wmdShow=='edit'">编辑文章</a>
+                        <a class="btn btn-small btn-info" ng-click="wmdHelp('help')">Markdown语法</a>
+                    </div>
+                    <div class="btn-group">
+                        <a ng-click="reply(article)" class="btn btn-small btn-primary" ng-show="replyToComment">取消</a>
+                    </div>
+                    <div class="btn-group">
+                        <a ng-click="submit()" class="btn btn-small btn-primary" ng-disabled="!editSave">提    交</a>
+                    </div>
+                </div>
             </section>
             <ul class="media-list">
                 <li class="media" ng-repeat="comment in article.commentsList">
@@ -93,7 +93,7 @@
                     <header class="media-heading">
                         <h6><a href="#" ng-click="getComments(comment.refer._id, comment)">{{comment.title}}</a></h6>
                     </header>
-                    <div class="media-content" ng-parse-markdown="comment.content"></div>
+                    <div class="media-content" gen-parse-markdown="comment.content"></div>
                     <footer>
                         <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
                             {{comment.date | formatDate}}发表</span>
@@ -120,7 +120,7 @@
                     <header class="media-heading">
                         <h6>{{comment.title}}</h6>
                     </header>
-                    <section class="media-content" ng-parse-markdown="comment.content"></section>
+                    <section class="media-content" gen-parse-markdown="comment.content"></section>
                     <footer>
                         <span><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a>
                             发表于{{comment.date | formatDate}}</span>
@@ -135,7 +135,7 @@
                   </div>
                 </div>
             </section>
-            <section class="pull-left" ng-pagination="pagination" ng-show="pagination"></section>
+            <section class="pull-left" gen-pagination="pagination" ng-show="pagination"></section>
         </aside>
     </div>
     <div class="col-span-3 sidebar">

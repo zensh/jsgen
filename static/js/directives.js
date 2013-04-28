@@ -2,12 +2,12 @@
 
 /* Directives */
 angular.module('jsGen.directives', []).
-directive('ngParseMarkdown', ['MdParse', 'sanitize', function (MdParse, sanitize) {
-    // <div ng-parse-markdown="document"></div>
+directive('genParseMarkdown', ['MdParse', 'sanitize', function (MdParse, sanitize) {
+    // <div gen-parse-markdown="document"></div>
     // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
     return function (scope, element, attr) {
-        element.addClass('ng-binding parse-markdown').data('$binding', attr.ngParseMarkdown);
-        scope.$watch(attr.ngParseMarkdown, function ngParseMarkdownWatchAction(value) {
+        element.addClass('ng-binding parse-markdown').data('$binding', attr.genParseMarkdown);
+        scope.$watch(attr.genParseMarkdown, function genParseMarkdownWatchAction(value) {
             value = value || '';
             value = MdParse(value);
             value = sanitize(value);
@@ -22,15 +22,15 @@ directive('ngParseMarkdown', ['MdParse', 'sanitize', function (MdParse, sanitize
         });
     };
 }]).
-directive('ngTiming', ['$timeout', function ($timeout) {
+directive('genTiming', ['$timeout', function ($timeout) {
     return {
         transclude: true,
         scope: true,
         template: '<i>{{timing}}</i>',
         link: function (scope, element, attr) {
-            element.addClass('ng-binding').data('$binding', attr.ngTiming);
-            var eventName = attr.ngTiming;
-            scope.$watch(attr.ngTiming, function ngTimingWatchAction(value) {
+            element.addClass('ng-binding').data('$binding', attr.genTiming);
+            var eventName = attr.genTiming;
+            scope.$watch(attr.genTiming, function genTimingWatchAction(value) {
                 var time = +value || 0;
                 if (time <= 0) {
                     return;
@@ -48,8 +48,8 @@ directive('ngTiming', ['$timeout', function ($timeout) {
         }
     };
 }]).
-directive('ngPagination', function () {
-    // <div ng-pagination="pagination"></div>
+directive('genPagination', function () {
+    // <div gen-pagination="pagination"></div>
     // 基于Bootstrap框架
     // pagination是一个对象，如：
     // {
@@ -72,9 +72,9 @@ directive('ngPagination', function () {
                             '<li ng-repeat="n in nums"><a href="#" ng-click="setNum(n)" title="每页{{n}}">{{n}}</a></li>' +
                         '</ul>',
         link: function (scope, element, attr) {
-            element.addClass('ng-binding').data('$binding', attr.ngPagination);
-            var eventName = attr.ngPagination;
-            scope.$watch(attr.ngPagination, function ngPaginationWatchAction(value) {
+            element.addClass('ng-binding').data('$binding', attr.genPagination);
+            var eventName = attr.genPagination;
+            scope.$watch(attr.genPagination, function genPaginationWatchAction(value) {
                 if (!value) {
                     return;
                 }
@@ -146,15 +146,15 @@ directive('ngPagination', function () {
         }
     };
 }).
-directive('ngTabActive', function () {
+directive('genTabActive', function () {
     //<ul>
-    //<li ng-tab-active="className"></li>
-    //<li ng-tab-active="className"></li>
+    //<li gen-tab-active="className"></li>
+    //<li gen-tab-active="className"></li>
     //</ul>
     // 点击li元素时，该元素将赋予className类，并移除其它兄弟元素的className类
     return {
         link: function (scope, element, attr) {
-            var className = attr.ngTabActive;
+            var className = attr.genTabActive;
             element.bind('click', function () {
                 element.parent().children().removeClass(className);
                 element.addClass(className);

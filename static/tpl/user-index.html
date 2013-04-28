@@ -13,7 +13,7 @@
                 <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
                 </h5>
             </header>
-            <section class="media-content" ng-parse-markdown="article.content" ng-class="article.read"></section>
+            <section class="media-content" gen-parse-markdown="article.content" ng-class="article.read"></section>
             <footer>
                 <ul class="list-inline text-muted">
                     <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
@@ -29,5 +29,5 @@
           </div>
         </li>
     </ul>
-    <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
+    <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>
 </div>

@@ -35,7 +35,7 @@
                             <i class="label pull-right" title="热度">{{article.hots}}</i>
                             </h4>
                         </header>
-                        <section class="media-content" ng-parse-markdown="article.content"></section>
+                        <section class="media-content" gen-parse-markdown="article.content"></section>
                         <footer>
                             <ul class="list-inline text-muted">
                                 <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
@@ -53,7 +53,7 @@
                 </ul>
             </div>
         </div>
-        <div class="pull-left" ng-pagination="pagination" ng-show="pagination"></div>
+        <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>
     </div>
     <div class="col-span-3 sidebar">
         <div class="panel">
@@ -95,7 +95,7 @@
                 <li class="media" ng-repeat="comment in hotComments">
                   <div class="media-body" id="{{comment._id}}">
                     <strong class="text-hot pull-left" title="热度"><em>{{comment.hots}}</em></strong>
-                    <section class="media-content" ng-parse-markdown="comment.content"></section>
+                    <section class="media-content" gen-parse-markdown="comment.content"></section>
                     <footer>
                         <strong><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a></strong>
                             <a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a>

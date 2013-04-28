@@ -6,7 +6,7 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.3.1';
+jsGen.version = '0.3.2';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -146,7 +146,7 @@ function createServer() {
                 if (jsGen.indexTpl) {
                     res.send(jsGen.indexTpl);
                 } else {
-                    fs.readFile(processPath + '/static/index_dev.html', 'utf8', serverDm.intercept(function (data) {
+                    fs.readFile(processPath + '/static/index.html', 'utf8', serverDm.intercept(function (data) {
                         jsGen.indexTpl = data.replace(/_jsGenVersion_/g, jsGen.version);
                         res.send(jsGen.indexTpl);
                     }));

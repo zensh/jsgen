@@ -1,4 +1,4 @@
-﻿/*
+/*
     "name": "pagedown", modified by jsGen
     "version": "1.1.0",
     "repository": { "type": "hg", "url": "https://code.google.com/p/pagedown/" },
@@ -905,7 +905,7 @@
 
             // If there is no registered preview panel
             // there is nothing to do.
-            if (!panels.preview)
+            if (!panels.preview || panels.preview.style.display === 'none') //jsGen
                 return;
 
 

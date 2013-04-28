@@ -631,11 +631,11 @@ controller('articleCtrl', ['$scope', '$routeParams', function ($scope, $routePar
         }
     });
     $scope.wmdHelp = function (s) {
-        if (s == 'preview') {
+        if (s === 'preview') {
             $scope.wmdShow = 'preview';
             $scope.replyTitle = '文章预览';
             MdEditor.refreshPreview();
-        } else if (s == 'help') {
+        } else if (s === 'help') {
             $scope.wmdShow = 'help';
             jsGen.getMarkdown(function (data) {
                 $scope.replyTitle = data.title;
