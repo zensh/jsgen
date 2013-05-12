@@ -182,11 +182,11 @@ a {
 .panel .nav-tabs {
     padding: 0 10px;
 }
-.container-large {
+.full-container {
     width: 100%;
     max-width: 1600px;
 }
-.container-large .row {
+.full-container .row {
     width: 100%;
     max-width: 1600px;
     margin-right: auto;

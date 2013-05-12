@@ -537,7 +537,9 @@ function getUsers(req, res, dm) {
         var data;
         for (var i = doc.data.length - 1; i >= 0; i--) {
             data = union(UserPublicTpl);
+            console.log(doc.data[i]);
             intersect(data, doc.data[i]);
+            console.log(data);
             data._id = doc.data[i]._id;
             data.email = doc.data[i].email;
             doc.data[i] = data;

@@ -53,7 +53,7 @@
                     <a class="navbar-brand" href="/" ng-bind="global.title"></a>
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
-                            <li ng-show="isLogin"><a href="/home">我的主页</a></li>
+                            <li ng-show="global.isLogin"><a href="/home">我的主页</a></li>
                             <li><a href="/tag/JavaScript">JavaScript</a></li>
                             <li class="visible-phone"><a href="/tag/AngularJS">AngularJS</a></li>
                             <li class="dropdown hidden-phone">
@@ -63,6 +63,7 @@
                                     <li><a href="/tag/AngularJS_开发指南">开发指南</a></li>
                                     <li><a href="/tag/AngularJS_API手册">API手册</a></li>
                                     <li><a href="/tag/AngularJS_文档资讯">文档资讯</a></li>
+                                    <li><a href="/tag/AngularJS">AngularJS</a></li>
                                     <li class="divider"></li>
                                     <li><a href="https://github.com/angular/angular.js" target="_blank">GitHub源代码</a></li>
                                     <li><a href="http://code.angularjs.org/" target="_blank">最新下载</a></li>
@@ -72,10 +73,10 @@
                             <li><a href="/tag/jsGen">jsGen</a></li>
                         </ul>
                         <ul class="nav pull-right">
-                            <li ng-hide="isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
-                            <li ng-hide="isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
-                            <li ng-show="isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" class="img-rounded"/></li>
-                            <li class="dropdown" ng-show="isLogin">
+                            <li ng-hide="global.isLogin"><a href="/register" ng-click="clearUser()">注册</a></li>
+                            <li ng-hide="global.isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
+                            <li ng-show="global.isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" class="img-rounded"/></li>
+                            <li class="dropdown" ng-show="global.isLogin">
                                 <a href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
                                 {{global.user.name}}[{{global.user.role | role}}] <b class="caret hidden-phone"></b>
                                 </a>
@@ -83,7 +84,7 @@
                                     <li><a href="/add">发表文章</a></li>
                                     <li><a ng-href="/home" title="Uid:{{global.user._id}}">我的主页</a></li>
                                     <li class="divider"></li>
-                                    <li ng-show="isEditor"><a ng-href="/admin">网站管理</a></li>
+                                    <li ng-show="global.isEditor"><a ng-href="/admin">网站管理</a></li>
                                     <li><a ng-href="/" ng-click="logout()">退出</a></li>
                                 </ul>
                             </li>
@@ -92,7 +93,7 @@
                 </div>
             </nav>
         </header>
-        <div id="main" class="container" ng-view></div>
+        <div id="main" class="container" ng-class="global.fullWidth" ng-view></div>
         <footer class="footer">
             <div class="container">
                 <p class="navbar-text text-muted">
@@ -118,7 +119,7 @@
                 </div>
             </div>
         </div>
-        <div id="loading" ng-show="loadingOn">
+        <div id="loading" ng-show="global.loadingOn">
             <div class="progress progress-striped active">
               <div class="progress-bar" style="width: 96%">拼命加载中！</div>
             </div>

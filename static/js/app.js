@@ -104,10 +104,14 @@ $anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getA
     jsGen.rootScope = $rootScope;
     jsGen.timer = null;
 
-    $rootScope.isAdmin = false;
-    $rootScope.isEditor = false;
-    $rootScope.isLogin = false;
-    $rootScope.loading = false;
+    $rootScope.global = {
+        isAdmin: false,
+        isEditor: false,
+        isLogin: false,
+        loading: false,
+        fullWidth: ''
+    }
+
     $rootScope.logout = function () {
         var doc = jsGen.rest.user.get({
             Uid: 'logout'
@@ -125,21 +129,21 @@ $anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getA
     };
     $rootScope.checkUser = function () {
         if ($rootScope.global.user && $rootScope.global.user.role) {
-            $rootScope.isLogin = true;
+            $rootScope.global.isLogin = true;
             if ($rootScope.global.user.role === 5) {
-                $rootScope.isAdmin = true;
+                $rootScope.global.isAdmin = true;
             } else {
-                $rootScope.isAdmin = false;
+                $rootScope.global.isAdmin = false;
             }
             if ($rootScope.global.user.role >= 4) {
-                $rootScope.isEditor = true;
+                $rootScope.global.isEditor = true;
             } else {
-                $rootScope.isEditor = false;
+                $rootScope.global.isEditor = false;
             }
         } else {
-            $rootScope.isLogin = false;
-            $rootScope.isAdmin = false;
-            $rootScope.isEditor = false;
+            $rootScope.global.isLogin = false;
+            $rootScope.global.isAdmin = false;
+            $rootScope.global.isEditor = false;
         }
     };
     $rootScope.checkIsFollow = function (user) {
@@ -180,7 +184,7 @@ $anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getA
             }
         });
     };
-    $rootScope.loading = true;
+    $rootScope.global.loading = true;
 
     function getServTime() {
         var result = jsGen.rest.index.get({
@@ -189,17 +193,15 @@ $anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getA
             if (result.timestamp) {
                 $rootScope.global.timestamp = result.timestamp;
             }
-            // if (result.version) {
-            //     var version = document.getElementsByTagName("meta")[0];
-            //     console.log(version);
-            // }
         });
         $timeout(getServTime, 300000);
     };
-    $rootScope.global = jsGen.rest.index.get({}, function () {
-        $rootScope.loading = false;
-        $rootScope.checkUser();
+    var result = jsGen.rest.index.get({}, function () {
+        angular.extend($rootScope.global, result);
+        $rootScope.global.loading = false;
+        $rootScope.global.title2 = $rootScope.global.description;
         $rootScope.global.info.angularjs = angular.version.full;
+        $rootScope.checkUser();
         if (!$rootScope.global.date) {
             $rootScope.msg = {
                 name: '错误提示',
@@ -207,27 +209,22 @@ $anchorScroll, newVersion, tools, cache, rest, sanitize, MdParse, MdEditor, getA
                 type: 'error'
             };
         }
-        $rootScope.global.title2 = $rootScope.global.description;
     });
     $rootScope.$watch(function () {
         return $location.path();
-    }, function (path, goBack) {
-        jsGen.goBack = goBack || '/';
-        var element = angular.element(document.getElementById('main'));
+    }, function (path) {
         var reg = /\/add|^\/A.+\/edit$/;
-        if (reg.test(path)) {
-            element.addClass('container-large');
-        } else {
-            element.removeClass('container-large');
+        if (!reg.test(path)) {
+            $rootScope.global.fullWidth = '';
         }
     });
-    $rootScope.$watch('loading', function (value) {
+    $rootScope.$watch('global.loading', function (value) {
         if (value) {
             $timeout(function () {
-                $rootScope.loadingOn = $rootScope.loading;
+                $rootScope.global.loadingOn = $rootScope.global.loading;
             }, 1000);
         } else {
-            $rootScope.loadingOn = false;
+            $rootScope.global.loadingOn = false;
         }
     });
     $rootScope.$watch('msg', function (msg) {

@@ -12,8 +12,6 @@
                 <th><a href="#" ng-click="predicate='role';reverse=!reverse">权限</a><a href="#" ng-click="editRole=!editRole">
                     <i class="glyphicon glyphicon-edit"></i></a></th>
                 <th><a href="#" ng-click="predicate='score';reverse=!reverse">积分</a></th>
-                <th><a href="#" ng-click="predicate='articles';reverse=!reverse">文章</a></th>
-                <th><a href="#" ng-click="predicate='fans';reverse=!reverse">粉丝</a></th>
                 <th><a href="#" ng-click="predicate='date';reverse=!reverse">注册日期</a></th>
                 <th><a href="#" ng-click="predicate='lastLoginDate';reverse=!reverse">登录时间</a></th>
             </tr>
@@ -21,18 +19,16 @@
         <tbody>
             <tr ng-repeat="user in data | orderBy:predicate:reverse">
                 <td><a ng-href="/{{user._id}}">{{user._id}}</a></td>
-                <td>{{user.name}}<a href="#" ng-show="user.locked" title="该用户已被锁定，点击解锁" ng-click="user.locked=false">
+                <td>{{user.name}}<a ng-show="user.locked" title="该用户已被锁定，点击解锁" ng-click="user.locked=false">
                     <i class="glyphicon glyphicon-exclamation-sign"></a></td>
                 <td ng-hide="editEmail">{{user.email}}</td>
-                <td ng-show="editEmail"><input type="email" ng-model="user.email"/></td>
+                <td ng-show="editEmail"><input type="email" class="col-span-12" ng-model="user.email"/></td>
                 <td ng-hide="editRole">{{user.role | role}}</td>
-                <td ng-show="editRole"><select ng-model="user.role" ng-options="role | role for role in roleArray">
+                <td ng-show="editRole"><select class="col-span-12" ng-model="user.role" ng-options="role | role for role in roleArray">
                     </select></td>
                 <td>{{user.score}}</td>
-                <td>{{user.articles}}</td>
-                <td>{{user.fans}}</td>
-                <td>{{user.date | date:'yy-MM-dd HH:mm'}}</td>
-                <td>{{user.lastLoginDate | date:'yy-MM-dd HH:mm'}}</td>
+                <td>{{user.date | date:'yy-MM-dd'}}</td>
+                <td>{{user.lastLoginDate | date:'yy-MM-dd'}}</td>
             </tr>
         </tbody>
         <tfoot>

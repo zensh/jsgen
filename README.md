@@ -1,4 +1,4 @@
-{jsGen} <small>0.3.2</small>
+{jsGen} <small>0.3.3</small>
 =======
 **——JavaScript Generated**
 
@@ -45,7 +45,7 @@ Administrator username: **admin** password: **admin@zensh.com** ，You can chang
     rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
 
 ### 更新 (Changelog)
-
+ + 2013/04/25 jsGen v0.3.3 优化浏览器端AngularJS应用。
  + 2013/04/25 jsGen v0.3.2 修复评论编辑器按钮隐藏、输入卡的bug（修改了Markdown.Editor.js），指令前缀改为gen。
  + 2013/04/25 jsGen v0.3.1 浏览器端AngularJS应用自动更新功能。
  + 2013/04/21 jsGen v0.3.0 服务器端增加用户自动登录功能，用户邮箱手动验证。客户端AngularJS应用更新jQuery、Bootstrap至最新版，优化UI。
@@ -140,7 +140,7 @@ Administrator username: **admin** password: **admin@zensh.com** ，You can chang
 
 10. **Robot SEO系统**，由于AngularJS网页内容在客户端动态生成，对搜索引擎robot天生免疫。jsGen针对robot访问，在服务器端动态生成robot专属html页面。搜索引擎Robot名称可在管理后台添加。
 
-### 说明 (Annotation)
+### 感谢 (Acknowledgments)
 
 **jsGen** 是为[AngularJS中文社区][2]开发的网站系统，测试版已经上线，还请大家温柔测试，积极反馈Bug。
 
