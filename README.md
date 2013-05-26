@@ -1,4 +1,4 @@
-{jsGen} <small>0.3.3</small>
+{jsGen} <small>0.3.4</small>
 =======
 **——JavaScript Generated**
 
@@ -45,6 +45,7 @@ Administrator username: **admin** password: **admin@zensh.com** ，You can chang
     rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
 
 ### 更新 (Changelog)
+ + 2013/04/25 jsGen v0.3.4 修复管理后台不出现网站设置的bug，管理后台增加邮箱验证设置，默认关闭邮箱验证。
  + 2013/04/25 jsGen v0.3.3 优化浏览器端AngularJS应用。
  + 2013/04/25 jsGen v0.3.2 修复评论编辑器按钮隐藏、输入卡的bug（修改了Markdown.Editor.js），指令前缀改为gen。
  + 2013/04/25 jsGen v0.3.1 浏览器端AngularJS应用自动更新功能。

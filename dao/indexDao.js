@@ -19,61 +19,62 @@ var that = jsGen.dao.db.bind('global', {
 
     setGlobalConfig: function (Obj, callback) {
         var setObj = {},
-        newObj = {
-            domain: '',
-            title: '',
-            url: '',
-            logo: '',
-            email: '',
-            description: '',
-            metatitle: '',
-            metadesc: '',
-            keywords: '',
-            robots: '',
-            visitors: 0,
-            users: 0,
-            articles: 0,
-            comments: 0,
-            onlineNum: 0,
-            onlineUsers: 0,
-            maxOnlineNum: 0,
-            maxOnlineTime: 0,
-            visitHistory: 0,
-            TimeInterval: 0,
-            ArticleTagsMax: 0,
-            UserTagsMax: 0,
-            TitleMinLen: 0,
-            TitleMaxLen: 0,
-            SummaryMaxLen: 0,
-            ContentMinLen: 0,
-            ContentMaxLen: 0,
-            UserNameMinLen: 0,
-            UserNameMaxLen: 0,
-            register: true,
-            UsersScore: [0, 0, 0, 0, 0, 0, 0],
-            ArticleStatus: [0, 0],
-            ArticleHots: [0, 0, 0, 0, 0],
-            userCache: 0,
-            articleCache: 0,
-            commentCache: 0,
-            listCache: 0,
-            tagCache: 0,
-            collectionCache: 0,
-            messageCache: 0,
-            paginationCache: [0, 0],
-            smtp: {
-                host: '',
-                secureConnection: true,
-                port: 0,
-                auth: {
-                    user: '',
-                    pass: ''
+            newObj = {
+                domain: '',
+                title: '',
+                url: '',
+                logo: '',
+                email: '',
+                description: '',
+                metatitle: '',
+                metadesc: '',
+                keywords: '',
+                robots: '',
+                visitors: 0,
+                users: 0,
+                articles: 0,
+                comments: 0,
+                onlineNum: 0,
+                onlineUsers: 0,
+                maxOnlineNum: 0,
+                maxOnlineTime: 0,
+                visitHistory: 0,
+                TimeInterval: 0,
+                ArticleTagsMax: 0,
+                UserTagsMax: 0,
+                TitleMinLen: 0,
+                TitleMaxLen: 0,
+                SummaryMaxLen: 0,
+                ContentMinLen: 0,
+                ContentMaxLen: 0,
+                UserNameMinLen: 0,
+                UserNameMaxLen: 0,
+                register: true,
+                emailVerification: true,
+                UsersScore: [0, 0, 0, 0, 0, 0, 0],
+                ArticleStatus: [0, 0],
+                ArticleHots: [0, 0, 0, 0, 0],
+                userCache: 0,
+                articleCache: 0,
+                commentCache: 0,
+                listCache: 0,
+                tagCache: 0,
+                collectionCache: 0,
+                messageCache: 0,
+                paginationCache: [0, 0],
+                smtp: {
+                    host: '',
+                    secureConnection: true,
+                    port: 0,
+                    auth: {
+                        user: '',
+                        pass: ''
+                    },
+                    senderName: '',
+                    senderEmail: ''
                 },
-                senderName: '',
-                senderEmail: ''
-            },
-            info: {}
-        };
+                info: {}
+            };
 
         intersect(newObj, Obj);
         if (Obj.visitors) {
@@ -107,7 +108,7 @@ var that = jsGen.dao.db.bind('global', {
         callback = callback || jsGen.lib.tools.callbackFn;
         globalConfig.date = Date.now();
         that.insert(
-        globalConfig, {
+            globalConfig, {
             w: 1
         }, callback);
     }

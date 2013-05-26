@@ -122,6 +122,15 @@
                     </div>
                 </div>
                 <div class="control-group">
+                    <label class="control-label">
+                    邮箱验证：
+                    </label>
+                    <div class="controls">
+                    <button class="btn btn-small" ng-class="setClass(global.emailVerification)" ng-click="global.emailVerification=!global.emailVerification">{{!global.emailVerification | boolean}}</button>
+                    <span class="help-inline text-info">{{global.emailVerification | boolean}}了邮箱验证</span>
+                    </div>
+                </div>
+                <div class="control-group">
                     <div class="controls" ng-show="editSave">
                         <button class="btn btn-primary" ng-click="submit()">保存</button>
                         <button class="btn btn-success" ng-click="reset()">重置</button>

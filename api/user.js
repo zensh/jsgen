@@ -43,15 +43,15 @@ userCache.getP = function (Uid, callback, convert) {
         }
         return callback(null, doc);
     } else jsGen.dao.user.getUserInfo(Uid, function (err, doc) {
-        if (doc) {
-            doc = intersect(union(UserPrivateTpl), doc);
-            that.put(Uid, doc);
-            if (convert) {
-                getConvert(doc);
+            if (doc) {
+                doc = intersect(union(UserPrivateTpl), doc);
+                that.put(Uid, doc);
+                if (convert) {
+                    getConvert(doc);
+                }
             }
-        }
-        return callback(err, doc);
-    });
+            return callback(err, doc);
+        });
 };
 
 jsGen.cache.userAll = {
@@ -174,7 +174,7 @@ function adduser(userObj, callback) {
     userObj.email = userObj.email.toLowerCase();
     userObj.avatar = gravatar(userObj.email);
     userObj.resetDate = Date.now();
-    userObj.role = 1;
+    userObj.role = jsGen.config.emailVerification ? 1 : 2;
     jsGen.dao.user.setNewUser(userObj, function (err, doc) {
         if (doc) {
             setCache(doc);
@@ -299,7 +299,11 @@ function login(req, res, dm) {
                 if (req.session.logauto) {
                     cookieLoginUpdate(Uid, function (cookie) {
                         if (cookie) {
-                            res.cookie('autologin', cookie, {maxAge:259200000, path:'/', httpOnly:true});
+                            res.cookie('autologin', cookie, {
+                                maxAge: 259200000,
+                                path: '/',
+                                httpOnly: true
+                            });
                         }
                         return res.sendjson(doc);
                     });
@@ -313,6 +317,14 @@ function login(req, res, dm) {
 
 function register(req, res, dm) {
     var data = req.apibody;
+
+    function emailToAdmin(doc) {
+        if (jsGen.config.email) {
+            var url = jsGen.config.url + '/' + doc._id;
+            jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
+        }
+    }
+
     if (!jsGen.config.register) {
         throw jsGen.Err(jsGen.lib.msg.registerClose);
     }
@@ -325,15 +337,14 @@ function register(req, res, dm) {
             req.session.Uid = doc._id;
             req.session.role = doc.role;
             doc._id = jsGen.dao.user.convertID(doc._id);
-            setReset({
-                u: doc._id,
-                r: 'role'
-            }, function () {
-                if (jsGen.config.email) {
-                    var url = jsGen.config.url + '/' + doc._id;
-                    jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
-                }
-            });
+            if (jsGen.config.emailVerification) {
+                setReset({
+                    u: doc._id,
+                    r: 'role'
+                }, emailToAdmin.bind(null, doc));
+            } else {
+                emailToAdmin(doc);
+            }
             return res.sendjson(doc);
         }
     }));
@@ -347,7 +358,7 @@ function setReset(resetObj, callback) {
     //     k: 'resetKey'
     // };
     var userObj = {},
-    callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || jsGen.lib.tools.callbackFn;
 
     userObj._id = resetObj.u;
     userObj.resetDate = Date.now();
@@ -623,8 +634,8 @@ function editUser(req, res, dm) {
         desc: '',
         tagsList: ['']
     },
-    body = {},
-    userObj = {};
+        body = {},
+        userObj = {};
 
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
@@ -657,7 +668,7 @@ function editUser(req, res, dm) {
             }
             userCache.getP(req.session.Uid, dm.intercept(function (doc) {
                 var tagList = {},
-                setTagList = [];
+                    setTagList = [];
                 if (doc) {
                     doc.tagsList.forEach(function (x) {
                         tagList[x] = -userObj._id;
@@ -705,7 +716,7 @@ function editUsers(req, res, dm) {
         locked: false,
         role: 0
     },
-    userArray = req.apibody.data,
+        userArray = req.apibody.data,
         body = {
             data: []
         };
@@ -839,20 +850,20 @@ function resetUser(req, res, dm) {
         if (doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 1) {
             if (HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.u, 'base64') === reset.k) {
                 switch (reset.r) {
-                    case 'locked':
-                        userObj.locked = false;
-                        break;
-                    case 'role':
-                        userObj.role = 2;
-                        break;
-                    case 'email':
-                        userObj.email = reset.e.toLowerCase();
-                        break;
-                    case 'passwd':
-                        userObj.passwd = SHA256(reset.e);
-                        break;
-                    default:
-                        throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+                case 'locked':
+                    userObj.locked = false;
+                    break;
+                case 'role':
+                    userObj.role = 2;
+                    break;
+                case 'email':
+                    userObj.email = reset.e.toLowerCase();
+                    break;
+                case 'passwd':
+                    userObj.passwd = SHA256(reset.e);
+                    break;
+                default:
+                    throw jsGen.Err(jsGen.lib.msg.resetInvalid);
                 }
                 userObj.resetDate = Date.now();
                 userObj.resetKey = '';
@@ -875,7 +886,7 @@ function resetUser(req, res, dm) {
 
 function getArticles(req, res, dm) {
     var list, key,
-    p = req.getparam.p || req.getparam.page || 1;
+        p = req.getparam.p || req.getparam.page || 1;
 
     p = +p;
     if (!req.session.Uid) {
@@ -920,7 +931,7 @@ function getArticles(req, res, dm) {
 
 function getUsersList(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.page || 1;
+        p = req.getparam.p || req.getparam.page || 1;
 
     p = +p;
     if (!req.session.Uid) {
@@ -947,42 +958,42 @@ function getUsersList(req, res, dm) {
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-            return getUserInfo(req, res, dm);
-        case 'logout':
-            return logout(req, res, dm);
-        case 'admin':
-            return getUsers(req, res, dm);
-        case 'reset':
-            return resetUser(req, res, dm);
-        case 'article':
-        case 'comment':
-        case 'mark':
-            return getArticles(req, res, dm);
-        case 'fans':
-        case 'follow':
-            return getUsersList(req, res, dm);
-        default:
-            return getUser(req, res, dm);
+    case undefined:
+    case 'index':
+        return getUserInfo(req, res, dm);
+    case 'logout':
+        return logout(req, res, dm);
+    case 'admin':
+        return getUsers(req, res, dm);
+    case 'reset':
+        return resetUser(req, res, dm);
+    case 'article':
+    case 'comment':
+    case 'mark':
+        return getArticles(req, res, dm);
+    case 'fans':
+    case 'follow':
+        return getUsersList(req, res, dm);
+    default:
+        return getUser(req, res, dm);
     }
 };
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-            return editUser(req, res, dm);
-        case 'login':
-            return login(req, res, dm);
-        case 'register':
-            return register(req, res, dm);
-        case 'admin':
-            return editUsers(req, res, dm);
-        case 'reset':
-            return getReset(req, res, dm);
-        default:
-            return setUser(req, res, dm);
+    case undefined:
+    case 'index':
+        return editUser(req, res, dm);
+    case 'login':
+        return login(req, res, dm);
+    case 'register':
+        return register(req, res, dm);
+    case 'admin':
+        return editUsers(req, res, dm);
+    case 'reset':
+        return getReset(req, res, dm);
+    default:
+        return setUser(req, res, dm);
     }
 };
 

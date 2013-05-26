@@ -19,7 +19,8 @@ function updateOnlineCache(req) {
     }
     jsGen.config.onlineNum = onlineCache.linkedList.length;
     jsGen.config.onlineUsers = (function () {
-        var i = 0, user = onlineCache.linkedList.head;
+        var i = 0,
+            user = onlineCache.linkedList.head;
         while (user && user.key) {
             if (user.key[0] === 'U') {
                 i += 1;
@@ -86,7 +87,11 @@ function getIndex(req, res, dm) {
                     req.session.logauto = true;
                     jsGen.api.user.cookieLoginUpdate(Uid, function (cookie) {
                         if (cookie) {
-                            res.cookie('autologin', cookie, {maxAge:259200000, path:'/', httpOnly:true});
+                            res.cookie('autologin', cookie, {
+                                maxAge: 259200000,
+                                path: '/',
+                                httpOnly: true
+                            });
                         }
                         config.user = doc;
                         return res.sendjson(config);
@@ -140,51 +145,52 @@ function getGlobal(req, res, dm) {
 
 function setGlobal(req, res, dm) {
     var body = {},
-    defaultObj = {
-        domain: '',
-        title: '',
-        url: '',
-        logo: '',
-        email: '',
-        description: '',
-        metatitle: '',
-        metadesc: '',
-        keywords: '',
-        robots: '',
-        TimeInterval: 0,
-        ArticleTagsMax: 0,
-        UserTagsMax: 0,
-        TitleMinLen: 0,
-        TitleMaxLen: 0,
-        SummaryMaxLen: 0,
-        ContentMinLen: 0,
-        ContentMaxLen: 0,
-        UserNameMinLen: 0,
-        UserNameMaxLen: 0,
-        register: true,
-        UsersScore: [0, 0, 0, 0, 0, 0, 0],
-        ArticleStatus: [0, 0],
-        ArticleHots: [0, 0, 0, 0, 0],
-        userCache: 0,
-        articleCache: 0,
-        commentCache: 0,
-        listCache: 0,
-        tagCache: 0,
-        collectionCache: 0,
-        messageCache: 0,
-        paginationCache: [0, 0],
-        smtp: {
-            host: '',
-            secureConnection: true,
-            port: 0,
-            auth: {
-                user: '',
-                pass: ''
-            },
-            senderName: '',
-            senderEmail: ''
-        }
-    };
+        defaultObj = {
+            domain: '',
+            title: '',
+            url: '',
+            logo: '',
+            email: '',
+            description: '',
+            metatitle: '',
+            metadesc: '',
+            keywords: '',
+            robots: '',
+            TimeInterval: 0,
+            ArticleTagsMax: 0,
+            UserTagsMax: 0,
+            TitleMinLen: 0,
+            TitleMaxLen: 0,
+            SummaryMaxLen: 0,
+            ContentMinLen: 0,
+            ContentMaxLen: 0,
+            UserNameMinLen: 0,
+            UserNameMaxLen: 0,
+            register: true,
+            emailVerification: true,
+            UsersScore: [0, 0, 0, 0, 0, 0, 0],
+            ArticleStatus: [0, 0],
+            ArticleHots: [0, 0, 0, 0, 0],
+            userCache: 0,
+            articleCache: 0,
+            commentCache: 0,
+            listCache: 0,
+            tagCache: 0,
+            collectionCache: 0,
+            messageCache: 0,
+            paginationCache: [0, 0],
+            smtp: {
+                host: '',
+                secureConnection: true,
+                port: 0,
+                auth: {
+                    user: '',
+                    pass: ''
+                },
+                senderName: '',
+                senderEmail: ''
+            }
+        };
 
     function checkArray(key, i, array) {
         key = +key;
@@ -272,19 +278,19 @@ function setGlobal(req, res, dm) {
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
-        case 'time':
-            return getServTime(req, res, dm);
-        case 'admin':
-            return getGlobal(req, res, dm);
-        default:
-            return getIndex(req, res, dm);
+    case 'time':
+        return getServTime(req, res, dm);
+    case 'admin':
+        return getGlobal(req, res, dm);
+    default:
+        return getIndex(req, res, dm);
     }
 };
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
-        case 'admin':
-            return setGlobal(req, res, dm);
+    case 'admin':
+        return setGlobal(req, res, dm);
     }
 };
 

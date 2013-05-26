@@ -11,6 +11,7 @@ test.js
 pids
 logs
 results
+backup/
 node_modules/
 test/
 mylogs/
