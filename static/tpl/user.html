@@ -12,7 +12,7 @@
                 <div class="media-body">
                     <h5 class="media-heading"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></h5>
                     <span ng-show="user.role">{{user.role | role}}</span><br />
-                    <a href="#" ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a>
+                    <a ng-show="!isMe" ng-click="followMe(user)" class="btn btn-success">{{user.isFollow | follow}}</a>
                 </div>
             </div>
             <div class="inner">
@@ -61,40 +61,40 @@
         </div>
         <div class="panel">
             <ul class="nav nav-list text-center" ng-show="isMe">
-                <li>
-                    <a href="#" ng-click="setTpl('user-list.html', 'follow')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-list.html', 'follow')"><i class="glyphicon glyphicon-chevron-left"></i> 我的关注 </a>
                 </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-list.html', 'fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-list.html', 'fans')"><i class="glyphicon glyphicon-chevron-left"></i> 我的粉丝 </a>
                 </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'mark')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的标记 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'mark')"><i class="glyphicon glyphicon-chevron-left"></i> 我的标记 </a>
                 </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'article')"><i class="glyphicon glyphicon-chevron-left"></i> 我的文章 </a>
                 </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'comment')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'comment')"><i class="glyphicon glyphicon-chevron-left"></i> 我的评论 </a>
                 </li>
-<!--                 <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
+<!--                 <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'collection')"><i class="glyphicon glyphicon-chevron-left"></i> 我的合集 </a>
                 </li>
-                <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'message')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'message')"><i class="glyphicon glyphicon-chevron-left"></i> 我的消息 </a>
                 </li> -->
-                <li>
-                    <a href="#" ng-click="setTpl('user-edit.html')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-edit.html')"><i class="glyphicon glyphicon-chevron-left"></i> 用户设置 </a>
                 </li>
             </ul>
             <ul class="nav nav-list text-center" ng-hide="isMe">
-                <li>
-                    <a href="#" ng-click="setTpl('user-article.html', 'article')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-article.html', 'article')"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的文章 </a>
                 </li>
-<!--                 <li>
-                    <a href="#" ng-click="setTpl('user-index.html','collection')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
+<!--                 <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-index.html','collection')"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的合集 </a>
                 </li> -->
-                <li>
-                    <a href="#" ng-click="setTpl('user-list.html', 'fans')" data-toggle="tab"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的粉丝 </a>
+                <li gen-tab-active="active">
+                    <a ng-click="setTpl('user-list.html', 'fans')"><i class="glyphicon glyphicon-chevron-left"></i> {{user.name}}的粉丝 </a>
                 </li>
             </ul>
         </div>

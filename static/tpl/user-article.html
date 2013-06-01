@@ -1,7 +1,7 @@
 <div ng-controller="userArticleCtrl">
     <ul class="media-list">
         <li class="media" ng-repeat="article in data">
-            <a class="pull-left text-muted" href="#" ng-click="remove(article)" title="删除文章" ng-show="isMe">
+            <a class="pull-left text-muted" ng-click="remove(article)" title="删除文章" ng-show="isMe">
                 <i class="glyphicon glyphicon-remove"></i>
             </a>
           <div class="media-body" id="{{article._id}}">

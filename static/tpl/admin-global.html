@@ -4,17 +4,17 @@
     </div>
 
     <ul class="nav nav-tabs">
-        <li class="active">
-            <a href="#" ng-click="setTab('tab1')" data-toggle="tab">基本设置</a>
+        <li class="active" gen-tab-active="active">
+            <a ng-click="setTab('tab1')">基本设置</a>
         </li>
-        <li>
-            <a href="#" ng-click="setTab('tab2')" data-toggle="tab">参数设置</a>
+        <li gen-tab-active="active">
+            <a ng-click="setTab('tab2')">参数设置</a>
         </li>
-        <li>
-            <a href="#" ng-click="setTab('tab3')" data-toggle="tab">缓存设置</a>
+        <li gen-tab-active="active">
+            <a ng-click="setTab('tab3')">缓存设置</a>
         </li>
-        <li>
-            <a href="#" ng-click="setTab('tab4')" data-toggle="tab">SMTP设置</a>
+        <li gen-tab-active="active">
+            <a ng-click="setTab('tab4')">SMTP设置</a>
         </li>
     </ul>
 
@@ -218,7 +218,7 @@
                     用户积分系数：
                     </label>
                     <div class="controls">
-                    <input type="text" name="UsersScore" ng-model="global.UsersScore" ng-list="/[,，\s]/"/>
+                    <input type="text" name="UsersScore" ng-model="global.UsersScore" ng-list="/[,，、]/"/>
                     <span class="text-info help-block">[评论×<strong>{{global.UsersScore[0]}}</strong>
                     ，文章×<strong>{{global.UsersScore[1]}}</strong>，关注×<strong>{{global.UsersScore[2]}}</strong>
                     ，粉丝×<strong>{{global.UsersScore[3]}}</strong>，文章热度×<strong>{{global.UsersScore[4]}}</strong>，
@@ -230,7 +230,7 @@
                     评论提升系数：
                     </label>
                     <div class="controls">
-                    <input type="text" name="ArticleStatus" ng-model="global.ArticleStatus" ng-list="/[,，\s]/" />
+                    <input type="text" name="ArticleStatus" ng-model="global.ArticleStatus" ng-list="/[,，、]/" />
                     <span class="text-info help-block">[评论的评论数达到<strong>{{global.ArticleStatus[0]}}</strong>时，自动提升正常文章，
                     达到<strong>{{global.ArticleStatus[1]}}</strong>时，自动提升为推荐文章]</span>
                     </div>
@@ -240,7 +240,7 @@
                     文章热度系数：
                     </label>
                     <div class="controls">
-                    <input type="text" name="ArticleHots" ng-model="global.ArticleHots" ng-list="/[,，\s]/"/>
+                    <input type="text" name="ArticleHots" ng-model="global.ArticleHots" ng-list="/[,，、]/"/>
                     <span class="text-info help-block">[访问+<strong>{{global.ArticleHots[0]}}</strong>，支持/反对±<strong>
                     {{global.ArticleHots[1]}}</strong>，评论+<strong>{{global.ArticleHots[2]}}</strong>，收藏+
                     <strong>{{global.ArticleHots[3]}}</strong>，推荐+<strong>{{global.ArticleHots[4]}}</strong>]</span>
@@ -318,7 +318,7 @@
                     分页导航缓存：
                     </label>
                     <div class="controls">
-                    <input type="text" name="paginationCache" ng-model="global.paginationCache" ng-list="/[,，\s]/"/>
+                    <input type="text" name="paginationCache" ng-model="global.paginationCache" ng-list="/[,，、]/"/>
                     <span class="text-info help-block">[有效期<strong>{{global.paginationCache[0]}}</strong>秒
                     ，最大容量<strong>{{global.paginationCache[1]}}</strong>]</span>
                     </div>

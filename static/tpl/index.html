@@ -12,7 +12,7 @@
                     <a href="/update" title="最近更新文章">更新</a>
                 </li>
                 <li id="other" ng-show="other.name">
-                    <a href="#" ng-click="getList(other._id)">{{other.name}}</a>
+                    <a ng-click="getList(other._id)">{{other.name}}</a>
                 </li>
                 <a href="/add" class="btn btn-success pull-right" ng-show="global.isLogin">发表文章</a>
             </ul>
@@ -60,7 +60,8 @@
             <div class="thumbnail inner text-center">
                 <img src="/static/img/angularjs.png" alt="angularjs">
                 <div class="caption">
-                <h5 class="text-left">使用超动感HTML &amp; JS开发WEB应用！</h5>
+                    <h5 class="text-left">使用超动感HTML &amp; JS开发WEB应用！</h5>
+                    <p class="text-hot">QQ交流群 <strong>278252889</strong></p>
                     <a href="https://github.com/angular/angular.js" class="btn btn-info" target="_blank">GitHub</a>
                     <a href="http://weibo.com/angularjs/" class="sina" target="_blank">
                         <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>
@@ -71,7 +72,7 @@
             <div class="thumbnail inner text-center">
                 <h2><strong>{<span class="text-success">js</span><span class="text-hot">G</span><span class="text-success">en</span>}</strong></h2>
                 <div class="caption">
-                <h5 class="text text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</h5>
+                    <h5 class="text text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</h5>
                     <a href="https://github.com/zensh/jsgen" class="btn btn-info" target="_blank">GitHub</a>
                     <a href="http://weibo.com/zensh" class="sina" target="_blank">
                         <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>

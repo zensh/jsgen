@@ -57,12 +57,12 @@
                             <li><a href="/tag/JavaScript">JavaScript</a></li>
                             <li class="visible-phone"><a href="/tag/AngularJS">AngularJS</a></li>
                             <li class="dropdown hidden-phone">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
+                                <a class="dropdown-toggle" data-toggle="dropdown">AngularJS<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/tag/AngularJS_入门教程">入门教程</a></li>
-                                    <li><a href="/tag/AngularJS_开发指南">开发指南</a></li>
-                                    <li><a href="/tag/AngularJS_API手册">API手册</a></li>
-                                    <li><a href="/tag/AngularJS_文档资讯">文档资讯</a></li>
+                                    <li><a href="/tag/AngularJS 入门教程">入门教程</a></li>
+                                    <li><a href="/tag/AngularJS 开发指南">开发指南</a></li>
+                                    <li><a href="/tag/AngularJS API手册">API手册</a></li>
+                                    <li><a href="/tag/AngularJS 文档资讯">文档资讯</a></li>
                                     <li><a href="/tag/AngularJS">AngularJS</a></li>
                                     <li class="divider"></li>
                                     <li><a href="https://github.com/angular/angular.js" target="_blank">GitHub源代码</a></li>
@@ -77,7 +77,7 @@
                             <li ng-hide="global.isLogin"><a href="/login" ng-click="clearUser()">登录</a></li>
                             <li ng-show="global.isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" class="img-rounded"/></li>
                             <li class="dropdown" ng-show="global.isLogin">
-                                <a href="#" title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
+                                <a title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
                                 {{global.user.name}}[{{global.user.role | role}}] <b class="caret hidden-phone"></b>
                                 </a>
                                 <ul class="dropdown-menu hidden-phone">
@@ -115,7 +115,7 @@
                 </div>
                 <div class="modal-footer">
                     <span ng-show="timeout">[<strong gen-timing="timeout"></strong>秒后自动返回]</span>
-                    <a href="#" class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
+                    <a class="btn btn-warning" data-dismiss="modal" aria-hidden="true" ng-click="err=null">关&nbsp;&nbsp;闭</a>
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <section class="clearfix inner" ng-controller="adminTagCtrl">
     <div class="page-header">
             <h4>标签管理
-                <a href="#" ng-click="editTag=!editTag">
+                <a ng-click="editTag=!editTag">
                 <i class="glyphicon glyphicon-edit"></i></a>
             </h4>
     </div>
@@ -10,7 +10,7 @@
             <a ng-hide="editTag" class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
             <small>文章{{tag.articles}}/会员{{tag.users}}</small></a>
             <a ng-show="editTag" class="form-inline"><input type="text" ng-model="tag.tag"/></a>
-            <a ng-hide="editTag" href="#" ng-click="remove(tag)" title="删除{{tag.tag}}">
+            <a ng-hide="editTag" ng-click="remove(tag)" title="删除{{tag.tag}}">
             <i class="glyphicon glyphicon-remove"></i></a>
         </li>
     </ul>

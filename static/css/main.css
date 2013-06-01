@@ -22,6 +22,7 @@ textarea {
 }
 a {
   color: #0066cc;
+  cursor: pointer;
 }
 @media screen and (min-width: 1200px) {
   .container {
@@ -37,10 +38,6 @@ a {
   }
   .form-horizontal.form-min .control-group > .controls {
     margin-left: 80px;
-  }
-  select,
-  input {
-    width: 33.33333333333333%;
   }
   .input-block-level {
     width: 100%;

@@ -222,8 +222,8 @@ function setTag(tagObj, callback) {
 };
 
 function filterTags(tagArray, callback) {
-    var tags = [],
-        callback = callback || jsGen.lib.tools.callbackFn;
+    var tags = [];
+    callback = callback || jsGen.lib.tools.callbackFn;
 
     if (!Array.isArray(tagArray)) {
         tagArray = [tagArray];
@@ -323,7 +323,7 @@ function getTag(req, res, dm) {
 
 function getTags(req, res, dm) {
     var list,
-    n = +req.path[3],
+        n = +req.path[3],
         p = req.getparam.p || req.getparam.page || 1;
 
     if (n > 0) {
@@ -364,9 +364,9 @@ function getTags(req, res, dm) {
 
 function editTags(req, res, dm) {
     var defaultObj = {
-            _id: '',
-            tag: ''
-        },
+        _id: '',
+        tag: ''
+    },
         body = {
             data: []
         },
@@ -438,24 +438,24 @@ function delTag(req, res, dm) {
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-        case 'hots':
-            return getTags(req, res, dm);
-        default:
-            return getTag(req, res, dm);
+    case undefined:
+    case 'index':
+    case 'hots':
+        return getTags(req, res, dm);
+    default:
+        return getTag(req, res, dm);
     }
 };
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-            return getTags(req, res, dm);
-        case 'admin':
-            return editTags(req, res, dm);
-        default:
-            return res.r404();
+    case undefined:
+    case 'index':
+        return getTags(req, res, dm);
+    case 'admin':
+        return editTags(req, res, dm);
+    default:
+        return res.r404();
     }
 };
 

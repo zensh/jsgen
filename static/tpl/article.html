@@ -91,7 +91,7 @@
                   </a>
                   <div class="media-body" id="{{comment._id}}">
                     <header class="media-heading">
-                        <h6><a href="#" ng-click="getComments(comment.refer._id, comment)">{{comment.title}}</a></h6>
+                        <h6><a ng-click="getComments(comment.refer._id, comment)">{{comment.title}}</a></h6>
                     </header>
                     <div class="media-content" gen-parse-markdown="comment.content"></div>
                     <footer>
@@ -149,7 +149,7 @@
                     <div class="media-body">
                         <h5 class="media-heading"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></h5>
                         <span ng-show="article.author.role">{{article.author.role | role}}</span><br />
-                        <a class="btn btn-small btn-success" href="#" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
+                        <a class="btn btn-small btn-success" ng-click="followMe(article.author)" ng-hide="isMe">{{article.author.isFollow | follow}}</a>
                     </div>
                 </div>
                 <div>
