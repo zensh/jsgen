@@ -2111,11 +2111,11 @@ forEach({
                 }
               }
               return false;
-            };	
+            };    
 
           events[type] = [];
-		
-		  // Refer to jQuery's implementation of mouseenter & mouseleave
+        
+          // Refer to jQuery's implementation of mouseenter & mouseleave
           // Read about mouseenter and mouseleave:
           // http://www.quirksmode.org/js/events_mouse.html#link8
           var eventmap = { mouseleave : "mouseout", mouseenter : "mouseover"}          
@@ -2125,7 +2125,7 @@ forEach({
             // NB: No relatedTarget if the mouse left/entered the browser window
             if ( !related || (related !== target && !contains(target, related)) ){
               handle(event, type);
-            }	
+            }    
 
           });
 
@@ -6254,12 +6254,12 @@ function $LogProvider(){
    * @returns {*} current value if used as getter or itself (chaining) if used as setter
    */
   this.debugEnabled = function(flag) {
-	  if (isDefined(flag)) {
-		  debug = flag;
-		  return this;
-	  } else {
-		  return debug;
-	  }
+      if (isDefined(flag)) {
+          debug = flag;
+          return this;
+      } else {
+          return debug;
+      }
   };
   
   this.$get = ['$window', function($window){
@@ -6313,13 +6313,13 @@ function $LogProvider(){
        * Write a debug message
        */
       debug: (function () {
-    	var fn = consoleLog('debug');
-    	
-    	return function() {
-    		if (debug) {
-    			fn.apply(self, arguments);
-    		}
-    	}
+        var fn = consoleLog('debug');
+        
+        return function() {
+            if (debug) {
+                fn.apply(self, arguments);
+            }
+        }
       }())
     };
 
