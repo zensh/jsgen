@@ -1,8 +1,12 @@
-{jsGen} <small>0.3.4</small>
+{jsGen} <small>0.4.0-wip</small>
 =======
 **——JavaScript Generated**
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
+
+### 0.4.0目标（开发中，暂不可正常运行）
+ + 改用 YUI的pure框架，兼容IE8
+ + 重构AngularJS客户端应用
 
 ### 简介 (Introduction)
 
