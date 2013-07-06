@@ -1,34 +1,34 @@
-<div class="row">
-    <div class="col-span-9">
+<div class="pure-g-r wrap">
+    <div class="pure-u-3-4">
         <div class="panel" ng-include src="getTpl">
         </div>
     </div>
-    <div class="col-span-3 sidebar">
-        <div class="panel">
-            <ul class="nav nav-list text-center">
-                <li class="active" gen-tab-active="active">
-                    <a ng-click="setTpl('admin-index.html')"><i class="glyphicon glyphicon-chevron-left"></i> 网站信息 </a>
+    <div class="pure-u-1-4 aside">
+        <div class="panel pure-menu pure-menu-open">
+            <ul class="text-center">
+                <li ng-class="{active: path=='index'}">
+                    <a href="/admin/index"><i class="icon-chevron-left left"></i>网站信息</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-user.html')"><i class="glyphicon glyphicon-chevron-left"></i> 用户管理 </a>
+                <li ng-class="{active: path=='user'}">
+                    <a href="/admin/user"><i class="icon-chevron-left left"></i>用户管理</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-tag.html')"><i class="glyphicon glyphicon-chevron-left"></i> 标签管理 </a>
+                <li ng-class="{active: path=='tag'}">
+                    <a href="/admin/tag"><i class="icon-chevron-left left"></i>标签管理</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-article.html', 'article')"><i class="glyphicon glyphicon-chevron-left"></i> 文章管理 </a>
+                <li ng-class="{active: path=='article'}">
+                    <a href="/admin/article"><i class="icon-chevron-left left"></i>文章管理</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-article.html', 'comment')"><i class="glyphicon glyphicon-chevron-left"></i> 评论管理 </a>
+                <li ng-class="{active: path=='comment'}">
+                    <a  href="/admin/comment"><i class="icon-chevron-left left"></i>评论管理</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-collection.html')"><i class="glyphicon glyphicon-chevron-left"></i> 合集管理 </a>
+                <li ng-class="{active: path=='collection'}">
+                    <a href="/admin/collection"><i class="icon-chevron-left left"></i>合集管理</a>
                 </li>
-                <li gen-tab-active="active">
-                    <a ng-click="setTpl('admin-message.html')"><i class="glyphicon glyphicon-chevron-left"></i> 消息管理 </a>
+                <li ng-class="{active: path=='message'}">
+                    <a href="/admin/message"><i class="icon-chevron-left left"></i>消息管理</a>
                 </li>
-                <li ng-show="global.isAdmin" gen-tab-active="active">
-                    <a ng-click="setTpl('admin-global.html')"><i class="glyphicon glyphicon-chevron-left"></i> 网站设置 </a>
+                <li  ng-class="{active: path=='global'}" ng-show="global.isAdmin">
+                    <a href="/admin/global"><i class="icon-chevron-left left"></i>网站设置</a>
                 </li>
             </ul>
         </div>

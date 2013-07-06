@@ -1,0 +1,8 @@
+<ul class="pure-paginator" ng-show="showPages.length>1">
+    <li><a class="pure-button prev" ng-class="{'pure-button-disabled': !paginationPrev}" ng-href="{{(paginationPrev&&(locationPath+paginationPrev))||''}}" title="上一页">&#171;</a></li>
+    <li ng-repeat="n in showPages">
+        <a class="pure-button" ng-class="{'pure-button-active': n==pageIndex, 'pure-button-disabled': n=='…'}" ng-href="{{(n!='…'&&(locationPath+n))||''}}" title="{{(n!='…'&&('第'+n+'页'))||''}}">{{n}}</a>
+    </li>
+    <li><a class="pure-button next" ng-class="{'pure-button-disabled': !paginationNext}" ng-href="{{(paginationNext&&(locationPath+paginationNext))||''}}" title="下一页">&#187;</a></li>
+    <li ng-repeat="n in perPages"><a class="pure-button" ng-href="{{locationPath}}1?pageSize={{n}}" title="每页{{n}}">{{n}}</a></li>
+</ul>

@@ -1,36 +1,43 @@
-<div class="row">
-    <div class="col-span-4">
-        <div class="panel-transparent inner">
-            <div class="page-header">
-                <h4>用户登录</h4>
+<div class="pure-g-r wrap">
+    <div class="pure-u-1-2">
+        <div class="panel pure-hidden-phone">
+            <div class="page-header text-center">
+                <span class="hot">欢迎回到AngularJS中文社区</span>
             </div>
-            <form class="form-horizontal form-min" name="login">
-                <div class="control-group">
-                    <label class="control-label">用户名：</label>
-                    <div class="controls">
-                        <input class="input-block-level" type="text" placeholder="name or Email or Uid"
-                        name="name" ng-model="logname" required/>
-                    </div>
+            <div class="inner text-center">
+                <img src="/static/img/angularjs.png" alt="angularjs">
+                <div class="text-show">使用超动感HTML &amp; JS开发WEB应用！</div>
+                <div class="text-show text-hot">QQ交流群 <strong>278252889</strong></div>
+                <div class="text-show">
+                    <a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="icon-github icon-large"></i>GitHub</a>
+                    <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="icon-weibo icon-large"></i>WeiBo</a>
                 </div>
-                <div class="control-group">
-                  <label class="control-label">密码：</label>
-                  <div class="controls">
-                    <input class="input-block-level" type="password" placeholder="password"
-                    name="password" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
-                    </div>
+            </div>
+        </div>
+    </div>
+    <div class="pure-u-1-2">
+        <div class="panel transparent">
+            <div class="page-header inner">
+                <span class="primary">用户登录</span>
+            </div>
+            <form class="pure-form pure-form-aligned inner" name="login">
+                <div class="pure-control-group">
+                    <label for="user-name">登录名：</label>
+                    <input id="user-name" type="text" placeholder="name or Email or Uid" name="登录名" ng-model="logname" required/>
                 </div>
-                <div class="control-group">
-                  <div class="controls">
-                    <label class="checkbox">
-                        <input type="checkbox" ng-model="logauto">3天内自动登录
+                <div class="pure-control-group">
+                  <label for="user-password">密码：</label>
+                    <input id="user-password" type="password" placeholder="password" name="密码" ng-model="logpwd" ng-minlength="6" ng-maxlength="20" required/>
+                </div>
+                <div class="pure-controls">
+                    <label for="auto-login" class="pure-checkbox">
+                        <input id="auto-login" type="checkbox" ng-model="logauto">3天内自动登录
                     </label>
-                    <button ng-click="submit()" class="btn btn-primary" ng-disabled="login.$error.required">登  录</button>
-                    <a ng-show="userReset" ng-href="{{'/reset/'+userReset}}" class="btn btn-warning">{{resetName}}</a>
+                    <button class="pure-button primary-bg" ng-disabled="login.$error.required" ng-click="submit()">登&nbsp;&nbsp;录</button>
+                    <a class="pure-button warning-bg" ng-show="userReset" ng-href="{{'/reset/'+userReset}}">{{resetName}}</a>
                     </div>
                 </div>
             </form>
         </div>
-    </div>
-    <div class="col-span-8">
     </div>
 </div>

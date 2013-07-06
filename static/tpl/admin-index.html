@@ -1,17 +1,16 @@
-<section class="clearfix inner" ng-controller="adminGlobalCtrl">
+<section class="inner" ng-controller="adminGlobalCtrl">
     <div class="page-header">
-            <h4>网站信息</h4>
+        网站信息
     </div>
     <ul class="nav nav-tabs">
-        <li class="active" gen-tab-active="active">
+        <li class="active" gen-tab-click="active">
             <a ng-click="setTab('tab1')">站点信息</a>
         </li>
-        <li gen-tab-active="active">
+        <li gen-tab-click="active">
             <a ng-click="setTab('tab2')">服务器信息</a>
         </li>
     </ul>
-
-    <div class="tab-content" ng-switch on="switchTab">
+    <div class="inner" ng-switch on="switchTab">
         <div class="active" ng-switch-when="tab1">
             <dl class="dl-horizontal">
               <dt>网站名称：</dt>

@@ -1,129 +1,73 @@
-<div class="row">
-    <div class="col-span-9">
-        <div class="panel">
-            <ul class="nav nav-tabs">
-                <li id="latest">
-                    <a href="/latest" title="最新文章">最新</a>
-                </li>
-                <li id="hots">
-                    <a href="/hots" title="热门文章">热门</a>
-                </li>
-                <li id="update">
-                    <a href="/update" title="最近更新文章">更新</a>
-                </li>
-                <li id="other" ng-show="other.name">
-                    <a ng-click="getList(other._id)">{{other.name}}</a>
-                </li>
-                <a href="/add" class="btn btn-success pull-right" ng-show="global.isLogin">发表文章</a>
-            </ul>
-            <div class="tab-content">
-                <ul class="list-inline inner">
-                    <li ng-repeat="tag in global.tagsList">
-                        <a ng-href="{{'/'+tag._id}}" class="btn btn-small btn-info">{{tag.tag}}</a>
-                    </li>
-                    <li>
-                        <a href="/tag" class="btn btn-small">更多标签…</a>
-                    </li>
-                </ul>
-                <ul class="media-list">
-                    <li class="media" ng-repeat="article in data">
-                      <div class="media-body" id="{{article._id}}">
-                        <header class="media-heading">
-                            <h4><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
-                            <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
-                            <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
-                            <i class="label pull-right" title="热度">{{article.hots}}</i>
-                            </h4>
-                        </header>
-                        <section class="media-content" gen-parse-markdown="article.content"></section>
-                        <footer>
-                            <ul class="list-inline text-muted">
-                                <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
-                                {{article.date | formatDate}}发表</li>
-                                <li>{{article.visitors}}次访问</li>
-                                <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
-                                <li>{{article.comments}}条评论</li>
-                                <li ng-repeat="tag in article.tagsList">
-                                    <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
-                                </li>
-                            </ul>
-                        </footer>
-                      </div>
-                    </li>
-                </ul>
-            </div>
+<div class="pure-g-r wrap">
+    <div class="pure-u-3-4">
+        <div class="panel" ng-include src="parent.getTpl">
         </div>
-        <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>
     </div>
-    <div class="col-span-3 sidebar">
-        <div class="panel">
-            <div class="thumbnail inner text-center">
-                <img src="/static/img/angularjs.png" alt="angularjs">
-                <div class="caption">
-                    <h5 class="text-left">使用超动感HTML &amp; JS开发WEB应用！</h5>
-                    <p class="text-hot">QQ交流群 <strong>278252889</strong></p>
-                    <a href="https://github.com/angular/angular.js" class="btn btn-info" target="_blank">GitHub</a>
-                    <a href="http://weibo.com/angularjs/" class="sina" target="_blank">
-                        <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>
+    <div class="pure-u-1-4">
+        <div class="panel pure-hidden-phone">
+            <div class="inner text-center">
+                <img src="/static/img/angularjs.png" alt="angularjs" height="62">
+                <div class="text-show text-left">使用超动感HTML &amp; JS开发WEB应用！</div>
+                <div class="text-show text-hot">QQ交流群 <strong class="hot">278252889</strong></div>
+                <div class="text-show">
+                    <a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="icon-github icon-large"></i>GitHub</a>
+                    <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="icon-weibo icon-large"></i>WeiBo</a>
                 </div>
             </div>
         </div>
-        <div class="panel">
-            <div class="thumbnail inner text-center">
-                <h2><strong>{<span class="text-success">js</span><span class="text-hot">G</span><span class="text-success">en</span>}</strong></h2>
-                <div class="caption">
-                    <h5 class="text text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</h5>
-                    <a href="https://github.com/zensh/jsgen" class="btn btn-info" target="_blank">GitHub</a>
-                    <a href="http://weibo.com/zensh" class="sina" target="_blank">
-                        <img src="http://img.t.sinajs.cn/t4/style/images/staticlogo/download/Buttons/32x32/Weibo_Buttons_32x32_blue_back.png" title="新浪微博" alt="新浪微博"/></a>
+        <div class="panel pure-hidden-phone">
+            <div class="inner text-center">
+                <div class="text-show-large">
+                    <strong>{<span class="success">js</span><span class="hot">G</span><span class="success">en</span>}</strong>
+                </div>
+                <div class="text-show text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</div>
+                <div class="text-show">
+                    <a href="https://github.com/zensh/jsgen" class="pure-button pure-button-small" target="_blank"><i class="icon-github icon-large"></i>GitHub</a>
+                    <a href="http://weibo.com/zensh" class="pure-button pure-button-small" target="_blank"><i class="icon-weibo icon-large"></i>WeiBo</a>
                 </div>
             </div>
         </div>
-        <div class="panel hidden-phone">
-            <header class="panel-heading text-muted">社区帮助</header>
-            <div class="inner">
-                <ol>
-                    <li>本社区网站不支持IE8以下的浏览器，推荐使用谷歌Chrome。</li>
-                    <li>新用户注册后请点击注册邮箱的验证链接，未验证可发表评论，验证后才可表文章。</li>
-                    <li>社区使用Markdown格式编辑、存储，编辑器带有Markdown简明语法供查阅。</li>
-                    <li>社区对移动设备支持良好，建议闲暇时使用手机或平板逛逛社区。</li>
-                </ol>
-            </div>
+        <div class="panel pure-hidden-phone">
+            <header class="panel-heading muted"><i class="icon-bullhorn"></i>社区帮助</header>
+            <ol class="inner">
+                <li>本社区网站不支持IE8以下的浏览器，推荐使用谷歌Chrome。</li>
+                <li>新用户注册后请点击注册邮箱的验证链接，未验证可发表评论，验证后才可表文章。</li>
+                <li>社区使用Markdown格式编辑、存储，编辑器带有Markdown简明语法供查阅。</li>
+                <li>社区对移动设备支持良好，建议闲暇时使用手机或平板逛逛社区。</li>
+            </ol>
         </div>
-        <div class="panel hidden-phone">
-            <header class="panel-heading text-muted">热门评论</header>
-            <ul class="media-list inner">
+        <div class="panel pure-hidden-phone">
+            <header class="panel-heading muted"><i class="icon-fire"></i>热门评论</header>
+            <ul class="media-list comments">
                 <li class="media" ng-repeat="comment in hotComments">
-                  <div class="media-body" id="{{comment._id}}">
-                    <strong class="text-hot pull-left" title="热度"><em>{{comment.hots}}</em></strong>
-                    <section class="media-content" gen-parse-markdown="comment.content"></section>
-                    <footer>
-                        <strong><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a></strong>
-                            <a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a>
-                    </footer>
-                  </div>
+                    <div class="media-object left"><em class="hot" title="热度">{{comment.hots}}</em></div>
+                    <div class="media-body">
+                        <div class="media-content" gen-parse-md="comment.content"></div>
+                        <footer class="media-footer">
+                            <a ng-href="{{'/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a>
+                        </footer>
+                    </div>
                 </li>
             </ul>
         </div>
         <div class="panel">
-            <header class="panel-heading text-muted">赞助链接</header>
-            <div class="inner">
-            </div>
+            <header class="panel-heading muted"><i class="icon-link"></i>友情链接</header>
+            <ul class="inner list-inline">
+                <li class="muted"><i class="icon-pushpin"></i>仅链接AngularJS框架网站</li>
+            </ol>
         </div>
         <div class="panel">
-            <header class="panel-heading text-muted">网站状态</header>
-            <div class="inner">
-                <ul class="list-inline">
-                  <li>访问总数：{{global.visitors}}</li>
-                  <li>文章总数：{{global.articles}}</li>
-                  <li>评论总数：{{global.comments}}</li>
-                  <li>会员总数：{{global.users}}</li>
-                  <li>在线访客：{{global.onlineNum}}</li>
-                  <li>在线会员：{{global.onlineUsers}}</li>
-                  <li>在线记录：{{global.maxOnlineNum}}</li>
-                  <li>时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
-                </ul>
-            </div>
+            <header class="panel-heading muted"><i class="icon-dashboard"></i>网站状态</header>
+            <ul class="inner list-inline">
+                <li>访问总数：{{global.visitors}}</li>
+                <li>文章总数：{{global.articles}}</li>
+                <li>评论总数：{{global.comments}}</li>
+                <li>会员总数：{{global.users}}</li>
+                <li>在线访客：{{global.onlineNum}}</li>
+                <li>在线会员：{{global.onlineUsers}}</li>
+                <li>在线记录：{{global.maxOnlineNum}}</li>
+                <li>时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
+            </ul>
         </div>
     </div>
 </div>

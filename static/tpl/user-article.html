@@ -1,28 +1,25 @@
 <div ng-controller="userArticleCtrl">
-    <ul class="media-list">
+    <ul class="media-list comments">
         <li class="media" ng-repeat="article in data">
-            <a class="pull-left text-muted" ng-click="remove(article)" title="删除文章" ng-show="isMe">
-                <i class="glyphicon glyphicon-remove"></i>
+            <a class="media-object left" ng-click="remove(article)" title="删除文章">
+                <i class="icon-remove"></i>
             </a>
-          <div class="media-body" id="{{article._id}}">
-            <header class="media-heading">
-                <h4><a ng-href="{{'/'+article._id}}">{{article.title}}</a>
-                <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
-                <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
-                <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
-                </h4>
-            </header>
-            <footer>
-                <ul class="list-inline text-muted">
-                    <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
-                    {{article.date | formatDate}}发表</li>
-                    <li>{{article.visitors}}次访问</li>
-                    <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
-                    <li>{{article.comments}}条评论</li>
-                    <li ng-show="isMe"><a class="btn btn-mini" ng-href="{{'/'+article._id+'/edit'}}">编辑</a></li>
-                </ul>
-            </footer>
-          </div>
+            <div class="media-body" id="{{article._id}}">
+                <header class="media-header">
+                    <a ng-href="{{'/'+article._id}}">
+                        <i class="success" ng-class="{'icon-hand-up':article.status==2}"></i>{{article.title}}</a>
+                    <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
+                    <a class="pure-button pure-button-link" ng-href="{{'/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
+                    <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>
+                </header>
+                <footer class="media-footer">
+                    <a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
+                    <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>
+                    <i class="icon-refresh" title="{{article.updateTime | formatDate:true}}更新"> {{article.updateTime | formatDate}}</i>
+                    <i class="icon-comments-alt" title="评论" ng-show="article.comments"> {{article.comments}}</i>
+                    <a ng-repeat="tag in article.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                </footer>
+            </div>
         </li>
     </ul>
     <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>

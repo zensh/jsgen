@@ -1,202 +1,166 @@
 'use strict';
+/*global angular */
 
-/* Tools */
 angular.module('jsGen.tools', []).
 factory('tools', function () {
     return function (o) {
         if (typeof o !== 'object') {
-            return false;
+            return;
         } else {
             return (function () {
-                this.checkType = this.checkType || checkType;
-                this.equal = this.equal || equal;
-                this.union = this.union || union;
-                this.intersect = this.intersect || intersect;
-                this.complement = this.complement || complement;
-                this.uniqueArray = this.uniqueArray || uniqueArray;
-                this.digestArray = this.digestArray || digestArray;
+                var hasOwn = Object.prototype.hasOwnProperty,
+                    toString = Object.prototype.toString,
+                    isArray = Array.isArray || function (obj) {
+                        return toString.call(obj) === '[object Array]';
+                    },
+                    isEmpty = function (obj) {
+                        for (var key in obj) {
+                            if (hasOwn.call(obj, key)) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    };
+
+                this.checkType = checkType;
+                this.union = union;
+                this.intersect = intersect;
+                this.digestArray = digestArray;
+                this.complement = complement;
                 return this;
 
                 function checkType(obj) {
                     var type = typeof obj;
                     if (obj === null) {
                         return 'null';
-                    } else if (type !== 'object') {
-                        return type;
-                    } else if (Array.isArray(obj)) {
+                    } else if (type === 'object' && isArray(obj)) {
                         return 'array';
-                    } else return type;
-                };
+                    } else {
+                        return type;
+                    }
+                }
 
-                function equal(a, b) {
-                    return JSON.stringify(a) === JSON.stringify(b);
-                };
-
-                //深度并集复制，用于数据对象复制、数据对象更新，若同时提供参数 a 对象和 b 对象，则将 b 对象所有属性（原始类型，忽略函数）复制给 a对象（同名则覆盖），
-                //返回值为深度复制了 b 后的 a，注意 a 和 b 必须同类型;
+                //深度并集复制，用于数据对象复制、数据对象更新，若同时提供参数 a 对象和 b 对象，则将 a 对象所有属性（原始类型，忽略函数）复制给 b 对象（同名则覆盖），
+                //返回值为深度复制了 a 后的 b，注意 a 和 b 必须同类型;
                 //若只提供参数 a，则 union 函数返回 a 的克隆，与JSON.parse(JSON.stringify(a))相比，克隆效率略高。
 
                 function union(a, b) {
-                    var s, type, hasOwn = Object.prototype.hasOwnProperty;
-                    if (b === undefined) {
-                        type = checkType(a);
-                        if (type === 'object') {
-                            s = {};
-                            for (var key in a) {
-                                if (!hasOwn.call(a, key)) {
-                                    continue;
-                                }
-                                var typeAkey = typeof a[key];
-                                if (typeAkey === 'object' && a[key] !== null) {
-                                    s[key] = union(a[key]);
-                                } else if (typeAkey !== 'function') {
-                                    s[key] = a[key];
-                                }
-                            }
-                            return s;
-                        } else if (type === 'array') {
-                            s = [];
-                            for (var i = 0, len = a.length; i < len; i++) {
-                                var typeAkey = typeof a[i];
-                                if (typeAkey === 'object' && a[i] !== null) {
-                                    s[i] = union(a[i]);
-                                } else if (typeAkey === 'function') {
-                                    s[i] = undefined;
-                                } else {
-                                    s[i] = a[i];
-                                }
-                            };
-                            return s;
-                        } else if (type === 'function') {
-                            return undefined;
+                    var type = checkType(a),
+                        typeK;
+
+                    function subFn(value, key, type, b) {
+                        if (type === 'object' || type === 'array') {
+                            b[key] = type === checkType(b[key]) ? b[key] : (type === 'object' ? {} : []);
+                            union(value, b[key]);
                         } else {
-                            return a;
-                        }
-                    } else if (checkType(a) !== checkType(b)) {
-                        return a;
-                    } else {
-                        type = checkType(b);
-                        if (type === 'object') {
-                            for (var key in b) {
-                                if (!hasOwn.call(b, key)) {
-                                    continue;
-                                }
-                                var typeBkey = checkType(b[key]);
-                                if (typeBkey === 'object') {
-                                    if (checkType(a[key]) !== 'object') {
-                                        a[key] = {};
-                                    }
-                                    union(a[key], b[key]);
-                                } else if (typeBkey === 'array') {
-                                    if (checkType(a[key]) !== 'array') {
-                                        a[key] = [];
-                                    }
-                                    union(a[key], b[key]);
-                                } else if (typeBkey !== 'function') {
-                                    a[key] = b[key];
-                                }
-                            }
-                            return a;
-                        } else if (type === 'array') {
-                            for (var i = 0, len = b.length; i < len; i++) {
-                                var typeBkey = checkType(b[i]);
-                                if (typeBkey === 'object') {
-                                    if (checkType(a[i]) !== 'object') {
-                                        a[i] = {};
-                                    }
-                                    union(a[i], b[i]);
-                                } else if (typeBkey === 'array') {
-                                    if (checkType(a[i]) !== 'array') {
-                                        a[i] = [];
-                                    }
-                                    union(a[i], b[i]);
-                                } else if (typeBkey === 'function') {
-                                    a[i] = undefined;
-                                } else {
-                                    a[i] = b[i];
-                                }
-                            };
-                            return a;
-                        } else if (type === 'function') {
-                            return undefined;
-                        } else {
-                            return a;
+                            b[key] = value;
                         }
                     }
-                };
+
+                    if (b === undefined || type === checkType(b)) {
+                        if (type === 'object') {
+                            b = b || {};
+                            for (var key in a) {
+                                typeK = checkType(a[key]);
+                                if (hasOwn.call(a, key) && typeK !== 'function') {
+                                    subFn(a[key], key, typeK, b);
+                                }
+                            }
+                        } else if (type === 'array') {
+                            b = b || [];
+                            for (var i = 0, l = a.length; i < l; i++) {
+                                typeK = checkType(a[i]);
+                                subFn(typeK === 'function' ? null : a[i], i, typeK, b);
+                            }
+                        } else if (type !== 'function') {
+                            b = a;
+                        }
+                    }
+                    return b;
+                }
 
                 //深度交集复制，用于数据对象校验，即以 a 为模板，当a 和 b 共有属性且属性值类型一致时，将 b 的属性值复制给 a，对于 a 有 b 没有或 b 有 a 没有的属性，均删除，返回相交复制后的 a;
                 // var a = {q:0,w:'',e:{a:0,b:[0,0,0]}}, b = {r:10,w:'hello',e:{a:99,b:[1,2,3,4,5]}};
                 // intersect(a, b);  // a 变成{w:'hello',e:{a:99,b:[1,2,3]}}
-                //如果 a 的某属性是数组，且只有一个值，则以它为模板，将 b 对应的该属性的数组的值校检比复制
-                // var a = {q:0,w:'',e:{a:0,b:[0]}}, b = {r:10,w:'hello',e:{a:99,b:[1,2,3,4,5]}};
-                // intersect(a, b);  // a 变成{w:'hello',e:{a:99,b:[1,2,3,4,5]}} 注意a.e.b与上面的区别
+                //如果 a 或其属性是 null，则完全复制 b 或其对应属性
+                //如果 a 或其属性是 {} 或 [], 且 b 或其对应属性类型一致（即对象类型或数组类型），则完全复制
+                //如果 a 的某属性是数组，且只有一个值，则以该值为模板，将 b 对应的该属性的数组的值校检并复制
+                // var a = {q:0,w:null,e:{a:0,b:[0]}}, b = {r:10,w:'hello',e:{a:99,b:[function(){},1,2,3,'4',5]}};
+                // intersect(a, b);  // 注意a与上面的区别
+                // var a = {q:0,w:null,e:{a:0,b:[null]}}, b = {r:10,w:'hello',e:{a:99,b:[function(){},1,2,3,'4',5]}};
+                // intersect(a, b);  // 注意a与上面的区别
 
                 function intersect(a, b) {
-                    var hasOwn = Object.prototype.hasOwnProperty;
-                    if (a && b) {
-                        var typeA = checkType(a),
-                            typeB = checkType(b);
-                        if (typeA === 'array' && typeB === 'array') {
+                    var type = checkType(a),
+                        empty = false;
+
+                    function subFn(a, b, key, type) {
+                        var typeK = checkType(a[key]);
+                        if (typeK === 'function') {
+                            a[key] = type === 'array' ? null : undefined;
+                        } else if (typeK === 'null') {
+                            a[key] = union(b[key]);
+                        } else if (typeK === checkType(b[key])) {
+                            if (typeK === 'object' || typeK === 'array') {
+                                intersect(a[key], b[key]);
+                            } else {
+                                a[key] = b[key];
+                            }
+                        } else {
+                            a[key] = undefined;
+                        }
+                        if (a[key] === undefined) {
+                            delete a[key];
+                        }
+                    }
+
+                    if (type === 'null') {
+                        a = undefined;
+                        empty = true;
+                    } else if (type === checkType(b)) {
+                        if (type === 'array') {
                             if (a.length === 0) {
-                                union(a, b);
+                                empty = true;
                             } else if (a.length === 1) {
-                                var o = union(a[0]);
-                                var typeAkey = checkType(o);
-                                if (typeAkey !== 'function' && b.length > 0) {
-                                    for (var i = b.length - 1; i >= 0; i--) {
-                                        typeBkey = checkType(b[i]);
-                                        if (typeBkey === typeAkey) {
-                                            if (typeBkey === 'object' || typeBkey === 'array') {
-                                                a[i] = union(o);
-                                                intersect(a[i], b[i]);
+                                var o = a[0],
+                                    typeK = checkType(o);
+                                a.length = 0;
+                                if (typeK !== 'function') {
+                                    for (var i = 0, l = b.length; i < l; i++) {
+                                        var typeB = checkType(b[i]);
+                                        if (typeK === 'null' || typeK === typeB) {
+                                            if (typeK === 'object' || typeK === 'array') {
+                                                a.push(intersect(union(o), b[i]));
                                             } else {
-                                                a[i] = b[i];
+                                                a.push(typeB === 'function' || typeB === 'undefined' ? null : b[i]);
                                             }
-                                        } else {
-                                            delete a[i];
                                         }
                                     }
-                                } else {
-                                    delete a[0];
                                 }
                             } else {
-                                for (var i = 0, len = a.length; i < len; i++) {
-                                    var typeBkey = checkType(b[i]);
-                                    if (checkType(a[i]) === typeBkey && typeBkey !== 'function') {
-                                        if (typeBkey === 'object' || typeBkey === 'array') {
-                                            intersect(a[i], b[i]);
-                                        } else {
-                                            a[i] = b[i];
-                                        }
-                                    } else {
-                                        delete a[i];
-                                    }
+                                for (var i = 0, l = a.length; i < l; i++) {
+                                    subFn(a, b, i, type);
                                 }
                             }
-                            digestArray(a);
-                        } else if (typeA === 'object' && typeB === 'object' && Object.keys(a).length === 0) {
-                            union(a, b);
-                        } else {
+                        } else if (type === 'object') {
+                            empty = true;
                             for (var key in a) {
-                                if (!hasOwn.call(a, key)) {
-                                    continue;
-                                }
-                                var typeBkey = checkType(b[key]);
-                                if (hasOwn.call(b, key) && checkType(a[key]) === typeBkey && typeBkey !== 'function') {
-                                    if (typeBkey === 'object' || typeBkey === 'array') {
-                                        intersect(a[key], b[key]);
+                                if (hasOwn.call(a, key)) {
+                                    empty = false;
+                                    if (hasOwn.call(b, key)) {
+                                        subFn(a, b, key, type);
                                     } else {
-                                        a[key] = b[key];
+                                        delete a[key];
                                     }
-                                } else {
-                                    delete a[key];
                                 }
                             }
                         }
                     }
+                    if (empty) {
+                        a = union(b, a);
+                    }
                     return a;
-                };
+                }
 
                 //深度补集运算，用于获取对象修改后的值。a为目标对象，b为对比对象。
                 //a的某属性值与b的对应属性值全等时，删除a的该属性，运算直接修改a，返回值也是a。
@@ -263,38 +227,21 @@ factory('tools', function () {
                         digestArray(a);
                     }
                     return a;
-                };
-                //数组去重，返回新数组，新数组中没有重复值。
+                }
 
-                function uniqueArray(a) {
-                    if (!Array.isArray(a)) {
-                        return a;
-                    }
-
-                    var o = {},
-                    re = [];
-                    for (var i = a.length - 1; i >= 0; i--) {
-                        if (o[typeof a[i] + a[i]] !== 1) {
-                            o[typeof a[i] + a[i]] = 1;
-                            re.push(a[i]);
-                        }
-                    };
-
-                    return re.reverse();
-                };
                 //数组去undefined，修改原数组，去除undefined值的元素。
 
                 function digestArray(a) {
-                    if (!Array.isArray(a)) {
-                        return a;
-                    }
-                    for (var i = a.length - 1; i >= 0; i--) {
-                        if (a[i] === undefined) {
-                            a.splice(i, 1);
+                    if (isArray(a)) {
+                        for (var i = a.length - 1; i >= 0; i--) {
+                            if (a[i] === undefined) {
+                                a.splice(i, 1);
+                            }
                         }
-                    };
+                    }
                     return a;
-                };
+                }
+
             }).call(o);
         }
     };

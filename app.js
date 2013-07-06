@@ -1,3 +1,6 @@
+'use strict';
+/*global global, require, process, module, jsGen, _restConfig*/
+
 var domain = require('domain'),
     http = require('http'),
     fs = require('fs'),
@@ -6,7 +9,7 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.3.5';
+jsGen.version = Date.now() + '';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -52,7 +55,9 @@ serverDm.run(function () {
                     var doc = jsGen.lib.json.GlobalConfig;
                     todo(doc);
                 });
-            } else todo(doc);
+            } else {
+                todo(doc);
+            }
 
             function todo(doc) {
                 that._update(doc);
@@ -86,7 +91,7 @@ serverDm.run(function () {
                     jsGen.config.info.rrestjs = _restConfig._version;
                 }));
                 createServer();
-            };
+            }
         }));
     }).call(jsGen.config);
 });
@@ -122,10 +127,10 @@ function createServer() {
                         }
                     });
                 }
-            } catch (err) {
-                delete err.domain;
+            } catch (error) {
+                delete error.domain;
                 //console.log('CatchERR:******************');
-                jsGen.errlog.error(err);
+                jsGen.errlog.error(error);
                 dm.dispose();
             }
         });
@@ -154,4 +159,4 @@ function createServer() {
             }
         });
     }).listen(jsGen.module.rrestjs.config.listenPort);
-};
+}

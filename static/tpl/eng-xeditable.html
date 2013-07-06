@@ -1,0 +1,6 @@
+<span ng-hide="isEdit">{{value}}<span class="muted" ng-show="placeholder">add a note</span></span>
+<form class="pure-form" ng-show="isEdit">
+    <input type="text" ng-model="value"></input>
+    <button class="pure-button pure-button-small" type="submit" ng-click="save()"><i class="icon-ok"></i></button>
+    <button class="pure-button pure-button-small" type="submit" ng-click="cancel()"><i class="icon-remove"></i></button>
+</form>

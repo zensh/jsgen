@@ -1,6 +1,6 @@
 'use strict';
+/*global angular, _*/
 
-/* Filters */
 angular.module('jsGen.filters', []).
 filter('role', function () {
     return function (text) {
@@ -123,10 +123,12 @@ filter('cutText', function () {
 }).
 filter('formatDate', ['$filter',
     function ($filter) {
-        return function (date) {
+        return function (date, full) {
             var o = Date.now() - date;
-            if (o > 259200000) {
-                return $filter('date')(date, 'yy-MM-dd HH:mm'); // 三天前直接显示标准日期格式
+            if (full) {
+                return $filter('date')(date, 'yyyy年MM月dd日 HH:mm');
+            } else if (o > 259200000) {
+                return $filter('date')(date, 'MM-dd HH:mm');
             } else if (o > 86400000) {
                 return Math.floor(o / 86400000) + '天前';
             } else if (o > 3600000) {

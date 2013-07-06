@@ -1,0 +1,12 @@
+<header class="page-header inner">
+    <h4>热门标签</h4>
+</header>
+<section class="inner">
+    <ul class="list-inline">
+        <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
+            <a class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
+            <small>文章{{tag.articles}}/会员{{tag.users}}</small></a>
+        </li>
+    </ul>
+</section>
+<div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>

@@ -1,32 +1,26 @@
 <header class="page-header inner" ng-show="help">
-    <h4>{{help.title}}</h4>
-    <p>{{help.content}}</p>
+    {{help.title}}<br />
+    <small class='info'>{{help.content}}</small>
 </header>
 <div ng-controller="userArticleCtrl">
     <ul class="media-list">
         <li class="media" ng-repeat="article in data">
-          <div class="media-body" id="{{article._id}}">
-            <header class="media-heading">
-                <h4><a ng-href="{{'/'+article._id}}" ng-class="article.read">{{article.title}}</a>
-                <i ng-show="article.status==2" class="glyphicon glyphicon-hand-up text-success" title="置顶"></i>
-                <i ng-show="article.status>=1" class="glyphicon glyphicon-fire text-hot" title="推荐"></i>
-                <i class="btn btn-mini pull-right" title="热度">{{article.hots}}</i>
-                </h4>
-            </header>
-            <section class="media-content" gen-parse-markdown="article.content" ng-class="article.read"></section>
-            <footer>
-                <ul class="list-inline text-muted">
-                    <li><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a>
-                    {{article.date | formatDate}}发表</li>
-                    <li>{{article.visitors}}次访问</li>
-                    <li ng-hide="article.date==article.updateTime">{{article.updateTime | formatDate}}更新</li>
-                    <li>{{article.comments}}条评论</li>
-                    <li ng-repeat="tag in article.tagsList">
-                        <a ng-href="{{'/'+tag._id}}" class="btn btn-mini">{{tag.tag}}</a>
-                    </li>
-                </ul>
-            </footer>
-          </div>
+            <div class="media-body" id="{{article._id}}">
+                <header class="media-header">
+                    <a ng-href="{{'/'+article._id}}">
+                        <i class="success" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}"></i>{{article.title}}</a>
+                    <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
+                    <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>
+                </header>
+                <div class="media-content list-content" ng-class="{muted: article.read}" gen-parse-md="article.content"></div>
+                <footer class="media-footer">
+                    <a ng-href="{{'/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
+                    <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>
+                    <i class="icon-refresh" title="{{article.updateTime | formatDate:true}}更新"> {{article.updateTime | formatDate}}</i>
+                    <i class="icon-comments-alt" title="评论" ng-show="article.comments"> {{article.comments}}</i>
+                    <a ng-repeat="tag in article.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                </footer>
+            </div>
         </li>
     </ul>
     <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>
