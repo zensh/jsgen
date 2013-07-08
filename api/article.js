@@ -501,7 +501,7 @@ function filterArticle(articleObj, callback) {
 
 function getArticle(req, res, dm) {
     var ID = req.path[2],
-        p = req.getparam.p || req.getparam.page || 1;
+        p = req.getparam.p || req.getparam.pageIndex || 1;
 
     if (checkID(ID, 'A')) {
         ID = jsGen.dao.article.convertID(ID);
@@ -609,20 +609,20 @@ function getComments(req, res, dm) {
 
 function getLatest(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.page || 1,
-        n = +req.path[3];
+    p = req.getparam.p || req.getparam.pageIndex || 1,
+        s = +req.path[3];
 
     p = +p;
-    if (req.path[2] === 'latest' && n > 0) {
-        if (n > 20) {
-            n = 20;
+    if (req.path[2] === 'latest' && s > 0) {
+        if (s > 20) {
+            s = 20;
         }
         req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.n = n;
-        list = cache._index.slice(-n).reverse();
+        req.getparam.pageIndex = 1;
+        req.getparam.pageSize = s;
+        list = cache._index.slice(-s).reverse();
     } else {
-        n = 0;
+        s = 0;
         if (!req.session.listPagination) {
             req.session.listPagination = {
                 key: cache._initTime
@@ -645,21 +645,21 @@ function getLatest(req, res, dm) {
 
 function getUpdate(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.page || 1,
-        n = +req.path[3],
+    p = req.getparam.p || req.getparam.pageIndex || 1,
+        s = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.updateList), 'base64');
 
     p = +p;
-    if (n > 0) {
-        if (n > 20) {
-            n = 20;
+    if (s > 0) {
+        if (s > 20) {
+            s = 20;
         }
         req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.n = n;
-        list = jsGen.cache.updateList.slice(0, n);
+        req.getparam.pageIndex = 1;
+        req.getparam.pageSize = s;
+        list = jsGen.cache.updateList.slice(0, s);
     } else {
-        n = 0;
+        s = 0;
         if (!req.session.listPagination) {
             req.session.listPagination = {
                 key: key
@@ -682,20 +682,20 @@ function getUpdate(req, res, dm) {
 
 function getHots(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.page || 1,
-        n = +req.path[3],
+    p = req.getparam.p || req.getparam.pageIndex || 1,
+        s = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.hotsList), 'base64');
     p = +p;
-    if (n > 0) {
-        if (n > 20) {
-            n = 20;
+    if (s > 0) {
+        if (s > 20) {
+            s = 20;
         }
         req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.n = n;
+        req.getparam.pageIndex = 1;
+        req.getparam.pageSize = s;
         list = jsGen.cache.hotsList.slice(0, n);
     } else {
-        n = 0;
+        s = 0;
         if (!req.session.listPagination) {
             req.session.listPagination = {
                 key: key
@@ -717,17 +717,17 @@ function getHots(req, res, dm) {
 };
 
 function getHotComments(req, res, dm) {
-    var list, n = +req.path[3] || 5;
+    var list, s = +req.path[3] || 5;
 
-    if (typeof n !== 'number') {
+    if (typeof s !== 'number') {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     }
-    if (n < 3) {
-        n = 3;
-    } else if (n > 50) {
-        n = 50;
+    if (s < 3) {
+        s = 3;
+    } else if (s > 50) {
+        s = 50;
     }
-    list = jsGen.cache.hotCommentsList.slice(0, n);
+    list = jsGen.cache.hotCommentsList.slice(0, s);
     convertArticles(list, dm.intercept(function (doc) {
         return res.sendjson({
             data: doc

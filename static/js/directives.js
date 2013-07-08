@@ -46,7 +46,7 @@ directive('genTabClick', function () {
 directive('genPagination', ['$location', 'getFile',
     function ($location, getFile) {
         // <div gen-pagination="options"></div>
-        // 基于pure框架
+        // HTML/CSS基于Bootstrap框架
         // options = {
         //     locationPath: 'pathUrl',
         //     sizePerPage: [25, 50, 100],
@@ -97,8 +97,9 @@ directive('genPagination', ['$location', 'getFile',
                     scope.paginationNext = pageIndex < lastPage ? pageIndex + 1 : 0;
                     scope.pageIndex = pageIndex;
                     scope.showPages = showPages;
+                    scope.pageSize = value.pageSize;
                     scope.perPages = value.sizePerPage || [];
-                    scope.locationPath = value.locationPath;
+                    scope.locationPath = value.locationPath +'?p=';
                 }, true);
             }
         };

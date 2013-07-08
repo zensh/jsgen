@@ -5,6 +5,67 @@ angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives', 
 constant('app', {
     version: jsGenVersion // 注册内部全局变量app
 }).
+config(['$httpProvider', 'app',
+    function ($httpProvider, app) {
+        // global loading status
+        var count = 0,
+            loading = false,
+            status = {
+                count: 0,
+                total: 0
+            };
+
+        status.cancel = function () {
+            count = 0;
+            loading = false;
+            this.count = 0;
+            this.total = 0;
+            app.loading(false, this); // end loading
+        };
+
+        // global loading start
+        $httpProvider.defaults.transformRequest.push(function (data) {
+            count += 1;
+            status.count = count;
+            status.total += 1;
+            if (!loading) {
+                setTimeout(function () {
+                    if (!loading && count > 0) {
+                        loading = true;
+                        app.loading(true, status);
+                    }
+                }, 1000); // if no response in 1000ms, begin loading
+            }
+            return data;
+        });
+        // global loading end
+        $httpProvider.defaults.transformResponse.push(function (data) {
+            count -= 1;
+            status.count = count;
+            if (loading && count === 0) {
+                status.cancel();
+            }
+            return data;
+        });
+        // global error handling
+        $httpProvider.interceptors.push(function () {
+            return {
+                response: function (response) {
+                    if (response.headers()['content-type'] === "application/json; charset=utf-8") {
+                        if (response.data && response.data.error) {
+                            return app.q.reject(response);
+                        }
+                    }
+                    return response;
+                },
+                responseError: function (response) {
+                    app.toast.error(response.data.error);
+                    return app.q.reject(response);
+                }
+            };
+        });
+    }
+]).
 provider('getFile', ['app',
     function (app) {
         var self = this;
@@ -20,18 +81,6 @@ provider('getFile', ['app',
                 md: self.md
             };
         };
-    }
-]).
-config(['$httpProvider',
-    function ($httpProvider) {
-        // $httpProvider.defaults.transformRequest.push(function (data) {
-        //     console.log('1111', data);
-        //     return data;
-        // });
-        // $httpProvider.defaults.transformResponse.push(function (data) {
-        //     console.log('2222', data);
-        //     return data;
-        // });
     }
 ]).
 config(['$routeProvider', '$locationProvider', 'getFileProvider',
@@ -83,35 +132,39 @@ config(['$routeProvider', '$locationProvider', 'getFileProvider',
             };
         $routeProvider.
         when('/', index).
+        when('/hots', index).
+        when('/update', index).
+        when('/latest', index).
+        when('/T:ID', index).
+        when('/tag/:TAG', index).
         when('/login', login).
         when('/register', register).
         when('/home', home).
         when('/admin', admin).
         when('/add', edit).
         when('/tag', tag).
-        when('/tag/:TAG', index).
         when('/reset/:RE', reset).
         when('/user/:UID', user).
         when('/A:ID/edit', edit).
         when('/U:ID', user).
         when('/A:ID', article).
         when('/C:ID', collection).
-        when('/T:ID', index).
-        when('/:OP', index).
         otherwise({
             redirectTo: '/'
         });
         $locationProvider.html5Mode(true);
     }
 ]).
-run(['app', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'getFile', 'tools', 'timing', 'cache', 'rest', 'sanitize',
-        'mdParse', 'mdEditor', 'getArticle', 'getUser', 'getList', 'getMarkdown',
-    function (app, $rootScope, $http, $location, $timeout, $filter,
-        $anchorScroll, getFile, tools, timing, cache, rest, sanitize, mdParse, mdEditor, getArticle, getUser, getList, getMarkdown) {
+run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'rest', 'sanitize',
+        'mdParse', 'mdEditor', 'promiseGet', 'custom', 'getArticle', 'getUser', 'getList', 'getMarkdown',
+    function (app, $q, $rootScope, $http, $location, $timeout, $filter,
+        $anchorScroll, getFile, tools, toast, timing, cache, rest, sanitize, mdParse, mdEditor, promiseGet, custom, getArticle, getUser, getList, getMarkdown) {
 
         window.app = app; // for test
         tools(app); //添加jsGen系列工具函数
+        app.q = $q;
         app.http = $http;
+        app.toast = toast;
         app.timing = timing;
         app.location = $location;
         app.timeout = $timeout;
@@ -123,6 +176,8 @@ run(['app', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorS
         app.sanitize = sanitize;
         app.mdParse = mdParse;
         app.mdEditor = mdEditor;
+        app.promiseGet = promiseGet;
+        app.custom = custom;
         app.getArticle = getArticle;
         app.getUser = getUser;
         app.getList = getList;
@@ -131,7 +186,8 @@ run(['app', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorS
         app.timer = null;
 
         app.validate = function (scope, turnoff, whiteList) {
-            var collect = [], error;
+            var collect = [],
+                error;
             whiteList = _.isArray(whiteList) ? whiteList : [];
             scope.$broadcast('srsTooltipValidate', collect, turnoff);
             error = _.filter(collect, function (value) {

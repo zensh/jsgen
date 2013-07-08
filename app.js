@@ -112,14 +112,14 @@ function createServer() {
                 });
                 if (err.hasOwnProperty('name')) {
                     res.sendjson({
-                        err: err
+                        error: err
                     });
                 } else {
                     //console.log('ReqErr:******************');
                     console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
                     jsGen.errlog.error(err);
                     res.sendjson({
-                        err: {
+                        error: {
                             name: '请求错误',
                             message: '对不起，请求出错了！',
                             type: 'error',

@@ -4,91 +4,60 @@
 angular.module('jsGen.controllers', []).
 controller('indexCtrl', ['app', '$scope', '$routeParams',
     function (app, $scope, $routeParams) {
-        var restPath = app.rest.article;
+        var ID = '',
+            restAPI = app.rest.article,
+            custom = app.custom;
 
-        $scope.data = null;
+        function checkRouteParams() {
+            var path = app.location.path().slice(1).split('/');
+            if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test(path[0])) {
+                restAPI = app.rest.tag;
+                $scope.other._id = path[0];
+                $scope.other.title = $routeParams.TAG || path[0];
+                $scope.parent.viewPath = '';
+            } else {
+                restAPI = app.rest.article;
+                $scope.parent.viewPath = path[0] || 'latest';
+            }
+            ID = $routeParams.TAG || path[0];
+        }
+
         $scope.global.title2 = $scope.global.description;
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            pagination: null,
-            other: null
+            listModel: custom.listModel()
         };
+        $scope.other = {};
+        $scope.pagination = {};
 
-        function checkRouteParams() {
-            var viewID = 'latest';
-            if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test($routeParams.OP)) {
-                restPath = app.rest.tag;
-                $scope.other._id = $routeParams.OP;
-                $scope.other.name = $routeParams.TAG;
-                viewID = 'other';
-            } else {
-                restPath = app.rest.article;
-                if ($routeParams.OP !== 'hots' && $routeParams.OP !== 'update') {
-                    $routeParams.OP = 'latest';
-                }
-                viewID = $routeParams.OP;
-            }
-        }
+        $scope.setListModel = function () {
+            $scope.parent.listModel = custom.listModel(!$scope.parent.listModel);
+        };
 
         checkRouteParams();
-        $scope.$on('pagination', function (event, doc) {
-            event.stopPropagation();
-            doc.ID = $routeParams.OP || $routeParams.TAG || 'latest';
-            app.rootScope.global.loading = true;
-            var result = restPath.get(doc, function () {
-                app.rootScope.global.loading = false;
-                if (!result.err) {
-                    if (result.tag) {
-                        $scope.other.name = result.tag.tag;
-                        $scope.other._id = result.tag._id;
-                    }
-                    if (result.pagination) {
-                        if (result.pagination.now === 1) {
-                            $scope.data = result.data;
-                        } else {
-                            $scope.data = $scope.data.concat(result.data).slice(-200);
-                        }
-                        $scope.pagination = result.pagination;
-                        if (!$scope.pagination.display) {
-                            $scope.pagination.display = {
-                                first: '首页',
-                                next: '下一页',
-                                last: '尾页'
-                            };
-                        }
-                    } else {
-                        $scope.data = result.data;
-                        $scope.pagination = null;
-                    }
-                } else {
-                    app.rootScope.msg = result.err;
-                }
-            });
-        });
-        $scope.$emit('pagination', {
-            n: 15,
-            p: 1
-        });
-        app.getList('comment', function (list) {
-            if (!list.err) {
-                list.data.forEach(function (comment, i) {
-                    list.data[i].content = app.filter('cutText')(comment.content, 180);
-                })
-                $scope.hotComments = list.data.slice(0, 5);
-            } else {
-                app.rootScope.msg = list.err;
+        app.promiseGet({
+            ID: ID,
+            p: $routeParams.p,
+            s: $routeParams.s || custom.pageSize()
+        }, restAPI).then(function (data) {
+            var pagination = data.pagination || {};
+            if (data.tag) {
+                $scope.other.title = data.tag.tag;
+                $scope.other._id = data.tag._id;
             }
+            pagination.locationPath = app.location.path();
+            pagination.sizePerPage = [10, 20, 50];
+            pagination.pageSize = custom.pageSize(pagination.pageSize);
+            $scope.pagination = pagination;
+            $scope.articleList = data.data;
         });
-        $scope.getList = function (s) {
-            $routeParams.OP = s;
-            $routeParams.TAG = null;
-            checkRouteParams();
-            $scope.$emit('pagination', {
-                n: 10,
-                p: 1
+        app.getList('comment').then(function (list) {
+            _.each(list.data, function (x, i) {
+                x.content = app.filter('cutText')(x.content, 180);
             });
-        };
+            $scope.hotComments = list.data.slice(0, 5);
+        });
     }
 ]).controller('tagCtrl', ['app', '$scope',
     function (app, $scope) {

@@ -431,7 +431,7 @@ function getUser(req, res, dm) {
     }
     userCache.getP(Uid, dm.intercept(function (user) {
         var list, key = 'Pub' + userID + req.path[3],
-            p = req.getparam.p || req.getparam.page || 1;
+            p = req.getparam.p || req.getparam.pageIndex || 1;
         p = +p;
         list = jsGen.cache.pagination.get(key);
         if (!list || p === 1) {
@@ -564,7 +564,7 @@ function getUserInfo(req, res, dm) {
     var userID = jsGen.dao.user.convertID(req.session.Uid);
     userCache.getP(req.session.Uid, dm.intercept(function (user) {
         var list, key = userID + 'home',
-            p = req.getparam.p || req.getparam.page || 1;
+            p = req.getparam.p || req.getparam.pageIndex || 1;
         p = +p;
         list = jsGen.cache.pagination.get(key);
         if (!list || p === 1) {
@@ -886,7 +886,7 @@ function resetUser(req, res, dm) {
 
 function getArticles(req, res, dm) {
     var list, key,
-        p = req.getparam.p || req.getparam.page || 1;
+        p = req.getparam.p || req.getparam.pageIndex || 1;
 
     p = +p;
     if (!req.session.Uid) {
@@ -931,7 +931,7 @@ function getArticles(req, res, dm) {
 
 function getUsersList(req, res, dm) {
     var list,
-        p = req.getparam.p || req.getparam.page || 1;
+        p = req.getparam.p || req.getparam.pageIndex || 1;
 
     p = +p;
     if (!req.session.Uid) {

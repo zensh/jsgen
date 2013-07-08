@@ -8,10 +8,13 @@
     <li ng-class="{active: parent.viewPath=='update'}">
         <a href="/update" title="最近更新文章">更新</a>
     </li>
-    <li ng-class="{active: parent.viewPath=='other'}" ng-show="parent.other._id">
-        <a ng-href="/{{parent.other._id}}">{{parent.other.name}}</a>
+    <li ng-class="{active: !parent.viewPath}" ng-show="other._id">
+        <a ng-href="/{{other._id}}">{{other.title}}</a>
     </li>
-    <a href="/add" class="pure-button success-bg right" ng-show="global.isLogin">发表文章</a>
+    <div class="pure-button-group right">
+        <a href="/add" class="pure-button success-bg" ng-show="global.isLogin">发表文章</a>
+        <a class="pure-button list-model primary-bg" title="{{parent.listModel&&'简洁模式'||'摘要模式'}}" ng-class="{'pure-button-active':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
+    </div>
 </ul>
 <ul class="list-inline inner">
     <li ng-repeat="tag in global.tagsList">
@@ -30,7 +33,7 @@
                 <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
                 <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>
             </header>
-            <div class="media-content list-content" gen-parse-md="article.content"></div>
+            <div class="media-content list-content" ng-hide="parent.listModel" gen-parse-md="article.content"></div>
             <footer class="media-footer">
                 <a ng-href="{{'/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
                 <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>
@@ -41,4 +44,3 @@
         </div>
     </li>
 </ul>
-<div gen-pagination="pagination"></div>

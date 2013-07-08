@@ -278,19 +278,19 @@ function getTag(req, res, dm) {
     }
     tagCache.getP(tag, dm.intercept(function (doc) {
         var list, key,
-            n = +req.path[3],
-            p = req.getparam.p || req.getparam.page || 1;
+            s = +req.path[3],
+            p = req.getparam.p || req.getparam.pageIndex || 1;
 
-        if (n > 0) {
-            if (n > 20) {
-                n = 20;
+        if (s > 0) {
+            if (s > 20) {
+                s = 20;
             }
             req.getparam = req.getparam || {};
-            req.getparam.p = 1;
-            req.getparam.n = n;
-            list = doc.articlesList.slice(-n).reverse();
+            req.getparam.pageIndex = 1;
+            req.getparam.pageSize = s;
+            list = doc.articlesList.slice(-s).reverse();
         } else {
-            n = 0;
+            s = 0;
             p = +p;
             key = MD5(JSON.stringify(doc.articlesList), 'base64');
 
@@ -310,7 +310,7 @@ function getTag(req, res, dm) {
             if (articlesList.pagination) {
                 union(req.session.listPagination, articlesList.pagination);
             }
-            if (p === 1 || n > 0) {
+            if (p === 1 || s > 0) {
                 doc._id = jsGen.dao.tag.convertID(doc._id);
                 delete doc.articlesList;
                 delete doc.usersList;
@@ -323,19 +323,19 @@ function getTag(req, res, dm) {
 
 function getTags(req, res, dm) {
     var list,
-        n = +req.path[3],
-        p = req.getparam.p || req.getparam.page || 1;
+        s = +req.path[3],
+        p = req.getparam.p || req.getparam.pageIndex || 1;
 
-    if (n > 0) {
-        if (n > 20) {
-            n = 20;
+    if (s > 0) {
+        if (s > 20) {
+            s = 20;
         }
         req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.n = n;
-        list = cache._index.slice(-n);
+        req.getparam.pageIndex = 1;
+        req.getparam.pageSize = s;
+        list = cache._index.slice(-s);
     } else {
-        n = 0;
+        s = 0;
         p = +p;
         if (!req.session.listPagination) {
             req.session.listPagination = {

@@ -1,24 +1,10 @@
 'use strict';
 /*global angular, _, marked, Sanitize, Markdown, prettyPrint, toastr*/
 
-angular.module('jsGen.services', ['ngResource']).
+angular.module('jsGen.services', ['ngResource', 'ngCookies']).
 constant('msg', {
     errorServer: 'Server response error!'
-}).
-factory('log', function () {
-    toastr.options = {
-        positionClass: 'toast-top-full-width'
-    };
-    return function (message, title, type) {
-        var TYPE = ['info', 'error', 'success', 'warning'];
-        title = title + '';
-        type = TYPE.indexOf(type) > -1 ? type : TYPE[0];
-        message = angular.isObject(message) ? JSON.stringify(message) : message;
-        window.console.log(type.toUpperCase() + ': [' + title + ']' + message);
-        toastr[type](message, title);
-    };
-}).
-factory('timing', ['$rootScope', '$q', '$exceptionHandler',
+}).factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     function ($rootScope, $q, $exceptionHandler) {
         function timing(fn, delay, times) {
             var timingId, count = 0,
@@ -59,16 +45,32 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
         };
         return timing;
     }
-]).
-factory('pretty', function () {
+]).factory('toast', ['$log',
+    function ($log) {
+        var toast = {},
+            methods = ['info', 'error', 'success', 'warning'];
+
+        angular.forEach(methods, function (x) {
+            toast[x] = function (message, title) {
+                var log = $log[x] || $log.log;
+                title = title + '';
+                log(message, title);
+                message = angular.isObject(message) ? angular.toJson(message) : message;
+                toastr[x](message, title);
+            };
+        });
+        toastr.options = angular.extend({
+            positionClass: 'toast-top-full-width'
+        }, toast.options);
+        return toast;
+    }
+]).factory('pretty', function () {
     return prettyPrint;
-}).
-factory('mdParse', function () {
+}).factory('mdParse', function () {
     return function (html) {
         return marked(html + '');
     };
-}).
-factory('sanitize', function () {
+}).factory('sanitize', function () {
     var San = Sanitize,
         config = San.Config,
         sanitize = [
@@ -87,8 +89,7 @@ factory('sanitize', function () {
         outerDOM.appendChild(sanitize[level].clean_node(innerDOM));
         return outerDOM.innerHTML;
     };
-}).
-factory('mdEditor', ['mdParse', 'sanitize', 'pretty',
+}).factory('mdEditor', ['mdParse', 'sanitize', 'pretty',
     function (mdParse, sanitize, pretty) {
         return function (idPostfix, level) {
             idPostfix = idPostfix ? idPostfix + '' : '';
@@ -105,15 +106,14 @@ factory('mdEditor', ['mdParse', 'sanitize', 'pretty',
             return editor;
         };
     }
-]).
-factory('rest', ['$resource',
+]).factory('rest', ['$resource',
     function ($resource) {
         return {
             index: $resource('/api/index/:OP', {
                 OP: 'index'
             }),
-            user: $resource('/api/user/:Uid/:OP', {
-                Uid: 'index',
+            user: $resource('/api/user/:ID/:OP', {
+                ID: 'index',
                 OP: 'index'
             }),
             article: $resource('/api/article/:ID/:OP', {
@@ -126,8 +126,7 @@ factory('rest', ['$resource',
             })
         };
     }
-]).
-factory('cache', ['$cacheFactory',
+]).factory('cache', ['$cacheFactory',
     function ($cacheFactory) {
         return {
             user: $cacheFactory('user', {
@@ -141,74 +140,63 @@ factory('cache', ['$cacheFactory',
             })
         };
     }
-]).
-factory('loading', ['$rootScope', '$timeout',
-    function ($rootScope, $timeout) {
-        // DOM must have '<div srs-alert-msg="loadingMsg"></div>'
-        $rootScope.loadingMsg = {
-            type: 'info',
-            message: '',
-            width: '100px',
-            loading: false
-        };
-
-        function loadingLoop() {
-            if ($rootScope.loadingMsg.loading) {
-                if ($rootScope.loadingMsg.message.length > 20) {
-                    $rootScope.loadingMsg.message = 'loading';
-                }
-                $rootScope.loadingMsg.message += ' .';
-                $timeout(loadingLoop, 500);
-            }
-        }
-
-        return function (value) {
-            if ($rootScope.loadingMsg.loading === value) {
-                return;
-            }
-            if (value) {
-                _.delay(function () {
-                    if ($rootScope.loadingMsg.loading) {
-                        $rootScope.loadingMsg.message = 'loading';
-                        loadingLoop();
-                        $rootScope.$broadcast('srsAlertMsg', true);
-                    }
-                }, 1000); // if no response in 1000ms, show loading message
-            } else {
-                $rootScope.loadingMsg.message = '';
-                $rootScope.$broadcast('srsAlertMsg', false);
-            }
-            $rootScope.loadingMsg.loading = !! value;
-        };
-    }
-]).
-factory('handleErr', ['msg', 'loading', 'log',
-    function (msg, loading, log) {
+]).factory('handleErr', ['msg', 'toast',
+    function (msg, loading, toast) {
         return {
             serverErr: function (data) {
-                loading(false);
-                log(msg.errorServer, data.status);
+                //toast.error(msg.errorServer, data.status);
             },
             responseErr: function (data) {
-                loading(false);
-                log(data.error, data.status);
+                //toast.error(data.error, data.status);
             }
         };
     }
-]).
-factory('pageSize', ['$cookieStore',
+]).factory('custom', ['$cookieStore',
     function ($cookieStore) {
-        return function (pageSize) {
-            var size = $cookieStore.get('pageSize') || 25;
-            if (pageSize > 0 && size !== pageSize) {
-                $cookieStore.put('pageSize', pageSize);
-                size = pageSize;
+        return {
+            pageSize: function (pageSize) {
+                var size = $cookieStore.get('pageSize') || 10;
+                if (pageSize > 0 && size !== pageSize) {
+                    $cookieStore.put('pageSize', pageSize);
+                    size = pageSize;
+                }
+                return size;
+            },
+            listModel: function (value) {
+                var model = $cookieStore.get('listModel');
+                if (angular.isDefined(value) && model !== value) {
+                    $cookieStore.put('listModel', value);
+                    model = value;
+                }
+                return model;
             }
-            return size;
         };
     }
-]).
-factory('getArticle', ['rest', 'cache',
+]).factory('promiseGet', ['$q', 'handleErr',
+    function ($q, handleErr) {
+        return function (param, restAPI, cacheId, cache) {
+            var result, defer = $q.defer();
+
+            result = cacheId && cache && cache.get(cacheId);
+            if (result) {
+                defer.resolve(result);
+            } else {
+                restAPI.get(param, function (data) {
+                    if (!data.error) {
+                        if (cacheId && cache) {
+                            cache.put(cacheId, data);
+                        }
+                        defer.resolve(data);
+                    } else {
+                        defer.reject(data.error);
+                        handleErr.responseErr(data);
+                    }
+                }, handleErr.serverErr);
+            }
+            return defer.promise;
+        };
+    }
+]).factory('getArticle', ['rest', 'cache',
     function (rest, cache) {
         return function (ID, callback) {
             var article = cache.article.get(ID);
@@ -226,8 +214,7 @@ factory('getArticle', ['rest', 'cache',
             }
         };
     }
-]).
-factory('getUser', ['rest', 'cache',
+]).factory('getUser', ['rest', 'cache',
     function (rest, cache) {
         return function (Uid, callback) {
             var user = cache.user.get(Uid);
@@ -245,28 +232,16 @@ factory('getUser', ['rest', 'cache',
             }
         };
     }
-]).
-factory('getList', ['rest', 'cache',
-    function (rest, cache) {
-        return function (ID, callback) {
-            var list = cache.list.get(ID);
-            if (list) {
-                return callback(list);
-            } else {
-                list = rest.article.get({
-                    ID: ID,
-                    OP: 10
-                }, function () {
-                    if (!list.err) {
-                        cache.list.put(ID, list);
-                    }
-                    return callback(list);
-                });
-            }
+]).factory('getList', ['rest', 'cache', 'promiseGet',
+    function (rest, cache, promiseGet) {
+        return function (listType) {
+            return promiseGet({
+                ID: listType,
+                OP: 10
+            }, rest.article, listType, cache.list);
         };
     }
-]).
-factory('getMarkdown', ['$http',
+]).factory('getMarkdown', ['$http',
     function ($http) {
         return function (callback) {
             $http.get('/static/md/markdown.md', {
