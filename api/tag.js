@@ -4,7 +4,8 @@ var union = jsGen.lib.tools.union,
     filterTag = jsGen.lib.tools.filterTag,
     MD5 = jsGen.lib.tools.MD5,
     pagination = jsGen.lib.tools.pagination,
-    tagCache = jsGen.cache.tag;
+    tagCache = jsGen.cache.tag,
+    resJson = jsGen.lib.tools.resJson;
 
 tagCache.getP = function (ID, callback) {
     var that = this,
@@ -316,7 +317,7 @@ function getTag(req, res, dm) {
                 delete doc.usersList;
                 articlesList.tag = doc;
             }
-            return res.sendjson(articlesList);
+            return res.sendjson(resJson(null, articlesList));
         }));
     }));
 };
@@ -358,7 +359,7 @@ function getTags(req, res, dm) {
         if (tagsList.pagination) {
             union(req.session.listPagination, tagsList.pagination);
         }
-        return res.sendjson(tagsList);
+        return res.sendjson(resJson(null, tagsList));
     }));
 };
 
@@ -387,7 +388,7 @@ function editTags(req, res, dm) {
     function next() {
         var tagObj;
         if (tagArray.length === 0) {
-            return res.sendjson(body);
+            return res.sendjson(resJson(null, body));
         }
         tagObj = tagArray.pop();
         if (!tagObj || !tagObj._id || !tagObj.tag) {
@@ -430,9 +431,7 @@ function delTag(req, res, dm) {
     jsGen.dao.tag.delTag(tag, dm.intercept(function () {
         tagCache.remove(tag);
         cache._remove(tag);
-        return res.sendjson({
-            remove: 'Ok'
-        });
+        return res.sendjson(resJson());
     }));
 };
 

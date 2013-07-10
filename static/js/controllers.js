@@ -1,22 +1,22 @@
 'use strict';
 /*global angular, _*/
 
-angular.module('jsGen.controllers', []).
+angular.module('jsGen.controllers', ['ui.validate']).
 controller('indexCtrl', ['app', '$scope', '$routeParams',
     function (app, $scope, $routeParams) {
         var ID = '',
-            restAPI = app.rest.article,
+            restAPI = app.restAPI.article,
             custom = app.custom;
 
         function checkRouteParams() {
             var path = app.location.path().slice(1).split('/');
             if ($routeParams.TAG || (/^T[0-9A-Za-z]{3,}$/).test(path[0])) {
-                restAPI = app.rest.tag;
+                restAPI = app.restAPI.tag;
                 $scope.other._id = path[0];
                 $scope.other.title = $routeParams.TAG || path[0];
                 $scope.parent.viewPath = '';
             } else {
-                restAPI = app.rest.article;
+                restAPI = app.restAPI.article;
                 $scope.parent.viewPath = path[0] || 'latest';
             }
             ID = $routeParams.TAG || path[0];
@@ -52,11 +52,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             $scope.pagination = pagination;
             $scope.articleList = data.data;
         });
-        app.getList('comment').then(function (list) {
-            _.each(list.data, function (x, i) {
+        app.getList('comment').then(function (data) {
+            data = data.data;
+            _.each(data, function (x, i) {
                 x.content = app.filter('cutText')(x.content, 180);
             });
-            $scope.hotComments = list.data.slice(0, 5);
+            $scope.hotComments = data.slice(0, 10);
         });
     }
 ]).controller('tagCtrl', ['app', '$scope',
@@ -65,9 +66,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         $scope.pagination = null;
         $scope.$on('pagination', function (event, doc) {
             event.stopPropagation();
-            app.rootScope.global.loading = true;
-            var result = app.rest.tag.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.tag.get(doc, function () {
+
                 if (!result.err) {
                     if (result.pagination) {
                         if (result.pagination.now === 1) {
@@ -112,37 +113,40 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
     }
 ]).controller('userLoginCtrl', ['app', '$scope',
     function (app, $scope) {
-        $scope.userReset = undefined;
-        $scope.resetName = undefined;
-        $scope.logauto = true;
+        app.clearUser();
+        $scope.login = {
+            logauto: true,
+            logname: '',
+            logpwd: ''
+        };
+        $scope.reset = {
+            title: '',
+            type: ''
+        };
+
         $scope.submit = function () {
-            var data = {}, result;
-            data.logname = $scope.logname;
-            data.logauto = $scope.logauto;
-            data.logtime = Date.now();
-            data.logtime = Math.max(data.logtime, $scope.global.timestamp);
-            data.logpwd = CryptoJS.SHA256($scope.logpwd).toString();
-            data.logpwd = CryptoJS.HmacSHA256(data.logpwd, data.logname + ':' + data.logtime).toString();
-            app.rootScope.global.loading = true;
-            result = app.rest.user.save({
-                Uid: 'login'
-            }, data, function () {
-                app.rootScope.global.loading = false;
-                if (!result.err) {
-                    $scope.global.user = app.union(result);
-                    $scope.checkUser();
+            if (app.validate($scope)) {
+                var data = app.union($scope.login);
+                data.logtime = Date.now() - app.timeOffset;
+                data.logpwd = app.CryptoJS.SHA256(data.logpwd).toString();
+                data.logpwd = app.CryptoJS.HmacSHA256(data.logpwd, data.logname + ':' + data.logtime).toString();
+
+                app.restAPI.user.save({
+                    ID: 'login'
+                }, data, function (data) {
+                    app.rootScope.global.user = data.data;
+                    app.checkUser();
+                    $scope.$destroy();
                     app.location.path('/home');
-                } else {
-                    if (result.err.name === 'locked') {
-                        $scope.resetName = '申请解锁';
-                        $scope.userReset = 'locked';
-                    } else if (result.err.name === 'passwd') {
-                        $scope.resetName = '找回密码';
-                        $scope.userReset = 'passwd';
-                    }
-                    app.rootScope.msg = result.err;
-                }
-            });
+                }, function (data) {
+                    var title = {
+                        locked: '申请解锁',
+                        passwd: '找回密码'
+                    };
+                    $scope.reset.type = data.error.name;
+                    $scope.reset.title = title[data.error.name];
+                });
+            }
         };
     }
 ]).controller('userResetCtrl', ['app', '$scope', '$routeParams',
@@ -156,15 +160,15 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             app.location.path(app.goBack);
         }
         $scope.submit = function () {
-            app.rootScope.global.loading = true;
-            var result = app.rest.user.save({
+
+            var result = app.restAPI.user.save({
                 Uid: 'reset'
             }, {
                 name: $scope.name,
                 email: $scope.email,
                 request: request
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (!result.err) {
                     result.name = '请求成功';
                     result.url = '/';
@@ -177,33 +181,41 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
     }
 ]).controller('userRegisterCtrl', ['app', '$scope',
     function (app, $scope) {
-        $scope.checkResult = true;
-        $scope.checkPwd = function () {
-            if ($scope.passwd2 !== $scope.passwd) {
-                $scope.checkResult = true;
-            } else {
-                $scope.checkResult = false;
-            }
+        app.clearUser();
+        $scope.user = {
+            name: '',
+            email: '',
+            passwd: '',
+            passwd2: ''
+        };
+
+        $scope.checkName = function (scope, model) {
+            return app.filter('checkName')(model.$value);
+        };
+        $scope.checkMin = function (scope, model) {
+            return app.filter('length')(model.$value) >= 5;
+        };
+        $scope.checkMax = function (scope, model) {
+            return app.filter('length')(model.$value) <= 15;
         };
         $scope.submit = function () {
-            var data = {},
-                result;
-            data.name = $scope.name;
-            data.passwd = CryptoJS.SHA256($scope.passwd).toString();
-            data.email = $scope.email;
-            app.rootScope.global.loading = true;
-            result = app.rest.user.save({
-                Uid: 'register'
-            }, data, function () {
-                app.rootScope.global.loading = false;
-                if (!result.err) {
-                    $scope.global.user = app.union(result);
-                    $scope.checkUser();
+            var user = $scope.user;
+            if (app.validate($scope)) {
+                var data = {
+                    name: user.name,
+                    email: user.email
+                };
+                data.passwd = app.CryptoJS.SHA256(user.passwd).toString();
+
+                app.restAPI.user.save({
+                    ID: 'register'
+                }, data, function (data) {
+                    app.rootScope.global.user = data.data;
+                    app.checkUser();
+                    $scope.$destroy();
                     app.location.path('/home');
-                } else {
-                    app.rootScope.msg = result.err;
-                }
-            });
+                });
+            }
         };
     }
 ]).controller('homeCtrl', ['app', '$scope',
@@ -240,10 +252,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             content: '这里显示您关注的标签或用户的最新文章。'
         };
         $scope.user = $scope.global.user;
-        app.rootScope.global.loading = true;
-        var result = app.rest.user.get({}, function () {
+
+        var result = app.restAPI.user.get({}, function () {
             var newArticle = 0;
-            app.rootScope.global.loading = false;
+
             if (result.err) {
                 app.rootScope.msg = result.err;
                 return;
@@ -289,15 +301,15 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 $scope.userOperate.OP = operate;
             }
         };
-        app.rootScope.global.loading = true;
+
         app.getUser(Uid, function (result) {
-            app.rootScope.global.loading = false;
+
             if (result.err) {
                 app.rootScope.msg = result.err;
                 return;
             }
             if (result.user) {
-                $scope.checkIsFollow(result.user);
+                app.checkFollow(result.user);
                 $scope.user = result.user;
                 if ($scope.global.user && $scope.global.user._id === result.user._id) {
                     app.location.path('/home');
@@ -314,12 +326,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             event.stopPropagation();
             doc.Uid = $scope.userOperate.Uid;
             doc.OP = $scope.userOperate.OP;
-            app.rootScope.global.loading = true;
-            var result = app.rest.user.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.user.get(doc, function () {
+
                 if (!result.err) {
                     result.data.forEach(function (x) {
-                        $scope.checkIsFollow(x);
+                        app.checkFollow(x);
                     });
                     if (result.pagination) {
                         if (result.pagination.now === 1) {
@@ -356,9 +368,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             event.stopPropagation();
             doc.Uid = $scope.userOperate.Uid;
             doc.OP = $scope.userOperate.OP;
-            app.rootScope.global.loading = true;
-            var result = app.rest.user.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.user.get(doc, function () {
+
                 if (result.err) {
                     result.err.url = '/';
                     app.rootScope.msg = result.err;
@@ -396,11 +408,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             });
         }, true);
         $scope.remove = function (article) {
-            app.rootScope.global.loading = true;
-            var result = app.rest.article.remove({
+
+            var result = app.restAPI.article.remove({
                 ID: article._id
             }, null, function () {
-                app.rootScope.global.loading = false;
+
                 if (result.remove) {
                     $scope.data.some(function (x, i) {
                         if (x._id === article._id) {
@@ -468,13 +480,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             $scope.editSave = false;
         };
         $scope.verifyEmail = function () {
-            app.rootScope.global.loading = true;
-            var verify = app.rest.user.save({
+
+            var verify = app.restAPI.user.save({
                 Uid: 'reset'
             }, {
                 request: 'role'
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (!verify.err) {
                     verify.name = '请求成功';
                     app.rootScope.msg = verify;
@@ -502,14 +514,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 data.tagsList = $scope.tagsList;
             }
             if (data.email) {
-                app.rootScope.global.loading = true;
-                changeEmail = app.rest.user.save({
+
+                changeEmail = app.restAPI.user.save({
                     Uid: 'reset'
                 }, {
                     email: data.email,
                     request: 'email'
                 }, function () {
-                    app.rootScope.global.loading = false;
+
                     if (!changeEmail.err) {
                         app.union(originData, {
                             email: data.email
@@ -523,9 +535,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             }
             delete data.email;
             if (!angular.equals(data, {})) {
-                app.rootScope.global.loading = true;
-                result = app.rest.user.save({}, data, function () {
-                    app.rootScope.global.loading = false;
+
+                result = app.restAPI.user.save({}, data, function () {
+
                     if (!result.err) {
                         app.union(result, $scope.user);
                         originData = app.union($scope.user);
@@ -583,7 +595,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 });
             }
         };
-        app.rootScope.global.loading = true;
+
         app.getArticle('A' + $routeParams.ID, function (article) {
             if (article.err) {
                 article.err.url = app.goBack;
@@ -614,12 +626,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 }
             }
             app.getUser(article.author._id, function (author) {
-                app.rootScope.global.loading = false;
+
                 if (author.err) {
                     app.rootScope.msg = author.err;
                     return;
                 }
-                $scope.checkIsFollow(author.user);
+                app.checkFollow(author.user);
                 $scope.article.author = author.user;
                 $scope.authorArticles = author.data;
             });
@@ -687,9 +699,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             event.stopPropagation();
             doc.ID = $scope.article._id;
             doc.OP = 'comment';
-            app.rootScope.global.loading = true;
-            var result = app.rest.article.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.article.get(doc, function () {
+
                 if (!result.err) {
                     $scope.pagination = result.pagination;
                     $scope.article.commentsList = $scope.article.commentsList.concat(result.data).slice(-200);
@@ -725,13 +737,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             });
             app.digestArray(idArray);
             if (idArray.length > 0) {
-                app.rootScope.global.loading = true;
-                var result = app.rest.article.save({
+
+                var result = app.restAPI.article.save({
                     ID: 'comment'
                 }, {
                     data: idArray
                 }, function () {
-                    app.rootScope.global.loading = false;
+
                     if (result.data) {
                         result.data.forEach(function (x) {
                             app.cache.article.put(x._id, x);
@@ -750,14 +762,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 app.rootScope.msg = Errmsg;
                 return;
             }
-            app.rootScope.global.loading = true;
-            result = app.rest.article.save({
+
+            result = app.restAPI.article.save({
                 ID: article._id,
                 OP: 'mark'
             }, {
                 mark: !article.isMark
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (result.save) {
                     article.isMark = !article.isMark;
                     if (article.markList) {
@@ -787,14 +799,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 app.rootScope.msg = Errmsg;
                 return;
             }
-            app.rootScope.global.loading = true;
-            result = app.rest.article.save({
+
+            result = app.restAPI.article.save({
                 ID: article._id,
                 OP: 'favor'
             }, {
                 favor: !article.isFavor
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (result.save) {
                     article.isFavor = !article.isFavor;
                     if (article.favorsList) {
@@ -831,14 +843,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 app.rootScope.msg = Errmsg;
                 return;
             }
-            app.rootScope.global.loading = true;
-            result = app.rest.article.save({
+
+            result = app.restAPI.article.save({
                 ID: article._id,
                 OP: 'oppose'
             }, {
                 oppose: !article.isOppose
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (result.save) {
                     article.isOppose = !article.isOppose;
                     if (article.opposesList) {
@@ -881,12 +893,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             data.content = document.getElementById('wmd-input').value;
             data.title = $scope.title;
             data.refer = $scope.refer;
-            app.rootScope.global.loading = true;
-            var result = app.rest.article.save({
+
+            var result = app.restAPI.article.save({
                 ID: $scope.article._id,
                 OP: 'comment'
             }, data, function () {
-                app.rootScope.global.loading = false;
+
                 if (!result.err) {
                     $scope.article.commentsList.unshift(result);
                     $scope.article.comments += 1;
@@ -928,9 +940,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         app.rootScope.global.fullWidth = 'full-container';
 
         if ($routeParams.ID) {
-            app.rootScope.global.loading = true;
+
             app.getArticle('A' + $routeParams.ID, function (article) {
-                app.rootScope.global.loading = false;
+
                 if (!article.err) {
                     $scope.previewTitle = '编辑文章';
                     $scope._id = article._id;
@@ -1023,9 +1035,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     OP: 'edit'
                 };
             }
-            app.rootScope.global.loading = true;
-            var result = app.rest.article.save(parameter, data, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.article.save(parameter, data, function () {
+
                 if (!result.err) {
                     app.cache.article.put(result._id, result);
                     app.location.path('/' + result._id);
@@ -1061,9 +1073,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         $scope.$on('pagination', function (event, doc) {
             event.stopPropagation();
             doc.Uid = 'admin';
-            app.rootScope.global.loading = true;
-            var result = app.rest.user.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.user.get(doc, function () {
+
                 if (!result.err) {
                     $scope.data = result.data;
                     originData = app.union($scope.data);
@@ -1113,13 +1125,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     _id: ''
                 }
             ]);
-            app.rootScope.global.loading = true;
-            var result = app.rest.user.save({
+
+            var result = app.restAPI.user.save({
                 Uid: 'admin'
             }, {
                 data: data
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (!result.err) {
                     $scope.data = app.union(result.data);
                     originData = app.union(result.data);
@@ -1140,9 +1152,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         $scope.pagination = null;
         $scope.$on('pagination', function (event, doc) {
             event.stopPropagation();
-            app.rootScope.global.loading = true;
-            var result = app.rest.tag.get(doc, function () {
-                app.rootScope.global.loading = false;
+
+            var result = app.restAPI.tag.get(doc, function () {
+
                 if (!result.err) {
                     $scope.data = result.data;
                     originData = app.union(result.data);
@@ -1173,11 +1185,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             }
         });
         $scope.remove = function (tag) {
-            app.rootScope.global.loading = true;
-            var result = app.rest.tag.remove({
+
+            var result = app.restAPI.tag.remove({
                 ID: tag._id
             }, null, function () {
-                app.rootScope.global.loading = false;
+
                 if (result.remove) {
                     $scope.data.some(function (x, i) {
                         if (x._id === tag._id) {
@@ -1213,13 +1225,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 }
             });
             app.digestArray(data);
-            app.rootScope.global.loading = true;
-            var result = app.rest.tag.save({
+
+            var result = app.restAPI.tag.save({
                 ID: 'admin'
             }, {
                 data: data
             }, function () {
-                app.rootScope.global.loading = false;
+
                 if (!result.err) {
                     $scope.data = app.union(result.data);
                     originData = app.union(result.data);
@@ -1240,11 +1252,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
 ]).controller('adminGlobalCtrl', ['app', '$scope',
     function (app, $scope) {
         var originData = {};
-        app.rootScope.global.loading = true;
-        $scope.global = app.rest.index.get({
+
+        $scope.global = app.restAPI.index.get({
             OP: 'admin'
         }, function () {
-            app.rootScope.global.loading = false;
+
             $scope.global = app.union($scope.global);
             originData = app.union($scope.global);
         });
@@ -1288,11 +1300,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     delete data[key];
                 }
             });
-            app.rootScope.global.loading = true;
-            var result = app.rest.index.save({
+
+            var result = app.restAPI.index.save({
                 OP: 'admin'
             }, data, function () {
-                app.rootScope.global.loading = false;
+
                 if (!result.err) {
                     $scope.global = app.union(result);
                     originData = app.union(result);

@@ -87,7 +87,7 @@
                 </div>
             </section>
             <ul class="media-list comments">
-                <li class="media" ng-repeat="comment in article.commentsList">
+                <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in article.commentsList">
                   <a class="media-object left" ng-href="{{'/'+comment.author._id}}">
                     <img class="img-small" ng-src="{{comment.author.avatar}}" src="/static/img/avatar.png">
                   </a>
@@ -184,7 +184,7 @@
             <header class="panel-heading">作者文章</header>
             <ul class="media-list comments">
                 <li ng-repeat="article in authorArticles">
-                    <small>{{article.date | formatDate}}</small>&nbsp;<a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a>
+                    <mark>{{article.date | formatDate}}</mark>&nbsp;<a ng-href="{{'/'+article._id}}" title="{{article.author.name+'发表'}}">{{article.title}}</a>
                 </li>
             </ul>
         </div>

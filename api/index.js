@@ -5,7 +5,8 @@ var url = require('url'),
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUrl = jsGen.lib.tools.checkUrl,
-    onlineCache = jsGen.cache.online;
+    onlineCache = jsGen.cache.online,
+    resJson = jsGen.lib.tools.resJson;
 
 function updateOnlineCache(req) {
     var now = Date.now();
@@ -76,7 +77,7 @@ function getIndex(req, res, dm) {
     if (req.session.Uid) {
         jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
             config.user = doc;
-            return res.sendjson(config);
+            return res.sendjson(resJson(null, config));
         }));
     } else if (req.cookie.autologin) {
         jsGen.api.user.cookieLogin(req.cookie.autologin, function (Uid) {
@@ -94,23 +95,20 @@ function getIndex(req, res, dm) {
                             });
                         }
                         config.user = doc;
-                        return res.sendjson(config);
+                        return res.sendjson(resJson(null, config));
                     });
                 }));
             } else {
-                return res.sendjson(config);
+                return res.sendjson(resJson(null, config));
             }
         });
     } else {
-        return res.sendjson(config);
+        return res.sendjson(resJson(null, config));
     }
 };
 
 function getServTime(req, res, dm) {
-    return res.sendjson({
-        timestamp: Date.now(),
-        version: jsGen.version
-    });
+    return res.sendjson(resJson());
 };
 
 function getGlobal(req, res, dm) {
@@ -140,7 +138,7 @@ function getGlobal(req, res, dm) {
     body.sys.memory.heapUsed = jsGen.lib.tools.formatBytes(body.sys.memory.heapUsed);
     body.sys.memory.total = jsGen.lib.tools.formatBytes(os.totalmem());
     body.sys.memory.free = jsGen.lib.tools.formatBytes(os.freemem());
-    return res.sendjson(body);
+    return res.sendjson(resJson(null, body));
 };
 
 function setGlobal(req, res, dm) {
@@ -272,7 +270,7 @@ function setGlobal(req, res, dm) {
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         body = intersect(defaultObj, doc);
         union(jsGen.config, body);
-        return res.sendjson(body);
+        return res.sendjson(resJson(null, body));
     }));
 };
 

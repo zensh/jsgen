@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _, marked, Sanitize, Markdown, prettyPrint, toastr*/
+/*global angular, _, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8*/
 
 angular.module('jsGen.services', ['ngResource', 'ngCookies']).
 constant('msg', {
@@ -29,7 +29,9 @@ constant('msg', {
                         $exceptionHandler(e);
                     }
                 }
-                $rootScope.$apply();
+                if (!$rootScope.$$phase) {
+                    $rootScope.$apply();
+                }
             }, delay);
 
             promise.$timingId = timingId;
@@ -60,12 +62,16 @@ constant('msg', {
             };
         });
         toastr.options = angular.extend({
-            positionClass: 'toast-top-full-width'
+            positionClass: 'toast-bottom-full-width'
         }, toast.options);
         return toast;
     }
 ]).factory('pretty', function () {
     return prettyPrint;
+}).factory('CryptoJS', function () {
+    return CryptoJS;
+}).factory('utf8', function () {
+    return utf8;
 }).factory('mdParse', function () {
     return function (html) {
         return marked(html + '');
@@ -106,24 +112,13 @@ constant('msg', {
             return editor;
         };
     }
-]).factory('rest', ['$resource',
+]).factory('restAPI', ['$resource',
     function ($resource) {
         return {
-            index: $resource('/api/index/:OP', {
-                OP: 'index'
-            }),
-            user: $resource('/api/user/:ID/:OP', {
-                ID: 'index',
-                OP: 'index'
-            }),
-            article: $resource('/api/article/:ID/:OP', {
-                ID: 'index',
-                OP: 'index'
-            }),
-            tag: $resource('/api/tag/:ID/:OP', {
-                ID: 'index',
-                OP: 'index'
-            })
+            index: $resource('/api/index/:OP'),
+            user: $resource('/api/user/:ID/:OP'),
+            article: $resource('/api/article/:ID/:OP'),
+            tag: $resource('/api/tag/:ID/:OP')
         };
     }
 ]).factory('cache', ['$cacheFactory',
@@ -182,28 +177,25 @@ constant('msg', {
                 defer.resolve(result);
             } else {
                 restAPI.get(param, function (data) {
-                    if (!data.error) {
-                        if (cacheId && cache) {
-                            cache.put(cacheId, data);
-                        }
-                        defer.resolve(data);
-                    } else {
-                        defer.reject(data.error);
-                        handleErr.responseErr(data);
+                    if (cacheId && cache) {
+                        cache.put(cacheId, data);
                     }
-                }, handleErr.serverErr);
+                    defer.resolve(data);
+                }, function (data) {
+                    defer.reject(data.error);
+                });
             }
             return defer.promise;
         };
     }
-]).factory('getArticle', ['rest', 'cache',
-    function (rest, cache) {
+]).factory('getArticle', ['restAPI', 'cache',
+    function (restAPI, cache) {
         return function (ID, callback) {
             var article = cache.article.get(ID);
             if (article) {
                 return callback(article);
             } else {
-                article = rest.article.get({
+                article = restAPI.article.get({
                     ID: ID
                 }, function () {
                     if (!article.err) {
@@ -214,14 +206,14 @@ constant('msg', {
             }
         };
     }
-]).factory('getUser', ['rest', 'cache',
-    function (rest, cache) {
+]).factory('getUser', ['restAPI', 'cache',
+    function (restAPI, cache) {
         return function (Uid, callback) {
             var user = cache.user.get(Uid);
             if (user) {
                 return callback(user);
             } else {
-                user = rest.user.get({
+                user = restAPI.user.get({
                     Uid: Uid
                 }, function () {
                     if (!user.err) {
@@ -232,13 +224,13 @@ constant('msg', {
             }
         };
     }
-]).factory('getList', ['rest', 'cache', 'promiseGet',
-    function (rest, cache, promiseGet) {
+]).factory('getList', ['restAPI', 'cache', 'promiseGet',
+    function (restAPI, cache, promiseGet) {
         return function (listType) {
             return promiseGet({
                 ID: listType,
                 OP: 10
-            }, rest.article, listType, cache.list);
+            }, restAPI.article, listType, cache.list);
         };
     }
 ]).factory('getMarkdown', ['$http',

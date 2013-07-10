@@ -12,7 +12,8 @@ var listArticleTpl = jsGen.lib.json.ListArticle,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent,
     pagination = jsGen.lib.tools.pagination,
-    checkTimeInterval = jsGen.lib.tools.checkTimeInterval;
+    checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
+    resJson = jsGen.lib.tools.resJson;
 
 articleCache.getP = function (ID, callback, convert) {
     var that = this,
@@ -532,9 +533,7 @@ function getArticle(req, res, dm) {
             var list = null;
             if (req.path[3] === 'comment') {
                 if (!req.session.commentPagination) {
-                    return res.sendjson({
-                        data: null
-                    });
+                    return res.sendjson(resJson(null, []));
                 }
                 list = jsGen.cache.pagination.get(req.session.commentPagination.key);
                 if (!list || (p === 1 && req.session.commentPagination.key !== article._id + article.updateTime)) {
@@ -542,21 +541,18 @@ function getArticle(req, res, dm) {
                     list = article.commentsList.reverse();
                     jsGen.cache.pagination.put(req.session.commentPagination.key, list);
                 }
-                pagination(req, list, commentCache, dm.intercept(function (commentsList) {
-                    union(req.session.commentPagination, commentsList.pagination);
-                    return res.sendjson(commentsList);
+                pagination(req, list, commentCache, dm.intercept(function (data, pagination) {
+                    union(req.session.commentPagination, pagination);
+                    return res.sendjson(resJson(null, data, pagination));
                 }));
             } else {
                 list = article.commentsList.reverse();
-                pagination(req, list, commentCache, dm.intercept(function (commentsList) {
-                    article.commentsList = commentsList.data;
-                    if (commentsList.pagination) {
-                        article.pagination = commentsList.pagination;
-                        req.session.commentPagination = commentsList.pagination;
-                        req.session.commentPagination.key = article._id + article.updateTime;
-                        jsGen.cache.pagination.put(req.session.commentPagination.key, list);
-                    }
-                    return res.sendjson(article);
+                pagination(req, list, commentCache, dm.intercept(function (data, pagination) {
+                    article.commentsList = data;
+                    req.session.commentPagination = pagination;
+                    req.session.commentPagination.key = article._id + article.updateTime;
+                    jsGen.cache.pagination.put(req.session.commentPagination.key, list);
+                    return res.sendjson(resJson(null, article, pagination));
                 }));
             }
         };
@@ -564,11 +560,8 @@ function getArticle(req, res, dm) {
 };
 
 function getComments(req, res, dm) {
-    var result = {
-        err: null,
-        data: []
-    },
-    IDArray = req.apibody.data;
+    var data = [],
+        IDArray = req.apibody.data;
 
     if (!IDArray) {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
@@ -589,7 +582,7 @@ function getComments(req, res, dm) {
     function next() {
         var ID;
         if (IDArray.length === 0) {
-            return res.sendjson(result);
+            return res.sendjson(resJson(null, data));
         }
         ID = IDArray.pop();
         if (!ID) {
@@ -635,11 +628,9 @@ function getLatest(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (articlesList) {
-        if (articlesList.pagination) {
-            union(req.session.listPagination, articlesList.pagination);
-        }
-        return res.sendjson(articlesList);
+    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+        union(req.session.listPagination, pagination);
+        return res.sendjson(resJson(null, data, pagination));
     }));
 };
 
@@ -672,11 +663,9 @@ function getUpdate(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (articlesList) {
-        if (articlesList.pagination) {
-            union(req.session.listPagination, articlesList.pagination);
-        }
-        return res.sendjson(articlesList);
+    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+        union(req.session.listPagination, pagination);
+        return res.sendjson(resJson(null, data, pagination));
     }));
 };
 
@@ -708,11 +697,9 @@ function getHots(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (articlesList) {
-        if (articlesList.pagination) {
-            union(req.session.listPagination, articlesList.pagination);
-        }
-        return res.sendjson(articlesList);
+    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+        union(req.session.listPagination, pagination);
+        return res.sendjson(resJson(null, data, pagination));
     }));
 };
 
@@ -729,9 +716,7 @@ function getHotComments(req, res, dm) {
     }
     list = jsGen.cache.hotCommentsList.slice(0, s);
     convertArticles(list, dm.intercept(function (doc) {
-        return res.sendjson({
-            data: doc
-        });
+        return res.sendjson(resJson(null, doc));
     }));
 };
 
@@ -772,7 +757,7 @@ function addArticle(req, res, dm) {
             }
             checkTimeInterval(req, 'Ad', true);
             articleCache.getP(doc._id, dm.intercept(function (doc) {
-                return res.sendjson(doc);
+                return res.sendjson(resJson(null, doc));
             }));
         }));
     }));
@@ -880,7 +865,7 @@ function setArticle(req, res, dm) {
                 }
                 checkTimeInterval(req, 'Ad', true);
                 commentCache.getP(doc._id, dm.intercept(function (doc) {
-                    return res.sendjson(doc);
+                    return res.sendjson(resJson(null, doc));
                 }));
             }));
         }));
@@ -906,7 +891,7 @@ function setArticle(req, res, dm) {
                     }
                     checkTimeInterval(req, 'Ed', true);
                     articleCache.getP(doc._id, dm.intercept(function (doc) {
-                        return res.sendjson(doc);
+                        return res.sendjson(resJson(null, doc));
                     }));
                 }));
             }));
@@ -956,9 +941,7 @@ function setArticle(req, res, dm) {
                 return value;
             });
             checkTimeInterval(req, 'Ma', true);
-            return res.sendjson({
-                save: 'Ok!'
-            });
+            return res.sendjson(resJson());
         }), false);
     } else if (req.path[3] === 'favor') {
         if (checkTimeInterval(req, 'Fa')) {
@@ -1000,9 +983,7 @@ function setArticle(req, res, dm) {
                 return value;
             });
             checkTimeInterval(req, 'Fa', true);
-            return res.sendjson({
-                save: 'Ok!'
-            });
+            return res.sendjson(resJson());
         }), false);
     } else if (req.path[3] === 'oppose') {
         if (checkTimeInterval(req, 'Op')) {
@@ -1044,9 +1025,7 @@ function setArticle(req, res, dm) {
                 return value;
             });
             checkTimeInterval(req, 'Op', true);
-            return res.sendjson({
-                save: 'Ok!'
-            });
+            return res.sendjson(resJson());
         }), false);
     } else {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
@@ -1129,9 +1108,7 @@ function deleteArticle(req, res, dm) {
             _id: article.author,
             articlesList: -ID
         });
-        return res.sendjson({
-            remove: 'Ok'
-        });
+        return res.sendjson(resJson());
     }), false);
 };
 

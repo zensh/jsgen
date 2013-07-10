@@ -13,7 +13,8 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     userCache = jsGen.cache.user,
     filterSummary = jsGen.lib.tools.filterSummary,
     pagination = jsGen.lib.tools.pagination,
-    checkTimeInterval = jsGen.lib.tools.checkTimeInterval;
+    checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
+    resJson = jsGen.lib.tools.resJson;
 
 userCache.getP = function (Uid, callback, convert) {
     var that = this,
@@ -252,9 +253,7 @@ function userLogin(loginData, callback) {
 function logout(req, res, dm) {
     req.delsession();
     res.clearcookie('autologin');
-    return res.sendjson({
-        logout: true
-    });
+    return res.sendjson(resJson());
 };
 
 function cookieLoginUpdate(Uid, callback) {
@@ -305,10 +304,10 @@ function login(req, res, dm) {
                                 httpOnly: true
                             });
                         }
-                        return res.sendjson(doc);
+                        return res.sendjson(resJson(null, doc));
                     });
                 } else {
-                    return res.sendjson(doc);
+                    return res.sendjson(resJson(null, doc));
                 }
             }));
         }));
@@ -345,7 +344,7 @@ function register(req, res, dm) {
             } else {
                 emailToAdmin(doc);
             }
-            return res.sendjson(doc);
+            return res.sendjson(resJson(null, doc));
         }
     }));
 };
@@ -392,7 +391,7 @@ function addUsers(req, res, dm) {
     function next() {
         var userObj;
         if (userArray.length === 0) {
-            return res.sendjson(body);
+            return res.sendjson(resJson(null, body));
         }
         userObj = userArray.pop();
         if (!userObj) {
@@ -465,10 +464,10 @@ function getUser(req, res, dm) {
                     userCache.getP(Uid, dm.intercept(function (user) {
                         doc.user = intersect(union(UserPublicTpl), user);
                         doc.user._id = userID;
-                        return res.sendjson(doc);
+                        return res.sendjson(resJson(null, doc));
                     }));
                 } else {
-                    return res.sendjson(doc);
+                    return res.sendjson(resJson(null, doc));
                 }
             }));
         };
@@ -533,9 +532,7 @@ function setUser(req, res, dm) {
                 return value;
             });
             checkTimeInterval(req, 'Fo', true);
-            return res.sendjson({
-                follow: follow
-            });
+            return res.sendjson(resJson(follow));
         }));
     }), false);
 };
@@ -553,7 +550,7 @@ function getUsers(req, res, dm) {
             data.email = doc.data[i].email;
             doc.data[i] = data;
         };
-        return res.sendjson(doc);
+        return res.sendjson(resJson(null, doc));
     }));
 };
 
@@ -615,10 +612,10 @@ function getUserInfo(req, res, dm) {
                     });
                     userCache.getP(req.session.Uid, dm.intercept(function (user) {
                         doc.user = user;
-                        return res.sendjson(doc);
+                        return res.sendjson(resJson(null, doc));
                     }));
                 } else {
-                    return res.sendjson(doc);
+                    return res.sendjson(resJson(null, doc));
                 }
             }));
         };
@@ -702,7 +699,7 @@ function editUser(req, res, dm) {
             if (doc) {
                 setCache(doc);
                 userCache.getP(req.session.Uid, dm.intercept(function (user) {
-                    return res.sendjson(user);
+                    return res.sendjson(resJson(null, user));
                 }));
             }
         }));
@@ -736,7 +733,7 @@ function editUsers(req, res, dm) {
     function next() {
         var userObj;
         if (userArray.length === 0) {
-            return res.sendjson(body);
+            return res.sendjson(resJson(null, body));
         }
         userObj = userArray.pop();
         if (!userObj || !userObj._id) {
@@ -825,10 +822,10 @@ function getReset(req, res, dm) {
         }
     }
     setReset(resetObj, dm.intercept(function () {
-        return res.sendjson({
+        return res.sendjson(resJson(null, {
             name: 'success',
             message: jsGen.lib.msg.requestSent
-        });
+        }));
     }));
 };
 
@@ -924,7 +921,7 @@ function getArticles(req, res, dm) {
 
     function getPagination() {
         pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
-            return res.sendjson(articlesList);
+            return res.sendjson(resJson(null, articlesList));
         }));
     };
 };
@@ -951,7 +948,7 @@ function getUsersList(req, res, dm) {
                 usersList.data[i] = intersect(union(UserPublicTpl), usersList.data[i]);
                 usersList.data[i]._id = userID;
             };
-            return res.sendjson(usersList);
+            return res.sendjson(resJson(null, usersList));
         }));
     }), false);
 };

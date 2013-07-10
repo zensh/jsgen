@@ -1,10 +1,7 @@
 'use strict';
 /*global angular, _, jsGenVersion*/
 
-angular.module('jsGen', ['jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools']).
-constant('app', {
-    version: jsGenVersion // 注册内部全局变量app
-}).
+angular.module('jsGen', ['jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools']).
 config(['$httpProvider', 'app',
     function ($httpProvider, app) {
         // global loading status
@@ -50,116 +47,35 @@ config(['$httpProvider', 'app',
         // global error handling
         $httpProvider.interceptors.push(function () {
             return {
-                response: function (response) {
-                    if (response.headers()['content-type'] === "application/json; charset=utf-8") {
-                        if (response.data && response.data.error) {
-                            return app.q.reject(response);
-                        }
+                response: function (res) {
+                    var error;
+                    if (angular.isObject(res.data)) {
+                        app.timestamp = res.data.timestamp;
+                        error = res.data.ack === false && res.data.error;
                     }
-                    return response;
+                    if (error) {
+                        app.toast.error(error.message, error.name);
+                        return app.q.reject(res.data);
+                    } else {
+                        return res;
+                    }
                 },
-                responseError: function (response) {
-                    app.toast.error(response.data.error);
-                    return app.q.reject(response);
+                responseError: function (res) {
+                    console.log(222, res);
+                    // app.toast.error(res.data.error);
+                    return app.q.reject(res);
                 }
             };
         });
     }
-]).
-provider('getFile', ['app',
-    function (app) {
-        var self = this;
-        this.html = function (fileName) {
-            return '/static/tpl/' + fileName + '?v=' + (app.version || '');
-        };
-        this.md = function (fileName) {
-            return '/static/md/' + fileName + '?v=' + (app.version || '');
-        };
-        this.$get = function () {
-            return {
-                html: self.html,
-                md: self.md
-            };
-        };
-    }
-]).
-config(['$routeProvider', '$locationProvider', 'getFileProvider',
-
-    function ($routeProvider, $locationProvider, getFileProvider) {
-        var index = {
-            templateUrl: getFileProvider.html('index.html'),
-            controller: 'indexCtrl'
-        },
-            login = {
-                templateUrl: getFileProvider.html('login.html'),
-                controller: 'userLoginCtrl'
-            },
-            register = {
-                templateUrl: getFileProvider.html('register.html'),
-                controller: 'userRegisterCtrl'
-            },
-            home = {
-                templateUrl: getFileProvider.html('user.html'),
-                controller: 'homeCtrl'
-            },
-            admin = {
-                templateUrl: getFileProvider.html('admin.html'),
-                controller: 'adminCtrl'
-            },
-            edit = {
-                templateUrl: getFileProvider.html('article-editor.html'),
-                controller: 'articleEditorCtrl'
-            },
-            tag = {
-                templateUrl: getFileProvider.html('tag.html'),
-                controller: 'tagCtrl'
-            },
-            reset = {
-                templateUrl: getFileProvider.html('reset.html'),
-                controller: 'userResetCtrl'
-            },
-            user = {
-                templateUrl: getFileProvider.html('user.html'),
-                controller: 'userCtrl'
-            },
-            article = {
-                templateUrl: getFileProvider.html('article.html'),
-                controller: 'articleCtrl'
-            },
-            collection = {
-                templateUrl: getFileProvider.html('collection.html'),
-                controller: 'collectionCtrl'
-            };
-        $routeProvider.
-        when('/', index).
-        when('/hots', index).
-        when('/update', index).
-        when('/latest', index).
-        when('/T:ID', index).
-        when('/tag/:TAG', index).
-        when('/login', login).
-        when('/register', register).
-        when('/home', home).
-        when('/admin', admin).
-        when('/add', edit).
-        when('/tag', tag).
-        when('/reset/:RE', reset).
-        when('/user/:UID', user).
-        when('/A:ID/edit', edit).
-        when('/U:ID', user).
-        when('/A:ID', article).
-        when('/C:ID', collection).
-        otherwise({
-            redirectTo: '/'
-        });
-        $locationProvider.html5Mode(true);
-    }
-]).
-run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'rest', 'sanitize',
-        'mdParse', 'mdEditor', 'promiseGet', 'custom', 'getArticle', 'getUser', 'getList', 'getMarkdown',
+]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'custom', 'getArticle', 'getUser', 'getList', 'getMarkdown',
     function (app, $q, $rootScope, $http, $location, $timeout, $filter,
-        $anchorScroll, getFile, tools, toast, timing, cache, rest, sanitize, mdParse, mdEditor, promiseGet, custom, getArticle, getUser, getList, getMarkdown) {
+        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, custom, getArticle, getUser, getList, getMarkdown) {
 
+        Date.now = Date.now || function () {
+            return new Date().getTime();
+        };
         window.app = app; // for test
         tools(app); //添加jsGen系列工具函数
         app.q = $q;
@@ -168,14 +84,17 @@ run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$a
         app.timing = timing;
         app.location = $location;
         app.timeout = $timeout;
+        app.timeOffset = 0;
+        app.timestamp = Date.now() + 0;
         app.filter = $filter;
         app.anchorScroll = $anchorScroll;
         app.getFile = getFile;
         app.cache = cache;
-        app.rest = rest;
+        app.restAPI = restAPI;
         app.sanitize = sanitize;
         app.mdParse = mdParse;
         app.mdEditor = mdEditor;
+        app.CryptoJS = CryptoJS;
         app.promiseGet = promiseGet;
         app.custom = custom;
         app.getArticle = getArticle;
@@ -185,17 +104,24 @@ run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$a
         app.rootScope = $rootScope;
         app.timer = null;
 
+        app.loading = function (value, status) {
+            // $rootScope.loading = status;
+            $rootScope.loading.show = value;
+            if (!$rootScope.$$phase) {
+                $rootScope.$apply();
+            }
+        };
         app.validate = function (scope, turnoff, whiteList) {
             var collect = [],
                 error;
             whiteList = _.isArray(whiteList) ? whiteList : [];
-            scope.$broadcast('srsTooltipValidate', collect, turnoff);
+            scope.$broadcast('genTooltipValidate', collect, turnoff);
             error = _.filter(collect, function (value) {
                 return value.validate && value.$invalid && whiteList.indexOf(value.$name) < 0;
             });
             if (error.length === 0) {
                 app.validate.errorList = null;
-                scope.$broadcast('srsTooltipValidate', collect, true);
+                scope.$broadcast('genTooltipValidate', collect, true);
             } else {
                 app.validate.errorList = error;
             }
@@ -208,7 +134,27 @@ run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$a
                 $rootScope.stopUnload = !angular.equals(data, pristineObj);
             }
         };
+        app.checkUser = function () {
+            var global = $rootScope.global;
+            global.isLogin = !! global.user;
+            global.isAdmin = global.user && global.user.role === 5;
+            global.isEditor = global.user && global.user.role >= 4;
+        };
+        app.clearUser = function () {
+            $rootScope.global.user = null;
+            app.checkUser();
+        };
+        app.checkFollow = function (user) {
+            var me = $rootScope.global.user || {};
+            user.isMe = user._id === me._id;
+            user.isFollow = !user.isMe && _.some(me.followList, function (x) {
+                return x === user._id;
+            });
+        };
 
+        $rootScope.loading = {
+            show: false
+        };
         $rootScope.global = {
             isAdmin: false,
             isEditor: false,
@@ -216,7 +162,6 @@ run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$a
             loading: false,
             fullWidth: ''
         };
-
         $rootScope.validateTooltip = {
             validate: true,
             validateMsg: {
@@ -225,157 +170,66 @@ run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$a
                 maxlenght: '太长！',
                 min: '太小！',
                 max: '太大！',
-                email: '格式无效！',
-                username: '汉字、小写字母a-z、数字0-9、或下划线_，请以汉字或小写字母开头',
-                minname: '长度必须大于5字节，一个汉字3字节',
-                maxname: '长度必须小于15字节，一个汉字3字节',
-                repassword: '两次输入密码必须一致！'
+                email: 'Email无效！',
+                pattern: '格式无效！',
+                username: '有效字符为汉字、字母、数字、下划线，以汉字或小写字母开头！',
+                minname: '长度应大于5字节，一个汉字3字节！',
+                maxname: '长度应小于15字节，一个汉字3字节！',
+                repasswd: '密码不一致！'
             }
         };
 
         $rootScope.logout = function () {
-            var doc = app.rest.user.get({
-                Uid: 'logout'
-            }, function () {
-                if (doc.logout) {
-                    delete $rootScope.global.user;
+            restAPI.user.get({
+                ID: 'logout'
+            }, function (data) {
+                console.log('logout', data);
+                if (data.ack) {
+                    $rootScope.global.user = null;
+                    app.checkUser();
+                    $location.path('/');
                 }
-                $rootScope.checkUser();
-                app.location.path('/');
-            });
-        };
-        $rootScope.clearUser = function () {
-            delete $rootScope.global.user;
-            $rootScope.checkUser();
-        };
-        $rootScope.checkUser = function () {
-            if ($rootScope.global.user && $rootScope.global.user.role) {
-                $rootScope.global.isLogin = true;
-                if ($rootScope.global.user.role === 5) {
-                    $rootScope.global.isAdmin = true;
-                } else {
-                    $rootScope.global.isAdmin = false;
-                }
-                if ($rootScope.global.user.role >= 4) {
-                    $rootScope.global.isEditor = true;
-                } else {
-                    $rootScope.global.isEditor = false;
-                }
-            } else {
-                $rootScope.global.isLogin = false;
-                $rootScope.global.isAdmin = false;
-                $rootScope.global.isEditor = false;
-            }
-        };
-        $rootScope.checkIsFollow = function (user) {
-            var me = $rootScope.global.user || {
-                followList: []
-            };
-            if (user._id === me._id) {
-                user.isMe = true;
-            }
-            user.isFollow = me.followList.some(function (x) {
-                return x === user._id;
             });
         };
         $rootScope.followMe = function (user) {
-            var result;
-            result = app.rest.user.save({
-                Uid: user._id
+            restAPI.user.save({
+                ID: user._id
             }, {
                 follow: !user.isFollow
-            }, function () {
-                if (!result.err) {
-                    if (result.follow) {
-                        $rootScope.global.user.followList.push(user._id);
-                    } else {
-                        $rootScope.global.user.followList.some(function (x, i, a) {
-                            if (x === user._id) {
-                                a.splice(i, 1);
-                                return true;
-                            }
-                        });
-                    }
-                    if (user.fans) {
-                        user.fans += user.isFollow ? -1 : 1;
-                    }
-                    user.isFollow = !user.isFollow;
+            }, function (data) {
+                if (result.follow) {
+                    $rootScope.global.user.followList.push(user._id);
                 } else {
-                    $rootScope.msg = result.err;
+                    $rootScope.global.user.followList.some(function (x, i, a) {
+                        if (x === user._id) {
+                            a.splice(i, 1);
+                            return true;
+                        }
+                    });
                 }
+                if (user.fans) {
+                    user.fans += user.isFollow ? -1 : 1;
+                }
+                user.isFollow = !user.isFollow;
             });
         };
-        $rootScope.global.loading = true;
+        restAPI.index.get({}, function (data) {
+            var global = data.data;
+            app.timeOffset = Date.now() - data.timestamp;
+            global.title2 = global.description;
+            global.info.angularjs = angular.version.full;
+            $rootScope.global = global;
+            app.checkUser();
+        });
 
-        function getServTime() {
-            var result = app.rest.index.get({
-                OP: 'time'
-            }, function () {
-                if (result.timestamp) {
-                    $rootScope.global.timestamp = result.timestamp;
-                }
-            });
-            $timeout(getServTime, 300000);
-        }
-
-        var result = app.rest.index.get({}, function () {
-            angular.extend($rootScope.global, result);
-            $rootScope.global.loading = false;
-            $rootScope.global.title2 = $rootScope.global.description;
-            $rootScope.global.info.angularjs = angular.version.full;
-            $rootScope.checkUser();
-            if (!$rootScope.global.date) {
-                $rootScope.msg = {
-                    name: '错误提示',
-                    message: '网页初始化出错',
-                    type: 'error'
-                };
-            }
-        });
-        $rootScope.$watch(function () {
-            return $location.path();
-        }, function (path) {
-            var reg = /\/add|^\/A.+\/edit$/;
-            if (!reg.test(path)) {
-                $rootScope.global.fullWidth = '';
-            }
-        });
-        $rootScope.$watch('global.loading', function (value) {
-            if (value) {
-                $timeout(function () {
-                    $rootScope.global.loadingOn = $rootScope.global.loading;
-                }, 1000);
-            } else {
-                $rootScope.global.loadingOn = false;
-            }
-        });
-        $rootScope.$watch('msg', function (msg) {
-            var dom;
-            if ($) {
-                dom = $('#msg-modal');
-            }
-            if (dom && dom.modal && msg && (msg.name || msg.message)) {
-                if (msg.type === 'error') {
-                    $rootScope.msgmodal = 'text-error';
-                } else {
-                    $rootScope.msgmodal = 'text-success';
-                }
-                dom.modal('show');
-                $rootScope.timeout = 5;
-                $rootScope.$on('timeout', function (event) {
-                    event.stopPropagation();
-                    var url = null;
-                    if ($rootScope.msg && $rootScope.msg.url) {
-                        url = $rootScope.msg.url;
-                    }
-                    $rootScope.msg = null;
-                    $rootScope.timeout = undefined;
-                    dom.modal('hide');
-                    if (url) {
-                        $location.path(url);
-                    }
+        timing(function () {  // 保证每300秒内与服务器存在连接，维持session
+            if (Date.now() - app.timestamp - app.timeOffset >= 300000) {
+                restAPI.index.get({
+                    OP: 'time'
+                }, function (data) {
+                    app.timestamp = data.timestamp;
                 });
             }
-        }, true);
+        }, 300000);
     }
 ]);

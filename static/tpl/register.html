@@ -20,25 +20,25 @@
             <div class="page-header inner">
                 <span class="success">用户注册</span>
             </div>
-            <form class="pure-form pure-form-aligned inner" name="register">
+            <form class="pure-form pure-form-aligned inner" novalidate>
                 <div class="pure-control-group">
-                    <label for="user-name">用户名：</label>
-                    <input id="user-name" type="text" placeholder="name" name="用户名" ng-model="name" required/>
+                    <label>用户名：</label>
+                    <input type="text" placeholder="name" name="用户名" ng-model="user.name" ui-validate="{username:checkName,minname:checkMin,maxname:checkMax}" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-control-group">
-                    <label for="user-email">邮箱：</label>
-                    <input id="user-email" type="email" placeholder="email" name="邮箱" ng-model="email" required/>
+                    <label>邮箱：</label>
+                    <input type="email" placeholder="email" name="邮箱" ng-model="user.email" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-control-group">
-                    <label for="user-password">密码：</label>
-                    <input id="user-password" type="password" placeholder="password" name="密码" ng-model="passwd" ng-minlength="6" ng-maxlength="20" required/>
+                    <label>密码：</label>
+                    <input type="password" placeholder="password" name="密码" ng-model="user.passwd" ng-minlength="6" ng-maxlength="20" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-control-group">
-                    <label for="re-password">重复密码：</label>
-                    <input id="re-password" type="password" name="重复密码" ng-model="passwd2" required/>
+                    <label>重复密码：</label>
+                    <input type="password" placeholder="password" name="重复密码" ng-model="user.passwd2" ui-validate="{repasswd:'$value==user.passwd'}" ui-validate-watch="'user.passwd'" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-controls">
-                    <button class="pure-button success-bg" ng-disabled="register.$error.required" ng-click="submit()">注&nbsp;&nbsp;册</button>
+                    <button class="pure-button success-bg" ng-click="submit()">注册</button>
                 </div>
             </form>
         </div>

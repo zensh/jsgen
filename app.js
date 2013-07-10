@@ -98,7 +98,8 @@ serverDm.run(function () {
 
 function createServer() {
     var server = http.createServer(function (req, res) {
-        var dm = domain.create();
+        var dm = domain.create(),
+            resJson = jsGen.lib.tools.resJson;
         dm.on('error', function (err) {
             console.log(err);
             delete err.domain;
@@ -111,21 +112,17 @@ function createServer() {
                     });
                 });
                 if (err.hasOwnProperty('name')) {
-                    res.sendjson({
-                        error: err
-                    });
+                    res.sendjson(resJson(err));
                 } else {
                     //console.log('ReqErr:******************');
                     console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
                     jsGen.errlog.error(err);
-                    res.sendjson({
-                        error: {
-                            name: '请求错误',
-                            message: '对不起，请求出错了！',
-                            type: 'error',
-                            url: '/'
-                        }
-                    });
+                    res.sendjson(resJson({
+                        name: '请求错误',
+                        message: '对不起，请求出错了！',
+                        type: 'error',
+                        url: '/'
+                    }));
                 }
             } catch (error) {
                 delete error.domain;
