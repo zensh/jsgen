@@ -43,8 +43,8 @@ directive('genTabClick', function () {
         }
     };
 }).
-directive('genPagination', ['$location', 'getFile',
-    function ($location, getFile) {
+directive('genPagination', ['getFile',
+    function (getFile) {
         // <div gen-pagination="options"></div>
         // HTML/CSS基于Bootstrap框架
         // options = {

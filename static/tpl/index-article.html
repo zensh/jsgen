@@ -13,7 +13,7 @@
     </li>
     <div class="pure-button-group right">
         <a href="/add" class="pure-button success-bg" ng-if="global.isLogin">发表文章</a>
-        <a class="pure-button list-model primary-bg" title="{{parent.listModel&&'简洁模式'||'摘要模式'}}" ng-class="{'pure-button-active':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
+        <a class="pure-button list-model primary-bg" title="{{parent.listModel&&'简洁模式'||'摘要模式'}}" ng-class="{'primary-bg':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
     </div>
 </ul>
 <ul class="list-inline inner">

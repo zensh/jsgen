@@ -459,15 +459,15 @@ function getUser(req, res, dm) {
             } else {
                 cache = jsGen.cache.list;
             }
-            pagination(req, list, cache, dm.intercept(function (doc) {
+            pagination(req, list, cache, dm.intercept(function (data) {
                 if (p === 1 && req.path[3] === 'index' || !req.path[3]) {
                     userCache.getP(Uid, dm.intercept(function (user) {
-                        doc.user = intersect(union(UserPublicTpl), user);
-                        doc.user._id = userID;
-                        return res.sendjson(resJson(null, doc));
+                        data.user = intersect(union(UserPublicTpl), user);
+                        data.user._id = userID;
+                        return res.sendjson(resJson(null, data));
                     }));
                 } else {
-                    return res.sendjson(resJson(null, doc));
+                    return res.sendjson(resJson(null, data));
                 }
             }));
         };
@@ -541,16 +541,16 @@ function getUsers(req, res, dm) {
     if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
-    pagination(req, cache._index, userCache, dm.intercept(function (doc) {
-        var data;
-        for (var i = doc.data.length - 1; i >= 0; i--) {
-            data = union(UserPublicTpl);
-            intersect(data, doc.data[i]);
-            data._id = doc.data[i]._id;
-            data.email = doc.data[i].email;
-            doc.data[i] = data;
+    pagination(req, cache._index, userCache, dm.intercept(function (data, pagination) {
+        var data2;
+        for (var i = data.length - 1; i >= 0; i--) {
+            data2 = union(UserPublicTpl);
+            intersect(data2, data[i]);
+            data2._id = data[i]._id;
+            data2.email = data[i].email;
+            data[i] = data2;
         };
-        return res.sendjson(resJson(null, doc));
+        return res.sendjson(resJson(null, data));
     }));
 };
 
@@ -920,8 +920,8 @@ function getArticles(req, res, dm) {
     }
 
     function getPagination() {
-        pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
-            return res.sendjson(resJson(null, articlesList));
+        pagination(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
+            return res.sendjson(resJson(null, data, pagination));
         }));
     };
 };
@@ -942,13 +942,13 @@ function getUsersList(req, res, dm) {
         } else {
             throw jsGen.Err(jsGen.lib.msg.requestDataErr);
         }
-        pagination(req, list, userCache, dm.intercept(function (usersList) {
-            for (var i = usersList.data.length - 1; i >= 0; i--) {
-                var userID = usersList.data[i]._id;
-                usersList.data[i] = intersect(union(UserPublicTpl), usersList.data[i]);
-                usersList.data[i]._id = userID;
+        pagination(req, list, userCache, dm.intercept(function (data, pagination) {
+            for (var i = data.length - 1; i >= 0; i--) {
+                var userID = data[i]._id;
+                data[i] = intersect(union(UserPublicTpl), data[i]);
+                data[i]._id = userID;
             };
-            return res.sendjson(resJson(null, usersList));
+            return res.sendjson(resJson(null, data, pagination));
         }));
     }), false);
 };

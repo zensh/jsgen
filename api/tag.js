@@ -307,17 +307,17 @@ function getTag(req, res, dm) {
                 jsGen.cache.pagination.put(req.session.listPagination.key, list);
             }
         }
-        pagination(req, list, jsGen.cache.list, dm.intercept(function (articlesList) {
-            if (articlesList.pagination) {
-                union(req.session.listPagination, articlesList.pagination);
-            }
+        pagination(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
+            union(req.session.listPagination, pagination);
             if (p === 1 || s > 0) {
                 doc._id = jsGen.dao.tag.convertID(doc._id);
                 delete doc.articlesList;
                 delete doc.usersList;
                 articlesList.tag = doc;
             }
-            return res.sendjson(resJson(null, articlesList));
+            return res.sendjson(resJson(null, data, pagination, {
+                tag: doc
+            }));
         }));
     }));
 };
@@ -350,16 +350,14 @@ function getTags(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, tagCache, dm.intercept(function (tagsList) {
-        tagsList.data.forEach(function (tag) {
+    pagination(req, list, tagCache, dm.intercept(function (data, pagination) {
+        data.forEach(function (tag) {
             tag._id = jsGen.dao.tag.convertID(tag._id);
             delete tag.articlesList;
             delete tag.usersList;
         });
-        if (tagsList.pagination) {
-            union(req.session.listPagination, tagsList.pagination);
-        }
-        return res.sendjson(resJson(null, tagsList));
+        union(req.session.listPagination, pagination);
+        return res.sendjson(resJson(null, data, pagination));
     }));
 };
 

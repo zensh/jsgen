@@ -42,6 +42,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             s: $routeParams.s || custom.pageSize()
         }, restAPI).then(function (data) {
             var pagination = data.pagination || {};
+            console.log(222,data)
             if (data.tag) {
                 $scope.other.title = data.tag.tag;
                 $scope.other._id = data.tag._id;
@@ -278,7 +279,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         $scope.$on('update', function (event, doc) {
             event.stopPropagation();
             $scope.user.tagsList = [];
-            app.union(doc, $scope.user);
+            app.union($scope.user, doc);
         });
     }
 ]).controller('userCtrl', ['app', '$scope', '$routeParams',
@@ -539,7 +540,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 result = app.restAPI.user.save({}, data, function () {
 
                     if (!result.err) {
-                        app.union(result, $scope.user);
+                        app.union($scope.user, result);
                         originData = app.union($scope.user);
                         initTags($scope.user.tagsList);
                         $scope.$emit('update', result);
@@ -1079,7 +1080,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 if (!result.err) {
                     $scope.data = result.data;
                     originData = app.union($scope.data);
-                    app.union(result.pagination, $scope.pagination);
+                    app.union($scope.pagination, result.pagination);
                 } else {
                     app.rootScope.msg = result.err;
                 }
@@ -1310,7 +1311,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     originData = app.union(result);
                     var clone = app.union($scope.global);
                     app.intersect(clone, $scope.global);
-                    app.union(clone, $scope.global);
+                    app.union($scope.global, clone);
                     app.rootScope.msg = {
                         name: '请求成功',
                         message: '修改成功！'
