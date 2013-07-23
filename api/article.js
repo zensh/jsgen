@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen, setImmediate*/
+
 var listArticleTpl = jsGen.lib.json.ListArticle,
     commentTpl = jsGen.lib.json.Comment,
     union = jsGen.lib.tools.union,
@@ -11,7 +14,7 @@ var listArticleTpl = jsGen.lib.json.ListArticle,
     filterTitle = jsGen.lib.tools.filterTitle,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent,
-    pagination = jsGen.lib.tools.pagination,
+    paginationList = jsGen.lib.tools.paginationList,
     checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
     resJson = jsGen.lib.tools.resJson;
 
@@ -41,7 +44,7 @@ articleCache.getP = function (ID, callback, convert) {
         doc.markList = jsGen.api.user.convertUsers(doc.markList);
         doc.refer = convertRefer(doc.refer);
         doc.comments = doc.commentsList.length;
-    };
+    }
 
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) {
@@ -87,7 +90,7 @@ commentCache.getP = function (ID, callback, convert) {
         doc.refer = convertRefer(doc.refer);
         doc.comments = doc.commentsList.length;
         doc.commentsList = convertArticleID(doc.commentsList);
-    };
+    }
 
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) {
@@ -124,7 +127,7 @@ listCache.getP = function (ID, callback, convert) {
         doc.tagsList = jsGen.api.tag.convertTags(doc.tagsList);
         doc.author = jsGen.api.user.convertUsers(doc.author)[0];
         doc.refer = convertRefer(doc.refer);
-    };
+    }
 
     callback = callback || jsGen.lib.tools.callbackFn;
     if (convert === undefined) {
@@ -222,7 +225,7 @@ cache._update = function (obj) {
     return this;
 };
 cache._remove = function (ID) {
-    var i= this._index.indexOf(ID);
+    var i = this._index.indexOf(ID);
     delete this[ID];
     if (i >= 0) {
         this._index.splice(i, 1);
@@ -250,8 +253,10 @@ cache._remove = function (ID) {
 }).call(cache);
 
 function updateList(article) {
-    var ID = jsGen.cache.updateList[0], articleID = article._id, list = [];
-    if (jsGen.cache.updateList.length===0 || !ID || article.updateTime > cache[ID].updateTime) {
+    var ID = jsGen.cache.updateList[0],
+        articleID = article._id,
+        list = [];
+    if (jsGen.cache.updateList.length === 0 || !ID || article.updateTime > cache[ID].updateTime) {
         list.push(articleID);
         articleID = 0;
     }
@@ -272,10 +277,13 @@ function updateList(article) {
     }
     jsGen.cache.updateList = list;
     return;
-};
+}
 
 function hotsList(article) {
-    var  ID = jsGen.cache.hotsList[0], articleID = article._id, list = [], now = Date.now();
+    var ID = jsGen.cache.hotsList[0],
+        articleID = article._id,
+        list = [],
+        now = Date.now();
     if (now - article.updateTime > 604800000) {
         return;
     }
@@ -300,14 +308,17 @@ function hotsList(article) {
     }
     jsGen.cache.hotsList = list;
     return;
-};
+}
 
 function hotCommentsList(article) {
-    var  ID = jsGen.cache.hotCommentsList[0], articleID = article._id, list = [], now = Date.now();
+    var ID = jsGen.cache.hotCommentsList[0],
+        articleID = article._id,
+        list = [],
+        now = Date.now();
     if (now - article.updateTime > 604800000) {
         return;
     }
-    if (jsGen.cache.hotCommentsList.length===0 || !ID || article.hots > cache[ID].hots) {
+    if (jsGen.cache.hotCommentsList.length === 0 || !ID || article.hots > cache[ID].hots) {
         list.push(articleID);
         articleID = 0;
     }
@@ -328,7 +339,7 @@ function hotCommentsList(article) {
     }
     jsGen.cache.hotCommentsList = list;
     return;
-};
+}
 
 function convertArticleID(IDArray) {
     var result = [];
@@ -342,7 +353,7 @@ function convertArticleID(IDArray) {
         result[i] = jsGen.dao.article.convertID(IDArray[i]);
     }
     return result;
-};
+}
 
 function convertArticles(IDArray, callback, mode) {
     var result = [];
@@ -387,7 +398,7 @@ function convertArticles(IDArray, callback, mode) {
             });
         }
     }
-};
+}
 
 function convertRefer(refer) {
     if (!refer) {
@@ -404,7 +415,7 @@ function convertRefer(refer) {
             url: refer
         };
     }
-};
+}
 
 function calcuHots(doc) {
     doc.hots = jsGen.config.ArticleHots[0] * (doc.visitors ? doc.visitors : 0);
@@ -415,7 +426,7 @@ function calcuHots(doc) {
     doc.hots += jsGen.config.ArticleHots[4] * (doc.status === 2 ? 1 : 0);
     doc.hots = Math.round(doc.hots);
     cache._update(doc);
-};
+}
 
 function checkStatus(article) {
     if (jsGen.config.ArticleStatus[0] > 0 && article.status === -1 && article.commentsList.length >= jsGen.config.ArticleStatus[0]) {
@@ -427,7 +438,7 @@ function checkStatus(article) {
         return true;
     }
     return false;
-};
+}
 
 function filterArticle(articleObj, callback) {
     var newObj = {
@@ -498,7 +509,7 @@ function filterArticle(articleObj, callback) {
     } else {
         return callback(null, newObj);
     }
-};
+}
 
 function getArticle(req, res, dm) {
     var ID = req.path[2],
@@ -517,7 +528,7 @@ function getArticle(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.articleDisplay2);
     }
     articleCache.getP(ID, dm.intercept(function (article) {
-        authorUid = jsGen.dao.user.convertID(article.author._id);
+        var authorUid = jsGen.dao.user.convertID(article.author._id);
         if (req.session.Uid !== authorUid && cache[ID].display === 1) {
             jsGen.cache.user.getP(authorUid, dm.intercept(function (user) {
                 if (user.fansList.indexOf(req.session.Uid) < 0) {
@@ -529,11 +540,12 @@ function getArticle(req, res, dm) {
         } else {
             get();
         }
+
         function get() {
             var list = null;
             if (req.path[3] === 'comment') {
                 if (!req.session.commentPagination) {
-                    return res.sendjson(resJson(null, []));
+                    return res.sendjson(resJson());
                 }
                 list = jsGen.cache.pagination.get(req.session.commentPagination.key);
                 if (!list || (p === 1 && req.session.commentPagination.key !== article._id + article.updateTime)) {
@@ -541,13 +553,13 @@ function getArticle(req, res, dm) {
                     list = article.commentsList.reverse();
                     jsGen.cache.pagination.put(req.session.commentPagination.key, list);
                 }
-                pagination(req, list, commentCache, dm.intercept(function (data, pagination) {
+                paginationList(req, list, commentCache, dm.intercept(function (data, pagination) {
                     union(req.session.commentPagination, pagination);
                     return res.sendjson(resJson(null, data, pagination));
                 }));
             } else {
                 list = article.commentsList.reverse();
-                pagination(req, list, commentCache, dm.intercept(function (data, pagination) {
+                paginationList(req, list, commentCache, dm.intercept(function (data, pagination) {
                     article.commentsList = data;
                     req.session.commentPagination = pagination;
                     req.session.commentPagination.key = article._id + article.updateTime;
@@ -557,7 +569,7 @@ function getArticle(req, res, dm) {
             }
         };
     }));
-};
+}
 
 function getComments(req, res, dm) {
     var data = [],
@@ -598,11 +610,11 @@ function getComments(req, res, dm) {
             return next();
         }));
     };
-};
+}
 
 function getLatest(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.pageIndex || 1,
+        p = req.getparam.p || req.getparam.pageIndex || 1,
         s = +req.path[3];
 
     p = +p;
@@ -628,15 +640,15 @@ function getLatest(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
         union(req.session.listPagination, pagination);
         return res.sendjson(resJson(null, data, pagination));
     }));
-};
+}
 
 function getUpdate(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.pageIndex || 1,
+        p = req.getparam.p || req.getparam.pageIndex || 1,
         s = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.updateList), 'base64');
 
@@ -663,15 +675,15 @@ function getUpdate(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
         union(req.session.listPagination, pagination);
         return res.sendjson(resJson(null, data, pagination));
     }));
-};
+}
 
 function getHots(req, res, dm) {
     var list,
-    p = req.getparam.p || req.getparam.pageIndex || 1,
+        p = req.getparam.p || req.getparam.pageIndex || 1,
         s = +req.path[3],
         key = MD5(JSON.stringify(jsGen.cache.hotsList), 'base64');
     p = +p;
@@ -682,7 +694,7 @@ function getHots(req, res, dm) {
         req.getparam = req.getparam || {};
         req.getparam.pageIndex = 1;
         req.getparam.pageSize = s;
-        list = jsGen.cache.hotsList.slice(0, n);
+        list = jsGen.cache.hotsList.slice(0, s);
     } else {
         s = 0;
         if (!req.session.listPagination) {
@@ -697,11 +709,11 @@ function getHots(req, res, dm) {
             jsGen.cache.pagination.put(req.session.listPagination.key, list);
         }
     }
-    pagination(req, list, listCache, dm.intercept(function (data, pagination) {
+    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
         union(req.session.listPagination, pagination);
         return res.sendjson(resJson(null, data, pagination));
     }));
-};
+}
 
 function getHotComments(req, res, dm) {
     var list, s = +req.path[3] || 5;
@@ -718,7 +730,7 @@ function getHotComments(req, res, dm) {
     convertArticles(list, dm.intercept(function (doc) {
         return res.sendjson(resJson(null, doc));
     }));
-};
+}
 
 function addArticle(req, res, dm) {
     if (!req.session.Uid) {
@@ -761,10 +773,11 @@ function addArticle(req, res, dm) {
             }));
         }));
     }));
-};
+}
 
 function setArticle(req, res, dm) {
-    var ID = req.path[2], date = Date.now();
+    var ID = req.path[2],
+        date = Date.now();
 
     if (!req.session.Uid) {
         throw jsGen.Err(jsGen.lib.msg.userNeedLogin);
@@ -935,7 +948,7 @@ function setArticle(req, res, dm) {
                 var i = value.markList.indexOf(ID);
                 if (mark) {
                     value.markList.push(ID);
-                } else if (i >=0) {
+                } else if (i >= 0) {
                     value.markList.splice(i, 1);
                 }
                 return value;
@@ -1030,7 +1043,7 @@ function setArticle(req, res, dm) {
     } else {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     }
-};
+}
 
 function robot(req, res, dm) {
     var obj = {}, ID = req.path[0];
@@ -1075,7 +1088,7 @@ function robot(req, res, dm) {
             }), 'comment');
         }));
     }
-};
+}
 
 function deleteArticle(req, res, dm) {
     var ID = req.path[2];
@@ -1110,40 +1123,40 @@ function deleteArticle(req, res, dm) {
         });
         return res.sendjson(resJson());
     }), false);
-};
+}
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-        case 'latest':
-            return getLatest(req, res, dm);
-        case 'hots':
-            return getHots(req, res, dm);
-        case 'update':
-            return getUpdate(req, res, dm);
-        case 'comment':
-            return getHotComments(req, res, dm);
-        default:
-            return getArticle(req, res, dm);
+    case undefined:
+    case 'index':
+    case 'latest':
+        return getLatest(req, res, dm);
+    case 'hots':
+        return getHots(req, res, dm);
+    case 'update':
+        return getUpdate(req, res, dm);
+    case 'comment':
+        return getHotComments(req, res, dm);
+    default:
+        return getArticle(req, res, dm);
     }
-};
+}
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
-        case undefined:
-        case 'index':
-            return addArticle(req, res, dm);
-        case 'comment':
-            return getComments(req, res, dm);
-        default:
-            return setArticle(req, res, dm);
+    case undefined:
+    case 'index':
+        return addArticle(req, res, dm);
+    case 'comment':
+        return getComments(req, res, dm);
+    default:
+        return setArticle(req, res, dm);
     }
-};
+}
 
 function deleteFn(req, res, dm) {
     return deleteArticle(req, res, dm);
-};
+}
 
 module.exports = {
     GET: getFn,

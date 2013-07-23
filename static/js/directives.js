@@ -185,10 +185,9 @@ directive('genTooltip', ['$timeout',
                     option = scope.$eval(attr.genTooltip) || {};
 
                 function invalidMsg(invalid) {
-                    if (enable) {
+                    ctrl.validate = enable && option.validate && element.is(':visible');
+                    if (ctrl.validate) {
                         var title = (ctrl.$name && ctrl.$name + ' ') || '';
-                        ctrl.validate = option.validate;
-                        invalid = ctrl.validate && invalid;
                         if (invalid && option.validateMsg) {
                             angular.forEach(ctrl.$error, function (value, key) {
                                 title += (value && option.validateMsg[key] && option.validateMsg[key] + ', ') || '';
@@ -196,7 +195,7 @@ directive('genTooltip', ['$timeout',
                         }
                         title = title.slice(0, -2) || attr.originalTitle || attr.title;
                         attr.$set('dataOriginalTitle', title ? title : '');
-                        showTooltip(invalid);
+                        showTooltip(!!invalid);
                     } else {
                         showTooltip(false);
                     }
@@ -210,22 +209,21 @@ directive('genTooltip', ['$timeout',
                 }
 
                 function initTooltip() {
-                    element.off('.tooltip').removeData('bs.tooltip');
+                    element.off('.tooltip').removeData('tooltip');
                     element.tooltip(option);
                 }
 
                 function showTooltip(show) {
-                    if (show) {
-                        element.addClass('invalid-error').tooltip('show');
-                    } else {
-                        element.removeClass('invalid-error').tooltip('hide');
+                    if (element.hasClass('invalid-error') !== show) {
+                        element[show ? 'addClass' : 'removeClass']('invalid-error');
+                        element.tooltip(show ? 'show' : 'hide');
                     }
                 }
 
-                if (option.container === 'ngView') {
-                    option.container = element.parents('.ng-view')[0] || element.parents('[ng-view]')[0];
-                } else if (option.container === 'inner') {
+                if (option.container === 'inner') {
                     option.container = element;
+                } else if (option.container === 'ngView') {
+                    option.container = element.parents('.ng-view')[0] || element.parents('[ng-view]')[0];
                 }
                 // use for AngularJS validation
                 if (option.validate) {
@@ -241,10 +239,9 @@ directive('genTooltip', ['$timeout',
                         }, showTooltip);
                     }
                     scope.$on('genTooltipValidate', function (event, collect, turnoff) {
-                        var visible = element.is(':visible');
-                        enable = visible && !turnoff;
+                        enable = !turnoff;
                         if (ctrl) {
-                            if (collect && visible) {
+                            if (angular.isArray(collect)) {
                                 collect.push(ctrl);
                             }
                             invalidMsg(ctrl.$invalid);
@@ -257,16 +254,7 @@ directive('genTooltip', ['$timeout',
                     });
                 }
                 element.bind('hidden.bs.tooltip', initTooltip);
-
-                scope.$watch(function () {
-                    return element.is(":visible");
-                }, function (value) {
-                    if (!value) {
-                        element.tooltip('destroy');
-                    } else {
-                        initTooltip();
-                    }
-                });
+                initTooltip();
             }
         };
     }

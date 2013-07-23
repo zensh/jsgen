@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 var url = require('url'),
     os = require('os'),
     union = jsGen.lib.tools.union,
@@ -80,7 +83,7 @@ function getIndex(req, res, dm) {
             return res.sendjson(resJson(null, config));
         }));
     } else if (req.cookie.autologin) {
-        jsGen.api.user.cookieLogin(req.cookie.autologin, function (Uid) {
+        jsGen.api.user.cookieLogin(req, function (Uid) {
             if (Uid) {
                 jsGen.cache.user.getP(Uid, dm.intercept(function (doc) {
                     req.session.Uid = Uid;
@@ -105,11 +108,11 @@ function getIndex(req, res, dm) {
     } else {
         return res.sendjson(resJson(null, config));
     }
-};
+}
 
 function getServTime(req, res, dm) {
     return res.sendjson(resJson());
-};
+}
 
 function getGlobal(req, res, dm) {
     var body = union(jsGen.config);
@@ -139,7 +142,7 @@ function getGlobal(req, res, dm) {
     body.sys.memory.total = jsGen.lib.tools.formatBytes(os.totalmem());
     body.sys.memory.free = jsGen.lib.tools.formatBytes(os.freemem());
     return res.sendjson(resJson(null, body));
-};
+}
 
 function setGlobal(req, res, dm) {
     var body = {},
@@ -272,7 +275,7 @@ function setGlobal(req, res, dm) {
         union(jsGen.config, body);
         return res.sendjson(resJson(null, body));
     }));
-};
+}
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
@@ -283,14 +286,14 @@ function getFn(req, res, dm) {
     default:
         return getIndex(req, res, dm);
     }
-};
+}
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
     case 'admin':
         return setGlobal(req, res, dm);
     }
-};
+}
 
 module.exports = {
     GET: getFn,

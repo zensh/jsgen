@@ -117,12 +117,10 @@ function createServer() {
                     //console.log('ReqErr:******************');
                     console.log(req.session.Uid + ':' + req.method + ' : ' + req.path);
                     jsGen.errlog.error(err);
-                    res.sendjson(resJson({
-                        name: '请求错误',
-                        message: '对不起，请求出错了！',
+                    res.sendjson(resJson(jsGen.Err('对不起，请求出错了！', '请求错误', {
                         type: 'error',
                         url: '/'
-                    }));
+                    })));
                 }
             } catch (error) {
                 delete error.domain;

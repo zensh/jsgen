@@ -1,7 +1,7 @@
 'use strict';
-/*global angular, _, jsGenVersion*/
+/*global angular, _*/
 
-angular.module('jsGen', ['jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools']).
+angular.module('jsGen', ['jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools', 'jsGen.locale']).
 config(['$httpProvider', 'app',
     function ($httpProvider, app) {
         // global loading status
@@ -26,7 +26,7 @@ config(['$httpProvider', 'app',
             status.count = count;
             status.total += 1;
             if (!loading) {
-                setTimeout(function () {
+                window.setTimeout(function () {
                     if (!loading && count > 0) {
                         loading = true;
                         app.loading(true, status);
@@ -48,34 +48,31 @@ config(['$httpProvider', 'app',
         $httpProvider.interceptors.push(function () {
             return {
                 response: function (res) {
-                    var error;
-                    if (angular.isObject(res.data)) {
-                        app.timestamp = res.data.timestamp;
-                        error = res.data.ack === false && res.data.error;
+                    var error, data = res.data;
+                    if (angular.isObject(data)) {
+                        app.timestamp = data.timestamp;
+                        error = !data.ack && data.error;
                     }
                     if (error) {
                         app.toast.error(error.message, error.name);
-                        return app.q.reject(res.data);
+                        return app.q.reject(data);
                     } else {
                         return res;
                     }
                 },
                 responseError: function (res) {
-                    console.log(222, res);
-                    // app.toast.error(res.data.error);
-                    return app.q.reject(res);
+                    var data = res.data;
+                    app.toast.error(data.message || data, res.status);
+                    return app.q.reject(data);
                 }
             };
         });
     }
-]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'custom', 'getArticle', 'getUser', 'getList', 'getMarkdown',
-    function (app, $q, $rootScope, $http, $location, $timeout, $filter,
-        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, custom, getArticle, getUser, getList, getMarkdown) {
+]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'getArticle', 'getUser', 'getList', 'getMarkdown',
+    function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
+        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, getArticle, getUser, getList, getMarkdown) {
 
-        Date.now = Date.now || function () {
-            return new Date().getTime();
-        };
         window.app = app; // for test
         tools(app); //添加jsGen系列工具函数
         app.q = $q;
@@ -87,6 +84,7 @@ config(['$httpProvider', 'app',
         app.timeOffset = 0;
         app.timestamp = Date.now() + 0;
         app.filter = $filter;
+        app.locale = $locale;
         app.anchorScroll = $anchorScroll;
         app.getFile = getFile;
         app.cache = cache;
@@ -96,7 +94,7 @@ config(['$httpProvider', 'app',
         app.mdEditor = mdEditor;
         app.CryptoJS = CryptoJS;
         app.promiseGet = promiseGet;
-        app.custom = custom;
+        app.myConf = myConf;
         app.getArticle = getArticle;
         app.getUser = getUser;
         app.getList = getList;
@@ -158,9 +156,7 @@ config(['$httpProvider', 'app',
         $rootScope.global = {
             isAdmin: false,
             isEditor: false,
-            isLogin: false,
-            loading: false,
-            fullWidth: ''
+            isLogin: false
         };
         $rootScope.validateTooltip = {
             validate: true,
@@ -179,16 +175,17 @@ config(['$httpProvider', 'app',
             }
         };
 
+        $rootScope.goBack = function () {
+            window.history.go(-1);
+        };
+
         $rootScope.logout = function () {
             restAPI.user.get({
                 ID: 'logout'
-            }, function (data) {
-                console.log('logout', data);
-                if (data.ack) {
-                    $rootScope.global.user = null;
-                    app.checkUser();
-                    $location.path('/');
-                }
+            }, function () {
+                $rootScope.global.user = null;
+                app.checkUser();
+                $location.path('/');
             });
         };
         $rootScope.followMe = function (user) {
@@ -197,12 +194,12 @@ config(['$httpProvider', 'app',
             }, {
                 follow: !user.isFollow
             }, function (data) {
-                if (result.follow) {
+                if (data.follow) {
                     $rootScope.global.user.followList.push(user._id);
                 } else {
-                    $rootScope.global.user.followList.some(function (x, i, a) {
+                    _.some($rootScope.global.user.followList, function (x, i, list) {
                         if (x === user._id) {
-                            a.splice(i, 1);
+                            list.splice(i, 1);
                             return true;
                         }
                     });
@@ -218,11 +215,11 @@ config(['$httpProvider', 'app',
             app.timeOffset = Date.now() - data.timestamp;
             global.title2 = global.description;
             global.info.angularjs = angular.version.full;
-            $rootScope.global = global;
+            app.union($rootScope.global, global);
             app.checkUser();
         });
 
-        timing(function () {  // 保证每300秒内与服务器存在连接，维持session
+        timing(function () { // 保证每300秒内与服务器存在连接，维持session
             if (Date.now() - app.timestamp - app.timeOffset >= 300000) {
                 restAPI.index.get({
                     OP: 'time'

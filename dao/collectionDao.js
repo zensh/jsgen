@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
     convertID(id);
     getCollectionsNum(callback);
@@ -21,19 +24,19 @@ var that = jsGen.dao.db.bind('collections', {
 
     convertID: function (id) {
         switch (typeof id) {
-            case 'string':
-                id = id.substring(1);
-                id = jsGen.lib.converter(id, 62, IDString);
-                return id;
-            case 'number':
-                id = jsGen.lib.converter(id, 62, IDString);
-                while (id.length < 3) {
-                    id = '0' + id;
-                }
-                id = 'C' + id;
-                return id;
-            default:
-                return null;
+        case 'string':
+            id = id.substring(1);
+            id = jsGen.lib.converter(id, 62, IDString);
+            return id;
+        case 'number':
+            id = jsGen.lib.converter(id, 62, IDString);
+            while (id.length < 3) {
+                id = '0' + id;
+            }
+            id = 'C' + id;
+            return id;
+        default:
+            return null;
         }
     },
 
@@ -177,7 +180,7 @@ var that = jsGen.dao.db.bind('collections', {
 
         function setCollectionInfoExec() {
             var setObj = {},
-            newObj = union(defaultObj),
+                newObj = union(defaultObj),
                 collectionObj = CollectionObjArray.pop();
 
             if (!collectionObj) {
@@ -207,13 +210,13 @@ var that = jsGen.dao.db.bind('collections', {
 
     setUpdate: function (collectionObj) {
         var setObj = {},
-        newObj = {
-            updateTime: 0,
-            update: {
-                _id: 0,
-                date: 0
-            }
-        };
+            newObj = {
+                updateTime: 0,
+                update: {
+                    _id: 0,
+                    date: 0
+                }
+            };
 
         newObj = intersect(newObj, collectionObj);
         setObj.$set = {
@@ -229,9 +232,9 @@ var that = jsGen.dao.db.bind('collections', {
 
     setComments: function (collectionObj) {
         var setObj = {},
-        newObj = {
-            commentsList: 0
-        };
+            newObj = {
+                commentsList: 0
+            };
 
         newObj = intersect(newObj, collectionObj);
         if (newObj.commentsList < 0) {
@@ -275,9 +278,9 @@ var that = jsGen.dao.db.bind('collections', {
                 newCollection._id = doc._id + 1;
             }
             that.insert(
-            newCollection, {
-                w: 1
-            }, callback);
+                newCollection, {
+                    w: 1
+                }, callback);
         });
     },
 

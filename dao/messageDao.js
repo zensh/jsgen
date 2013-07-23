@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
     convertID(id);
     getMessagesNum(callback);
@@ -17,19 +20,19 @@ var that = jsGen.dao.db.bind('messages', {
 
     convertID: function (id) {
         switch (typeof id) {
-            case 'string':
-                id = id.substring(1);
-                id = jsGen.lib.converter(id, 62, IDString);
-                return id;
-            case 'number':
-                id = jsGen.lib.converter(id, 62, IDString);
-                while (id.length < 3) {
-                    id = '0' + id;
-                }
-                id = 'M' + id;
-                return id;
-            default:
-                return null;
+        case 'string':
+            id = id.substring(1);
+            id = jsGen.lib.converter(id, 62, IDString);
+            return id;
+        case 'number':
+            id = jsGen.lib.converter(id, 62, IDString);
+            while (id.length < 3) {
+                id = '0' + id;
+            }
+            id = 'M' + id;
+            return id;
+        default:
+            return null;
         }
     },
 
@@ -92,13 +95,13 @@ var that = jsGen.dao.db.bind('messages', {
 
     setMessage: function (messageObj) {
         var query = {},
-        setObj = {},
-        newObj = {
-            receiver: {
-                _id: 0,
-                read: false
-            }
-        };
+            setObj = {},
+            newObj = {
+                receiver: {
+                    _id: 0,
+                    read: false
+                }
+            };
 
         newObj = intersect(newObj, messageObj);
 
@@ -131,9 +134,9 @@ var that = jsGen.dao.db.bind('messages', {
                 newMessage._id = doc._id + 1;
             }
             that.insert(
-            newMessage, {
-                w: 1
-            }, callback);
+                newMessage, {
+                    w: 1
+                }, callback);
         });
     },
 

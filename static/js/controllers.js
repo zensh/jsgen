@@ -6,7 +6,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
     function (app, $scope, $routeParams) {
         var ID = '',
             restAPI = app.restAPI.article,
-            custom = app.custom;
+            myConf = app.myConf,
+            global = app.rootScope.global;
 
         function checkRouteParams() {
             var path = app.location.path().slice(1).split('/');
@@ -22,37 +23,43 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             ID = $routeParams.TAG || path[0];
         }
 
-        $scope.global.title2 = $scope.global.description;
+        function getArticleList() {
+            app.promiseGet({
+                ID: ID,
+                p: $routeParams.p,
+                s: $routeParams.s || myConf.pageSize()
+            }, restAPI).then(function (data) {
+                var pagination = data.pagination || {};
+                if (data.tag) {
+                    $scope.other.title = data.tag.tag;
+                    $scope.other._id = data.tag._id;
+                }
+                pagination.locationPath = app.location.path();
+                pagination.sizePerPage = [10, 20, 50];
+                pagination.pageSize = myConf.pageSize(pagination.pageSize);
+                $scope.pagination = pagination;
+                $scope.articleList = data.data;
+            });
+        }
+
+        global.title2 = global.description;
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            listModel: custom.listModel()
+            listModel: myConf.listModel()
         };
         $scope.other = {};
         $scope.pagination = {};
 
         $scope.setListModel = function () {
-            $scope.parent.listModel = custom.listModel(!$scope.parent.listModel);
+            var parent = $scope.parent;
+            parent.listModel = myConf.listModel(!parent.listModel);
+            myConf.pageSize(parent.listModel ? 20 : 10);
+            getArticleList();
         };
 
         checkRouteParams();
-        app.promiseGet({
-            ID: ID,
-            p: $routeParams.p,
-            s: $routeParams.s || custom.pageSize()
-        }, restAPI).then(function (data) {
-            var pagination = data.pagination || {};
-            console.log(222,data)
-            if (data.tag) {
-                $scope.other.title = data.tag.tag;
-                $scope.other._id = data.tag._id;
-            }
-            pagination.locationPath = app.location.path();
-            pagination.sizePerPage = [10, 20, 50];
-            pagination.pageSize = custom.pageSize(pagination.pageSize);
-            $scope.pagination = pagination;
-            $scope.articleList = data.data;
-        });
+        getArticleList();
         app.getList('comment').then(function (data) {
             data = data.data;
             _.each(data, function (x, i) {
@@ -61,55 +68,39 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
             $scope.hotComments = data.slice(0, 10);
         });
     }
-]).controller('tagCtrl', ['app', '$scope',
-    function (app, $scope) {
-        $scope.data = null;
-        $scope.pagination = null;
-        $scope.$on('pagination', function (event, doc) {
-            event.stopPropagation();
+]).controller('tagCtrl', ['app', '$scope', '$routeParams',
+    function (app, $scope, $routeParams) {
+        var restAPI = app.restAPI.tag,
+            myConf = app.myConf;
 
-            var result = app.restAPI.tag.get(doc, function () {
+        $scope.parent = {
+            getTpl: app.getFile.html('index-tag.html'),
+            viewPath: 'latest',
+            listModel: myConf.listModel()
+        };
+        $scope.pagination = {};
 
-                if (!result.err) {
-                    if (result.pagination) {
-                        if (result.pagination.now === 1) {
-                            $scope.data = result.data;
-                        } else {
-                            $scope.data = $scope.data.concat(result.data).slice(-500);
-                        }
-                        $scope.pagination = result.pagination;
-                        if (!$scope.pagination.display) {
-                            $scope.pagination.display = {
-                                first: '首页',
-                                next: '下一页',
-                                last: '尾页'
-                            };
-                        }
-                    } else {
-                        $scope.data = result.data;
-                    }
-                } else {
-                    app.rootScope.msg = result.err;
-                }
+        app.promiseGet({
+            p: $routeParams.p,
+            s: $routeParams.s || myConf.pageSize(50, 'tag')
+        }, restAPI).then(function (data) {
+            var pagination = data.pagination || {};
+            pagination.locationPath = app.location.path();
+            pagination.pageSize = myConf.pageSize(pagination.pageSize);
+            $scope.pagination = pagination;
+            if (pagination.pageIndex > 1) {
+                $scope.tagList = $scope.tagList.concat(data.data).slice(-500);
+            } else {
+                $scope.tagList = data.data;
+            }
+        });
+
+        app.getList('comment').then(function (data) {
+            data = data.data;
+            _.each(data, function (x, i) {
+                x.content = app.filter('cutText')(x.content, 180);
             });
-        });
-        $scope.$emit('pagination', {
-            n: 50,
-            p: 1
-        });
-        app.getList('hots', function (list) {
-            if (!list.err) {
-                $scope.hotArticles = list.data.slice(0, 5);
-            } else {
-                app.rootScope.msg = list.err;
-            }
-        });
-        app.getList('latest', function (list) {
-            if (!list.err) {
-                $scope.latestArticles = list.data.slice(0, 5);
-            } else {
-                app.rootScope.msg = list.err;
-            }
+            $scope.hotComments = data.slice(0, 10);
         });
     }
 ]).controller('userLoginCtrl', ['app', '$scope',
@@ -140,44 +131,33 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     $scope.$destroy();
                     app.location.path('/home');
                 }, function (data) {
-                    var title = {
-                        locked: '申请解锁',
-                        passwd: '找回密码'
-                    };
                     $scope.reset.type = data.error.name;
-                    $scope.reset.title = title[data.error.name];
+                    $scope.reset.title = app.locale.RESET[data.error.name];
                 });
             }
         };
     }
 ]).controller('userResetCtrl', ['app', '$scope', '$routeParams',
     function (app, $scope, $routeParams) {
-        var request = $routeParams.RE;
-        if (request === 'locked') {
-            $scope.header = '申请解锁';
-        } else if (request === 'passwd') {
-            $scope.header = '找回密码';
-        } else {
-            app.location.path(app.goBack);
+        var locale = app.locale;
+        if (['locked', 'passwd'].indexOf($routeParams.type) < 0) {
+            app.rootScope.goBack();
         }
+        $scope.reset = {
+            name: '',
+            email: '',
+            request: $routeParams.type,
+            title: locale.RESET[$routeParams.type]
+        };
         $scope.submit = function () {
-
-            var result = app.restAPI.user.save({
-                Uid: 'reset'
-            }, {
-                name: $scope.name,
-                email: $scope.email,
-                request: request
-            }, function () {
-
-                if (!result.err) {
-                    result.name = '请求成功';
-                    result.url = '/';
-                    app.rootScope.msg = result;
-                } else {
-                    app.rootScope.msg = result.err;
-                }
-            });
+            if (app.validate($scope)) {
+                app.restAPI.user.save({
+                    ID: 'reset'
+                }, $scope.reset, function (data) {
+                    app.toastr.success(locale.RESET.email, locale.RESPONSE.success);
+                    app.rootScope.goBack();
+                });
+            }
         };
     }
 ]).controller('userRegisterCtrl', ['app', '$scope',
@@ -905,11 +885,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                     $scope.article.comments += 1;
                     $scope.article.updateTime = Date.now();
                     if ($scope.replyToComment) $scope.article.commentsList.some(function (x, i) {
-                            if ($scope.replyToComment === x._id) {
-                                $scope.article.commentsList[i].commentsList.push(result._id);
-                                return true;
-                            }
-                        });
+                        if ($scope.replyToComment === x._id) {
+                            $scope.article.commentsList[i].commentsList.push(result._id);
+                            return true;
+                        }
+                    });
                     app.cache.article.put($scope.article._id, $scope.article);
                     $scope.replyToComment = false;
                     $scope.title = '评论：' + app.filter('cutText')($scope.article.title, $scope.global.TitleMaxLen - 9);
@@ -1105,12 +1085,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         };
         $scope.submit = function () {
             var defaultObj = [{
-                    _id: '',
-                    email: '',
-                    locked: false,
-                    role: 0
-                }
-            ];
+                _id: '',
+                email: '',
+                locked: false,
+                role: 0
+            }];
             $scope.editEmail = false;
             $scope.editRole = false;
             $scope.editSave = false;
@@ -1123,9 +1102,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
                 }
             });
             app.complement(data, originData, [{
-                    _id: ''
-                }
-            ]);
+                _id: ''
+            }]);
 
             var result = app.restAPI.user.save({
                 Uid: 'admin'
@@ -1211,10 +1189,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams',
         };
         $scope.submit = function () {
             var defaultObj = [{
-                    _id: '',
-                    tag: ''
-                }
-            ];
+                _id: '',
+                tag: ''
+            }];
             $scope.editTag = false;
             $scope.editSave = false;
             var data = app.union($scope.data);

@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
     convertID(id);
     getArticlesIndex(date, limit, callback);
@@ -21,19 +24,19 @@ var that = jsGen.dao.db.bind('articles', {
 
     convertID: function (id) {
         switch (typeof id) {
-            case 'string':
-                id = id.substring(1);
-                id = jsGen.lib.converter(id, 62, IDString);
-                return id;
-            case 'number':
-                id = jsGen.lib.converter(id, 62, IDString);
-                while (id.length < 3) {
-                    id = '0' + id;
-                }
-                id = 'A' + id;
-                return id;
-            default:
-                return null;
+        case 'string':
+            id = id.substring(1);
+            id = jsGen.lib.converter(id, 62, IDString);
+            return id;
+        case 'number':
+            id = jsGen.lib.converter(id, 62, IDString);
+            while (id.length < 3) {
+                id = '0' + id;
+            }
+            id = 'A' + id;
+            return id;
+        default:
+            return null;
         }
     },
 
@@ -105,22 +108,22 @@ var that = jsGen.dao.db.bind('articles', {
 
     setArticle: function (articleObj, callback) {
         var setObj = {},
-        newObj = {
-            author: 0,
-            date: 0,
-            display: 0,
-            status: 0,
-            refer: '',
-            title: '',
-            cover: '',
-            content: '',
-            hots: 0,
-            visitors: 0,
-            updateTime: 0,
-            collection: 0,
-            tagsList: [0],
-            comment: true
-        };
+            newObj = {
+                author: 0,
+                date: 0,
+                display: 0,
+                status: 0,
+                refer: '',
+                title: '',
+                cover: '',
+                content: '',
+                hots: 0,
+                visitors: 0,
+                updateTime: 0,
+                collection: 0,
+                tagsList: [0],
+                comment: true
+            };
 
         intersect(newObj, articleObj);
         setObj.$set = newObj;
@@ -140,9 +143,9 @@ var that = jsGen.dao.db.bind('articles', {
 
     setFavor: function (articleObj) {
         var setObj = {},
-        newObj = {
-            favorsList: 0
-        };
+            newObj = {
+                favorsList: 0
+            };
 
         intersect(newObj, articleObj);
         if (newObj.favorsList < 0) {
@@ -163,9 +166,9 @@ var that = jsGen.dao.db.bind('articles', {
 
     setOppose: function (articleObj) {
         var setObj = {},
-        newObj = {
-            opposesList: 0
-        };
+            newObj = {
+                opposesList: 0
+            };
 
         intersect(newObj, articleObj);
         if (newObj.opposesList < 0) {
@@ -186,9 +189,9 @@ var that = jsGen.dao.db.bind('articles', {
 
     setMark: function (articleObj) {
         var setObj = {},
-        newObj = {
-            markList: 0
-        };
+            newObj = {
+                markList: 0
+            };
 
         intersect(newObj, articleObj);
         if (newObj.markList < 0) {
@@ -209,9 +212,9 @@ var that = jsGen.dao.db.bind('articles', {
 
     setComment: function (articleObj, callback) {
         var setObj = {},
-        newObj = {
-            commentsList: 0
-        };
+            newObj = {
+                commentsList: 0
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
         intersect(newObj, articleObj);
         if (newObj.commentsList < 0) {

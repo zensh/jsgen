@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
 用户数据 mongodb 访问层
 convertID(id); 用户显示Uid与MongoDB内部_id之间的转换;
@@ -31,19 +34,19 @@ var that = jsGen.dao.db.bind('users', {
 
     convertID: function (id) {
         switch (typeof id) {
-            case 'string':
-                id = id.substring(1);
-                id = jsGen.lib.converter(id, 26, UIDString);
-                return id;
-            case 'number':
-                id = jsGen.lib.converter(id, 26, UIDString);
-                while (id.length < 5) {
-                    id = 'a' + id;
-                }
-                id = 'U' + id;
-                return id;
-            default:
-                return null;
+        case 'string':
+            id = id.substring(1);
+            id = jsGen.lib.converter(id, 26, UIDString);
+            return id;
+        case 'number':
+            id = jsGen.lib.converter(id, 26, UIDString);
+            while (id.length < 5) {
+                id = 'a' + id;
+            }
+            id = 'U' + id;
+            return id;
+        default:
+            return null;
         }
     },
 
@@ -130,21 +133,21 @@ var that = jsGen.dao.db.bind('users', {
 
     setUserInfo: function (userObj, callback) {
         var setObj = {},
-        newObj = {
-            name: '',
-            email: '',
-            passwd: '',
-            resetKey: '',
-            resetDate: 0,
-            locked: false,
-            sex: '',
-            role: 0,
-            avatar: '',
-            desc: '',
-            score: 0,
-            readtimestamp: 0,
-            tagsList: [0]
-        };
+            newObj = {
+                name: '',
+                email: '',
+                passwd: '',
+                resetKey: '',
+                resetDate: 0,
+                locked: false,
+                sex: '',
+                role: 0,
+                avatar: '',
+                desc: '',
+                score: 0,
+                readtimestamp: 0,
+                tagsList: [0]
+            };
 
         newObj = intersect(newObj, userObj);
         setObj.$set = newObj;
@@ -164,9 +167,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setLoginAttempt: function (userObj) {
         var setObj = {},
-        newObj = {
-            loginAttempts: 0,
-        };
+            newObj = {
+                loginAttempts: 0,
+            };
 
         newObj = intersect(newObj, userObj);
         if (newObj.loginAttempts === 0) {
@@ -184,13 +187,13 @@ var that = jsGen.dao.db.bind('users', {
 
     setLogin: function (userObj) {
         var setObj = {},
-        newObj = {
-            lastLoginDate: 0,
-            login: {
-                date: 0,
-                ip: ''
-            }
-        };
+            newObj = {
+                lastLoginDate: 0,
+                login: {
+                    date: 0,
+                    ip: ''
+                }
+            };
 
         newObj = intersect(newObj, userObj);
         setObj.$set = {
@@ -213,26 +216,26 @@ var that = jsGen.dao.db.bind('users', {
                 'social.baidu': {}
             }
         },
-        newObj = {
-            social: {
-                weibo: {
-                    id: '',
-                    name: ''
-                },
-                qq: {
-                    id: '',
-                    name: ''
-                },
-                google: {
-                    id: '',
-                    name: ''
-                },
-                baidu: {
-                    id: '',
-                    name: ''
+            newObj = {
+                social: {
+                    weibo: {
+                        id: '',
+                        name: ''
+                    },
+                    qq: {
+                        id: '',
+                        name: ''
+                    },
+                    google: {
+                        id: '',
+                        name: ''
+                    },
+                    baidu: {
+                        id: '',
+                        name: ''
+                    }
                 }
-            }
-        };
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
@@ -266,9 +269,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setFans: function (userObj) {
         var setObj = {},
-        newObj = {
-            fansList: 0
-        };
+            newObj = {
+                fansList: 0
+            };
 
         newObj = intersect(newObj, userObj);
         if (newObj.fansList < 0) {
@@ -295,9 +298,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setFollow: function (userObj, callback) {
         var setObj = {},
-        newObj = {
-            followList: 0
-        };
+            newObj = {
+                followList: 0
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
@@ -327,9 +330,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setArticle: function (userObj, callback) {
         var setObj = {},
-        newObj = {
-            articlesList: 0
-        };
+            newObj = {
+                articlesList: 0
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
@@ -359,9 +362,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setCollection: function (userObj, callback) {
         var setObj = {},
-        newObj = {
-            collectionsList: 0
-        };
+            newObj = {
+                collectionsList: 0
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
@@ -391,9 +394,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setMark: function (userObj) {
         var setObj = {},
-        newObj = {
-            markList: 0
-        };
+            newObj = {
+                markList: 0
+            };
 
         newObj = intersect(newObj, userObj);
         if (newObj.markList < 0) {
@@ -429,15 +432,15 @@ var that = jsGen.dao.db.bind('users', {
                 'messages.receive': 0
             }
         },
-        newObj = {
-            messages: {
-                article: 0,
-                collection: 0,
-                comment: 0,
-                fan: 0,
-                receive: 0
-            }
-        };
+            newObj = {
+                messages: {
+                    article: 0,
+                    collection: 0,
+                    comment: 0,
+                    fan: 0,
+                    receive: 0
+                }
+            };
         callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
@@ -499,9 +502,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setReceive: function (userObj) {
         var setObj = {},
-        newObj = {
-            receiveList: 0
-        };
+            newObj = {
+                receiveList: 0
+            };
 
         newObj = intersect(newObj, userObj);
         if (newObj.receiveList < 0) {
@@ -522,9 +525,9 @@ var that = jsGen.dao.db.bind('users', {
 
     setSend: function (userObj) {
         var setObj = {},
-        newObj = {
-            sendList: 0
-        };
+            newObj = {
+                sendList: 0
+            };
 
         newObj = intersect(newObj, userObj);
         if (newObj.sendList < 0) {
@@ -565,19 +568,19 @@ var that = jsGen.dao.db.bind('users', {
             }
             delete newUser._id;
             that.insert(
-            preAllocate, {
-                w: 1
-            }, function (err, doc) {
-                if (err) {
-                    return callback(err, doc);
-                }
-                that.findAndModify({
-                    _id: preAllocate._id
-                }, [], newUser, {
-                    w: 1,
-                    new: true
-                }, callback);
-            });
+                preAllocate, {
+                    w: 1
+                }, function (err, doc) {
+                    if (err) {
+                        return callback(err, doc);
+                    }
+                    that.findAndModify({
+                        _id: preAllocate._id
+                    }, [], newUser, {
+                        w: 1,
+                        new: true
+                    }, callback);
+                });
         });
     }
 });

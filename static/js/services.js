@@ -2,9 +2,7 @@
 /*global angular, _, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8*/
 
 angular.module('jsGen.services', ['ngResource', 'ngCookies']).
-constant('msg', {
-    errorServer: 'Server response error!'
-}).factory('timing', ['$rootScope', '$q', '$exceptionHandler',
+factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     function ($rootScope, $q, $exceptionHandler) {
         function timing(fn, delay, times) {
             var timingId, count = 0,
@@ -135,24 +133,14 @@ constant('msg', {
             })
         };
     }
-]).factory('handleErr', ['msg', 'toast',
-    function (msg, loading, toast) {
-        return {
-            serverErr: function (data) {
-                //toast.error(msg.errorServer, data.status);
-            },
-            responseErr: function (data) {
-                //toast.error(data.error, data.status);
-            }
-        };
-    }
-]).factory('custom', ['$cookieStore',
+]).factory('myConf', ['$cookieStore',
     function ($cookieStore) {
         return {
-            pageSize: function (pageSize) {
-                var size = $cookieStore.get('pageSize') || 10;
+            pageSize: function (pageSize, type) {
+                type += 'PageSize';
+                var size = $cookieStore.get(type) || 10;
                 if (pageSize > 0 && size !== pageSize) {
-                    $cookieStore.put('pageSize', pageSize);
+                    $cookieStore.put(type, pageSize);
                     size = pageSize;
                 }
                 return size;
@@ -167,8 +155,8 @@ constant('msg', {
             }
         };
     }
-]).factory('promiseGet', ['$q', 'handleErr',
-    function ($q, handleErr) {
+]).factory('promiseGet', ['$q',
+    function ($q) {
         return function (param, restAPI, cacheId, cache) {
             var result, defer = $q.defer();
 

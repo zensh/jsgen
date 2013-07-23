@@ -8,8 +8,10 @@ factory('tools', function () {
             return;
         } else {
             return (function () {
-                this.digestArray = digestArray;
-                this.complement = complement;
+                Date.now = Date.now || function () {
+                    return new Date().getTime();
+                };
+
                 this.intersect = intersect;
                 this.checkType = checkType;
                 this.isArray = isArray;
@@ -157,87 +159,6 @@ factory('tools', function () {
                     }
                     return a;
                 }
-
-                //深度补集运算，用于获取对象修改后的值。a为目标对象，b为对比对象。
-                //a的某属性值与b的对应属性值全等时，删除a的该属性，运算直接修改a，返回值也是a。
-                //ignore，不参与对比的属性模板;
-                //keyMode为true时，对属性进行补集元算，即a的属性名在b中也存在时，则删除a中该属性。
-
-                function complement(a, b, ignore, keyMode) {
-                    if (a && b) {
-                        var typeA = checkType(a),
-                            typeB = checkType(b),
-                            ignore = ignore || undefined;
-                        keyMode = keyMode || undefined;
-                        if (typeA !== typeB || (typeA !== 'object' && typeA !== 'array')) {
-                            return a;
-                        }
-                        if (ignore) {
-                            if (typeof ignore === 'object') {
-                                return complement(a, complement(b, ignore, true), keyMode);
-                            } else {
-                                if (!keyMode) {
-                                    keyMode = true;
-                                }
-                            }
-                        }
-                        if (!keyMode) {
-                            if (typeB === 'array' && b.length === 1) {
-                                var o = union(b[0]);
-                                for (var i = a.length - 1; i >= 0; i--) {
-                                    if (a[i] === o) {
-                                        delete a[i];
-                                    } else if (o && typeof o === 'object') {
-                                        complement(a[i], o);
-                                    }
-                                }
-                            } else {
-                                for (var key in a) {
-                                    if (a[key] === b[key]) {
-                                        delete a[key];
-                                    } else if (b[key] && typeof b[key] === 'object') {
-                                        complement(a[key], b[key]);
-                                    }
-                                }
-                            }
-                        } else {
-                            if (typeB === 'array' && b.length === 1) {
-                                var o = union(b[0]);
-                                for (var i = a.length - 1; i >= 0; i--) {
-                                    if (o && typeof o === 'object') {
-                                        complement(a[i], o, true);
-                                    } else if (typeof a[i] === typeof o) {
-                                        delete a[i];
-                                    }
-                                }
-                            } else {
-                                for (var key in a) {
-                                    if (b[key] && typeof b[key] === 'object') {
-                                        complement(a[key], b[key], true);
-                                    } else if (typeof a[key] === typeof b[key]) {
-                                        delete a[key];
-                                    }
-                                }
-                            }
-                        }
-                        digestArray(a);
-                    }
-                    return a;
-                }
-
-                //数组去undefined，修改原数组，去除undefined值的元素。
-
-                function digestArray(a) {
-                    if (isArray(a)) {
-                        for (var i = a.length - 1; i >= 0; i--) {
-                            if (a[i] === undefined) {
-                                a.splice(i, 1);
-                            }
-                        }
-                    }
-                    return a;
-                }
-
             }).call(o);
         }
     };

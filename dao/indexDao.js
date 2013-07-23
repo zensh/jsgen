@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
  */
 var union = jsGen.lib.tools.union,
@@ -109,8 +112,8 @@ var that = jsGen.dao.db.bind('global', {
         globalConfig.date = Date.now();
         that.insert(
             globalConfig, {
-            w: 1
-        }, callback);
+                w: 1
+            }, callback);
     }
 
 });

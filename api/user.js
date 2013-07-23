@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     UserPrivateTpl = jsGen.lib.json.UserPrivateTpl,
     union = jsGen.lib.tools.union,
@@ -12,7 +15,7 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     gravatar = jsGen.lib.tools.gravatar,
     userCache = jsGen.cache.user,
     filterSummary = jsGen.lib.tools.filterSummary,
-    pagination = jsGen.lib.tools.pagination,
+    paginationList = jsGen.lib.tools.paginationList,
     checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
     resJson = jsGen.lib.tools.resJson;
 
@@ -44,15 +47,15 @@ userCache.getP = function (Uid, callback, convert) {
         }
         return callback(null, doc);
     } else jsGen.dao.user.getUserInfo(Uid, function (err, doc) {
-            if (doc) {
-                doc = intersect(union(UserPrivateTpl), doc);
-                that.put(Uid, doc);
-                if (convert) {
-                    getConvert(doc);
-                }
+        if (doc) {
+            doc = intersect(union(UserPrivateTpl), doc);
+            that.put(Uid, doc);
+            if (convert) {
+                getConvert(doc);
             }
-            return callback(err, doc);
-        });
+        }
+        return callback(err, doc);
+    });
 };
 
 jsGen.cache.userAll = {
@@ -128,7 +131,7 @@ function convertUsers(UidArray, mode) {
         }
         return result;
     }
-};
+}
 
 function calcuScore(user) {
     //UsersScore: [1, 3, 5, 10, 0.5, 1]
@@ -147,14 +150,14 @@ function calcuScore(user) {
     user.score += jsGen.config.UsersScore[5] * Math.floor((Date.now() - user.date) / 86400000);
     user.score = Math.round(user.score);
     cache._update(user);
-};
+}
 
 function setCache(obj) {
     cache._remove(obj._id);
     cache._update(obj);
     obj = intersect(union(UserPrivateTpl), obj);
     userCache.put(obj._id, obj);
-};
+}
 
 function adduser(userObj, callback) {
     var err;
@@ -183,7 +186,7 @@ function adduser(userObj, callback) {
         }
         return callback(err, doc);
     });
-};
+}
 
 function userLogin(loginData, callback) {
     var Uid, date = Date.now();
@@ -237,7 +240,7 @@ function userLogin(loginData, callback) {
                 lastLoginDate: date,
                 login: {
                     date: date,
-                    ip: req.ip
+                    ip: loginData.ip
                 }
             });
         } else {
@@ -248,13 +251,13 @@ function userLogin(loginData, callback) {
             return callback(jsGen.Err(jsGen.lib.msg.userPasswd, 'passwd'));
         }
     });
-};
+}
 
 function logout(req, res, dm) {
     req.delsession();
     res.clearcookie('autologin');
     return res.sendjson(resJson());
-};
+}
 
 function cookieLoginUpdate(Uid, callback) {
     callback = callback || jsGen.lib.tools.callbackFn;
@@ -271,25 +274,27 @@ function cookieLoginUpdate(Uid, callback) {
     });
 }
 
-function cookieLogin(cookie, callback) {
-    var data = JSON.parse(new Buffer(cookie, 'base64').toString());
+function cookieLogin(req, callback) {
+    var data = JSON.parse(new Buffer(req.cookie.autologin, 'base64').toString());
     if (typeof data !== 'object') {
         return callback();
     } else {
         data.logname = data.n;
-        data.logtime = data.t
-        data.logpwd = data.p
+        data.logtime = data.t;
+        data.logpwd = data.p;
+        data.ip = req.ip;
         userLogin(data, function (err, Uid) {
             return callback(Uid);
         });
     }
-};
+}
 
 function login(req, res, dm) {
     var Uid, data = req.apibody;
     if (typeof req.apibody !== 'object') {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     } else {
+        req.apibody.ip = req.ip;
         userLogin(req.apibody, dm.intercept(function (Uid) {
             userCache.getP(Uid, dm.intercept(function (doc) {
                 req.session.Uid = Uid;
@@ -312,7 +317,7 @@ function login(req, res, dm) {
             }));
         }));
     }
-};
+}
 
 function register(req, res, dm) {
     var data = req.apibody;
@@ -347,7 +352,7 @@ function register(req, res, dm) {
             return res.sendjson(resJson(null, doc));
         }
     }));
-};
+}
 
 function setReset(resetObj, callback) {
     // var resetObj = {
@@ -373,7 +378,7 @@ function setReset(resetObj, callback) {
             return jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(callback);
         }
     });
-};
+}
 
 function addUsers(req, res, dm) {
     var body = [];
@@ -412,7 +417,7 @@ function addUsers(req, res, dm) {
             return next();
         }));
     };
-};
+}
 
 function getUser(req, res, dm) {
     var userID, Uid = decodeURI(req.path[2]);
@@ -459,7 +464,7 @@ function getUser(req, res, dm) {
             } else {
                 cache = jsGen.cache.list;
             }
-            pagination(req, list, cache, dm.intercept(function (data) {
+            paginationList(req, list, cache, dm.intercept(function (data) {
                 if (p === 1 && req.path[3] === 'index' || !req.path[3]) {
                     userCache.getP(Uid, dm.intercept(function (user) {
                         data.user = intersect(union(UserPublicTpl), user);
@@ -472,7 +477,7 @@ function getUser(req, res, dm) {
             }));
         };
     }), false);
-};
+}
 
 function setUser(req, res, dm) {
     var userID, Uid = decodeURI(req.path[2]);
@@ -532,16 +537,18 @@ function setUser(req, res, dm) {
                 return value;
             });
             checkTimeInterval(req, 'Fo', true);
-            return res.sendjson(resJson(follow));
+            return res.sendjson(resJson(null, null, null, {
+                follow: follow
+            }));
         }));
     }), false);
-};
+}
 
 function getUsers(req, res, dm) {
     if (req.session.role < 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
-    pagination(req, cache._index, userCache, dm.intercept(function (data, pagination) {
+    paginationList(req, cache._index, userCache, dm.intercept(function (data, pagination) {
         var data2;
         for (var i = data.length - 1; i >= 0; i--) {
             data2 = union(UserPublicTpl);
@@ -552,7 +559,7 @@ function getUsers(req, res, dm) {
         };
         return res.sendjson(resJson(null, data));
     }));
-};
+}
 
 function getUserInfo(req, res, dm) {
     if (!req.session.Uid) {
@@ -568,37 +575,39 @@ function getUserInfo(req, res, dm) {
             var i = jsGen.api.article.cache._index.length - 1;
             list = [];
             checkList();
-
-            function checkList() {
-                var ID = jsGen.api.article.cache._index[i];
-                if (!ID) {
-                    return checkList();
-                }
-                i -= 1;
-                if (i === -1 || list.length >= 500) {
-                    list.sort(function (a, b) {
-                        return jsGen.api.article.cache[b].updateTime - jsGen.api.article.cache[a].updateTime;
-                    });
-                    jsGen.cache.pagination.put(key, list);
-                    return getPagination();
-                } else {
-                    jsGen.cache.list.getP(ID, dm.intercept(function (article) {
-                        var checkTag = user.tagsList.some(function (x) {
-                            if (article.tagsList.indexOf(x) >= 0) return true;
-                        });
-                        if (checkTag || req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0) {
-                            list.push(ID);
-                        }
-                        return checkList();
-                    }), false);
-                }
-            };
         } else {
             getPagination();
         }
 
+        function checkList() {
+            var ID = jsGen.api.article.cache._index[i];
+            if (!ID) {
+                return checkList();
+            }
+            i -= 1;
+            if (i === -1 || list.length >= 500) {
+                list.sort(function (a, b) {
+                    return jsGen.api.article.cache[b].updateTime - jsGen.api.article.cache[a].updateTime;
+                });
+                jsGen.cache.pagination.put(key, list);
+                return getPagination();
+            } else {
+                jsGen.cache.list.getP(ID, dm.intercept(function (article) {
+                    var checkTag = user.tagsList.some(function (x) {
+                        if (article.tagsList.indexOf(x) >= 0) {
+                            return true;
+                        }
+                    });
+                    if (checkTag || req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0) {
+                        list.push(ID);
+                    }
+                    return checkList();
+                }), false);
+            }
+        }
+
         function getPagination() {
-            pagination(req, list, jsGen.cache.list, dm.intercept(function (doc) {
+            paginationList(req, list, jsGen.cache.list, dm.intercept(function (doc) {
                 var now = Date.now();
                 doc.readtimestamp = user.readtimestamp;
                 if (p === 1) {
@@ -618,9 +627,9 @@ function getUserInfo(req, res, dm) {
                     return res.sendjson(resJson(null, doc));
                 }
             }));
-        };
+        }
     }), false);
-};
+}
 
 function editUser(req, res, dm) {
     var defaultObj = {
@@ -704,7 +713,7 @@ function editUser(req, res, dm) {
             }
         }));
     };
-};
+}
 
 function editUsers(req, res, dm) {
     var defaultObj = {
@@ -774,7 +783,7 @@ function editUsers(req, res, dm) {
             return next();
         }));
     };
-};
+}
 
 function getReset(req, res, dm) {
     var resetObj = {};
@@ -822,12 +831,9 @@ function getReset(req, res, dm) {
         }
     }
     setReset(resetObj, dm.intercept(function () {
-        return res.sendjson(resJson(null, {
-            name: 'success',
-            message: jsGen.lib.msg.requestSent
-        }));
+        return res.sendjson(resJson());
     }));
-};
+}
 
 function resetUser(req, res, dm) {
     var body = {};
@@ -879,7 +885,7 @@ function resetUser(req, res, dm) {
             throw jsGen.Err(jsGen.lib.msg.resetOutdate);
         }
     }));
-};
+}
 
 function getArticles(req, res, dm) {
     var list, key,
@@ -920,11 +926,11 @@ function getArticles(req, res, dm) {
     }
 
     function getPagination() {
-        pagination(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
+        paginationList(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
             return res.sendjson(resJson(null, data, pagination));
         }));
     };
-};
+}
 
 function getUsersList(req, res, dm) {
     var list,
@@ -942,7 +948,7 @@ function getUsersList(req, res, dm) {
         } else {
             throw jsGen.Err(jsGen.lib.msg.requestDataErr);
         }
-        pagination(req, list, userCache, dm.intercept(function (data, pagination) {
+        paginationList(req, list, userCache, dm.intercept(function (data, pagination) {
             for (var i = data.length - 1; i >= 0; i--) {
                 var userID = data[i]._id;
                 data[i] = intersect(union(UserPublicTpl), data[i]);
@@ -951,7 +957,7 @@ function getUsersList(req, res, dm) {
             return res.sendjson(resJson(null, data, pagination));
         }));
     }), false);
-};
+}
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
@@ -974,7 +980,7 @@ function getFn(req, res, dm) {
     default:
         return getUser(req, res, dm);
     }
-};
+}
 
 function postFn(req, res, dm) {
     switch (req.path[2]) {
@@ -992,7 +998,7 @@ function postFn(req, res, dm) {
     default:
         return setUser(req, res, dm);
     }
-};
+}
 
 module.exports = {
     GET: getFn,

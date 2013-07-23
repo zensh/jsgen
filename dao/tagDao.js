@@ -1,3 +1,6 @@
+'use strict';
+/*global require, module, Buffer, jsGen*/
+
 /*
     convertID(id);
     getTagsNum(callback);
@@ -17,19 +20,19 @@ var that = jsGen.dao.db.bind('tags', {
 
     convertID: function (id) {
         switch (typeof id) {
-            case 'string':
-                id = id.substring(1);
-                id = jsGen.lib.converter(id, 62, IDString);
-                return id;
-            case 'number':
-                id = jsGen.lib.converter(id, 62, IDString);
-                while (id.length < 3) {
-                    id = '0' + id;
-                }
-                id = 'T' + id;
-                return id;
-            default:
-                return null;
+        case 'string':
+            id = id.substring(1);
+            id = jsGen.lib.converter(id, 62, IDString);
+            return id;
+        case 'number':
+            id = jsGen.lib.converter(id, 62, IDString);
+            while (id.length < 3) {
+                id = '0' + id;
+            }
+            id = 'T' + id;
+            return id;
+        default:
+            return null;
         }
     },
 
@@ -91,11 +94,11 @@ var that = jsGen.dao.db.bind('tags', {
 
     setTag: function (tagObj, callback) {
         var setObj = {},
-        newObj = {
-            tag: '',
-            articlesList: 0,
-            usersList: 0
-        };
+            newObj = {
+                tag: '',
+                articlesList: 0,
+                usersList: 0
+            };
 
         newObj = intersect(newObj, tagObj);
         if (newObj.tag) {

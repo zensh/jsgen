@@ -826,10 +826,9 @@ ol.inner {
   border-width: 0 5px 5px;
 }
 
-.invalid-error,
 input.invalid-error,
 textarea.invalid-error {
-    border: 1px solid #ff0000;
+    border-color: #ff0000;
     background-color: #ffeeee;
 }
 .validate-tooltip.top .tooltip-arrow {

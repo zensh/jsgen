@@ -18,19 +18,19 @@
     <div class="pure-u-1-2">
         <div class="panel transparent">
             <div class="page-header inner">
-                <span class="warning">{{header}}</span>
+                <span class="warning">{{reset.title}}</span>
             </div>
-            <form class="pure-form pure-form-aligned inner" name="reset">
+            <form class="pure-form pure-form-aligned inner" novalidate>
                 <div class="pure-control-group">
-                    <label for="user-name">用户名/Uid：</label>
-                    <input id="user-name" type="text" placeholder="name or Uid" name="用户名/Uid" ng-model="name" required/>
+                    <label>用户名/Uid：</label>
+                    <input type="text" placeholder="name or Uid" name="用户名/Uid" ng-model="reset.name" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-control-group">
-                    <label for="user-email">邮箱：</label>
-                    <input id="user-email" type="email" placeholder="email" name="邮箱" ng-model="email" required/>
+                    <label>邮箱：</label>
+                    <input type="email" placeholder="email" name="邮箱" ng-model="reset.email" gen-tooltip="validateTooltip" required/>
                 </div>
                 <div class="pure-controls">
-                    <button class="pure-button warning-bg" ng-disabled="reset.$error.required" ng-click="submit()">提&nbsp;&nbsp;交</button>
+                    <button class="pure-button warning-bg" ng-click="submit()">提交</button>
                 </div>
             </form>
         </div>
