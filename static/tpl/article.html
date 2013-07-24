@@ -89,7 +89,7 @@
             <ul class="media-list comments">
                 <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in article.commentsList">
                   <a class="media-object left" ng-href="{{'/'+comment.author._id}}">
-                    <img class="img-small" ng-src="{{comment.author.avatar}}" src="/static/img/avatar.png">
+                    <img class="img-small" ng-src="{{comment.author.avatar||'/static/img/avatar.png'}}">
                   </a>
                   <div class="media-body" id="{{comment._id}}">
                     <header class="media-heading">
@@ -121,7 +121,7 @@
             <ul id="refer-comments" class="media-list comments">
                 <li class="media" ng-repeat="comment in referComments">
                   <a class="media-object left" ng-href="{{'/'+comment.author._id}}">
-                      <img class="img-small" ng-src="{{comment.author.avatar}}" src="/static/img/avatar.png">
+                      <img class="img-small" ng-src="{{comment.author.avatar||'/static/img/avatar.png'}}">
                   </a>
                   <div class="media-body">
                     <header class="media-heading">
@@ -152,7 +152,7 @@
             <header class="panel-heading">作者信息</header>
             <div class="media inner">
                 <a class="media-object left" ng-href="{{'/'+article.author._id}}">
-                    <img class="img-small" ng-src="{{article.author.avatar}}">
+                    <img class="img-small" ng-src="{{article.author.avatar||'/static/img/avatar.png'}}">
                 </a>
                 <div class="media-body">
                     <header class="media-header"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></header>

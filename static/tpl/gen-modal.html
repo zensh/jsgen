@@ -1,12 +1,16 @@
-<div class="modal hide fade" id="{{id}}">
-    <div class="modal-header" ng-show="title">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>{{title}}</h3>
-    </div>
-    <div class="modal-body" ng-transclude></div>
-    <div class="modal-footer" ng-show="confirmBtn || cancelBtn || deleteBtn">
-        <button type="button" class="btn btn-warning pull-left" ng-show="deleteBtn" ng-click="deleteCb()">{{deleteBtn}}</button>
-        <button type="button" class="btn btn-primary" ng-show="confirmBtn" ng-click="confirmCb()">{{confirmBtn}}</button>
-        <button type="button" class="btn" ng-show="cancelBtn" ng-click="cancelCb()">{{cancelBtn}}</button>
-    </div>
+<div class="pure-u modal fade" id="{{id}}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="title">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{title}}</h4>
+            </div>
+            <div class="modal-body" ng-transclude></div>
+            <div class="modal-footer" ng-show="confirmBtn || cancelBtn || deleteBtn">
+                <button type="button" class="pure-button warning-bg pull-left" ng-show="deleteBtn" ng-click="deleteCb()">{{deleteBtn}}</button>
+                <button type="button" class="pure-button primary-bg" ng-show="confirmBtn" ng-click="confirmCb()">{{confirmBtn}}</button>
+                <button type="button" class="pure-button" ng-show="cancelBtn" ng-click="cancelCb()">{{cancelBtn}}</button>
+            </div>
+        </div>
+    <div>
 </div>

@@ -6,7 +6,6 @@ constant('app', {
     version: jsGenVersion // 注册内部全局变量app
 }).provider('getFile', ['app',
     function (app) {
-        var self = this;
         this.html = function (fileName) {
             return '/static/tpl/' + fileName + '?v=' + (app.version || '');
         };
@@ -15,8 +14,8 @@ constant('app', {
         };
         this.$get = function () {
             return {
-                html: self.html,
-                md: self.md
+                html: this.html,
+                md: this.md
             };
         };
     }
@@ -78,12 +77,16 @@ constant('app', {
         when('/register', register).
         when('/reset', reset).
         when('/home', home).
+        when('/home/', home).
+        when('/home/:OP', home).
         when('/admin', admin).
         when('/add', edit).
         when('/tag', tag).
-        when('/user/:ID', user).
         when('/A:ID/edit', edit).
+        when('/user/U:ID', user).
+        when('/user/U:ID/:OP', user).
         when('/U:ID', user).
+        when('/U:ID/:OP', user).
         when('/A:ID', article).
         when('/C:ID', collection).
         otherwise({

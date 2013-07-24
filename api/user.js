@@ -12,6 +12,7 @@ var UserPublicTpl = jsGen.lib.json.UserPublicTpl,
     SHA256 = jsGen.lib.tools.SHA256,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256,
     HmacMD5 = jsGen.lib.tools.HmacMD5,
+    isJSON = jsGen.lib.tools.isJSON,
     gravatar = jsGen.lib.tools.gravatar,
     userCache = jsGen.cache.user,
     filterSummary = jsGen.lib.tools.filterSummary,
@@ -357,7 +358,7 @@ function register(req, res, dm) {
 function setReset(resetObj, callback) {
     // var resetObj = {
     //     u: 'Uxxxxx'
-    //     r: 'request= role/locked/email/passwd',
+    //     r: 'role|locked|email|passwd',
     //     e: 'email',
     //     k: 'resetKey'
     // };
@@ -373,7 +374,7 @@ function setReset(resetObj, callback) {
         } else {
             resetObj.k = HmacMD5(HmacMD5(userObj.resetKey, resetObj.r), resetObj.u + '', 'base64');
             var resetUrl = new Buffer(JSON.stringify(resetObj)).toString('base64');
-            resetUrl = jsGen.config.url + '/api/user/reset/' + resetUrl;
+            resetUrl = jsGen.config.url + '/reset?req=' + resetUrl;
             var email = resetObj.e || doc.email;
             return jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(callback);
         }
@@ -422,7 +423,7 @@ function addUsers(req, res, dm) {
 function getUser(req, res, dm) {
     var userID, Uid = decodeURI(req.path[2]);
     if (checkUserID(Uid)) {
-        userID = Uid
+        userID = Uid;
         Uid = jsGen.dao.user.convertID(userID);
         if (!cache[Uid]) {
             throw jsGen.Err(jsGen.lib.msg.UidNone);
@@ -464,18 +465,16 @@ function getUser(req, res, dm) {
             } else {
                 cache = jsGen.cache.list;
             }
-            paginationList(req, list, cache, dm.intercept(function (data) {
-                if (p === 1 && req.path[3] === 'index' || !req.path[3]) {
-                    userCache.getP(Uid, dm.intercept(function (user) {
-                        data.user = intersect(union(UserPublicTpl), user);
-                        data.user._id = userID;
-                        return res.sendjson(resJson(null, data));
+            paginationList(req, list, cache, dm.intercept(function (data, pagination) {
+                userCache.getP(Uid, dm.intercept(function (user) {
+                    user = intersect(union(UserPublicTpl), user);
+                    user._id = userID;
+                    return res.sendjson(resJson(null, data, pagination, {
+                        user: user
                     }));
-                } else {
-                    return res.sendjson(resJson(null, data));
-                }
+                }));
             }));
-        };
+        }
     }), false);
 }
 
@@ -607,9 +606,9 @@ function getUserInfo(req, res, dm) {
         }
 
         function getPagination() {
-            paginationList(req, list, jsGen.cache.list, dm.intercept(function (doc) {
-                var now = Date.now();
-                doc.readtimestamp = user.readtimestamp;
+            paginationList(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
+                var now = Date.now(),
+                    readtimestamp = user.readtimestamp;
                 if (p === 1) {
                     jsGen.dao.user.setUserInfo({
                         _id: req.session.Uid,
@@ -619,13 +618,10 @@ function getUserInfo(req, res, dm) {
                         value.readtimestamp = now;
                         return value;
                     });
-                    userCache.getP(req.session.Uid, dm.intercept(function (user) {
-                        doc.user = user;
-                        return res.sendjson(resJson(null, doc));
-                    }));
-                } else {
-                    return res.sendjson(resJson(null, doc));
                 }
+                return res.sendjson(resJson(null, data, pagination, {
+                    readtimestamp: readtimestamp
+                }));
             }));
         }
     }), false);
@@ -815,7 +811,7 @@ function getReset(req, res, dm) {
         if (checkUserID(req.apibody.name)) {
             var user = cache[jsGen.dao.user.convertID(req.apibody.name)];
             if (!user) {
-                throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+                throw jsGen.Err(jsGen.lib.msg.UidNone);
             }
             resetObj.u = user._id;
             resetObj.e = user.email;
@@ -824,10 +820,10 @@ function getReset(req, res, dm) {
             resetObj.u = user._id;
             resetObj.e = user.email;
         } else {
-            throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+            throw jsGen.Err(jsGen.lib.msg.userNameNone);
         }
         if (req.apibody.email.toLowerCase() !== resetObj.e) {
-            throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+            throw jsGen.Err(jsGen.lib.msg.userEmailNotMatch);
         }
     }
     setReset(resetObj, dm.intercept(function () {
@@ -839,7 +835,13 @@ function resetUser(req, res, dm) {
     var body = {};
     var Uid = null;
 
-    var reset = JSON.parse(new Buffer(req.path[3], 'base64').toString());
+    if (typeof reset !== 'object' || !reset.u || !reset.r || !reset.k) {
+        throw jsGen.Err(jsGen.lib.msg.resetInvalid);
+    }
+    var reset = new Buffer(req.path[3], 'base64').toString();
+    if (isJSON(reset)) {
+        reset = JSON.parse(reset);
+    }
     if (typeof reset !== 'object' || !reset.u || !reset.r || !reset.k) {
         throw jsGen.Err(jsGen.lib.msg.resetInvalid);
     }
@@ -851,7 +853,7 @@ function resetUser(req, res, dm) {
         var userObj = {};
         userObj._id = Uid;
         if (doc && doc.resetKey && (Date.now() - doc.resetDate) / 86400000 < 1) {
-            if (HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.u, 'base64') === reset.k) {
+            if (HmacMD5(HmacMD5(doc.resetKey, reset.r), reset.u + '', 'base64') === reset.k) {
                 switch (reset.r) {
                 case 'locked':
                     userObj.locked = false;
@@ -876,7 +878,7 @@ function resetUser(req, res, dm) {
                         req.session.Uid = user._id;
                         req.session.role = user.role;
                     }
-                    return res.redirect('/');
+                    return res.sendjson(resJson());
                 }));
             } else {
                 throw jsGen.Err(jsGen.lib.msg.resetInvalid);

@@ -11,14 +11,17 @@ factory('tools', function () {
                 Date.now = Date.now || function () {
                     return new Date().getTime();
                 };
+                var breaker = {};
 
                 this.intersect = intersect;
                 this.checkType = checkType;
                 this.isArray = isArray;
                 this.isEmpty = isEmpty;
                 this.hasOwn = hasOwn;
+                this.filter = filter;
                 this.union = union;
                 this.each = each;
+                this.some = some;
                 return this;
 
                 function isArray(obj) {
@@ -39,25 +42,70 @@ factory('tools', function () {
                 }
 
                 function each(obj, iterator, context, right) {
+                    iterator = iterator || angular.noop;
                     if (!obj) {
                         return;
                     } else if (obj.length === +obj.length) {
                         var i, l;
                         if (!right) {
                             for (i = 0, l = obj.length; i < l; i++) {
-                                iterator.call(context, obj[i], i, obj);
+                                if (iterator.call(context, obj[i], i, obj) === breaker) {
+                                    return;
+                                }
                             }
                         } else {
                             for (i = obj.length - 1; i >= 0; i--) {
-                                iterator.call(context, obj[i], i, obj);
+                                if (iterator.call(context, obj[i], i, obj) === breaker) {
+                                    return;
+                                }
                             }
                         }
                     } else {
                         for (var key in obj) {
                             if (hasOwn(obj, key)) {
-                                iterator.call(context, obj[key], key, obj);
+                                if (iterator.call(context, obj[key], key, obj) === breaker) {
+                                    return;
+                                }
                             }
                         }
+                    }
+                }
+
+                function some(obj, iterator, context) {
+                    var result = false,
+                        nativeSome = Array.prototype.some;
+
+                    iterator = iterator || angular.noop;
+                    if (!obj) {
+                        return result;
+                    } else if (nativeSome && obj.some === nativeSome) {
+                        return obj.some(iterator, context);
+                    } else {
+                        each(obj, function (value, index, list) {
+                            if (result || (result = iterator.call(context, value, index, list))) {
+                                return breaker;
+                            }
+                        });
+                        return !!result;
+                    }
+                }
+
+                function filter(obj, iterator, context) {
+                    var result = [],
+                        nativeFilter = Array.prototype.filter;
+
+                    iterator = iterator || angular.noop;
+                    if (!obj) {
+                        return result;
+                    } else if (nativeFilter && obj.filter === nativeFilter) {
+                        return obj.filter(iterator, context);
+                    } else {
+                        each(obj, function (value, index, list) {
+                            if (iterator.call(context, value, index, list)) {
+                                result.push(value);
+                            }
+                        });
+                        return result;
                     }
                 }
 

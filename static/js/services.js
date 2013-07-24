@@ -13,15 +13,14 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             delay = parseInt(delay, 10);
             times = parseInt(times, 10);
             times = times >= 0 ? times : 0;
-            timingId = setInterval(function () {
+            timingId = window.setInterval(function () {
                 count += 1;
-                promise.$count = count;
                 if (times && count >= times) {
-                    clearInterval(timingId);
-                    defer.resolve(fn());
+                    window.clearInterval(timingId);
+                    defer.resolve(fn(count, times, delay));
                 } else {
                     try {
-                        fn();
+                        fn(count, times, delay);
                     } catch (e) {
                         defer.reject(e);
                         $exceptionHandler(e);
@@ -53,7 +52,6 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
         angular.forEach(methods, function (x) {
             toast[x] = function (message, title) {
                 var log = $log[x] || $log.log;
-                title = title + '';
                 log(message, title);
                 message = angular.isObject(message) ? angular.toJson(message) : message;
                 toastr[x](message, title);
@@ -123,13 +121,13 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     function ($cacheFactory) {
         return {
             user: $cacheFactory('user', {
-                capacity: 50
+                capacity: 20
             }),
             article: $cacheFactory('article', {
                 capacity: 100
             }),
             list: $cacheFactory('list', {
-                capacity: 10
+                capacity: 100
             })
         };
     }
@@ -174,42 +172,6 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
                 });
             }
             return defer.promise;
-        };
-    }
-]).factory('getArticle', ['restAPI', 'cache',
-    function (restAPI, cache) {
-        return function (ID, callback) {
-            var article = cache.article.get(ID);
-            if (article) {
-                return callback(article);
-            } else {
-                article = restAPI.article.get({
-                    ID: ID
-                }, function () {
-                    if (!article.err) {
-                        cache.article.put(ID, article);
-                    }
-                    return callback(article);
-                });
-            }
-        };
-    }
-]).factory('getUser', ['restAPI', 'cache',
-    function (restAPI, cache) {
-        return function (Uid, callback) {
-            var user = cache.user.get(Uid);
-            if (user) {
-                return callback(user);
-            } else {
-                user = restAPI.user.get({
-                    Uid: Uid
-                }, function () {
-                    if (!user.err) {
-                        cache.user.put(Uid, user);
-                    }
-                    return callback(user);
-                });
-            }
         };
     }
 ]).factory('getList', ['restAPI', 'cache', 'promiseGet',

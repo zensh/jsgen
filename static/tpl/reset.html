@@ -15,10 +15,10 @@
             </div>
         </div>
     </div>
-    <div class="pure-u-1-2">
+    <div class="pure-u-1-2" ng-show="parent.title">
         <div class="panel transparent">
             <div class="page-header inner">
-                <span class="warning">{{reset.title}}</span>
+                <strong class="warning">{{parent.title}}</strong>
             </div>
             <form class="pure-form pure-form-aligned inner" novalidate>
                 <div class="pure-control-group">
@@ -35,4 +35,5 @@
             </form>
         </div>
     </div>
+    <div gen-modal-msg="timingModal">{{parent.timing}}秒钟后自动返回首页</div>
 </div>

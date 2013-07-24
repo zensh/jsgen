@@ -87,6 +87,7 @@ small {
 }
 
 .panel {
+    position: relative;
     padding: 10px 0;
     margin: 15px 10px 0;
     background-color: #ffffff;
@@ -476,13 +477,17 @@ small {
 }
 .img-mini {
     height: 40px;
+    width: 40px;
     margin: 5px;
     border-radius: 5px;
 }
 .img-small {
     height: 80px;
+    width: 80px;
 }
-.muted {
+.muted,
+.muted a,
+.muted .list-content {
     color: #888;
 }
 .transparent {
@@ -548,9 +553,10 @@ ol.inner {
 }
 .page-header {
     padding-bottom: 10px;
-    margin: 30px 0 15px;
+    margin: 5px 0 15px;
     border-bottom: 1px solid #eeeeee;
     font-size: 1.2em;
+    min-height: 30px;
 }
 
 .article-header {
@@ -861,16 +867,12 @@ textarea.invalid-error {
   z-index: 1040;
   display: none;
   overflow: auto;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
 }
 
 .modal.fade {
   top: -25%;
-  -webkit-transition: opacity 0.3s linear, top 0.3s ease-out;
-     -moz-transition: opacity 0.3s linear, top 0.3s ease-out;
-       -o-transition: opacity 0.3s linear, top 0.3s ease-out;
-          transition: opacity 0.3s linear, top 0.3s ease-out;
+  -webkit-transition: opacity 0.25s linear, top 0.25s ease-out;
+          transition: opacity 0.25s linear, top 0.25s ease-out;
 }
 
 .modal.fade.in {
@@ -896,9 +898,7 @@ textarea.invalid-error {
   outline: none;
   -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
           box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
-  -webkit-background-clip: padding-box;
-     -moz-background-clip: padding-box;
-          background-clip: padding-box;
+  background-clip: padding-box;
 }
 
 .modal-backdrop {
@@ -999,6 +999,7 @@ textarea.invalid-error {
 .list-model {
     padding-left: .8em;
     padding-right: .8em;
+    font-size: 16px;
 }
 
 .loading {
@@ -1010,6 +1011,10 @@ textarea.invalid-error {
     height: 54px;
     margin: -27px 0 0 -25px;
     background: url(../img/loading.gif) no-repeat center center;
+}
+
+.pure-form-aligned .pure-controls-group {
+    margin: 0 0 0.5em 10em;
 }
 
 @-webkit-keyframes fadeInDown {
@@ -1061,10 +1066,10 @@ textarea.invalid-error {
 }
 
 .fadeInDown {
-  -webkit-animation: fadeInDown 0.3s linear;
-  -moz-animation: fadeInDown 0.3s linear;
-  -o-animation: fadeInDown 0.3s linear;
-  animation: fadeInDown 0.3s linear;
+  -webkit-animation: fadeInDown 0.25s linear;
+  -moz-animation: fadeInDown 0.25s linear;
+  -o-animation: fadeInDown 0.25s linear;
+  animation: fadeInDown 0.25s linear;
 }
 
 @-webkit-keyframes fadeOutDown {
@@ -1116,10 +1121,10 @@ textarea.invalid-error {
 }
 
 .fadeOutDown {
-  -webkit-animation: fadeOutDown 0.3s linear;
-  -moz-animation: fadeOutDown 0.3s linear;
-  -o-animation: fadeOutDown 0.3s linear;
-  animation: fadeOutDown 0.3s linear;
+  -webkit-animation: fadeOutDown 0.25s linear;
+  -moz-animation: fadeOutDown 0.25s linear;
+  -o-animation: fadeOutDown 0.25s linear;
+  animation: fadeOutDown 0.25s linear;
 }
 
 @-webkit-keyframes fadeIn {
@@ -1143,10 +1148,10 @@ textarea.invalid-error {
 }
 
 .fadeIn {
-  -webkit-animation: fadeIn 0.3s linear;
-  -moz-animation: fadeIn 0.3s linear;
-  -o-animation: fadeIn 0.3s linear;
-  animation: fadeIn 0.3s linear;
+  -webkit-animation: fadeIn 0.25s linear;
+  -moz-animation: fadeIn 0.25s linear;
+  -o-animation: fadeIn 0.25s linear;
+  animation: fadeIn 0.25s linear;
 }
 
 @-webkit-keyframes fadeOut {
@@ -1170,8 +1175,8 @@ textarea.invalid-error {
 }
 
 .fadeOut {
-  -webkit-animation: fadeOut 0.3s linear;
-  -moz-animation: fadeOut 0.3s linear;
-  -o-animation: fadeOut 0.3s linear;
-  animation: fadeOut 0.3s linear;
+  -webkit-animation: fadeOut 0.25s linear;
+  -moz-animation: fadeOut 0.25s linear;
+  -o-animation: fadeOut 0.25s linear;
+  animation: fadeOut 0.25s linear;
 }

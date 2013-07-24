@@ -1,6 +1,6 @@
 <div class="pure-g-r wrap">
     <div class="pure-u-3-4">
-        <div class="panel" ng-include src="getTpl">
+        <div class="panel" ng-include src="parent.getTpl">
         </div>
     </div>
     <div class="pure-u-1-4 aside">
@@ -11,7 +11,7 @@
                 </a>
                 <div class="media-body">
                     <header class="media-header"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></header>
-                    <button ng-show="!isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | follow}}</button>
+                    <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | follow}}</button>
                 </div>
             </div>
             <ul class="inner list-inline article-info">
@@ -56,32 +56,35 @@
             </dl>
         </div>
         <div class="panel pure-menu pure-menu-open">
-            <ul class="text-center" ng-show="isMe">
-                <li ng-class="{active: path=='follow'}">
-                    <a href="/user/follow"><i class="icon-chevron-left left"></i>我的关注</a>
+            <ul class="text-center" ng-show="parent.isMe">
+                <li ng-class="{active: parent.viewPath=='index'}">
+                    <a href="/home"><i class="icon-chevron-left left"></i>我的主页</a>
                 </li>
-                <li ng-class="{active: path=='fans'}">
-                    <a href="/user/fans"><i class="icon-chevron-left left"></i>我的粉丝</a>
+                <li ng-class="{active: parent.viewPath=='follow'}">
+                    <a href="/home/follow"><i class="icon-chevron-left left"></i>我的关注</a>
                 </li>
-                <li ng-class="{active: path=='mark'}">
-                    <a href="/user/mark"><i class="icon-chevron-left left"></i>我的收藏</a>
+                <li ng-class="{active: parent.viewPath=='fans'}">
+                    <a href="/home/fans"><i class="icon-chevron-left left"></i>我的粉丝</a>
                 </li>
-                <li ng-class="{active: path=='article'}">
-                    <a href="/user/article"><i class="icon-chevron-left left"></i>我的文章</a>
+                <li ng-class="{active: parent.viewPath=='mark'}">
+                    <a href="/home/mark"><i class="icon-chevron-left left"></i>我的收藏</a>
                 </li>
-                <li ng-class="{active: path=='comment'}">
-                    <a href="/user/comment"><i class="icon-chevron-left left"></i>我的评论</a>
+                <li ng-class="{active: parent.viewPath=='article'}">
+                    <a href="/home/article"><i class="icon-chevron-left left"></i>我的文章</a>
                 </li>
-                <li ng-class="{active: path=='info'}">
-                    <a href="/user/info"><i class="icon-chevron-left left"></i>用户设置</a>
+                <li ng-class="{active: parent.viewPath=='comment'}">
+                    <a href="/home/comment"><i class="icon-chevron-left left"></i>我的评论</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='detail'}">
+                    <a href="/home/detail"><i class="icon-chevron-left left"></i>用户设置</a>
                 </li>
             </ul>
-            <ul class="text-center" ng-hide="isMe">
-                <li ng-class="{active: path=='article'}">
-                    <a href="/user/article"><i class="icon-chevron-left left"></i>{{user.name}}的文章</a>
+            <ul class="text-center" ng-hide="parent.isMe">
+                <li ng-class="{active: parent.viewPath=='article'}">
+                    <a ng-href="/{{user._id}}/article"><i class="icon-chevron-left left"></i>{{user.name}}的文章</a>
                 </li>
-                <li ng-class="{active: path=='fans'}">
-                    <a href="/user/fans"><i class="icon-chevron-left left"></i>{{user.name}}的粉丝</a>
+                <li ng-class="{active: parent.viewPath=='fans'}">
+                    <a ng-href="/{{user._id}}/fans"><i class="icon-chevron-left left"></i>{{user.name}}的粉丝</a>
                 </li>
             </ul>
         </div>

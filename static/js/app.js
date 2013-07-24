@@ -69,9 +69,9 @@ config(['$httpProvider', 'app',
         });
     }
 ]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'getArticle', 'getUser', 'getList', 'getMarkdown',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf',
     function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
-        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, getArticle, getUser, getList, getMarkdown) {
+        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf) {
 
         window.app = app; // for test
         tools(app); //添加jsGen系列工具函数
@@ -83,7 +83,7 @@ config(['$httpProvider', 'app',
         app.timeout = $timeout;
         app.timeOffset = 0;
         app.timestamp = Date.now() + 0;
-        app.filter = $filter;
+        app.ngFilter = $filter;
         app.locale = $locale;
         app.anchorScroll = $anchorScroll;
         app.getFile = getFile;
@@ -95,12 +95,7 @@ config(['$httpProvider', 'app',
         app.CryptoJS = CryptoJS;
         app.promiseGet = promiseGet;
         app.myConf = myConf;
-        app.getArticle = getArticle;
-        app.getUser = getUser;
-        app.getList = getList;
-        app.getMarkdown = getMarkdown;
         app.rootScope = $rootScope;
-        app.timer = null;
 
         app.loading = function (value, status) {
             // $rootScope.loading = status;
@@ -112,9 +107,9 @@ config(['$httpProvider', 'app',
         app.validate = function (scope, turnoff, whiteList) {
             var collect = [],
                 error;
-            whiteList = _.isArray(whiteList) ? whiteList : [];
+            whiteList = app.isArray(whiteList) ? whiteList : [];
             scope.$broadcast('genTooltipValidate', collect, turnoff);
-            error = _.filter(collect, function (value) {
+            error = app.filter(collect, function (value) {
                 return value.validate && value.$invalid && whiteList.indexOf(value.$name) < 0;
             });
             if (error.length === 0) {
@@ -126,11 +121,17 @@ config(['$httpProvider', 'app',
             return !app.validate.errorList;
         };
         app.checkDirty = function (tplObj, pristineObj, Obj) {
+            var data = app.union(tplObj);
             if (Obj) {
-                var data = app.union(tplObj);
                 app.intersect(data, Obj);
-                $rootScope.stopUnload = !angular.equals(data, pristineObj);
+                app.each(data, function (x, key, list) {
+                    if (angular.equals(x, pristineObj[key])) {
+                        delete list[key];
+                    }
+                });
+                $rootScope.stopUnload = !app.isEmpty(data);
             }
+            return data;
         };
         app.checkUser = function () {
             var global = $rootScope.global;
@@ -145,9 +146,13 @@ config(['$httpProvider', 'app',
         app.checkFollow = function (user) {
             var me = $rootScope.global.user || {};
             user.isMe = user._id === me._id;
-            user.isFollow = !user.isMe && _.some(me.followList, function (x) {
+            user.isFollow = !user.isMe && app.some(me.followList, function (x) {
                 return x === user._id;
             });
+        };
+        app.checkAuthor = function (article) {
+            var me = $rootScope.global.user || {};
+            article.isAuthor = article.author._id === me._id;
         };
 
         $rootScope.loading = {
@@ -160,20 +165,35 @@ config(['$httpProvider', 'app',
         };
         $rootScope.validateTooltip = {
             validate: true,
-            validateMsg: {
-                required: '必填！',
-                minlength: '太短！',
-                maxlenght: '太长！',
-                min: '太小！',
-                max: '太大！',
-                email: 'Email无效！',
-                pattern: '格式无效！',
-                username: '有效字符为汉字、字母、数字、下划线，以汉字或小写字母开头！',
-                minname: '长度应大于5字节，一个汉字3字节！',
-                maxname: '长度应小于15字节，一个汉字3字节！',
-                repasswd: '密码不一致！'
-            }
+            validateMsg: $locale.VALIDATE
         };
+
+        $rootScope.stopUnload = false;
+        $rootScope.unSaveModal = {
+            confirmBtn: $locale.BTN_TEXT.confirm,
+            confirmFn: function () {
+                $rootScope.$emit('loadNext');
+                return true;
+            },
+            cancelBtn: $locale.BTN_TEXT.cancel,
+            cancelFn: true
+        };
+        $rootScope.$on('$locationChangeStart', function (event, next, current) {
+            if ($rootScope.stopUnload) {
+                event.preventDefault();
+                $rootScope.nextUrl = next;
+                $rootScope.unSaveModal.modal(true);
+            } else {
+                $rootScope.nextUrl = '';
+            }
+        });
+        $rootScope.$on('loadNext', function (event) {
+            event.preventDefault();
+            if ($rootScope.stopUnload && $rootScope.nextUrl) {
+                $rootScope.stopUnload = false;
+                window.location.href = $rootScope.nextUrl;
+            }
+        });
 
         $rootScope.goBack = function () {
             window.history.go(-1);
@@ -196,17 +216,17 @@ config(['$httpProvider', 'app',
             }, function (data) {
                 if (data.follow) {
                     $rootScope.global.user.followList.push(user._id);
+                    app.toast.success($locale.USER.followed + user.name, $locale.RESPONSE.success);
                 } else {
-                    _.some($rootScope.global.user.followList, function (x, i, list) {
+                    app.some($rootScope.global.user.followList, function (x, i, list) {
                         if (x === user._id) {
                             list.splice(i, 1);
+                            app.toast.success($locale.USER.unfollowed + user.name, $locale.RESPONSE.success);
                             return true;
                         }
                     });
                 }
-                if (user.fans) {
-                    user.fans += user.isFollow ? -1 : 1;
-                }
+                user.fans += user.isFollow ? -1 : 1;
                 user.isFollow = !user.isFollow;
             });
         };

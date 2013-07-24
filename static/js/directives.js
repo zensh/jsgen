@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _*/
+/*global angular*/
 
 angular.module('jsGen.directives', []).
 directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
@@ -62,7 +62,9 @@ directive('genPagination', ['getFile',
                     if (!angular.isObject(value)) {
                         return;
                     }
-                    var i = 0, pageIndex = 1, showPages = [],
+                    var i = 0,
+                        pageIndex = 1,
+                        showPages = [],
                         lastPage = Math.ceil(value.total / value.pageSize) || 1;
 
                     pageIndex = value.pageIndex >= 1 ? value.pageIndex : 1;
@@ -99,7 +101,7 @@ directive('genPagination', ['getFile',
                     scope.showPages = showPages;
                     scope.pageSize = value.pageSize;
                     scope.perPages = value.sizePerPage || [];
-                    scope.locationPath = value.locationPath +'?p=';
+                    scope.locationPath = value.locationPath + '?p=';
                 }, true);
             }
         };
@@ -109,7 +111,7 @@ directive('genModalMsg', ['getFile',
     function (getFile) {
         //<div gen-modal-msg="msgModal">[body]</div>
         // scope.msgModal = {
-        //     id: 'msg-modal',    [required]
+        //     id: 'msg-modal',    [option]
         //     title: 'message title',    [option]
         //     confirmBtn: 'confirm button name',    [option]
         //     confirmFn: function () {},    [option]
@@ -138,6 +140,11 @@ directive('genModalMsg', ['getFile',
 
                 function showModal(value) {
                     modalElement.modal(value ? 'show' : 'hide');
+                    if (value) {
+                        var element = modalElement.children(),
+                            top = ($(window).height() - element.outerHeight()) * 0.382;
+                        element.css('top', top);
+                    }
                 }
 
                 angular.extend(scope, options);
@@ -195,7 +202,7 @@ directive('genTooltip', ['$timeout',
                         }
                         title = title.slice(0, -2) || attr.originalTitle || attr.title;
                         attr.$set('dataOriginalTitle', title ? title : '');
-                        showTooltip(!!invalid);
+                        showTooltip( !! invalid);
                     } else {
                         showTooltip(false);
                     }
