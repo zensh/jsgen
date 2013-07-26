@@ -44,22 +44,24 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
         };
         return timing;
     }
-]).factory('toast', ['$log',
-    function ($log) {
+]).factory('toast', ['$log', 'tools',
+    function ($log, tools) {
         var toast = {},
             methods = ['info', 'error', 'success', 'warning'];
 
         angular.forEach(methods, function (x) {
             toast[x] = function (message, title) {
                 var log = $log[x] || $log.log;
+                title = tools.toStr(title);
                 log(message, title);
-                message = angular.isObject(message) ? angular.toJson(message) : message;
+                message = angular.isObject(message) ? angular.toJson(message) : tools.toStr(message);
                 toastr[x](message, title);
             };
         });
         toastr.options = angular.extend({
             positionClass: 'toast-bottom-full-width'
         }, toast.options);
+        toast.clear = toastr.clear;
         return toast;
     }
 ]).factory('pretty', function () {
@@ -68,33 +70,37 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     return CryptoJS;
 }).factory('utf8', function () {
     return utf8;
-}).factory('mdParse', function () {
-    return function (html) {
-        return marked(html + '');
-    };
-}).factory('sanitize', function () {
-    var San = Sanitize,
-        config = San.Config,
-        sanitize = [
-            new San({}),
-            new San(config.RESTRICTED),
-            new San(config.BASIC),
-            new San(config.RELAXED)
-        ];
-    // level: 0, 1, 2, 3
-    return function (html, level) {
-        var create = document.createElement.bind(document),
-            innerDOM = create('div'),
-            outerDOM = create('div');
-        level = level ? level : 3;
-        innerDOM.innerHTML = html + '';
-        outerDOM.appendChild(sanitize[level].clean_node(innerDOM));
-        return outerDOM.innerHTML;
-    };
-}).factory('mdEditor', ['mdParse', 'sanitize', 'pretty',
-    function (mdParse, sanitize, pretty) {
+}).factory('mdParse', ['tools',
+    function (tools) {
+        return function (html) {
+            return marked(tools.toStr(html));
+        };
+    }
+]).factory('sanitize', ['tools',
+    function (tools) {
+        var San = Sanitize,
+            config = San.Config,
+            sanitize = [
+                new San({}),
+                new San(config.RESTRICTED),
+                new San(config.BASIC),
+                new San(config.RELAXED)
+            ];
+        // level: 0, 1, 2, 3
+        return function (html, level) {
+            var create = document.createElement.bind(document),
+                innerDOM = create('div'),
+                outerDOM = create('div');
+            level = level >= 0 ? level : 3;
+            innerDOM.innerHTML = tools.toStr(html);
+            outerDOM.appendChild(sanitize[level].clean_node(innerDOM));
+            return outerDOM.innerHTML;
+        };
+    }
+]).factory('mdEditor', ['mdParse', 'sanitize', 'pretty', 'tools',
+    function (mdParse, sanitize, pretty, tools) {
         return function (idPostfix, level) {
-            idPostfix = idPostfix ? idPostfix + '' : '';
+            idPostfix = tools.toStr(idPostfix);
             var editor = new Markdown.Editor({
                 makeHtml: function (text) {
                     return sanitize(mdParse(text), level);
@@ -125,6 +131,9 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             }),
             article: $cacheFactory('article', {
                 capacity: 100
+            }),
+            comment: $cacheFactory('comment', {
+                capacity: 500
             }),
             list: $cacheFactory('list', {
                 capacity: 100
@@ -183,21 +192,74 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             }, restAPI.article, listType, cache.list);
         };
     }
-]).factory('getMarkdown', ['$http',
-    function ($http) {
-        return function (callback) {
-            $http.get('/static/md/markdown.md', {
-                cache: true
-            }).success(function (data, status) {
-                var markdown = {};
-                if (!data.err) {
-                    markdown.title = 'Markdown简明语法';
-                    markdown.content = data;
-                } else {
-                    markdown.err = data.err;
-                }
-                return callback(markdown);
-            });
+]).factory('getArticle', ['restAPI', 'cache', 'promiseGet',
+    function (restAPI, cache, promiseGet) {
+        return function (ID) {
+            return promiseGet({
+                ID: ID
+            }, restAPI.article, ID, cache.article);
         };
     }
-]);
+]).factory('getUser', ['restAPI', 'cache', 'promiseGet',
+    function (restAPI, cache, promiseGet) {
+        return function (ID) {
+            return promiseGet({
+                ID: ID
+            }, restAPI.user, ID, cache.user);
+        };
+    }
+]).factory('getMarkdown', ['$http',
+    function ($http) {
+        return $http.get('/static/md/markdown.md', {
+            cache: true
+        });
+    }
+]).factory('anchorScroll',
+    function () {
+        function toView(element, top, height) {
+            var winHeight = $(window).height();
+
+            element = $(element);
+            height = height > 0 ? height : winHeight / 10;
+            $('html, body').animate({
+                scrollTop: top ? (element.offset().top - height) : (element.offset().top + element.outerHeight() + height - winHeight)
+            }, {
+                duration: 200,
+                easing: 'linear',
+                complete: function () {
+                    if (!inView(element)) {
+                        element[0].scrollIntoView( !! top);
+                    }
+                }
+            });
+        }
+
+        function inView(element) {
+            element = $(element);
+
+            var win = $(window),
+                winHeight = win.height(),
+                eleTop = element.offset().top,
+                eleHeight = element.outerHeight(),
+                viewTop = win.scrollTop(),
+                viewBottom = viewTop + winHeight;
+
+            function isInView(middle) {
+                return middle > viewTop && middle < viewBottom;
+            }
+
+            if (isInView(eleTop + (eleHeight > winHeight ? winHeight : eleHeight) / 2)) {
+                return true;
+            } else if (eleHeight > winHeight) {
+                return isInView(eleTop + eleHeight - winHeight / 2);
+            } else {
+                return false;
+            }
+        }
+
+        return {
+            toView: toView,
+            inView: inView
+        };
+    }
+);

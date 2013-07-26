@@ -11,18 +11,18 @@
                 </a>
                 <div class="media-body">
                     <header class="media-header"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></header>
-                    <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | follow}}</button>
+                    <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | switch:'follow'}}</button>
                 </div>
             </div>
             <ul class="inner list-inline article-info">
                 <li>
-                    <strong class="hot">{{user.role | role}}</strong>
+                    <strong class="hot">{{user.role | match:'role'}}</strong>
                 </li>
                 <li ng-show="user.email">
                     Email：<strong>{{user.email}}</strong>
                 </li>
                 <li ng-show="user.sex">
-                    性别：<strong>{{user.sex | sex}}</strong>
+                    性别：<strong>{{user.sex | match:'gender'}}</strong>
                 </li>
                 <li ng-show="user.score">
                     积分：<strong>{{user.score}}</strong>

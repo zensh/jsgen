@@ -436,10 +436,15 @@ function getUser(req, res, dm) {
     }
     userCache.getP(Uid, dm.intercept(function (user) {
         var list, key = 'Pub' + userID + req.path[3],
-            p = req.getparam.p || req.getparam.pageIndex || 1;
+            p = req.getparam.p || req.getparam.pageIndex || 1,
+            publicUser = intersect(union(UserPublicTpl), user);
+
         p = +p;
+        publicUser._id = userID;
         list = jsGen.cache.pagination.get(key);
-        if (!list || p === 1) {
+        if (!req.path[3] || req.path[3] === 'index') {
+            return res.sendjson(resJson(null, publicUser));
+        } else if (!list || p === 1) {
             if (req.path[3] === 'fans') {
                 list = user.fansList;
                 jsGen.cache.pagination.put(key, list);
@@ -466,12 +471,8 @@ function getUser(req, res, dm) {
                 cache = jsGen.cache.list;
             }
             paginationList(req, list, cache, dm.intercept(function (data, pagination) {
-                userCache.getP(Uid, dm.intercept(function (user) {
-                    user = intersect(union(UserPublicTpl), user);
-                    user._id = userID;
-                    return res.sendjson(resJson(null, data, pagination, {
-                        user: user
-                    }));
+                return res.sendjson(resJson(null, data, pagination, {
+                    user: publicUser
                 }));
             }));
         }

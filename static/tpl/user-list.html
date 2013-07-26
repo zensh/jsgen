@@ -10,18 +10,18 @@
           <div class="media-body" id="{{user._id}}">
             <header class="media-heading">
                 <div class="media-heading">
-                    <a ng-click="followMe(user)" class="pure-button pure-button-small success-bg right" ng-class="{'success-bg':!user.isFollow,'primary-bg':user.isFollow}" ng-hide="user.isMe">{{user.isFollow | follow}}</a>
+                    <a ng-click="followMe(user)" class="pure-button pure-button-small success-bg right" ng-class="{'success-bg':!user.isFollow,'primary-bg':user.isFollow}" ng-hide="user.isMe">{{user.isFollow | switch:'follow'}}</a>
                     <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                     <small class="muted">{{user.date | formatDate:true}}注册 / {{user.lastLoginDate | formatDate:true}}最后登录</small>
                     <ul class="inner list-inline article-info">
                         <li>
-                            <strong class="hot">{{user.role | role}}</strong>
+                            <strong class="hot">{{user.role | match:'role'}}</strong>
                         </li>
                         <li ng-show="user.email">
                             UID：<strong>{{user._id}}</strong>
                         </li>
                         <li ng-show="user.sex">
-                            性别：<strong>{{user.sex | sex}}</strong>
+                            性别：<strong>{{user.sex | match:'gender'}}</strong>
                         </li>
                         <li ng-show="user.score">
                             积分：<strong>{{user.score}}</strong>

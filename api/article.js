@@ -575,11 +575,8 @@ function getComments(req, res, dm) {
     var data = [],
         IDArray = req.apibody.data;
 
-    if (!IDArray) {
-        throw jsGen.Err(jsGen.lib.msg.requestDataErr);
-    }
     if (!Array.isArray(IDArray)) {
-        IDArray = [IDArray];
+        throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     }
     for (var i = 0, len = IDArray.length; i < len; i++) {
         if (checkID(IDArray[i], 'A')) {
@@ -605,7 +602,7 @@ function getComments(req, res, dm) {
         }
         commentCache.getP(ID, dm.intercept(function (doc) {
             if (doc) {
-                result.data.push(doc);
+                data.push(doc);
             }
             return next();
         }));

@@ -2,109 +2,41 @@
 /*global angular, _*/
 
 angular.module('jsGen.filters', []).
-filter('string', function () {
-    return function (value) {
-        return value === 0 ? '0' : (value && (value + '') || '');
-    };
-}).
-filter('role', function () {
-    return function (text) {
-        switch (text) {
-        case 5:
-            return '管理员';
-        case 4:
-            return '编辑';
-        case 3:
-            return '组员';
-        case 2:
-            return '会员';
-        case 1:
-            return '待验证';
-        case 0:
-            return '禁言';
-        default:
-            return text;
-        }
-    };
-}).
-filter('sex', function () {
-    return function (text) {
-        switch (text) {
-        case 'male':
-            return '男性';
-        case 'female':
-            return '女性';
-        default:
-            return text;
-        }
-    };
-}).
-filter('boolean', function () {
-    return function (text) {
-        if (text) {
-            return '开启';
-        } else {
-            return '关闭';
-        }
-    };
-}).
-filter('follow', function () {
-    return function (text) {
-        if (text) {
-            return '已关注';
-        } else {
-            return '关注';
-        }
-    };
-}).
-filter('favor', function () {
-    return function (text) {
-        if (text) {
-            return '已支持';
-        } else {
-            return '支持';
-        }
-    };
-}).
-filter('mark', function () {
-    return function (text) {
-        if (text) {
-            return '已标记';
-        } else {
-            return '标记';
-        }
-    };
-}).
-filter('oppose', function () {
-    return function (text) {
-        if (text) {
-            return '已反对';
-        } else {
-            return '反对';
-        }
-    };
-}).
-filter('checkName', ['$filter', function ($filter) {
-    return function (text) {
-        var reg = /^[(\u4e00-\u9fa5)a-z][(\u4e00-\u9fa5)a-zA-Z0-9_]{1,}$/;
-        text = $filter('string')(text);
-        return reg.test(text);
-    };
-}]).
-filter('length', ['$filter', 'utf8',
-    function ($filter, utf8) {
+filter('match', ['$locale',
+    function ($locale) {
+        return function (value, type) {
+            return $locale.FILTER[type] && $locale.FILTER[type][value] || '';
+        };
+    }
+]).
+filter('switch', ['$locale',
+    function ($locale) {
+        return function (value, type) {
+            return $locale.FILTER[type] && $locale.FILTER[type][+ !! value] || '';
+        };
+    }
+]).
+filter('checkName', ['tools',
+    function (tools) {
         return function (text) {
-            text = $filter('string')(text);
+            var reg = /^[(\u4e00-\u9fa5)a-z][(\u4e00-\u9fa5)a-zA-Z0-9_]{1,}$/;
+            text = tools.toStr(text);
+            return reg.test(text);
+        };
+    }
+]).
+filter('length', ['utf8', 'tools',
+    function (utf8, tools) {
+        return function (text) {
+            text = tools.toStr(text);
             return utf8.stringToBytes(text).length;
         };
     }
 ]).
-filter('cutText', ['utf8',
-    function (utf8) {
+filter('cutText', ['utf8', 'tools',
+    function (utf8, tools) {
         return function (text, len) {
-            if (typeof text !== 'string') {
-                return text;
-            }
+            text = tools.toStr(text);
             text = text.replace(/\s+/g, ' ');
             var bytes = utf8.stringToBytes(text);
             len = len || 0;
@@ -117,22 +49,23 @@ filter('cutText', ['utf8',
         };
     }
 ]).
-filter('formatDate', ['$filter',
-    function ($filter) {
+filter('formatDate', ['$filter', '$locale',
+    function ($filter, $locale) {
         return function (date, full) {
-            var o = Date.now() - date;
+            var o = Date.now() - date,
+                dateFilter = $filter('date');
             if (full) {
-                return $filter('date')(date, 'yyyy年MM月dd日 HH:mm');
+                return dateFilter(date, $locale.DATETIME.full);
             } else if (o > 259200000) {
-                return $filter('date')(date, 'MM-dd HH:mm');
+                return dateFilter(date, $locale.DATETIME.short);
             } else if (o > 86400000) {
-                return Math.floor(o / 86400000) + '天前';
+                return Math.floor(o / 86400000) + $locale.DATETIME.dayAgo;
             } else if (o > 3600000) {
-                return Math.floor(o / 3600000) + '小时前';
+                return Math.floor(o / 3600000) + $locale.DATETIME.hourAgo;
             } else if (o > 60000) {
-                return Math.floor(o / 60000) + '分钟前';
+                return Math.floor(o / 60000) + $locale.DATETIME.minuteAgo;
             } else {
-                return "刚刚";
+                return $locale.DATETIME.secondAgo;
             }
         };
     }

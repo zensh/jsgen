@@ -98,7 +98,7 @@
                             <li ng-show="isLogin" class="hidden-phone"><img ng-src="{{global.user.avatar}}" class="img-rounded"/></li>
                             <li class="dropdown" ng-show="isLogin">
                                 <a title="Uid:{{global.user._id}}" class="dropdown-toggle" data-toggle="dropdown">
-                                {{global.user.name}}[{{global.user.role | role}}] <b class="caret hidden-phone"></b>
+                                {{global.user.name}}[{{global.user.role | match:'role'}}] <b class="caret hidden-phone"></b>
                                 </a>
                                 <ul class="dropdown-menu hidden-phone">
                                     <li><a href="/add">发表文章</a></li>

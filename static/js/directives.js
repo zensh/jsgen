@@ -1,5 +1,5 @@
 'use strict';
-/*global angular*/
+/*global angular, $*/
 
 angular.module('jsGen.directives', []).
 directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
@@ -8,8 +8,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
         // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
         return function (scope, element, attr) {
             scope.$watch(attr.genParseMd, function (value) {
-                value = value + '';
-                if (value) {
+                if (value || value === 0) {
                     value = mdParse(value);
                     value = sanitize(value);
                     element.html(value);
@@ -26,8 +25,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             });
         };
     }
-]).
-directive('genTabClick', function () {
+]).directive('genTabClick', function () {
     //<ul>
     //<li gen-tab-click="className"></li>
     //<li gen-tab-click="className"></li>
@@ -42,13 +40,12 @@ directive('genTabClick', function () {
             });
         }
     };
-}).
-directive('genPagination', ['getFile',
+}).directive('genPagination', ['getFile',
     function (getFile) {
         // <div gen-pagination="options"></div>
         // HTML/CSS基于Bootstrap框架
         // options = {
-        //     locationPath: 'pathUrl',
+        //     path: 'pathUrl',
         //     sizePerPage: [25, 50, 100],
         //     pageSize: 25,
         //     pageIndex: 1,
@@ -95,24 +92,31 @@ directive('genPagination', ['getFile',
                         showPages.push(lastPage);
                     }
 
-                    scope.paginationPrev = pageIndex > 1 ? pageIndex - 1 : 0;
-                    scope.paginationNext = pageIndex < lastPage ? pageIndex + 1 : 0;
+                    scope.prev = pageIndex > 1 ? pageIndex - 1 : 0;
+                    scope.next = pageIndex < lastPage ? pageIndex + 1 : 0;
+                    scope.total = value.total;
                     scope.pageIndex = pageIndex;
                     scope.showPages = showPages;
                     scope.pageSize = value.pageSize;
-                    scope.perPages = value.sizePerPage || [];
-                    scope.locationPath = value.locationPath + '?p=';
+                    scope.perPages = value.sizePerPage || [10, 20, 50];
+                    scope.path = value.path && value.path + '?p=';
                 }, true);
+                scope.paginationTo = function (p, s) {
+                    if (!scope.path && p > 0) {
+                        s = s || scope.pageSize;
+                        scope.$emit('genPagination', p, s);
+                    }
+                };
             }
         };
     }
-]).
-directive('genModalMsg', ['getFile',
-    function (getFile) {
+]).directive('genModalMsg', ['getFile', '$timeout',
+    function (getFile, $timeout) {
         //<div gen-modal-msg="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
         //     title: 'message title',    [option]
+        //     width: 640,    [option]
         //     confirmBtn: 'confirm button name',    [option]
         //     confirmFn: function () {},    [option]
         //     cancelBtn: 'cancel button name',    [option]
@@ -129,26 +133,52 @@ directive('genModalMsg', ['getFile',
                 var modalStatus,
                     modalElement = element.children(),
                     list = ['Confirm', 'Cancel', 'Delete'],
-                    options = scope.$parent.$eval(attr.genModalMsg);
+                    options = scope.$eval(attr.genModalMsg),
+                    isFunction = angular.isFunction;
 
                 function wrap(fn) {
                     return function () {
-                        var value = angular.isFunction(fn) ? fn() : true;
+                        var value = isFunction(fn) ? fn() : true;
                         showModal(!value);
                     };
+                }
+
+                function resize() {
+                    var element = modalElement.children(),
+                        top = ($(window).height() - element.outerHeight()) * 0.382,
+                        css = {};
+
+                    top = top > 0 ? top : 0;
+                    css.top = top;
+                    if (options.width > 0) {
+                        css.width = options.width;
+                        css.marginLeft = -options.width / 2;
+                    }
+                    element.css(css);
                 }
 
                 function showModal(value) {
                     modalElement.modal(value ? 'show' : 'hide');
                     if (value) {
-                        var element = modalElement.children(),
-                            top = ($(window).height() - element.outerHeight()) * 0.382;
-                        element.css('top', top);
+                        $timeout(resize);
                     }
                 }
 
-                angular.extend(scope, options);
+                if (!element.is(':visible')) {
+                    return;
+                }
+
+                options.cancelFn = options.cancelFn || true;
+                options.backdrop = options.backdrop || 'static';
+                options.show = options.show || false;
                 options.modal = showModal;
+
+                scope.$watch(function () {
+                    return options;
+                }, function (value) {
+                    angular.extend(scope, value);
+                }, true);
+
                 scope.id = scope.id || attr.genModalMsg + '-' + (uniqueModalId++);
                 angular.forEach(list, function (name) {
                     var x = name.toLowerCase(),
@@ -159,22 +189,22 @@ directive('genModalMsg', ['getFile',
                     scope[btn] = options[btn] || (options[fn] && name);
                 });
 
-                modalElement.on('shown', function (event) {
+                modalElement.on('shown.bs.modal', function (event) {
                     event.stopPropagation();
                     modalStatus = true;
                 });
-                modalElement.on('hidden', function (event) {
+                modalElement.on('hidden.bs.modal', function (event) {
                     event.stopPropagation();
-                    if (modalStatus && angular.isFunction(options.cancelFn)) {
+                    if (modalStatus && isFunction(options.cancelFn)) {
                         options.cancelFn(); // when hide by other way, run cancelFn;
                     }
                     modalStatus = false;
                 });
+                modalElement.modal(options);
             }
         };
     }
-]).
-directive('genTooltip', ['$timeout',
+]).directive('genTooltip', ['$timeout',
     function ($timeout) {
         //<div data-original-title="tootip title" gen-tooltip="tootipOption"></div>
         // tootipOption = {
@@ -293,6 +323,42 @@ directive('genTooltip', ['$timeout',
                 element.addClass('gen-xeditable');
                 scope.placeholder = !scope.value;
                 scope.isEdit = false;
+            }
+        };
+    }
+]).directive('genMoving', ['anchorScroll',
+    function (anchorScroll) {
+        return {
+            link: function (scope, element, attr) {
+                var option = scope.$eval(attr.genMoving);
+
+                function resetTextarea() {
+                    var textarea = element.find('textarea');
+                    if (textarea.is(textarea)) {
+                        textarea.css({
+                            height: 'auto',
+                            width: '100%'
+                        });
+                    }
+                }
+
+                option.appendTo = function (selector) {
+                    element.appendTo($(selector));
+                    resetTextarea();
+                };
+                option.prependTo = function (selector) {
+                    element.prependTo($(selector));
+                    resetTextarea();
+                };
+                option.childrenOf = function (selector) {
+                    return $(selector).find(element).is(element);
+                };
+                option.scrollIntoView = function (top, height) {
+                    anchorScroll.toView(element, top, height);
+                };
+                option.inView = function () {
+                    return anchorScroll.inView(element);
+                };
             }
         };
     }

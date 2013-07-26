@@ -37,7 +37,7 @@
                 <li>社区对移动设备支持良好，建议闲暇时使用手机或平板逛逛社区。</li>
             </ol>
         </div>
-        <div class="panel pure-hidden-phone">
+        <div class="panel pure-hidden-phone" ng-show="hotComments.length>0">
             <header class="panel-heading muted"><i class="icon-fire"></i>热门评论</header>
             <ul class="media-list comments">
                 <li class="media" ng-repeat="comment in hotComments">

@@ -117,8 +117,8 @@
                     用户注册：
                     </label>
                     <div class="controls">
-                    <button class="btn btn-small" ng-class="setClass(global.register)" ng-click="global.register=!global.register">{{!global.register | boolean}}</button>
-                    <span class="help-inline text-info">{{global.register | boolean}}了注册</span>
+                    <button class="btn btn-small" ng-class="setClass(global.register)" ng-click="global.register=!global.register">{{!global.register | switch:'turn'}}</button>
+                    <span class="help-inline text-info">{{global.register | switch:'turn'}}了注册</span>
                     </div>
                 </div>
                 <div class="control-group">
@@ -126,8 +126,8 @@
                     邮箱验证：
                     </label>
                     <div class="controls">
-                    <button class="btn btn-small" ng-class="setClass(global.emailVerification)" ng-click="global.emailVerification=!global.emailVerification">{{!global.emailVerification | boolean}}</button>
-                    <span class="help-inline text-info">{{global.emailVerification | boolean}}了邮箱验证</span>
+                    <button class="btn btn-small" ng-class="setClass(global.emailVerification)" ng-click="global.emailVerification=!global.emailVerification">{{!global.emailVerification | switch:'turn'}}</button>
+                    <span class="help-inline text-info">{{global.emailVerification | switch:'turn'}}了邮箱验证</span>
                     </div>
                 </div>
                 <div class="control-group">
@@ -399,8 +399,8 @@
                     是否开启SSL：
                     </label>
                     <div class="controls">
-                    <button class="btn btn-small" ng-class="setClass(global.smtp.secureConnection)" ng-click="global.smtp.secureConnection=!global.smtp.secureConnection">{{!global.smtp.secureConnection | boolean}}</button>
-                    <span class="help-inline text-info">{{global.smtp.secureConnection | boolean}}了SSL</span>
+                    <button class="btn btn-small" ng-class="setClass(global.smtp.secureConnection)" ng-click="global.smtp.secureConnection=!global.smtp.secureConnection">{{!global.smtp.secureConnection | switch:'turn'}}</button>
+                    <span class="help-inline text-info">{{global.smtp.secureConnection | switch:'turn'}}了SSL</span>
                     </div>
                 </div>
                 <div class="control-group">

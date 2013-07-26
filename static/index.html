@@ -35,7 +35,7 @@
                     </ul>
                     <ul class="right user" ng-if="global.isLogin">
                         <li><img class="img-mini" ng-src="{{global.user.avatar}}"/></li>
-                        <li><a href="/home"><i class="icon-smile"></i>{{global.user.name}}[{{global.user.role | role}}]</a></li>
+                        <li><a href="/home"><i class="icon-smile"></i>{{global.user.name}}[{{global.user.role | match:'role'}}]</a></li>
                         <li><a ng-click="logout()"><i class="icon-signout"></i>退出</a></li>
                     </ul>
                 </nav>

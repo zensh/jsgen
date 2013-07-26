@@ -67,7 +67,6 @@ constant('app', {
                 controller: 'collectionCtrl'
             };
         $routeProvider.
-        when('/', index).
         when('/hots', index).
         when('/update', index).
         when('/latest', index).
@@ -77,11 +76,10 @@ constant('app', {
         when('/register', register).
         when('/reset', reset).
         when('/home', home).
-        when('/home/', home).
         when('/home/:OP', home).
         when('/admin', admin).
-        when('/add', edit).
         when('/tag', tag).
+        when('/add', edit).
         when('/A:ID/edit', edit).
         when('/user/U:ID', user).
         when('/user/U:ID/:OP', user).
@@ -89,9 +87,10 @@ constant('app', {
         when('/U:ID/:OP', user).
         when('/A:ID', article).
         when('/C:ID', collection).
+        when('/', index).
         otherwise({
             redirectTo: '/'
         });
-        $locationProvider.html5Mode(true);
+        $locationProvider.html5Mode(true).hashPrefix('!');
     }
 ]);

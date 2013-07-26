@@ -22,7 +22,7 @@
         </div>
         <div class="pure-control-group">
             <label>用户性别：</label>
-            <select ng-model="user.sex" ng-options="sex | sex for sex in sexArray">
+            <select ng-model="user.sex" ng-options="sex | match:'gender' for sex in sexArray">
             </select>
         </div>
         <div class="pure-control-group">
@@ -35,7 +35,7 @@
         </div>
         <div class="pure-control-group">
             <label>个人简介：</label>
-            <textarea class="pure-input-1-2" name="个人简介" ng-model="user.desc" ui-validate="{maxlenght:checkDesc}" gen-tooltip="validateTooltip">
+            <textarea class="pure-input-1-2" name="个人简介" ng-model="user.desc" ui-validate="{maxlength:checkDesc}" gen-tooltip="validateTooltip">
             </textarea>
         </div>
         <div class="pure-control-group">

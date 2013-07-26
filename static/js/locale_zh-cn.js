@@ -17,7 +17,7 @@ run(['$locale',
             VALIDATE: {
                 required: '必填！',
                 minlength: '太短！',
-                maxlenght: '太长！',
+                maxlength: '太长！',
                 min: '太小！',
                 max: '太大！',
                 more: '太多！',
@@ -33,7 +33,7 @@ run(['$locale',
                 confirm: '确定',
                 cancel: '取消',
                 remove: '删除',
-                goBack: '立刻返回'
+                goBack: '返回'
             },
             TIMING: {
                 goHome: '秒钟后自动返回主页'
@@ -51,16 +51,50 @@ run(['$locale',
                 fans: '的粉丝'
             },
             ARTICLE: {
+                preview: '预览：',
+                reply: '评论：',
                 removed: '成功删除 ',
                 updated: '成功更新 ',
-                added: '成功保存 '
+                added: '成功保存 ',
+                markdown: 'Markdown简明语法',
+                marked: '已收藏 ',
+                unmarked: '已取消收藏 ',
+                favored: '已支持 ',
+                unfavored: '已取消支持 ',
+                opposed: '已反对 ',
+                unopposed: '已取消反对 ',
+                highlight: '置顶 ',
+                unhighlight: '取消置顶 '
             },
             USER: {
-                followed: '成功关注 ',
-                unfollowed: '成功取消关注 ',
+                followed: '已关注 ',
+                unfollowed: '已取消关注 ',
                 email: '验证邮件已发送到新邮箱，通过验证后才保存修改',
                 updated: '用户信息更新成功',
-                noUpdate: '用户信息暂无变更'
+                noUpdate: '用户信息暂无变更',
+                noLogin: '您还未登录'
+            },
+            FILTER: {
+                role: ['禁言', '待验证', '会员', '组员', '编辑', '管理员'],
+                follow: ['关注', '已关注'],
+                favor: ['支持', '已支持'],
+                mark: ['收藏', '已收藏'],
+                oppose: ['反对', '已反对'],
+                highlight: ['置顶', '取消置顶'],
+                turn: ['开启', '关闭'],
+                edit: ['添加', '编辑'],
+                gender: {
+                    male: '男',
+                    female: '女'
+                }
+            },
+            DATETIME: {
+                full: 'yyyy年MM月dd日 HH:mm',
+                short: 'MM-dd HH:mm',
+                dayAgo: '天前',
+                hourAgo: '小时前',
+                minuteAgo: '分钟前',
+                secondAgo: '刚刚'
             }
         });
     }

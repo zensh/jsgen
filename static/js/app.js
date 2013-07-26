@@ -1,7 +1,7 @@
 'use strict';
 /*global angular, _*/
 
-angular.module('jsGen', ['jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.directives', 'jsGen.controllers', 'jsGen.tools', 'jsGen.locale']).
+angular.module('jsGen', ['jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
 config(['$httpProvider', 'app',
     function ($httpProvider, app) {
         // global loading status
@@ -68,13 +68,16 @@ config(['$httpProvider', 'app',
             };
         });
     }
-]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', '$anchorScroll', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf',
+]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll',
     function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
-        $anchorScroll, getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf) {
+        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll) {
+        var unSave = {
+            stopUnload: false,
+            nextUrl: ''
+        };
 
         window.app = app; // for test
-        tools(app); //添加jsGen系列工具函数
         app.q = $q;
         app.http = $http;
         app.toast = toast;
@@ -83,9 +86,9 @@ config(['$httpProvider', 'app',
         app.timeout = $timeout;
         app.timeOffset = 0;
         app.timestamp = Date.now() + 0;
-        app.ngFilter = $filter;
+        app.filter = $filter;
         app.locale = $locale;
-        app.anchorScroll = $anchorScroll;
+        app.anchorScroll = anchorScroll;
         app.getFile = getFile;
         app.cache = cache;
         app.restAPI = restAPI;
@@ -96,6 +99,7 @@ config(['$httpProvider', 'app',
         app.promiseGet = promiseGet;
         app.myConf = myConf;
         app.rootScope = $rootScope;
+        angular.extend(app, tools); //添加jsGen系列工具函数
 
         app.loading = function (value, status) {
             // $rootScope.loading = status;
@@ -104,13 +108,14 @@ config(['$httpProvider', 'app',
                 $rootScope.$apply();
             }
         };
-        app.validate = function (scope, turnoff, whiteList) {
+        app.validate = function (scope, turnoff) {
             var collect = [],
-                error;
-            whiteList = app.isArray(whiteList) ? whiteList : [];
+                error = [];
             scope.$broadcast('genTooltipValidate', collect, turnoff);
-            error = app.filter(collect, function (value) {
-                return value.validate && value.$invalid && whiteList.indexOf(value.$name) < 0;
+            app.each(collect, function (x) {
+                if (x.validate && x.$invalid) {
+                    error.push(x);
+                }
             });
             if (error.length === 0) {
                 app.validate.errorList = null;
@@ -122,16 +127,26 @@ config(['$httpProvider', 'app',
         };
         app.checkDirty = function (tplObj, pristineObj, Obj) {
             var data = app.union(tplObj);
-            if (Obj) {
+            if (data && pristineObj && Obj) {
                 app.intersect(data, Obj);
                 app.each(data, function (x, key, list) {
                     if (angular.equals(x, pristineObj[key])) {
                         delete list[key];
                     }
                 });
-                $rootScope.stopUnload = !app.isEmpty(data);
+                unSave.stopUnload = !app.isEmpty(data);
+            } else {
+                unSave.stopUnload = false;
             }
             return data;
+        };
+        app.removeItem = function (item, key, list) {
+            return app.some(list, function (x, i) {
+                if (x[key] === item[key]) {
+                    list.splice(i, 1);
+                    return true;
+                }
+            });
         };
         app.checkUser = function () {
             var global = $rootScope.global;
@@ -168,7 +183,6 @@ config(['$httpProvider', 'app',
             validateMsg: $locale.VALIDATE
         };
 
-        $rootScope.stopUnload = false;
         $rootScope.unSaveModal = {
             confirmBtn: $locale.BTN_TEXT.confirm,
             confirmFn: function () {
@@ -179,19 +193,19 @@ config(['$httpProvider', 'app',
             cancelFn: true
         };
         $rootScope.$on('$locationChangeStart', function (event, next, current) {
-            if ($rootScope.stopUnload) {
+            if (unSave.stopUnload) {
                 event.preventDefault();
-                $rootScope.nextUrl = next;
+                unSave.nextUrl = next;
                 $rootScope.unSaveModal.modal(true);
             } else {
-                $rootScope.nextUrl = '';
+                unSave.nextUrl = '';
             }
         });
         $rootScope.$on('loadNext', function (event) {
             event.preventDefault();
-            if ($rootScope.stopUnload && $rootScope.nextUrl) {
-                $rootScope.stopUnload = false;
-                window.location.href = $rootScope.nextUrl;
+            if (unSave.stopUnload && unSave.nextUrl) {
+                unSave.stopUnload = false;
+                window.location.href = unSave.nextUrl;
             }
         });
 

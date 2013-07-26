@@ -23,8 +23,8 @@
                     <i class="glyphicon glyphicon-exclamation-sign"></a></td>
                 <td ng-hide="editEmail">{{user.email}}</td>
                 <td ng-show="editEmail"><input type="email" class="col-span-12" ng-model="user.email"/></td>
-                <td ng-hide="editRole">{{user.role | role}}</td>
-                <td ng-show="editRole"><select class="col-span-12" ng-model="user.role" ng-options="role | role for role in roleArray">
+                <td ng-hide="editRole">{{user.role | match:'role'}}</td>
+                <td ng-show="editRole"><select class="col-span-12" ng-model="user.role" ng-options="role | match:'role' for role in roleArray">
                     </select></td>
                 <td>{{user.score}}</td>
                 <td>{{user.date | date:'yy-MM-dd'}}</td>

@@ -20,6 +20,9 @@ a {
 small {
     letter-spacing: -1px;
 }
+mark {
+  background-color: #ddd;
+}
 [class^="icon-"],
 [class*=" icon-"] {
     font-size: 1.1em;
@@ -339,10 +342,7 @@ small {
 }
 
 
-
-
-.wmd-button-row
-{
+.wmd-button-row {
     position: relative;
     margin-left: 5px;
     margin-right: 5px;
@@ -351,8 +351,7 @@ small {
     padding: 0px;
     height: 20px;
 }
-.wmd-spacer
-{
+.wmd-spacer {
     width: 1px;
     height: 20px;
     margin-left: 14px;
@@ -380,24 +379,19 @@ small {
     height: 20px;
     display: inline-block;
 }
-.wmd-spacer1
-{
+.wmd-spacer1 {
     left: 50px;
 }
-.wmd-spacer2
-{
+.wmd-spacer2 {
     left: 175px;
 }
-.wmd-spacer3
-{
+.wmd-spacer3 {
     left: 300px;
 }
-.wmd-prompt-background
-{
+.wmd-prompt-background {
     background-color: Black;
 }
-.wmd-prompt-dialog
-{
+.wmd-prompt-dialog {
     border: 1px solid #999999;
     background-color: #F5F5F5;
 }
@@ -409,7 +403,7 @@ small {
     border: 1px solid #999999;
     color: black;
 }
-.wmd-prompt-dialog > form > input[type="button"]{
+.wmd-prompt-dialog > form > input[type="button"] {
     border: 1px solid #888888;
     font-family: trebuchet MS, helvetica, sans-serif;
     font-size: 0.8em;
@@ -419,9 +413,9 @@ small {
     background-color: #ffffff;
     padding: 10px;
     min-height: 100px;
-}
-#wmd-preview > p {
-    text-indent: 2em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px #ddd;
 }
 
 .wrap {
@@ -496,6 +490,10 @@ small {
 .inner {
     padding-left: 15px;
     padding-right: 15px;
+}
+.well {
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 ol.inner {
     padding-left: 30px;
@@ -573,6 +571,7 @@ ol.inner {
 }
 .article-content {
     padding: 0 2em;
+    min-height: 80px;
 }
 .article-content > p {
     text-indent: 2em;
@@ -968,19 +967,6 @@ textarea.invalid-error {
   clear: both;
 }
 
-.modal-footer .btn + .btn {
-  margin-bottom: 0;
-  margin-left: 5px;
-}
-
-.modal-footer .btn-group .btn + .btn {
-  margin-left: -1px;
-}
-
-.modal-footer .btn-block + .btn-block {
-  margin-left: 0;
-}
-
 @media screen and (min-width: 768px) {
   .modal-dialog {
     right: auto;
@@ -994,6 +980,33 @@ textarea.invalid-error {
     -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   }
+}
+.close {
+  float: right;
+  font-size: 21px;
+  font-weight: bold;
+  line-height: 1;
+  color: #000;
+  text-shadow: 0 1px 0 #ffffff;
+  opacity: 0.2;
+  filter: alpha(opacity=20);
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
+
+button.close {
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
 }
 
 .list-model {
