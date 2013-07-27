@@ -55,7 +55,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             scope: true,
             templateUrl: getFile.html('gen-pagination.html'),
             link: function (scope, element, attr) {
-                scope.$watch(attr.genPagination, function (value) {
+                scope.$watchCollection(attr.genPagination, function (value, old) {
                     if (!angular.isObject(value)) {
                         return;
                     }
@@ -100,7 +100,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     scope.pageSize = value.pageSize;
                     scope.perPages = value.sizePerPage || [10, 20, 50];
                     scope.path = value.path && value.path + '?p=';
-                }, true);
+                });
                 scope.paginationTo = function (p, s) {
                     if (!scope.path && p > 0) {
                         s = s || scope.pageSize;
@@ -362,4 +362,21 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]);
+]).directive('genSrc',
+    function () {
+        return {
+            priority: 99,
+            link: function (scope, element, attr) {
+                attr.$observe('genSrc', function (value) {
+                    if (value) {
+                        var img = new Image();
+                        img.onload = function () {
+                            attr.$set('src', value);
+                        };
+                        img.src = value;
+                    }
+                });
+            }
+        };
+    }
+);

@@ -10,19 +10,19 @@
             </a>
             <div class="media-body" id="{{article._id}}" ng-class="{muted: article.read}">
                 <header class="media-header">
-                    <a ng-href="{{'/'+article._id}}">
+                    <a ng-href="{{'#/'+article._id}}">
                         <i class="success" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}" ng-hide="article.isAuthor"></i>{{article.title}}</a>
                     <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
-                    <a class="pure-button pure-button-link" ng-href="{{'/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
+                    <a class="pure-button pure-button-link" ng-href="{{'#/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
                     <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>
                 </header>
                 <div class="media-content list-content" ng-animate="{show:'fadeIn',hide:'fadeOut'}" ng-hide="parent.listModel" gen-parse-md="article.content"></div>
                 <footer class="media-footer">
-                    <a ng-href="{{'/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
+                    <a ng-href="{{'#/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
                     <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>
                     <i class="icon-refresh" title="{{article.updateTime | formatDate:true}}更新"> {{article.updateTime | formatDate}}</i>
                     <i class="icon-comments-alt" title="评论" ng-show="article.comments"> {{article.comments}}</i>
-                    <a ng-repeat="tag in article.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                    <a ng-repeat="tag in article.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
                 </footer>
             </div>
         </li>

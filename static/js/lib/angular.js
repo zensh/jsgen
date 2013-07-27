@@ -221,7 +221,7 @@ function nextUid() {
 
 /**
  * Set or clear the hashkey for an object.
- * @param obj object 
+ * @param obj object
  * @param h the hashkey (!truthy to delete the hashkey)
  */
 function setHashKey(obj, h) {
@@ -2111,21 +2111,21 @@ forEach({
                 }
               }
               return false;
-            };	
+            };
 
           events[type] = [];
-		
+
 		  // Refer to jQuery's implementation of mouseenter & mouseleave
           // Read about mouseenter and mouseleave:
           // http://www.quirksmode.org/js/events_mouse.html#link8
-          var eventmap = { mouseleave : "mouseout", mouseenter : "mouseover"}          
+          var eventmap = { mouseleave : "mouseout", mouseenter : "mouseover"}
           bindFn(element, eventmap[type], function(event) {
             var ret, target = this, related = event.relatedTarget;
             // For mousenter/leave call the handler if related is outside the target.
             // NB: No relatedTarget if the mouse left/entered the browser window
             if ( !related || (related !== target && !contains(target, related)) ){
               handle(event, type);
-            }	
+            }
 
           });
 
@@ -3055,7 +3055,7 @@ function $AnimationProvider($provide) {
    *
    * @param {string} name The name of the animation.
    * @param {function} factory The factory function that will be executed to return the animation object.
-   * 
+   *
    */
   this.register = function(name, factory) {
     $provide.factory(camelCase(name) + suffix, factory);
@@ -3270,7 +3270,7 @@ var $AnimatorProvider = function() {
      */
      var AnimatorService = function(scope, attrs) {
         var animator = {};
-  
+
         /**
          * @ngdoc function
          * @name ng.animator#enter
@@ -3285,7 +3285,7 @@ var $AnimatorProvider = function() {
          * @param {jQuery/jqLite element} after the sibling element (which is the previous element) of the element that will be the focus of the enter animation
         */
         animator.enter = animateActionFactory('enter', insert, noop);
-  
+
         /**
          * @ngdoc function
          * @name ng.animator#leave
@@ -3299,7 +3299,7 @@ var $AnimatorProvider = function() {
          * @param {jQuery/jqLite element} parent the parent element of the element that will be the focus of the leave animation
         */
         animator.leave = animateActionFactory('leave', noop, remove);
-  
+
         /**
          * @ngdoc function
          * @name ng.animator#move
@@ -3315,7 +3315,7 @@ var $AnimatorProvider = function() {
          * @param {jQuery/jqLite element} after the sibling element (which is the previous element) of the element that will be the focus of the move animation
         */
         animator.move = animateActionFactory('move', move, noop);
-  
+
         /**
          * @ngdoc function
          * @name ng.animator#show
@@ -3328,7 +3328,7 @@ var $AnimatorProvider = function() {
          * @param {jQuery/jqLite element} element the element that will be rendered visible or hidden
         */
         animator.show = animateActionFactory('show', show, noop);
-  
+
         /**
          * @ngdoc function
          * @name ng.animator#hide
@@ -3355,7 +3355,7 @@ var $AnimatorProvider = function() {
           animateActionFactory(event, noop, noop)(element);
         }
         return animator;
-  
+
         function animateActionFactory(type, beforeFn, afterFn) {
           return function(element, parent, after) {
             var ngAnimateValue = scope.$eval(attrs.ngAnimate);
@@ -3415,10 +3415,10 @@ var $AnimatorProvider = function() {
                 polyfillStart(element, done, memento);
               } else if (isFunction($window.getComputedStyle)) {
                 //one day all browsers will have these properties
-                var w3cAnimationProp = 'animation'; 
+                var w3cAnimationProp = 'animation';
                 var w3cTransitionProp = 'transition';
 
-                //but some still use vendor-prefixed styles 
+                //but some still use vendor-prefixed styles
                 var vendorAnimationProp = $sniffer.vendorPrefix + 'Animation';
                 var vendorTransitionProp = $sniffer.vendorPrefix + 'Transition';
 
@@ -3426,7 +3426,7 @@ var $AnimatorProvider = function() {
                     delayKey = 'Delay',
                     animationIterationCountKey = 'IterationCount',
                     duration = 0;
-                
+
                 //we want all the styles defined before and after
                 var ELEMENT_NODE = 1;
                 forEach(element, function(element) {
@@ -3472,15 +3472,15 @@ var $AnimatorProvider = function() {
             }
           };
         }
-  
+
         function show(element) {
           element.css('display', '');
         }
-  
+
         function hide(element) {
           element.css('display', 'none');
         }
-  
+
         function insert(element, parent, after) {
           if (after) {
             after.after(element);
@@ -3488,11 +3488,11 @@ var $AnimatorProvider = function() {
             parent.append(element);
           }
         }
-  
+
         function remove(element) {
           element.remove();
         }
-  
+
         function move(element, parent, after) {
           // Do not remove element before insert. Removing will cause data associated with the
           // element to be dropped. Insert will implicitly do the remove.
@@ -6244,7 +6244,7 @@ function $LocationProvider(){
 function $LogProvider(){
   var debug = true,
       self = this;
-  
+
   /**
    * @ngdoc property
    * @name ng.$logProvider#debugEnabled
@@ -6261,7 +6261,7 @@ function $LogProvider(){
 		  return debug;
 	  }
   };
-  
+
   this.$get = ['$window', function($window){
     return {
       /**
@@ -6303,18 +6303,18 @@ function $LogProvider(){
        * Write an error message
        */
       error: consoleLog('error'),
-      
+
       /**
        * @ngdoc method
        * @name ng.$log#debug
        * @methodOf ng.$log
-       * 
+       *
        * @description
        * Write a debug message
        */
       debug: (function () {
     	var fn = consoleLog('debug');
-    	
+
     	return function() {
     		if (debug) {
     			fn.apply(self, arguments);
@@ -6725,7 +6725,7 @@ function parser(text, json, $filter, csp){
       constant: left.constant && middle.constant && right.constant
     });
   }
-  
+
   function binaryFn(left, fn, right) {
     return extend(function(self, locals) {
       return fn(self, locals, left, right);
@@ -6830,7 +6830,7 @@ function parser(text, json, $filter, csp){
       return left;
     }
   }
-  
+
   function logicalOR() {
     var left = logicalAND();
     var token;
@@ -7416,25 +7416,25 @@ function $ParseProvider() {
  *   you can treat promises attached to a scope as if they were the resulting values.
  * - Q has many more features than $q, but that comes at a cost of bytes. $q is tiny, but contains
  *   all the important functionality needed for common async tasks.
- * 
+ *
  *  # Testing
- * 
+ *
  *  <pre>
  *    it('should simulate promise', inject(function($q, $rootScope) {
  *      var deferred = $q.defer();
  *      var promise = deferred.promise;
  *      var resolvedValue;
- * 
+ *
  *      promise.then(function(value) { resolvedValue = value; });
  *      expect(resolvedValue).toBeUndefined();
- * 
+ *
  *      // Simulate resolving of promise
  *      deferred.resolve(123);
  *      // Note that the 'then' function does not get called synchronously.
  *      // This is because we want the promise API to always be async, whether or not
  *      // it got called synchronously or asynchronously.
  *      expect(resolvedValue).toBeUndefined();
- * 
+ *
  *      // Propagate promise resolution to 'then' functions using $apply().
  *      $rootScope.$apply();
  *      expect(resolvedValue).toEqual(123);
@@ -7531,7 +7531,7 @@ function qFactory(nextTick, exceptionHandler) {
           return result.promise;
         },
         always: function(callback) {
-          
+
           function makePromise(value, resolved) {
             var result = defer();
             if (resolved) {
@@ -7541,14 +7541,14 @@ function qFactory(nextTick, exceptionHandler) {
             }
             return result.promise;
           }
-          
+
           function handleCallback(value, isResolved) {
-            var callbackOutput = null;            
+            var callbackOutput = null;
             try {
               callbackOutput = (callback ||defaultCallback)();
             } catch(e) {
               return makePromise(e, false);
-            }            
+            }
             if (callbackOutput && callbackOutput.then) {
               return callbackOutput.then(function() {
                 return makePromise(value, isResolved);
@@ -7559,7 +7559,7 @@ function qFactory(nextTick, exceptionHandler) {
               return makePromise(value, isResolved);
             }
           }
-          
+
           return this.then(function(value) {
             return handleCallback(value, true);
           }, function(error) {
@@ -11187,7 +11187,7 @@ var DATE_FORMATS = {
      m: dateGetter('Minutes', 1),
     ss: dateGetter('Seconds', 2),
      s: dateGetter('Seconds', 1),
-     // while ISO 8601 requires fractions to be prefixed with `.` or `,` 
+     // while ISO 8601 requires fractions to be prefixed with `.` or `,`
      // we can be just safely rely on using `sss` since we currently don't support single or two digit fractions
    sss: dateGetter('Milliseconds', 3),
   EEEE: dateStrGetter('Day'),
@@ -11426,9 +11426,9 @@ var uppercaseFilter = valueFn(uppercase);
  * {@link ng.$filter} for more information about Angular arrays.
  *
  * @param {Array|string} input Source array or string to be limited.
- * @param {string|number} limit The length of the returned array or string. If the `limit` number 
+ * @param {string|number} limit The length of the returned array or string. If the `limit` number
  *     is positive, `limit` number of items from the beginning of the source array/string are copied.
- *     If the number is negative, `limit` number  of items from the end of the source array/string 
+ *     If the number is negative, `limit` number  of items from the end of the source array/string
  *     are copied. The `limit` will be trimmed if it exceeds `array.length`
  * @returns {Array|string} A new sub-array or substring of length `limit` or less if input array
  *     had less than `limit` elements.
@@ -11478,7 +11478,7 @@ var uppercaseFilter = valueFn(uppercase);
 function limitToFilter(){
   return function(input, limit) {
     if (!isArray(input) && !isString(input)) return input;
-    
+
     limit = int(limit);
 
     if (isString(input)) {
@@ -14284,20 +14284,20 @@ var ngControllerDirective = [function() {
  * @element html
  * @description
  * Enables [CSP (Content Security Policy)](https://developer.mozilla.org/en/Security/CSP) support.
- * 
+ *
  * This is necessary when developing things like Google Chrome Extensions.
- * 
+ *
  * CSP forbids apps to use `eval` or `Function(string)` generated functions (among other things).
  * For us to be compatible, we just need to implement the "getterFn" in $parse without violating
  * any of these restrictions.
- * 
+ *
  * AngularJS uses `Function(string)` generated functions as a speed optimization. By applying `ngCsp`
  * it is be possible to opt into the CSP compatible mode. When this mode is on AngularJS will
  * evaluate all expressions up to 30% slower than in non-CSP mode, but no security violations will
  * be raised.
- * 
+ *
  * In order to use this feature put `ngCsp` directive on the root element of the application.
- * 
+ *
  * @example
  * This example shows how to apply the `ngCsp` directive to the `html` tag.
    <pre>
@@ -14605,7 +14605,7 @@ var ngSubmitDirective = ngDirective(function(scope, element, attrs) {
  * position within the DOM (HTML), such as the `:first-child` or `:last-child` pseudo-classes.
  *
  * Note that **when an element is removed using ngIf its scope is destroyed** and **a new scope
- * is created when the element is restored**.  The scope created within `ngIf` inherits from 
+ * is created when the element is restored**.  The scope created within `ngIf` inherits from
  * its parent scope using
  * {@link https://github.com/angular/angular.js/wiki/The-Nuances-of-Scope-Prototypal-Inheritance prototypal inheritance}.
  * An important implication of this is if `ngModel` is used within `ngIf` to bind to
@@ -14613,7 +14613,7 @@ var ngSubmitDirective = ngDirective(function(scope, element, attrs) {
  * variable within the child scope will override (hide) the value in the parent scope.
  *
  * Also, `ngIf` recreates elements using their compiled state. An example scenario of this behavior
- * is if an element's class attribute is directly modified after it's compiled, using something like 
+ * is if an element's class attribute is directly modified after it's compiled, using something like
  * jQuery's `.addClass()` method, and the element is later removed. When `ngIf` recreates the element
  * the added class will be lost because the original compiled state is used to regenerate the element.
  *
@@ -16608,7 +16608,7 @@ var selectDirective = ['$compile', '$parse', function($compile,   $parse) {
                       for (var trackIndex = 0; trackIndex < collection.length; trackIndex++) {
                         locals[valueName] = collection[trackIndex];
                         if (trackFn(scope, locals) == key) break;
-                      } 
+                      }
                     } else {
                       locals[valueName] = collection[key];
                     }

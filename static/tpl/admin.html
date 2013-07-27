@@ -1,4 +1,4 @@
-<div class="pure-g-r wrap">
+<div class="wrap">
     <div class="pure-u-3-4">
         <div class="panel" ng-include src="getTpl">
         </div>
@@ -7,28 +7,28 @@
         <div class="panel pure-menu pure-menu-open">
             <ul class="text-center">
                 <li ng-class="{active: path=='index'}">
-                    <a href="/admin/index"><i class="icon-chevron-left left"></i>网站信息</a>
+                    <a href="#/admin/index"><i class="icon-chevron-left left"></i>网站信息</a>
                 </li>
                 <li ng-class="{active: path=='user'}">
-                    <a href="/admin/user"><i class="icon-chevron-left left"></i>用户管理</a>
+                    <a href="#/admin/user"><i class="icon-chevron-left left"></i>用户管理</a>
                 </li>
                 <li ng-class="{active: path=='tag'}">
-                    <a href="/admin/tag"><i class="icon-chevron-left left"></i>标签管理</a>
+                    <a href="#/admin/tag"><i class="icon-chevron-left left"></i>标签管理</a>
                 </li>
                 <li ng-class="{active: path=='article'}">
-                    <a href="/admin/article"><i class="icon-chevron-left left"></i>文章管理</a>
+                    <a href="#/admin/article"><i class="icon-chevron-left left"></i>文章管理</a>
                 </li>
                 <li ng-class="{active: path=='comment'}">
-                    <a  href="/admin/comment"><i class="icon-chevron-left left"></i>评论管理</a>
+                    <a  href="#/admin/comment"><i class="icon-chevron-left left"></i>评论管理</a>
                 </li>
                 <li ng-class="{active: path=='collection'}">
-                    <a href="/admin/collection"><i class="icon-chevron-left left"></i>合集管理</a>
+                    <a href="#/admin/collection"><i class="icon-chevron-left left"></i>合集管理</a>
                 </li>
                 <li ng-class="{active: path=='message'}">
-                    <a href="/admin/message"><i class="icon-chevron-left left"></i>消息管理</a>
+                    <a href="#/admin/message"><i class="icon-chevron-left left"></i>消息管理</a>
                 </li>
                 <li  ng-class="{active: path=='global'}" ng-show="global.isAdmin">
-                    <a href="/admin/global"><i class="icon-chevron-left left"></i>网站设置</a>
+                    <a href="#/admin/global"><i class="icon-chevron-left left"></i>网站设置</a>
                 </li>
             </ul>
         </div>

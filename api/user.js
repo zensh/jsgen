@@ -325,7 +325,7 @@ function register(req, res, dm) {
 
     function emailToAdmin(doc) {
         if (jsGen.config.email) {
-            var url = jsGen.config.url + '/' + doc._id;
+            var url = jsGen.config.url + '/#/' + doc._id;
             jsGen.lib.email.tpl(jsGen.config.title, doc.name, jsGen.config.email, url, 'register').send();
         }
     }
@@ -374,7 +374,7 @@ function setReset(resetObj, callback) {
         } else {
             resetObj.k = HmacMD5(HmacMD5(userObj.resetKey, resetObj.r), resetObj.u + '', 'base64');
             var resetUrl = new Buffer(JSON.stringify(resetObj)).toString('base64');
-            resetUrl = jsGen.config.url + '/reset?req=' + resetUrl;
+            resetUrl = jsGen.config.url + '/#/reset?req=' + resetUrl;
             var email = resetObj.e || doc.email;
             return jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(callback);
         }

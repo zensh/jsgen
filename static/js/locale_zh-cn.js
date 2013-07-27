@@ -1,7 +1,7 @@
 'use strict';
 /*global angular, _*/
 
-angular.module('jsGen.locale', []).
+angular.module('jsGen.locale', ['ngLocale']).
 run(['$locale',
     function ($locale) {
         angular.extend($locale, {
@@ -55,6 +55,7 @@ run(['$locale',
                 reply: '评论：',
                 removed: '成功删除 ',
                 updated: '成功更新 ',
+                noUpdate: '文章暂无变更',
                 added: '成功保存 ',
                 markdown: 'Markdown简明语法',
                 marked: '已收藏 ',

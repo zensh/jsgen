@@ -66,6 +66,8 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     }
 ]).factory('pretty', function () {
     return prettyPrint;
+}).factory('param', function () {
+    return $.param;
 }).factory('CryptoJS', function () {
     return CryptoJS;
 }).factory('utf8', function () {
@@ -88,9 +90,8 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             ];
         // level: 0, 1, 2, 3
         return function (html, level) {
-            var create = document.createElement.bind(document),
-                innerDOM = create('div'),
-                outerDOM = create('div');
+            var innerDOM = document.createElement('div'),
+                outerDOM = document.createElement('div');
             level = level >= 0 ? level : 3;
             innerDOM.innerHTML = tools.toStr(html);
             outerDOM.appendChild(sanitize[level].clean_node(innerDOM));
@@ -140,26 +141,27 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             })
         };
     }
-]).factory('myConf', ['$cookieStore',
-    function ($cookieStore) {
+]).factory('myConf', ['$cookieStore', 'tools',
+    function ($cookieStore, tools) {
+        function checkValue(value, defaultValue) {
+            return tools.isNull(value) ? defaultValue : value;
+        }
+
+        function myCookies(name, initial) {
+            return function (value, pre, defaultValue) {
+                pre = tools.toStr(pre) + name;
+                defaultValue = checkValue(defaultValue, initial);
+                var result = checkValue($cookieStore.get(pre), defaultValue);
+                if (!tools.isNull(value) && result !== checkValue(value, defaultValue)) {
+                    $cookieStore.put(pre, value);
+                    result = value;
+                }
+                return result;
+            };
+        }
         return {
-            pageSize: function (pageSize, type) {
-                type += 'PageSize';
-                var size = $cookieStore.get(type) || 10;
-                if (pageSize > 0 && size !== pageSize) {
-                    $cookieStore.put(type, pageSize);
-                    size = pageSize;
-                }
-                return size;
-            },
-            listModel: function (value) {
-                var model = $cookieStore.get('listModel');
-                if (angular.isDefined(value) && model !== value) {
-                    $cookieStore.put('listModel', value);
-                    model = value;
-                }
-                return model;
-            }
+            pageSize: myCookies('PageSize', 10),
+            listModel: myCookies('ListModel', false)
         };
     }
 ]).factory('promiseGet', ['$q',

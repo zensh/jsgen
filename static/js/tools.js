@@ -3,9 +3,6 @@
 
 angular.module('jsGen.tools', []).
 factory('tools', function () {
-    Date.now = Date.now || function () {
-        return new Date().getTime();
-    };
     var breaker = {};
 
     return {
@@ -14,6 +11,7 @@ factory('tools', function () {
         some: some,
         union: union,
         toStr: toStr,
+        isNull: isNull,
         hasOwn: hasOwn,
         isEmpty: isEmpty,
         isArray: isArray,
@@ -21,20 +19,16 @@ factory('tools', function () {
         checkType: checkType
     };
 
-    function trim(str) {
-        str = toStr(str);
-        str = str.replace(/ +/g, ' ');
-        str = str.replace(/^ /, '');
-        str = str.replace(/ $/, '');
-        return str;
-    }
-
     function isArray(obj) {
         return Array.isArray && Array.isArray(obj) || Object.prototype.toString.call(obj) === '[object Array]';
     }
 
+    function isNull(obj) {
+        return obj === null || obj === undefined || obj !== obj;
+    }
+
     function toStr(value) {
-        return (value || value === 0) && (value + '') || '';
+        return isNull(value) ? '' : value + '';
     }
 
     function hasOwn(obj, key) {
@@ -48,6 +42,14 @@ factory('tools', function () {
             }
         }
         return true;
+    }
+
+    function trim(str) {
+        str = toStr(str);
+        str = str.replace(/ +/g, ' ');
+        str = str.replace(/^ /, '');
+        str = str.replace(/ $/, '');
+        return str;
     }
 
     function each(obj, iterator, context, right) {

@@ -24,18 +24,20 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         }
 
         function getArticleList() {
-            app.promiseGet({
+            var params = {
                 ID: ID,
                 p: $routeParams.p,
-                s: $routeParams.s || myConf.pageSize()
-            }, restAPI, app.location.url(), app.cache.list).then(function (data) {
+                s: $routeParams.s || myConf.pageSize(null, 'index', 10)
+            };
+
+            app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
                 var pagination = data.pagination || {};
                 if (data.tag) {
                     $scope.other.title = data.tag.tag;
                     $scope.other._id = data.tag._id;
                 }
                 pagination.path = app.location.path();
-                pagination.pageSize = myConf.pageSize(pagination.pageSize);
+                pagination.pageSize = myConf.pageSize(pagination.pageSize, 'index');
                 $scope.pagination = pagination;
                 $scope.articleList = data.data;
             });
@@ -45,15 +47,15 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            listModel: myConf.listModel()
+            listModel: myConf.listModel(null, 'index', false)
         };
         $scope.other = {};
         $scope.pagination = {};
 
         $scope.setListModel = function () {
             var parent = $scope.parent;
-            parent.listModel = myConf.listModel(!parent.listModel);
-            myConf.pageSize(parent.listModel ? 20 : 10);
+            parent.listModel = myConf.listModel(!parent.listModel, 'index');
+            myConf.pageSize(parent.listModel ? 20 : 10, 'index');
             getArticleList();
         };
 
@@ -70,20 +72,22 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 ]).controller('tagCtrl', ['app', '$scope', '$routeParams', 'getList',
     function (app, $scope, $routeParams, getList) {
         var restAPI = app.restAPI.tag,
-            myConf = app.myConf;
+            myConf = app.myConf,
+            params = {
+                p: $routeParams.p,
+                s: $routeParams.s || myConf.pageSize(null, 'tag', 50)
+            };
 
         $scope.parent = {
             getTpl: app.getFile.html('index-tag.html')
         };
         $scope.pagination = {};
 
-        app.promiseGet({
-            p: $routeParams.p,
-            s: $routeParams.s || myConf.pageSize(0, 'tag') || myConf.pageSize(50, 'tag')
-        }, restAPI, app.location.url(), app.cache.list).then(function (data) {
+        app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
             var pagination = data.pagination || {};
             pagination.path = app.location.path();
             pagination.pageSize = myConf.pageSize(pagination.pageSize, 'tag');
+            pagination.sizePerPage = [50, 100, 200];
             $scope.pagination = pagination;
             $scope.tagList = data.data;
         });
@@ -257,12 +261,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         }
 
+        $scope.user = global.user;
         $scope.parent = {
             getTpl: app.getFile.html(tplName()),
             isMe: true,
             viewPath: $routeParams.OP || 'index'
         };
-        $scope.user = global.user;
     }
 ]).controller('userCtrl', ['app', '$scope', '$routeParams', 'getUser',
     function (app, $scope, $routeParams, getUser) {
@@ -292,19 +296,19 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
     function (app, $scope, $routeParams) {
         var restAPI = app.restAPI.user,
             myConf = app.myConf,
-            locale = app.locale;
+            locale = app.locale,
+            params = {
+                ID: $routeParams.ID && 'U' + $routeParams.ID || $routeParams.OP,
+                OP: $routeParams.OP || 'fans',
+                p: $routeParams.p,
+                s: $routeParams.s || myConf.pageSize(null, 'user', 20)
+            };
 
-        $routeParams.OP = $routeParams.OP || 'fans';
         $scope.parent = {
             title: ''
         };
 
-        app.promiseGet({
-            ID: $routeParams.ID && 'U' + $routeParams.ID || $routeParams.OP,
-            OP: $routeParams.OP,
-            p: $routeParams.p,
-            s: $routeParams.s || myConf.pageSize(0, 'user') || myConf.pageSize(20, 'user')
-        }, restAPI, app.location.url(), app.cache.list).then(function (data) {
+        app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
             var pagination = data.pagination || {};
 
             pagination.path = app.location.path();
@@ -314,9 +318,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 app.checkFollow(x);
             });
             if (!$routeParams.ID) {
-                $scope.parent.title = locale.HOME_TITLE[$routeParams.OP];
+                $scope.parent.title = locale.HOME_TITLE[params.OP];
             } else {
-                $scope.parent.title = data.user.name + locale.USER_TITLE[$routeParams.OP];
+                $scope.parent.title = data.user.name + locale.USER_TITLE[params.OP];
             }
             $scope.userList = data.data;
         });
@@ -328,37 +332,38 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             locale = app.locale;
 
         function getArticleList() {
-            app.promiseGet({
+            var params = {
                 ID: $routeParams.ID && 'U' + $routeParams.ID || $routeParams.OP,
-                OP: $routeParams.OP,
+                OP: $routeParams.OP || ($routeParams.ID ? 'article' : 'index'),
                 p: $routeParams.p,
-                s: $routeParams.s || myConf.pageSize()
-            }, restAPI, app.location.url(), app.cache.list).then(function (data) {
+                s: $routeParams.s || myConf.pageSize(null, 'home', 10)
+            };
+            app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
                 var newArticles = 0,
                     pagination = data.pagination || {};
 
                 pagination.path = app.location.path();
-                pagination.pageSize = myConf.pageSize(pagination.pageSize);
+                pagination.pageSize = myConf.pageSize(pagination.pageSize, 'home');
                 $scope.pagination = pagination;
                 if (!$routeParams.ID) {
+                    var user = app.rootScope.global.user || {};
                     app.each(data.data, function (x) {
                         if (data.readtimestamp > 0) {
                             x.read = x.updateTime < data.readtimestamp;
                             newArticles += !x.read;
                         }
-                        app.checkAuthor(x);
+                        x.isAuthor = x.author._id === user._id;
                     });
-                    $scope.parent.title = locale.HOME_TITLE[$routeParams.OP] || newArticles + locale.HOME_TITLE.index + app.filter('date')(data.readtimestamp, 'medium');
+                    $scope.parent.title = params.OP !== 'index' ? locale.HOME_TITLE[params.OP] : newArticles + locale.HOME_TITLE.index + app.filter('date')(data.readtimestamp, 'medium');
                 } else {
-                    $scope.parent.title = data.user.name + locale.USER_TITLE[$routeParams.OP];
+                    $scope.parent.title = data.user.name + locale.USER_TITLE[params.OP];
                 }
                 $scope.articleList = data.data;
             });
         }
 
-        $routeParams.OP = $routeParams.OP || 'article';
         $scope.parent = {
-            listModel: myConf.listModel(),
+            listModel: myConf.listModel(null, 'home', false),
             title: ''
         };
         $scope.pagination = {};
@@ -389,8 +394,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
         $scope.setListModel = function () {
             var parent = $scope.parent;
-            parent.listModel = myConf.listModel(!parent.listModel);
-            myConf.pageSize(parent.listModel ? 20 : 10);
+            parent.listModel = myConf.listModel(!parent.listModel, 'home');
+            myConf.pageSize(parent.listModel ? 20 : 10, 'home');
             getArticleList();
         };
         $scope.remove = function (article) {
@@ -432,9 +437,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 
         $scope.sexArray = ['male', 'female'];
 
-        $scope.$watch('user', function (value) {
+        $scope.$watchCollection('user', function (value) {
             app.checkDirty(user, originData, value);
-        }, true);
+        });
 
         $scope.checkName = function (scope, model) {
             return filter('checkName')(model.$value);
@@ -752,12 +757,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
         $scope.$on('genPagination', function (event, p, s) {
             event.stopPropagation();
-            app.promiseGet({
+            var params = {
                 ID: ID,
                 OP: 'comment',
                 p: p,
-                s: myConf.pageSize(s, 'comment')
-            }, restAPI, ID + p + '-' + s, listCache).then(function (data) {
+                s: myConf.pageSize(s, 'comment', 10)
+            };
+            app.promiseGet(params, restAPI, app.param(params), listCache).then(function (data) {
                 var pagination = data.pagination || {},
                     commentsList = data.data;
                 pagination.pageSize = myConf.pageSize(pagination.pageSize, 'comment');
@@ -828,6 +834,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         function initArticle(data) {
             originData = app.union(article);
             if (data) {
+                data = app.union(data);
                 app.each(data.tagsList, function (x, i, list) {
                     list[i] = x.tag;
                 });
@@ -905,28 +912,32 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
 
         $scope.submit = function () {
+            var data = app.union($scope.article);
             if (app.validate($scope)) {
-                var data = app.union($scope.article);
-                data.title = app.sanitize(app.trim(data.title), 0);
-                restAPI.save({
-                    ID: ID || 'index',
-                    OP: ID && 'edit'
-                }, data, function (data) {
-                    var article = data.data;
-                    initArticle(article);
-                    articleCache.put(article._id, data);
-                    app.toast.success(locale.ARTICLE[ID ? 'updated' : 'added'] + article.title);
-                    var timing = app.timing(null, 1000, 2);
-                    timing.then(function () {
-                        app.location.search({}).path('/' + article._id);
+                if (app.checkDirty(article, originData, data)) {
+                    data.title = app.sanitize(app.trim(data.title), 0);
+                    restAPI.save({
+                        ID: ID || 'index',
+                        OP: ID && 'edit'
+                    }, data, function (data) {
+                        var article = data.data;
+                        articleCache.put(article._id, data);
+                        initArticle(article);
+                        app.toast.success(locale.ARTICLE[ID ? 'updated' : 'added'] + article.title);
+                        var timing = app.timing(null, 1000, 2);
+                        timing.then(function () {
+                            app.location.search({}).path('/' + article._id);
+                        });
                     });
-                });
+                } else {
+                    app.toast.info(locale.ARTICLE.noUpdate);
+                }
             }
         };
 
-        $scope.$watch('article', function (value) {
+        $scope.$watchCollection('article', function (value) {
             app.checkDirty(article, originData, value);
-        }, true);
+        });
 
         mdEditor().run();
         if (ID) {

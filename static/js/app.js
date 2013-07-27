@@ -61,26 +61,35 @@ config(['$httpProvider', 'app',
                     }
                 },
                 responseError: function (res) {
-                    var data = res.data;
-                    app.toast.error(data.message || data, res.status);
+                    var data = res.data || res,
+                        status = res.status || '',
+                        message = data.message || (angular.isObject(data) ? 'Error!' : data);
+
+                    app.toast.error(message, status);
                     return app.q.reject(data);
                 }
             };
         });
     }
 ]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'param',
     function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
-        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll) {
+        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, param) {
         var unSave = {
             stopUnload: false,
             nextUrl: ''
+        };
+        var global = $rootScope.global = {
+            isAdmin: false,
+            isEditor: false,
+            isLogin: false
         };
 
         window.app = app; // for test
         app.q = $q;
         app.http = $http;
         app.toast = toast;
+        app.param = param;
         app.timing = timing;
         app.location = $location;
         app.timeout = $timeout;
@@ -138,7 +147,7 @@ config(['$httpProvider', 'app',
             } else {
                 unSave.stopUnload = false;
             }
-            return data;
+            return unSave.stopUnload ? data : null;
         };
         app.removeItem = function (item, key, list) {
             return app.some(list, function (x, i) {
@@ -149,34 +158,24 @@ config(['$httpProvider', 'app',
             });
         };
         app.checkUser = function () {
-            var global = $rootScope.global;
             global.isLogin = !! global.user;
             global.isAdmin = global.user && global.user.role === 5;
             global.isEditor = global.user && global.user.role >= 4;
         };
         app.clearUser = function () {
-            $rootScope.global.user = null;
+            global.user = null;
             app.checkUser();
         };
         app.checkFollow = function (user) {
-            var me = $rootScope.global.user || {};
+            var me = global.user || {};
             user.isMe = user._id === me._id;
             user.isFollow = !user.isMe && app.some(me.followList, function (x) {
                 return x === user._id;
             });
         };
-        app.checkAuthor = function (article) {
-            var me = $rootScope.global.user || {};
-            article.isAuthor = article.author._id === me._id;
-        };
 
         $rootScope.loading = {
             show: false
-        };
-        $rootScope.global = {
-            isAdmin: false,
-            isEditor: false,
-            isLogin: false
         };
         $rootScope.validateTooltip = {
             validate: true,
@@ -217,7 +216,7 @@ config(['$httpProvider', 'app',
             restAPI.user.get({
                 ID: 'logout'
             }, function () {
-                $rootScope.global.user = null;
+                global.user = null;
                 app.checkUser();
                 $location.path('/');
             });
@@ -229,10 +228,10 @@ config(['$httpProvider', 'app',
                 follow: !user.isFollow
             }, function (data) {
                 if (data.follow) {
-                    $rootScope.global.user.followList.push(user._id);
+                    global.user.followList.push(user._id);
                     app.toast.success($locale.USER.followed + user.name, $locale.RESPONSE.success);
                 } else {
-                    app.some($rootScope.global.user.followList, function (x, i, list) {
+                    app.some(global.user.followList, function (x, i, list) {
                         if (x === user._id) {
                             list.splice(i, 1);
                             app.toast.success($locale.USER.unfollowed + user.name, $locale.RESPONSE.success);
@@ -245,11 +244,11 @@ config(['$httpProvider', 'app',
             });
         };
         restAPI.index.get({}, function (data) {
-            var global = data.data;
             app.timeOffset = Date.now() - data.timestamp;
-            global.title2 = global.description;
-            global.info.angularjs = angular.version.full;
-            app.union($rootScope.global, global);
+            data = data.data;
+            data.title2 = data.description;
+            data.info.angularjs = angular.version.full;
+            app.union(global, data);
             app.checkUser();
         });
 

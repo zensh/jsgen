@@ -1,50 +1,49 @@
-<div class="pure-g-r">
-    <div class="pure-u-1-2 pure-hidden-phone">
-        <article class="panel">
-            <div class="page-header inner">
-                <strong>{{parent.title}}</strong>
-            </div>
-            <div class="article-content" gen-parse-md="parent.content">
-            </div>
-        </article>
-    </div>
-    <div class="pure-u-1-2">
-        <div class="panel">
-            <div class="page-header inner">
-                <strong>{{parent.edit | switch:'edit'}}文章</strong>
-            </div>
-            <form class="inner pure-form pure-form-stacked" novalidate>
-                <label>文章标题
-                    <span class="info">
-                    [必填，{{global.TitleMinLen}} 到 {{global.TitleMaxLen}} 字节，当前<strong class="hot">{{parent.titleBytes}}</strong>字节]
-                    </span>
-                </label>
-                <input class="pure-input-1" type="text" placeholder="文章标题" name="文章标题" ng-model="article.title" ui-validate="{maxlength:checkTitleMax,minlength:checkTitleMin}" gen-tooltip="validateTooltip" required/>
-                <label>文章来源
-                    <span class="info">[如转载文章，请填完整的原文URL地址]</span>
-                </label>
-                <input class="pure-input-1" type="url" placeholder="文章来源URL" name="文章来源" ng-model="article.refer" gen-tooltip="validateTooltip"/>
-                <label>文章内容
-                    <span class="info">
-                        [使用<a class="hot" ng-click="wmdPreview()">MarkDown语法</a>，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong class="hot">{{parent.contentBytes}}</strong>字节]
-                    </span>
-                </label>
-                <div id="wmd-button-bar"></div>
-                <textarea class="wmd-input pure-input-1" id="wmd-input" name="文章内容" placeholder="{{global.isLogin&&'请使用MarkDown语法编辑内容'||'您还没有登录，不能发表文章哦'}}" ng-model="article.content" rows="10" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
-                </textarea>
-                <label>文章标签
-                    <span class="info">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
-                </label>
-                <textarea class="pure-input-1" name="文章标签" ng-model="article.tagsList" ng-list="/[,，、]/" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">
-                </textarea>
-                <mark>热门标签：</mark>
-                <a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a>
-                <div class="well">
-                    <button class="pure-button pure-button-small primary-bg" ng-click="wmdPreview()">MarkDown语法 / 文章预览</button>
-                    <button type="submit" class="pure-button pure-button-small success-bg" ng-class="{'pure-button-disabled':!global.isLogin}" ng-click="submit()">提交</button>
-                </div>
-            </form>
+<div class="pure-u-1-2 pure-hidden-phone">
+    <article class="panel">
+        <div class="page-header inner">
+            <strong>{{parent.title}}</strong>
         </div>
+        <div class="article-content" gen-parse-md="parent.content">
+        </div>
+    </article>
+</div>
+<div class="pure-u-1-2">
+    <div class="panel">
+        <div class="page-header inner">
+            <strong>{{parent.edit | switch:'edit'}}文章</strong>
+        </div>
+        <form class="inner pure-form pure-form-stacked" novalidate>
+            <label>文章标题
+                <span class="info">
+                [必填，{{global.TitleMinLen}} 到 {{global.TitleMaxLen}} 字节，当前<strong class="hot">{{parent.titleBytes}}</strong>字节]
+                </span>
+            </label>
+            <input class="pure-input-1" type="text" placeholder="文章标题" name="文章标题" ng-model="article.title" ui-validate="{maxlength:checkTitleMax,minlength:checkTitleMin}" gen-tooltip="validateTooltip" required/>
+            <label>文章来源
+                <span class="info">[如转载文章，请填完整的原文URL地址]</span>
+            </label>
+            <input class="pure-input-1" type="url" placeholder="文章来源URL" name="文章来源" ng-model="article.refer" gen-tooltip="validateTooltip"/>
+            <label>文章内容
+                <span class="info">
+                    [使用<a class="hot" ng-click="wmdPreview()">MarkDown语法</a>，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong class="hot">{{parent.contentBytes}}</strong>字节]
+                </span>
+            </label>
+            <div id="wmd-button-bar"></div>
+            <textarea class="wmd-input pure-input-1" id="wmd-input" name="文章内容" placeholder="{{global.isLogin&&'请使用MarkDown语法编辑内容'||'您还没有登录，不能发表文章哦'}}" ng-model="article.content" rows="10" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
+            </textarea>
+            <label>文章标签
+                <span class="info">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
+            </label>
+            <textarea class="pure-input-1" name="文章标签" ng-model="article.tagsList" ng-list="/[,，、]/" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">
+            </textarea>
+            <mark>热门标签：</mark>
+            <a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a>
+            <div class="well">
+                <button class="pure-button pure-button-small info-bg" ng-click="wmdPreview()">MarkDown语法 / 文章预览</button>
+                <button type="submit" class="pure-button pure-button-small success-bg" ng-class="{'pure-button-disabled':!global.isLogin}" ng-click="submit()">提交</button>
+                <button class="pure-button pure-button-small primary-bg" ng-click="goBack()">返回</button>
+            </div>
+        </form>
     </div>
 </div>
 <div gen-modal-msg="unSaveModal">确定要离开？未保存的数据将会丢失！</div>
