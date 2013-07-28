@@ -72,9 +72,9 @@ config(['$httpProvider', 'app',
         });
     }
 ]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'param',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'applyFn', 'param',
     function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
-        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, param) {
+        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, applyFn, param) {
         var unSave = {
             stopUnload: false,
             nextUrl: ''
@@ -84,6 +84,25 @@ config(['$httpProvider', 'app',
             isEditor: false,
             isLogin: false
         };
+
+        function resize() {
+            var viewWidth = global.viewWidth = $(window).width();
+            global.isPocket = viewWidth < 480;
+            global.isPhone = viewWidth < 768;
+            global.isTablet = !global.isPhone && viewWidth < 980;
+            global.isDesktop = viewWidth >= 980;
+        }
+
+        function init() {
+            restAPI.index.get({}, function (data) {
+                app.timeOffset = Date.now() - data.timestamp;
+                data = data.data;
+                data.title2 = data.description;
+                data.info.angularjs = angular.version.full;
+                app.union(global, data);
+                app.checkUser();
+            });
+        }
 
         window.app = app; // for test
         app.q = $q;
@@ -113,9 +132,7 @@ config(['$httpProvider', 'app',
         app.loading = function (value, status) {
             // $rootScope.loading = status;
             $rootScope.loading.show = value;
-            if (!$rootScope.$$phase) {
-                $rootScope.$apply();
-            }
+            applyFn();
         };
         app.validate = function (scope, turnoff) {
             var collect = [],
@@ -243,6 +260,10 @@ config(['$httpProvider', 'app',
                 user.isFollow = !user.isFollow;
             });
         };
+
+        $(window).resize(applyFn.bind(null, resize));
+        resize();
+
         restAPI.index.get({}, function (data) {
             app.timeOffset = Date.now() - data.timestamp;
             data = data.data;
@@ -253,13 +274,10 @@ config(['$httpProvider', 'app',
         });
 
         timing(function () { // 保证每300秒内与服务器存在连接，维持session
-            if (Date.now() - app.timestamp - app.timeOffset >= 300000) {
-                restAPI.index.get({
-                    OP: 'time'
-                }, function (data) {
-                    app.timestamp = data.timestamp;
-                });
+            if (Date.now() - app.timestamp - app.timeOffset >= 240000) {
+                init();
             }
-        }, 300000);
+        }, 60000);
+        init();
     }
 ]);

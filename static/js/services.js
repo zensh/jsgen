@@ -264,4 +264,15 @@ factory('timing', ['$rootScope', '$q', '$exceptionHandler',
             inView: inView
         };
     }
-);
+).factory('applyFn', ['$rootScope',
+    function ($rootScope) {
+        return function (fn, scope) {
+            fn = angular.isFunction(fn) ? fn : angular.noop;
+            scope = scope && scope.$apply ? scope : $rootScope;
+            fn();
+            if (!scope.$$phase) {
+                scope.$apply();
+            }
+        };
+    }
+]);

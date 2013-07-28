@@ -47,7 +47,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            listModel: myConf.listModel(null, 'index', false)
+            listModel: myConf.listModel(global.isPhone || null, 'index', false)
         };
         $scope.other = {};
         $scope.pagination = {};
@@ -78,6 +78,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 s: $routeParams.s || myConf.pageSize(null, 'tag', 50)
             };
 
+        app.rootScope.global.title2 = app.locale.TAG.title;
         $scope.parent = {
             getTpl: app.getFile.html('index-tag.html')
         };
@@ -103,6 +104,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 ]).controller('userLoginCtrl', ['app', '$scope',
     function (app, $scope) {
         app.clearUser();
+        app.rootScope.global.title2 = app.locale.USER.login;
         $scope.login = {
             logauto: true,
             logname: '',
@@ -150,6 +152,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             });
         }
 
+        app.rootScope.global.title2 = locale.USER.reset;
         $scope.reset = {
             name: '',
             email: '',
@@ -164,7 +167,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             confirmFn: function () {
                 app.timing.cancel(timing);
                 app.timing(null, 100, 1).then(function () {
-                    app.app.location.search({}).path('/');
+                    app.location.search({}).path('/');
                 });
                 return true;
             },
@@ -198,9 +201,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 ]).controller('userRegisterCtrl', ['app', '$scope',
     function (app, $scope) {
         var filter = app.filter,
-            lengthFn = filter('length');
+            lengthFn = filter('length'),
+            global = app.rootScope.global;
 
         app.clearUser();
+        global.title2 = app.locale.USER.register;
         $scope.user = {
             name: '',
             email: '',
@@ -261,6 +266,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         }
 
+        global.title2 = app.locale.HOME.title;
         $scope.user = global.user;
         $scope.parent = {
             getTpl: app.getFile.html(tplName()),
@@ -282,6 +288,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         }
 
+        app.rootScope.global.title2 = app.locale.USER.title;
         $scope.parent = {
             getTpl: app.getFile.html(tplName()),
             isMe: false,
@@ -290,6 +297,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 
         getUser('U' + $routeParams.ID).then(function (data) {
             $scope.user = data.data;
+            app.rootScope.global.title2 = $scope.user.name + app.locale.USER.title;
         });
     }
 ]).controller('userListCtrl', ['app', '$scope', '$routeParams',
@@ -318,9 +326,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 app.checkFollow(x);
             });
             if (!$routeParams.ID) {
-                $scope.parent.title = locale.HOME_TITLE[params.OP];
+                $scope.parent.title = locale.HOME[params.OP];
             } else {
-                $scope.parent.title = data.user.name + locale.USER_TITLE[params.OP];
+                $scope.parent.title = data.user.name + locale.USER[params.OP];
             }
             $scope.userList = data.data;
         });
@@ -329,7 +337,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
     function (app, $scope, $routeParams) {
         var restAPI = app.restAPI.user,
             myConf = app.myConf,
-            locale = app.locale;
+            locale = app.locale,
+            global = app.rootScope.global;
 
         function getArticleList() {
             var params = {
@@ -346,7 +355,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 pagination.pageSize = myConf.pageSize(pagination.pageSize, 'home');
                 $scope.pagination = pagination;
                 if (!$routeParams.ID) {
-                    var user = app.rootScope.global.user || {};
+                    var user = global.user || {};
                     app.each(data.data, function (x) {
                         if (data.readtimestamp > 0) {
                             x.read = x.updateTime < data.readtimestamp;
@@ -354,16 +363,16 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         }
                         x.isAuthor = x.author._id === user._id;
                     });
-                    $scope.parent.title = params.OP !== 'index' ? locale.HOME_TITLE[params.OP] : newArticles + locale.HOME_TITLE.index + app.filter('date')(data.readtimestamp, 'medium');
+                    $scope.parent.title = params.OP !== 'index' ? locale.HOME[params.OP] : newArticles + locale.HOME.index + app.filter('date')(data.readtimestamp, 'medium');
                 } else {
-                    $scope.parent.title = data.user.name + locale.USER_TITLE[params.OP];
+                    $scope.parent.title = data.user.name + locale.USER[params.OP];
                 }
                 $scope.articleList = data.data;
             });
         }
 
         $scope.parent = {
-            listModel: myConf.listModel(null, 'home', false),
+            listModel: myConf.listModel(global.isPhone || null, 'index', false),
             title: ''
         };
         $scope.pagination = {};
@@ -454,8 +463,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             return lengthFn(model.$value) <= global.SummaryMaxLen;
         };
         $scope.checkTag = function (scope, model) {
-            var length = model.$value && model.$value.length || 0;
-            return length <= global.UserTagsMax;
+            var list = model.$value || '';
+            list = angular.isString(list) ? list.split(/[,，、]/) : list;
+            return list.length <= global.UserTagsMax;
         };
         $scope.getTag = function (tag) {
             var tagsList = $scope.user.tagsList;
@@ -860,6 +870,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         }
 
+        global.title2 = app.locale.ARTICLE.title;
         $scope.parent = {
             edit: !! ID,
             wmdPreview: true,
@@ -895,8 +906,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             return lengthFn(model.$value) <= global.ContentMaxLen;
         };
         $scope.checkTag = function (scope, model) {
-            var length = model.$value && model.$value.length || 0;
-            return length <= global.ArticleTagsMax;
+            var list = model.$value || '';
+            list = angular.isString(list) ? list.split(/[,，、]/) : list;
+            return list.length <= global.ArticleTagsMax;
         };
         $scope.getTag = function (tag) {
             var tagsList = $scope.article.tagsList;

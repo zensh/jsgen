@@ -38,7 +38,8 @@ run(['$locale',
             TIMING: {
                 goHome: '秒钟后自动返回主页'
             },
-            HOME_TITLE: {
+            HOME: {
+                title: '我的主页',
                 index: ' 更新，阅读时间线：',
                 mark: '我的收藏',
                 article: '我的文章',
@@ -46,11 +47,8 @@ run(['$locale',
                 follow: '我的关注',
                 fans: '我的粉丝'
             },
-            USER_TITLE: {
-                article: '的文章',
-                fans: '的粉丝'
-            },
             ARTICLE: {
+                title: '添加/编辑文章',
                 preview: '预览：',
                 reply: '评论：',
                 removed: '成功删除 ',
@@ -68,12 +66,21 @@ run(['$locale',
                 unhighlight: '取消置顶 '
             },
             USER: {
+                title: '的主页',
+                login: '用户登录',
+                reset: '用户信息找回',
+                register: '用户注册',
+                article: '的文章',
+                fans: '的粉丝',
                 followed: '已关注 ',
                 unfollowed: '已取消关注 ',
                 email: '验证邮件已发送到新邮箱，通过验证后才保存修改',
                 updated: '用户信息更新成功',
                 noUpdate: '用户信息暂无变更',
                 noLogin: '您还未登录'
+            },
+            TAG: {
+                title: '热门标签'
             },
             FILTER: {
                 role: ['禁言', '待验证', '会员', '组员', '编辑', '管理员'],
