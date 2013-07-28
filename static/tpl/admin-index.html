@@ -1,46 +1,46 @@
-<section class="inner" ng-controller="adminGlobalCtrl">
-    <div class="page-header">
-        网站信息
+<div class="panel" ng-controller="adminGlobalCtrl">
+    <div class="page-header inner">
+        <strong>网站信息</strong>
     </div>
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs inner">
         <li class="active" gen-tab-click="active">
-            <a ng-click="setTab('tab1')">站点信息</a>
+            <a ng-click="parent.switchTab='tab1'">站点信息</a>
         </li>
         <li gen-tab-click="active">
-            <a ng-click="setTab('tab2')">服务器信息</a>
+            <a ng-click="parent.switchTab='tab2'">服务器信息</a>
         </li>
     </ul>
-    <div class="inner" ng-switch on="switchTab">
-        <div class="active" ng-switch-when="tab1">
+    <div class="inner" ng-switch on="parent.switchTab">
+        <div ng-switch-default>
             <dl class="dl-horizontal">
               <dt>网站名称：</dt>
-              <dd>{{global.title}}</dd>
+              <dd>{{global.title | placeholder}}</dd>
               <dt>网站网址：</dt>
-              <dd>{{global.url}}</dd>
+              <dd>{{global.url | placeholder}}</dd>
               <dt>网站副标题：</dt>
-              <dd>{{global.description}}</dd>
+              <dd>{{global.description | placeholder}}</dd>
               <dt>网站Meta标题：</dt>
-              <dd>{{global.metatitle}}</dd>
+              <dd>{{global.metatitle | placeholder}}</dd>
               <dt>网站Meta描述：</dt>
-              <dd>{{global.metadesc}}</dd>
+              <dd>{{global.metadesc | placeholder}}</dd>
               <dt>网站Meta关键词：</dt>
-              <dd>{{global.keywords}}</dd>
+              <dd>{{global.keywords | placeholder}}</dd>
               <dt>上线时间：</dt>
               <dd>{{global.date | date:'yy-MM-dd HH:mm'}}</dd>
               <dt>访问总数：</dt>
-              <dd>{{global.visitors}}</dd>
+              <dd>{{global.visitors | placeholder}}</dd>
               <dt>会员总数：</dt>
-              <dd>{{global.users}}</dd>
+              <dd>{{global.users | placeholder}}</dd>
               <dt>文章总数：</dt>
-              <dd>{{global.articles}}</dd>
+              <dd>{{global.articles | placeholder}}</dd>
               <dt>评论总数：</dt>
-              <dd>{{global.comments}}</dd>
+              <dd>{{global.comments | placeholder}}</dd>
               <dt>在线访客：</dt>
-              <dd>{{global.onlineNum}}</dd>
+              <dd>{{global.onlineNum | placeholder}}</dd>
               <dt>在线会员：</dt>
-              <dd>{{global.onlineUsers}}</dd>
+              <dd>{{global.onlineUsers | placeholder}}</dd>
               <dt>在线记录：</dt>
-              <dd>{{global.maxOnlineNum}}</dd>
+              <dd>{{global.maxOnlineNum | placeholder}}</dd>
               <dt>记录时间：</dt>
               <dd>{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</dd>
             </dl>
@@ -48,9 +48,9 @@
         <div ng-switch-when="tab2">
             <dl class="dl-horizontal">
               <dt>服务器已运行时间：</dt>
-              <dd>{{global.sys.uptime}}</dd>
+              <dd>{{global.sys.uptime | formatTime}}</dd>
               <dt>服务器操作系统：</dt>
-              <dd>{{global.sys.platform}}</dd>
+              <dd>{{global.sys.platform | placeholder}}</dd>
               <dt>软件信息：</dt>
               <dd>
                   <span>软件：<a ng-href="{{global.info.homepage}}"><strong>{{global.info.name}}</strong></a></span>
@@ -68,45 +68,45 @@
               </dd>
               <dt>内存使用：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.memory"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.memory track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>用户缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.user"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.user track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>文章缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.article"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.article track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>评论缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.comment"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.comment track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>文章列表缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.list"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.list track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>标签缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.tag"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.tag track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>合集缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.collection"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.collection track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>消息缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.message"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.message track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>分页导航缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.pagination"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.pagination track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
               <dt>操作限时缓存：</dt>
               <dd>
-                <span ng-repeat="(key, value) in global.sys.timeInterval"><strong>{{key}}：</strong>{{value}} | </span>
+                <span ng-repeat="(key, value) in global.sys.timeInterval track by $index"><strong>{{key}}：</strong>{{value | formatBytes}} | </span>
               </dd>
             </dl>
         </div>
     </div>
-</section>
+</div>

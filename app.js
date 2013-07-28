@@ -9,7 +9,7 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = Date.now() + '';
+jsGen.version = '0.4.9-wip';
 
 serverDm.on('error', function (err) {
     delete err.domain;

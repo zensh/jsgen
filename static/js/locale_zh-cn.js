@@ -27,7 +27,8 @@ run(['$locale',
                 minname: '长度应大于5字节，一个汉字3字节！',
                 maxname: '长度应小于15字节，一个汉字3字节！',
                 repasswd: '密码不一致！',
-                url: 'URL无效！'
+                url: 'URL无效！',
+                tag: '标签错误，不能包含“,”、“，”和“、”'
             },
             BTN_TEXT: {
                 confirm: '确定',
@@ -46,6 +47,15 @@ run(['$locale',
                 comment: '我的评论',
                 follow: '我的关注',
                 fans: '我的粉丝'
+            },
+            ADMIN: {
+                index: '网站信息',
+                user: '用户管理',
+                tag: '标签管理',
+                article: '文章管理',
+                comment: '评论管理',
+                message: '消息管理',
+                global: '网站设置'
             },
             ARTICLE: {
                 title: '添加/编辑文章',
@@ -80,7 +90,10 @@ run(['$locale',
                 noLogin: '您还未登录'
             },
             TAG: {
-                title: '热门标签'
+                title: '热门标签',
+                removed: '成功删除 ',
+                updated: '成功更新 ',
+                noUpdate: '标签暂无变更'
             },
             FILTER: {
                 role: ['禁言', '待验证', '会员', '组员', '编辑', '管理员'],
@@ -97,6 +110,12 @@ run(['$locale',
                 }
             },
             DATETIME: {
+                second: '秒',
+                minute: '分',
+                hour: '时',
+                day: '天',
+                month: '月',
+                year: '年',
                 full: 'yyyy年MM月dd日 HH:mm',
                 short: 'MM-dd HH:mm',
                 dayAgo: '天前',

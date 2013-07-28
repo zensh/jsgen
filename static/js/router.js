@@ -78,6 +78,7 @@ constant('app', {
         when('/home', home).
         when('/home/:OP', home).
         when('/admin', admin).
+        when('/admin/:OP', admin).
         when('/tag', tag).
         when('/add', edit).
         when('/A:ID/edit', edit).

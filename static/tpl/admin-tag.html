@@ -1,22 +1,21 @@
-<section class="clearfix inner" ng-controller="adminTagCtrl">
-    <div class="page-header">
-            <h4>标签管理
-                <a ng-click="editTag=!editTag">
-                <i class="glyphicon glyphicon-edit"></i></a>
-            </h4>
+<div ng-controller="adminTagCtrl">
+    <div class="panel">
+        <div class="inner page-header">
+            <strong>标签管理</strong>
+        </div>
+        <form class="pure-form pure-g-r inner">
+            <div class="pure-u-1-2 edit-tag" ng-repeat="tag in tagList" id="{{tag._id}}">
+                <a title="删除标签" ng-click="remove(tag)" gen-tooltip><i class="icon-remove"></i></a>
+                <input class="pure-input-1-2 input-flat" type="text" name="标签" ng-model="tag.tag" ui-validate="{tag:checkTag,minlength:checkTagMin}" gen-tooltip="validateTooltip" required>
+                <small class="muted"><a ng-href="#/{{tag._id}}">文章 {{tag.articles}}/会员 {{tag.users}}</a></small>
+            </div>
+        </form>
+        <div class="inner well text-right" ng-show="parent.editSave">
+            <button class="pure-button success-bg" ng-click="submit()">保存</button>
+            <button class="pure-button info-bg" ng-click="reset()">重置</button>
+        </div>
     </div>
-    <ul class="list-inline">
-        <li ng-repeat="tag in data" id="{{tag._id}}" class="text-center">
-            <a ng-hide="editTag" class="btn btn-info" ng-href="{{'/'+tag._id}}"><strong>{{tag.tag}}</strong>
-            <small>文章{{tag.articles}}/会员{{tag.users}}</small></a>
-            <a ng-show="editTag" class="form-inline"><input type="text" ng-model="tag.tag"/></a>
-            <a ng-hide="editTag" ng-click="remove(tag)" title="删除{{tag.tag}}">
-            <i class="glyphicon glyphicon-remove"></i></a>
-        </li>
-    </ul>
-    <div class="pull-left" gen-pagination="pagination" ng-show="pagination"></div>
-    <div class="pull-right" ng-show="editSave">
-        <button class="btn btn-primary" ng-click="submit()">保存</button>
-        <button class="btn btn-success" ng-click="reset()">重置</button>
-    </div>
-</section>
+    <div gen-pagination="pagination"></div>
+    <div gen-modal-msg="removeTagModal">确定要删除标签 {{removeTag.tag}}？</div>
+</div>
+<div gen-modal-msg="unSaveModal">确定要离开？未保存的数据将会丢失！</div>

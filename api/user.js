@@ -557,7 +557,7 @@ function getUsers(req, res, dm) {
             data2.email = data[i].email;
             data[i] = data2;
         };
-        return res.sendjson(resJson(null, data));
+        return res.sendjson(resJson(null, data, pagination));
     }));
 }
 

@@ -250,8 +250,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             return app.location.search({}).path('/');
         }
 
-        function tplName() {
-            switch ($routeParams.OP) {
+        function tplName(path) {
+            switch (path) {
             case 'follow':
             case 'fans':
                 return 'user-list.html';
@@ -269,7 +269,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         global.title2 = app.locale.HOME.title;
         $scope.user = global.user;
         $scope.parent = {
-            getTpl: app.getFile.html(tplName()),
+            getTpl: app.getFile.html(tplName($routeParams.OP)),
             isMe: true,
             viewPath: $routeParams.OP || 'index'
         };
@@ -381,13 +381,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.removeArticleModal = {
             confirmBtn: locale.BTN_TEXT.confirm,
             confirmFn: function () {
+                var article = $scope.removeArticle;
                 app.restAPI.article.remove({
-                    ID: $scope.removeArticle._id
+                    ID: article._id
                 }, function () {
                     app.some($scope.articleList, function (x, i, list) {
-                        if (x._id === $scope.removeArticle._id) {
+                        if (x._id === article._id) {
                             list.splice(i, 1);
-                            app.toast.success(locale.ARTICLE.removed + $scope.removeArticle.title, locale.RESPONSE.success);
+                            app.toast.success(locale.ARTICLE.removed + article.title, locale.RESPONSE.success);
                             return true;
                         }
                     });
@@ -445,10 +446,6 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         }
 
         $scope.sexArray = ['male', 'female'];
-
-        $scope.$watchCollection('user', function (value) {
-            app.checkDirty(user, originData, value);
-        });
 
         $scope.checkName = function (scope, model) {
             return filter('checkName')(model.$value);
@@ -519,6 +516,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 }
             }
         };
+
+        $scope.$watchCollection('user', function (value) {
+            app.checkDirty(user, originData, value);
+        });
         initUser();
     }
 ]).controller('articleCtrl', ['app', '$scope', '$routeParams', 'mdEditor', 'getList', 'getMarkdown',
@@ -962,200 +963,237 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             initArticle();
         }
     }
-]).controller('adminCtrl', ['app', '$scope',
-    function (app, $scope) {
-        if (!app.rootScope.global.isEditor) {
-            app.location.path('/');
+]).controller('adminCtrl', ['app', '$scope', '$routeParams',
+    function (app, $scope, $routeParams) {
+        var global = app.rootScope.global,
+            path = $routeParams.OP || 'index';
+
+        if (!global.isEditor) {
+            return app.location.search({}).path('/');
         }
-        $scope.getTpl = app.getFile('admin-index.html');
-        $scope.setTpl = function (tpl) {
-            $scope.getTpl = app.getFile(tpl);
+
+        function tplName(path) {
+            path = path === 'comment' ? 'article' : path;
+            return 'admin-' + path + '.html';
+        }
+
+        $scope.parent = {
+            getTpl: app.getFile.html(tplName(path)),
+            viewPath: path
         };
+        global.title2 = app.locale.ADMIN[path];
     }
-]).controller('adminUserCtrl', ['app', '$scope',
-    function (app, $scope) {
-        var originData = {};
-        $scope.roleArray = [0, 1, 2, 3, 4, 5];
-        $scope.editEmail = false;
-        $scope.editRole = false;
-        $scope.editSave = false;
-        $scope.pagination = {
-            now: 1,
-            total: 1,
-            num: 20,
-            nums: [20, 50, 100]
+]).controller('adminUserCtrl', ['app', '$scope', '$routeParams',
+    function (app, $scope, $routeParams) {
+        var originData = {},
+            restAPI = app.restAPI.user,
+            myConf = app.myConf,
+            locale = app.locale,
+            params = {
+                ID: 'admin',
+                p: $routeParams.p,
+                s: $routeParams.s || myConf.pageSize(null, 'userAdmin', 50)
+            },
+            userList = [{
+                _id: '',
+                name: '',
+                locked: false,
+                email: '',
+                role: 0,
+                score: 0,
+                date: 0,
+                lastLoginDate: 0
+            }];
+
+        function initUserList(list) {
+            originData = app.union(app.union(userList), list);
+            $scope.userList = app.union(originData);
+            $scope.parent.editSave = !! app.checkDirty(userList, originData, $scope.userList);
+        }
+
+        $scope.parent = {
+            editSave: false,
+            isSelectAll: false
         };
-        $scope.$on('pagination', function (event, doc) {
-            event.stopPropagation();
-            doc.Uid = 'admin';
+        $scope.pagination = {};
+        $scope.roleArray = [0, 1, 2, 3, 4, 5];
 
-            var result = app.restAPI.user.get(doc, function () {
-
-                if (!result.err) {
-                    $scope.data = result.data;
-                    originData = app.union($scope.data);
-                    app.union($scope.pagination, result.pagination);
-                } else {
-                    app.rootScope.msg = result.err;
-                }
+        $scope.selectAll = function () {
+            app.each($scope.userList, function (x) {
+                x.isSelect = $scope.parent.isSelectAll;
             });
-        });
-        $scope.$emit('pagination', {
-            n: $scope.pagination.num,
-            p: $scope.pagination.now
-        });
-        $scope.$watch(function () {
-            if (angular.equals($scope.data, originData)) {
-                $scope.editSave = false;
-            } else {
-                $scope.editSave = true;
-            }
-        });
+        };
         $scope.reset = function () {
-            $scope.data = app.union(originData);
-            $scope.editEmail = false;
-            $scope.editRole = false;
-            $scope.editSave = false;
+            $scope.userList = app.union(originData);
         };
         $scope.submit = function () {
-            var defaultObj = [{
+            var list = [{
                 _id: '',
-                email: '',
                 locked: false,
                 role: 0
             }];
-            $scope.editEmail = false;
-            $scope.editRole = false;
-            $scope.editSave = false;
-            var data = app.union($scope.data);
-            originData = app.intersect(app.union(defaultObj), originData);
-            data = app.intersect(app.union(defaultObj), data);
-            angular.forEach(data, function (value, key) {
-                if (angular.equals(value, originData[key])) {
-                    delete data[key];
-                }
-            });
-            app.complement(data, originData, [{
-                _id: ''
-            }]);
-
-            var result = app.restAPI.user.save({
-                Uid: 'admin'
-            }, {
-                data: data
-            }, function () {
-
-                if (!result.err) {
-                    $scope.data = app.union(result.data);
-                    originData = app.union(result.data);
-                    app.rootScope.msg = {
-                        name: '请求成功',
-                        message: '修改成功！'
-                    };
+            if (app.validate($scope)) {
+                var data = app.checkDirty(userList, originData, $scope.userList);
+                if (app.isEmpty(data)) {
+                    app.toast.info(locale.USER.noUpdate);
                 } else {
-                    app.rootScope.msg = result.err;
+                    data = app.intersect(list, data);
+                    restAPI.save({
+                        ID: 'admin'
+                    }, {
+                        data: data
+                    }, function (result) {
+                        var updated = [];
+                        app.each(data, function (x) {
+                            var tag = result.data[x._id];
+                            app.some($scope.tagList, function (y, i, list) {
+                                if (x._id === y._id) {
+                                    if (tag) {
+                                        app.union(y, tag);
+                                        updated.push(tag.tag);
+                                    } else {
+                                        list.splice(i, 1);
+                                    }
+                                    return true;
+                                }
+                            });
+                        });
+                        initUserList($scope.userList);
+                        app.toast.success(locale.USER.updated + updated.join(', '), locale.RESPONSE.success);
+                    });
                 }
-            });
-        };
-    }
-]).controller('adminTagCtrl', ['app', '$scope',
-    function (app, $scope) {
-        var originData = {};
-        $scope.data = null;
-        $scope.pagination = null;
-        $scope.$on('pagination', function (event, doc) {
-            event.stopPropagation();
-
-            var result = app.restAPI.tag.get(doc, function () {
-
-                if (!result.err) {
-                    $scope.data = result.data;
-                    originData = app.union(result.data);
-                    if (result.pagination) {
-                        $scope.pagination = result.pagination;
-                        if (!$scope.pagination.display) {
-                            $scope.pagination.display = {
-                                first: '首页',
-                                next: '下一页',
-                                last: '尾页'
-                            };
-                        }
-                    }
-                } else {
-                    app.rootScope.msg = result.err;
-                }
-            });
-        });
-        $scope.$emit('pagination', {
-            n: 50,
-            p: 1
-        });
-        $scope.$watch(function () {
-            if (angular.equals($scope.data, originData)) {
-                $scope.editSave = false;
-            } else {
-                $scope.editSave = true;
             }
+        };
+        $scope.$watch('userList', function (value) {
+            $scope.parent.editSave = !! app.checkDirty(userList, originData, value);
+        }, true);
+        app.promiseGet(params, restAPI).then(function (data) {
+            var pagination = data.pagination || {};
+            pagination.path = app.location.path();
+            pagination.pageSize = myConf.pageSize(pagination.pageSize, 'userAdmin');
+            pagination.sizePerPage = [50, 100, 200];
+            $scope.pagination = pagination;
+            initUserList(data.data);
         });
-        $scope.remove = function (tag) {
+    }
+]).controller('adminTagCtrl', ['app', '$scope', '$routeParams',
+    function (app, $scope, $routeParams) {
+        var originData = {},
+            restAPI = app.restAPI.tag,
+            myConf = app.myConf,
+            locale = app.locale,
+            params = {
+                ID: 'index',
+                p: $routeParams.p,
+                s: $routeParams.s || myConf.pageSize(null, 'tagAdmin', 20)
+            },
+            tagList = [{
+                _id: '',
+                articles: 0,
+                tag: '',
+                users: 0
+            }];
 
-            var result = app.restAPI.tag.remove({
-                ID: tag._id
-            }, null, function () {
+        function initTagList(list) {
+            originData = app.union(app.union(tagList), list);
+            $scope.tagList = app.union(originData);
+            $scope.parent.editSave = !! app.checkDirty(tagList, originData, $scope.tagList);
+        }
 
-                if (result.remove) {
-                    $scope.data.some(function (x, i) {
+        $scope.parent = {
+            editSave: false
+        };
+        $scope.pagination = {};
+        $scope.removeTag = null;
+
+        $scope.removeTagModal = {
+            confirmBtn: locale.BTN_TEXT.confirm,
+            confirmFn: function () {
+                var tag = $scope.removeTag;
+                restAPI.remove({
+                    ID: tag._id
+                }, function () {
+                    app.some($scope.tagList, function (x, i, list) {
                         if (x._id === tag._id) {
-                            $scope.data.splice(i, 1);
+                            list.splice(i, 1);
+                            app.toast.success(locale.TAG.removed + tag.tag, locale.RESPONSE.success);
                             return true;
                         }
                     });
-                    originData = app.union($scope.data);
-                    app.rootScope.msg = {
-                        name: '删除标签',
-                        message: '已成功删除标签：' + tag.tag + '！',
-                        type: 'success'
-                    }
-                } else {
-                    app.rootScope.msg = result.err;
-                }
-            });
+                    initTagList($scope.tagList);
+                    $scope.removeTag = null;
+                });
+                return true;
+            },
+            cancelBtn: locale.BTN_TEXT.cancel,
+            cancelFn: function () {
+                $scope.removeTag = null;
+                return true;
+            }
+        };
+
+        $scope.checkTag = function (scope, model) {
+            var tag = app.toStr(model.$value);
+            return !/[,，、]/.test(tag);
+        };
+        $scope.checkTagMin = function (scope, model) {
+            return app.filter('length')(model.$value) >= 3;
+        };
+        $scope.reset = function () {
+            $scope.tagList = app.union(originData);
+        };
+        $scope.remove = function (tag) {
+            $scope.removeTag = tag;
+            $scope.removeTagModal.modal(true);
         };
         $scope.submit = function () {
-            var defaultObj = [{
+            var list = [{
                 _id: '',
                 tag: ''
             }];
-            $scope.editTag = false;
-            $scope.editSave = false;
-            var data = app.union($scope.data);
-            originData = app.intersect(app.union(defaultObj), originData);
-            data = app.intersect(app.union(defaultObj), data);
-            angular.forEach(data, function (value, key) {
-                if (angular.equals(value, originData[key])) {
-                    delete data[key];
-                }
-            });
-            app.digestArray(data);
-
-            var result = app.restAPI.tag.save({
-                ID: 'admin'
-            }, {
-                data: data
-            }, function () {
-
-                if (!result.err) {
-                    $scope.data = app.union(result.data);
-                    originData = app.union(result.data);
-                    app.rootScope.msg = {
-                        name: '请求成功',
-                        message: '修改成功！'
-                    };
+            if (app.validate($scope)) {
+                var data = app.checkDirty(tagList, originData, $scope.tagList);
+                if (app.isEmpty(data)) {
+                    app.toast.info(locale.TAG.noUpdate);
                 } else {
-                    app.rootScope.msg = result.err;
+                    data = app.intersect(list, data);
+                    restAPI.save({
+                        ID: 'admin'
+                    }, {
+                        data: data
+                    }, function (result) {
+                        var updated = [];
+                        app.each(data, function (x) {
+                            var tag = result.data[x._id];
+                            app.some($scope.tagList, function (y, i, list) {
+                                if (x._id === y._id) {
+                                    if (tag) {
+                                        app.union(y, tag);
+                                        updated.push(tag.tag);
+                                    } else {
+                                        list.splice(i, 1);
+                                    }
+                                    return true;
+                                }
+                            });
+                        });
+                        initTagList($scope.tagList);
+                        app.toast.success(locale.TAG.updated + updated.join(', '), locale.RESPONSE.success);
+                    });
                 }
-            });
+            }
         };
+
+        $scope.$watch('tagList', function (value) {
+            $scope.parent.editSave = !! app.checkDirty(tagList, originData, value);
+        }, true);
+        app.promiseGet(params, restAPI).then(function (data) {
+            var pagination = data.pagination || {};
+            pagination.path = app.location.path();
+            pagination.pageSize = myConf.pageSize(pagination.pageSize, 'tagAdmin');
+            pagination.sizePerPage = [20, 50, 100];
+            initTagList(data.data);
+        });
     }
 ]).controller('adminArticleCtrl', ['app', '$scope',
     function (app, $scope) {
@@ -1163,28 +1201,33 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
     }
 ]).controller('adminGlobalCtrl', ['app', '$scope',
     function (app, $scope) {
-        var originData = {};
+        var originData = {},
+            tagsArray = [],
+            locale = app.locale,
+            filter = app.filter,
+            restAPI = app.restAPI.index,
+            lengthFn = filter('length'),
+            global = {
+                avatar: '',
+                name: '',
+                sex: '',
+                email: '',
+                desc: '',
+                passwd: '',
+                tagsList: ['']
+            };
 
-        $scope.global = app.restAPI.index.get({
-            OP: 'admin'
-        }, function () {
-
-            $scope.global = app.union($scope.global);
-            originData = app.union($scope.global);
-        });
-        $scope.editSave = false;
-        $scope.switchTab = 'tab1';
-        $scope.$watch(function () {
-            if (angular.equals($scope.global, originData)) {
-                $scope.editSave = false;
-            } else {
-                $scope.editSave = true;
-            }
-        });
-        $scope.setTab = function (tab) {
-            $scope.switchTab = tab;
-            app.rootScope.msg = null;
+        function initglobal(data) {
+            originData = app.union(data);
+            // originData = app.intersect(app.union(user), originData);
+            $scope.global = app.union(originData);
+            //app.checkDirty(global, originData, $scope.global);
         }
+
+        $scope.parent = {
+            switchTab: 'tab1'
+        };
+
         $scope.setClass = function (b) {
             return b ? 'btn-warning' : 'btn-success';
         };
@@ -1232,5 +1275,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 }
             });
         };
+        app.promiseGet({
+            OP: 'admin'
+        }, restAPI).then(function (data) {
+            initglobal(data.data);
+        });
     }
 ]);

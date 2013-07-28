@@ -1,10 +1,10 @@
-{jsGen} <small>0.4.8-wip</small>
+{jsGen} <small>0.4.9-wip</small>
 =======
 **——JavaScript Generated**
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
 
-### 0.4.8目标（开发中，暂不可正常运行）
+### 0.5.0目标（管理后台API交互未完成）
  + 改用 YUI的pure框架，兼容IE8
  + 重构AngularJS客户端应用
 
@@ -49,6 +49,7 @@ Administrator username: **admin** password: **admin@zensh.com** ，You can chang
     rm tmp/static/*    //删除js、css静态缓存,可能会需要清空浏览器端缓存
 
 ### 更新 (Changelog)
+ + 2013/07/29 jsGen v0.4.9 完全重构，本版基本完成AngularJS客户端部分的重构，主要包括使用pure CSS框架，重写并优化AngularJS代码，添加若干功能，兼容IE8！（本版管理后台仍在重构，不影响前台使用，待0.5.0版完成）
  + 2013/06/01 jsGen v0.3.5 修复若干bug，标签允许空格。
  + 2013/05/26 jsGen v0.3.4 修复管理后台不出现网站设置的bug，管理后台增加邮箱验证设置，默认关闭邮箱验证。
  + 2013/04/25 jsGen v0.3.3 优化浏览器端AngularJS应用。

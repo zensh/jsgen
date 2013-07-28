@@ -368,9 +368,7 @@ function editTags(req, res, dm) {
         _id: '',
         tag: ''
     },
-        body = {
-            data: []
-        },
+        data = {},
         tagArray = req.apibody.data;
 
     if (req.session.role < 4) {
@@ -388,7 +386,7 @@ function editTags(req, res, dm) {
     function next() {
         var tagObj;
         if (tagArray.length === 0) {
-            return res.sendjson(resJson(null, body));
+            return res.sendjson(resJson(null, data));
         }
         tagObj = tagArray.pop();
         if (!tagObj || !tagObj._id || !tagObj.tag) {
@@ -401,7 +399,7 @@ function editTags(req, res, dm) {
                 doc._id = jsGen.dao.tag.convertID(doc._id);
                 delete doc.articlesList;
                 delete doc.usersList;
-                body.data.push(doc);
+                data[doc._id] = doc;
             }
             return next();
         }));

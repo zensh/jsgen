@@ -305,7 +305,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             link: function (scope, element, attr) {
                 var origin;
 
-                element.bind('dblclick', function () {
+                element.bind('click', function () {
                     origin = scope.value;
                     scope.isEdit = true;
                 });

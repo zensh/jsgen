@@ -120,7 +120,7 @@ function getGlobal(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     body.sys = {
-        uptime: process.uptime(),
+        uptime: Math.round(process.uptime()),
         cpus: os.cpus(),
         platform: process.platform,
         node: process.versions,
@@ -135,12 +135,6 @@ function getGlobal(req, res, dm) {
         pagination: jsGen.cache.pagination.info(),
         timeInterval: jsGen.cache.timeInterval.info()
     };
-    body.sys.uptime = jsGen.lib.tools.formatTime(Math.round(body.sys.uptime));
-    body.sys.memory.rss = jsGen.lib.tools.formatBytes(body.sys.memory.rss);
-    body.sys.memory.heapTotal = jsGen.lib.tools.formatBytes(body.sys.memory.heapTotal);
-    body.sys.memory.heapUsed = jsGen.lib.tools.formatBytes(body.sys.memory.heapUsed);
-    body.sys.memory.total = jsGen.lib.tools.formatBytes(os.totalmem());
-    body.sys.memory.free = jsGen.lib.tools.formatBytes(os.freemem());
     return res.sendjson(resJson(null, body));
 }
 

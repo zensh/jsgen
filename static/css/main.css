@@ -83,11 +83,33 @@ body > div {
 .pure-u-1-2 {
     width: 49.9%;
 }
-
+.pure-table {
+    border: none;
+    width: 100%;
+}
+.pure-table thead {
+    background-color: transparent;
+}
+.pure-table th {
+    font-weight: normal;
+    text-align: center;
+    padding: 8px 2px;
+}
+.pure-table tbody tr:hover {
+    background-color: #f6f6f6;
+}
+.pure-table td {
+    padding: 8px 2px;
+    font-size: .9em;
+}
+.pure-table-horizontal td, .pure-table-horizontal th {
+    border-width: 0 0 1px;
+    border-bottom: 1px solid #eee;
+}
 .article-header {
     padding: 0 1em;
     margin: 2em 0;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #eee;
 }
 .article-info {
     font-size: 0.8em;
@@ -134,8 +156,11 @@ body > div {
     font-size: .9em;
     padding: 25px 5px 5px 5px;
 }
-.menu .pure-menu li img {
+.menu .pure-menu li a.pure-menu-img,
+.menu .pure-menu li a.pure-menu-img img {
     display: block;
+    margin: 0;
+    padding: 0;
 }
 .menu .pure-menu .pure-menu-logo li a {
     color: #eee;
@@ -498,6 +523,17 @@ body > div {
     border-radius: 4px;
     box-shadow: inset 0 1px 3px #ddd;
 }
+
+.edit-tag {
+    margin: 5px 0;
+    padding: 2px 0;
+    border-bottom: 1px solid #eee;
+}
+.edit-tag input {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
 
 .pagination {
     display: inline-block;
@@ -964,6 +1000,14 @@ ol.inner {
 }
 .transparent {
     background-color: transparent;
+}
+.input-flat {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+.input-flat:focus {
+    background-color: rgb(230, 255, 230);
 }
 .success {
     color: rgb(28, 184, 65); /* this is a green */

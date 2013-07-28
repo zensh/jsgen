@@ -24,11 +24,10 @@
         <div class="pure-u-1 menu">
             <div class="pure-menu pure-menu-open pure-menu-horizontal wrap">
                 <ul class="pure-menu-logo">
-                    <li><img height="50" ng-src="{{global.logo}}"/></li>
+                    <li><a class="pure-menu-img" href="#/"><img height="50" ng-src="{{global.logo}}"/></a></li>
                     <li><a href="#/">{{global.title}}</a></li>
                 </ul>
                 <ul class="pure-hidden-phone">
-                    <li ng-show="global.isLogin"><a href="#/home"><i class="icon-home"></i>Home</a></li>
                     <li><a href="#/tag/JavaScript">JavaScript</a></li>
                     <li><a href="#/tag/AngularJS">AngularJS</a></li>
                     <li><a href="#/tag/Node.js">Node.js</a></li>
@@ -39,9 +38,10 @@
                     <li><a href="#/login"><i class="icon-signin"></i>登录</a></li>
                 </ul>
                 <ul class="right user" ng-if="global.isLogin">
-                    <li><img class="img-mini" src="/static/img/avatar.png" gen-src="{{global.user.avatar}}"/></li>
-                    <li><a ng-href="{{global.isEditor&&'#/admin'||'#/home'}}"><i class="icon-smile"></i>{{global.user.name}}<span class="pure-hidden-phone">[{{global.user.role | match:'role'}}]</span></a></li>
-                    <li class="pure-hidden-phone"><a ng-click="logout()"><i class="icon-signout"></i>退出</a></li>
+                    <li><a class="pure-menu-img" href="#/home"><img class="img-mini" src="/static/img/avatar.png" gen-src="{{global.user.avatar}}"/></a></li>
+                    <li class="pure-visible-desktop"><a href="#/home"><i class="icon-home"></i>{{global.user.name}}</a></li>
+                    <li ng-show="global.isEditor"><a href="#/admin"><i class="icon-gear"></i>管理</a></li>
+                    <li class="pure-visible-desktop"><a ng-click="logout()"><i class="icon-signout"></i>退出</a></li>
                 </ul>
             </div>
         </div>

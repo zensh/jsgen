@@ -16,7 +16,8 @@ factory('tools', function () {
         isEmpty: isEmpty,
         isArray: isArray,
         intersect: intersect,
-        checkType: checkType
+        checkType: checkType,
+        digestArray: digestArray
     };
 
     function isArray(obj) {
@@ -47,8 +48,8 @@ factory('tools', function () {
     function trim(str) {
         str = toStr(str);
         str = str.replace(/ +/g, ' ');
-        str = str.replace(/^ /, '');
-        str = str.replace(/ $/, '');
+        str = str.replace(/^\s+/, '');
+        str = str.replace(/\s+$/, '');
         return str;
     }
 
@@ -56,7 +57,7 @@ factory('tools', function () {
         iterator = iterator || angular.noop;
         if (!obj) {
             return;
-        } else if (obj.length === +obj.length) {
+        } else if (isArray(obj)) {
             var i, l;
             if (!right) {
                 for (i = 0, l = obj.length; i < l; i++) {
@@ -106,7 +107,7 @@ factory('tools', function () {
         var type = typeof obj;
         if (obj === null) {
             return 'null';
-        } else if (type === 'object' && isArray(obj)) {
+        } else if (isArray(obj)) {
             return 'array';
         } else {
             return type;
@@ -199,5 +200,19 @@ factory('tools', function () {
             }
         }
         return a;
+    }
+
+    function digestArray(array) {
+        var result = [];
+        if (isArray(array)) {
+            each(array, function (x) {
+                if (checkType(x) !== 'undefined') {
+                    result.push(x);
+                }
+            });
+            return result;
+        } else {
+            return array;
+        }
     }
 });
