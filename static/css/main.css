@@ -14,7 +14,7 @@ textarea {
     font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 a {
-    color: rgb(0, 120, 231);
+    color: rgb(0, 102, 204);
     cursor: pointer;
 }
 small {
@@ -184,7 +184,7 @@ body > div {
 .aside .pure-menu a:focus,
 .aside .pure-menu .active > a {
     color: #fff;
-    background-color: rgb(0, 120, 231);
+    background-color: rgb(0, 102, 204);
 }
 
 .footer {
@@ -230,7 +230,7 @@ body > div {
     border: none;
 }
 .pure-button-link {
-    color: rgb(0, 120, 231);
+    color: rgb(0, 102, 204);
     background: transparent;
     padding: .2em .3em;
 }
@@ -1016,7 +1016,7 @@ ol.inner {
     color: rgb(66, 184, 221); /* this is a light blue */
 }
 .primary {
-    color: rgb(0, 120, 231);
+    color: rgb(0, 102, 204);
 }
 .hot {
     color: rgb(252, 60, 60);
@@ -1034,7 +1034,7 @@ ol.inner {
     background-color: rgb(66, 184, 221);
 }
 .primary-bg {
-    background-color: rgb(0, 120, 231);
+    background-color: rgb(0, 102, 204);
 }
 
 @media (min-width: 980px) {
