@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _*/
+/*global angular*/
 
 angular.module('jsGen.controllers', ['ui.validate']).
 controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
@@ -64,7 +64,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         getList('comment').then(function (data) {
             data = app.union(data.data);
             app.each(data, function (x, i) {
-                x.content = app.filter('cutText')(app.trim(x.content), 180);
+                x.content = app.filter('cutText')(app.trim(x.content, true), 180);
             });
             $scope.hotComments = data.slice(0, 6);
         });
@@ -96,7 +96,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         getList('comment').then(function (data) {
             data = app.union(data.data);
             app.each(data, function (x, i) {
-                x.content = app.filter('cutText')(app.trim(x.content), 180);
+                x.content = app.filter('cutText')(app.trim(x.content, true), 180);
             });
             $scope.hotComments = data.slice(0, 6);
         });
@@ -483,8 +483,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             });
         };
         $scope.submit = function () {
-            var result, changeEmail,
-                data = app.union($scope.user);
+            var data = app.union($scope.user);
             if (app.validate($scope)) {
                 data = app.checkDirty(user, originData, data);
                 if (app.isEmpty(data)) {
@@ -1006,7 +1005,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }];
 
         function initUserList(list) {
-            originData = app.union(app.union(userList), list);
+            originData = app.intersect(app.union(userList), list);
             $scope.userList = app.union(originData);
             $scope.parent.editSave = !! app.checkDirty(userList, originData, $scope.userList);
         }
@@ -1042,18 +1041,13 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         ID: 'admin'
                     }, {
                         data: data
-                    }, function (result) {
+                    }, function (data) {
                         var updated = [];
-                        app.each(data, function (x) {
-                            var tag = result.data[x._id];
-                            app.some($scope.tagList, function (y, i, list) {
+                        app.each(data.data, function (x) {
+                            app.some($scope.userList, function (y) {
                                 if (x._id === y._id) {
-                                    if (tag) {
-                                        app.union(y, tag);
-                                        updated.push(tag.tag);
-                                    } else {
-                                        list.splice(i, 1);
-                                    }
+                                    app.union(y, x);
+                                    updated.push(x.name);
                                     return true;
                                 }
                             });
@@ -1208,73 +1202,91 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             restAPI = app.restAPI.index,
             lengthFn = filter('length'),
             global = {
-                avatar: '',
-                name: '',
-                sex: '',
+                domain: '',
+                title: '',
+                url: '',
+                logo: '',
                 email: '',
-                desc: '',
-                passwd: '',
-                tagsList: ['']
+                description: '',
+                metatitle: '',
+                metadesc: '',
+                keywords: '',
+                robots: '',
+                TimeInterval: 0,
+                ArticleTagsMax: 0,
+                UserTagsMax: 0,
+                TitleMinLen: 0,
+                TitleMaxLen: 0,
+                SummaryMaxLen: 0,
+                ContentMinLen: 0,
+                ContentMaxLen: 0,
+                UserNameMinLen: 0,
+                UserNameMaxLen: 0,
+                register: true,
+                emailVerification: true,
+                UsersScore: [null, null, null, null, null, null],
+                ArticleStatus: [null, null],
+                ArticleHots: [null, null, null, null, null],
+                userCache: 0,
+                articleCache: 0,
+                commentCache: 0,
+                listCache: 0,
+                tagCache: 0,
+                collectionCache: 0,
+                messageCache: 0,
+                paginationCache: [null, null],
+                smtp: {
+                    host: '',
+                    secureConnection: true,
+                    port: 0,
+                    auth: {
+                        user: '',
+                        pass: ''
+                    },
+                    senderName: '',
+                    senderEmail: ''
+                }
             };
 
+
         function initglobal(data) {
+            $scope.global = app.union(data);
             originData = app.union(data);
-            // originData = app.intersect(app.union(user), originData);
-            $scope.global = app.union(originData);
-            //app.checkDirty(global, originData, $scope.global);
+            originData = app.intersect(app.union(global), originData);
+            $scope.editGlobal = app.union(originData);
+            app.checkDirty(global, originData, $scope.editGlobal);
         }
 
         $scope.parent = {
             switchTab: 'tab1'
         };
-
-        $scope.setClass = function (b) {
-            return b ? 'btn-warning' : 'btn-success';
-        };
         $scope.reset = function () {
-            $scope.global = app.union(originData);
-            $scope.editSave = false;
+            $scope.editGlobal = app.union(originData);
         };
         $scope.submit = function () {
-            var data = app.union($scope.global);
-            $scope.editSave = false;
-            angular.forEach(data.UsersScore, function (value, key) {
-                data.UsersScore[key] = +value;
-            });
-            angular.forEach(data.ArticleStatus, function (value, key) {
-                data.ArticleStatus[key] = +value;
-            });
-            angular.forEach(data.ArticleHots, function (value, key) {
-                data.ArticleHots[key] = +value;
-            });
-            angular.forEach(data.paginationCache, function (value, key) {
-                data.paginationCache[key] = +value;
-            });
-            angular.forEach(data, function (value, key) {
-                if (angular.equals(value, originData[key])) {
-                    delete data[key];
-                }
-            });
-
-            var result = app.restAPI.index.save({
-                OP: 'admin'
-            }, data, function () {
-
-                if (!result.err) {
-                    $scope.global = app.union(result);
-                    originData = app.union(result);
-                    var clone = app.union($scope.global);
-                    app.intersect(clone, $scope.global);
-                    app.union($scope.global, clone);
-                    app.rootScope.msg = {
-                        name: '请求成功',
-                        message: '修改成功！'
-                    };
+            var data = app.union($scope.editGlobal);
+            if (app.validate($scope)) {
+                data = app.checkDirty(global, originData, data);
+                if (app.isEmpty(data)) {
+                    app.toast.info(locale.ADMIN.noUpdate);
                 } else {
-                    app.rootScope.msg = result.err;
+                    restAPI.save({
+                        OP: 'admin'
+                    }, data, function (data) {
+                        initglobal(data.data);
+                        var updated = app.union(originData);
+                        delete updated.smtp;
+                        delete updated.email;
+                        app.union(app.rootScope.global, updated);
+                        app.toast.success(locale.ADMIN.updated, locale.RESPONSE.success);
+                    });
                 }
-            });
+            }
         };
+
+        $scope.$watchCollection('editGlobal', function (value) {
+            app.checkDirty(global, originData, value);
+        });
         app.promiseGet({
             OP: 'admin'
         }, restAPI).then(function (data) {

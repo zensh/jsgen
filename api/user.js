@@ -715,14 +715,11 @@ function editUser(req, res, dm) {
 function editUsers(req, res, dm) {
     var defaultObj = {
         _id: '',
-        email: '',
         locked: false,
         role: 0
     },
         userArray = req.apibody.data,
-        body = {
-            data: []
-        };
+        result = [];
 
     if (req.session.role !== 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
@@ -739,7 +736,7 @@ function editUsers(req, res, dm) {
     function next() {
         var userObj;
         if (userArray.length === 0) {
-            return res.sendjson(resJson(null, body));
+            return res.sendjson(resJson(null, result));
         }
         userObj = userArray.pop();
         if (!userObj || !userObj._id) {
@@ -750,15 +747,6 @@ function editUsers(req, res, dm) {
         userObj._id = jsGen.dao.user.convertID(userID);
         if (!cache[userObj._id]) {
             return next();
-        }
-        if (userObj.email) {
-            if (!checkEmail(userObj.email)) {
-                throw jsGen.Err(jsGen.lib.msg.userEmailErr);
-            } else if (userObj.email.toLowerCase() === cache[req.session.Uid].email.toLowerCase()) {
-                delete userObj.email;
-            } else if (cache[userObj.email.toLowerCase()]) {
-                throw jsGen.Err(jsGen.lib.msg.userEmailExist);
-            }
         }
         if (userObj.role) {
             userObj.role = Math.floor(userObj.role);
@@ -775,7 +763,7 @@ function editUsers(req, res, dm) {
                 var data = intersect(union(UserPublicTpl), doc);
                 data.email = doc.email;
                 data._id = userID;
-                body.data.push(data);
+                result.push(data);
             }
             return next();
         }));

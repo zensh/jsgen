@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _*/
+/*global angular*/
 
 angular.module('jsGen.filters', []).
 filter('placeholder', ['tools',

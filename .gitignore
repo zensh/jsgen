@@ -14,11 +14,8 @@ results
 backup/
 node_modules/
 test/
-mylogs/
 json/
 scss/
-config/config.js
-tmp/
 
 npm-debug.log
 .DS_Store

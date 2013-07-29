@@ -1037,48 +1037,6 @@ ol.inner {
     background-color: rgb(0, 102, 204);
 }
 
-@media (min-width: 980px) {
-    .pure-visible-phone {
-        display: none !important;
-    }
-    .pure-visible-tablet {
-        display: none !important;
-    }
-    .pure-hidden-desktop {
-        display: none !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .pure-g-r > .pure-u,
-    .pure-g-r > [class *= "pure-u-"] {
-        width: 100%;
-    }
-}
-
-@media (max-width: 767px) {
-    .pure-g-r > .pure-u,
-    .pure-g-r > [class *= "pure-u-"] {
-        width: 100%;
-    }
-    .pure-hidden-phone {
-        display: none !important;
-    }
-    .pure-visible-desktop {
-        display: none !important;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 979px) {
-    .pure-hidden-tablet {
-        display: none !important;
-    }
-    .pure-visible-desktop {
-        display: none !important;
-    }
-}
-
-
 @-webkit-keyframes fadeInDown {
   0% {
     opacity: 0;

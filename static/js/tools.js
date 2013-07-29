@@ -1,5 +1,5 @@
 'use strict';
-/*global angular */
+/*global angular*/
 
 angular.module('jsGen.tools', []).
 factory('tools', function () {
@@ -45,31 +45,33 @@ factory('tools', function () {
         return true;
     }
 
+    function checkType(obj) {
+        var type = typeof obj;
+        if (obj === null) {
+            return 'null';
+        } else if (isArray(obj)) {
+            return 'array';
+        } else {
+            return type;
+        }
+    }
+
     function trim(str, strict) {
         str = toStr(str);
-        str = str.replace(strict&&/\s+/g||/ +/g, ' ');
+        str = str.replace(strict && /\s+/g || / +/g, ' ');
         str = str.replace(/^\s+/, '');
         str = str.replace(/\s+$/, '');
         return str;
     }
 
-    function each(obj, iterator, context, right) {
+    function each(obj, iterator, context, arrayLike) {
         iterator = iterator || angular.noop;
         if (!obj) {
             return;
-        } else if (isArray(obj)) {
-            var i, l;
-            if (!right) {
-                for (i = 0, l = obj.length; i < l; i++) {
-                    if (iterator.call(context, obj[i], i, obj) === breaker) {
-                        return;
-                    }
-                }
-            } else {
-                for (i = obj.length - 1; i >= 0; i--) {
-                    if (iterator.call(context, obj[i], i, obj) === breaker) {
-                        return;
-                    }
+        } else if (arrayLike || isArray(obj)) {
+            for (var i = 0, l = obj.length; i < l; i++) {
+                if (iterator.call(context, obj[i], i, obj) === breaker) {
+                    return;
                 }
             }
         } else {
@@ -100,17 +102,6 @@ factory('tools', function () {
                 }
             });
             return !!result;
-        }
-    }
-
-    function checkType(obj) {
-        var type = typeof obj;
-        if (obj === null) {
-            return 'null';
-        } else if (isArray(obj)) {
-            return 'array';
-        } else {
-            return type;
         }
     }
 

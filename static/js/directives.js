@@ -110,9 +110,9 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]).directive('genModalMsg', ['getFile', '$timeout',
+]).directive('genModal', ['getFile', '$timeout',
     function (getFile, $timeout) {
-        //<div gen-modal-msg="msgModal">[body]</div>
+        //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
         //     title: 'message title',    [option]
@@ -133,7 +133,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                 var modalStatus,
                     modalElement = element.children(),
                     list = ['Confirm', 'Cancel', 'Delete'],
-                    options = scope.$eval(attr.genModalMsg),
+                    options = scope.$eval(attr.genModal),
                     isFunction = angular.isFunction;
 
                 function wrap(fn) {
@@ -144,15 +144,21 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                 }
 
                 function resize() {
-                    var element = modalElement.children(),
-                        top = ($(window).height() - element.outerHeight()) * 0.382,
+                    var jqWin = $(window),
+                        element = modalElement.children(),
+                        top = (jqWin.height() - element.outerHeight()) * 0.382,
                         css = {};
 
                     top = top > 0 ? top : 0;
                     css.top = top;
                     if (options.width > 0) {
+                        var width = jqWin.width() - 20;
+                        options.width = Math.min(options.width, width);
                         css.width = options.width;
                         css.marginLeft = -options.width / 2;
+                        if (css.width === width) {
+                            css.paddingLeft = css.paddingRight = 0;
+                        }
                     }
                     element.css(css);
                 }
@@ -179,7 +185,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     angular.extend(scope, value);
                 }, true);
 
-                scope.id = scope.id || attr.genModalMsg + '-' + (uniqueModalId++);
+                scope.id = scope.id || attr.genModal + '-' + (uniqueModalId++);
                 angular.forEach(list, function (name) {
                     var x = name.toLowerCase(),
                         cb = x + 'Cb',

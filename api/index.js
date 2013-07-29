@@ -135,6 +135,7 @@ function getGlobal(req, res, dm) {
         pagination: jsGen.cache.pagination.info(),
         timeInterval: jsGen.cache.timeInterval.info()
     };
+    delete body.smtp.auth.pass;
     return res.sendjson(resJson(null, body));
 }
 
@@ -163,9 +164,9 @@ function setGlobal(req, res, dm) {
             UserNameMaxLen: 0,
             register: true,
             emailVerification: true,
-            UsersScore: [0, 0, 0, 0, 0, 0, 0],
-            ArticleStatus: [0, 0],
-            ArticleHots: [0, 0, 0, 0, 0],
+            UsersScore: [null, null, null, null, null, null],
+            ArticleStatus: [null, null],
+            ArticleHots: [null, null, null, null, null],
             userCache: 0,
             articleCache: 0,
             commentCache: 0,
@@ -173,7 +174,7 @@ function setGlobal(req, res, dm) {
             tagCache: 0,
             collectionCache: 0,
             messageCache: 0,
-            paginationCache: [0, 0],
+            paginationCache: [null, null],
             smtp: {
                 host: '',
                 secureConnection: true,
@@ -265,9 +266,10 @@ function setGlobal(req, res, dm) {
         jsGen.robotReg = new RegExp(setObj.robots, 'i');
     }
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
-        body = intersect(defaultObj, doc);
-        union(jsGen.config, body);
-        return res.sendjson(resJson(null, body));
+        doc = intersect(defaultObj, doc);
+        union(jsGen.config, doc);
+        delete doc.smtp.auth.pass;
+        return res.sendjson(resJson(null, doc));
     }));
 }
 

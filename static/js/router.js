@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _, jsGenVersion*/
+/*global angular, jsGenVersion*/
 
 angular.module('jsGen.router', []).
 constant('app', {

@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _*/
+/*global angular*/
 
 angular.module('jsGen.locale', ['ngLocale']).
 run(['$locale',
@@ -55,7 +55,9 @@ run(['$locale',
                 article: '文章管理',
                 comment: '评论管理',
                 message: '消息管理',
-                global: '网站设置'
+                global: '网站设置',
+                updated: '成功更新 ',
+                noUpdate: '设置暂无变更'
             },
             ARTICLE: {
                 title: '添加/编辑文章',

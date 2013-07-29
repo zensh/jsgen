@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, _*/
+/*global angular*/
 
 angular.module('jsGen', ['jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
 config(['$httpProvider', 'app',
@@ -71,22 +71,24 @@ config(['$httpProvider', 'app',
             };
         });
     }
-]).run(['app', '$q', '$rootScope', '$http', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
+]).run(['app', '$q', '$rootScope', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
     'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'applyFn', 'param',
-    function (app, $q, $rootScope, $http, $location, $timeout, $filter, $locale,
+    function (app, $q, $rootScope, $location, $timeout, $filter, $locale,
         getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, applyFn, param) {
         var unSave = {
-            stopUnload: false,
-            nextUrl: ''
-        };
-        var global = $rootScope.global = {
-            isAdmin: false,
-            isEditor: false,
-            isLogin: false
-        };
+                stopUnload: false,
+                nextUrl: ''
+            },
+            global = $rootScope.global = {
+                isAdmin: false,
+                isEditor: false,
+                isLogin: false
+            },
+            jqWin = $(window);
 
         function resize() {
-            var viewWidth = global.viewWidth = $(window).width();
+            var viewWidth = global.viewWidth = jqWin.width();
+            global.viewHeight = jqWin.height();
             global.isPocket = viewWidth < 480;
             global.isPhone = viewWidth < 768;
             global.isTablet = !global.isPhone && viewWidth < 980;
@@ -104,9 +106,7 @@ config(['$httpProvider', 'app',
             });
         }
 
-        window.app = app; // for test
         app.q = $q;
-        app.http = $http;
         app.toast = toast;
         app.param = param;
         app.timing = timing;
@@ -199,7 +199,6 @@ config(['$httpProvider', 'app',
             validate: true,
             validateMsg: $locale.VALIDATE
         };
-
         $rootScope.unSaveModal = {
             confirmBtn: $locale.BTN_TEXT.confirm,
             confirmFn: function () {
@@ -227,7 +226,6 @@ config(['$httpProvider', 'app',
         $rootScope.goBack = function () {
             window.history.go(-1);
         };
-
         $rootScope.logout = function () {
             restAPI.user.get({
                 ID: 'logout'
@@ -260,7 +258,7 @@ config(['$httpProvider', 'app',
             });
         };
 
-        $(window).resize(applyFn.bind(null, resize));
+        jqWin.resize(applyFn.bind(null, resize));
         timing(function () { // 保证每300秒内与服务器存在连接，维持session
             if (Date.now() - app.timestamp - app.timeOffset >= 240000) {
                 init();
