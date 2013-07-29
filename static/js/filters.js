@@ -56,9 +56,9 @@ filter('placeholder', ['tools',
             var o = Date.now() - date,
                 dateFilter = $filter('date');
             if (full) {
-                return dateFilter(date, $locale.DATETIME.full);
+                return dateFilter(date, $locale.DATETIME.fullD);
             } else if (o > 259200000) {
-                return dateFilter(date, $locale.DATETIME.short);
+                return dateFilter(date, $locale.DATETIME.shortD);
             } else if (o > 86400000) {
                 return Math.floor(o / 86400000) + $locale.DATETIME.dayAgo;
             } else if (o > 3600000) {

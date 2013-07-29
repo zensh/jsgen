@@ -203,7 +203,12 @@ config(['$httpProvider', 'app',
         $rootScope.unSaveModal = {
             confirmBtn: $locale.BTN_TEXT.confirm,
             confirmFn: function () {
-                $rootScope.$emit('loadNext');
+                if (unSave.stopUnload && unSave.nextUrl) {
+                    unSave.stopUnload = false;
+                    $timeout(function () {
+                        window.location.href = unSave.nextUrl;
+                    }, 100);
+                }
                 return true;
             },
             cancelBtn: $locale.BTN_TEXT.cancel,
@@ -216,13 +221,6 @@ config(['$httpProvider', 'app',
                 $rootScope.unSaveModal.modal(true);
             } else {
                 unSave.nextUrl = '';
-            }
-        });
-        $rootScope.$on('loadNext', function (event) {
-            event.preventDefault();
-            if (unSave.stopUnload && unSave.nextUrl) {
-                unSave.stopUnload = false;
-                window.location.href = unSave.nextUrl;
             }
         });
 
@@ -263,22 +261,12 @@ config(['$httpProvider', 'app',
         };
 
         $(window).resize(applyFn.bind(null, resize));
-        resize();
-
-        restAPI.index.get({}, function (data) {
-            app.timeOffset = Date.now() - data.timestamp;
-            data = data.data;
-            data.title2 = data.description;
-            data.info.angularjs = angular.version.full;
-            app.union(global, data);
-            app.checkUser();
-        });
-
         timing(function () { // 保证每300秒内与服务器存在连接，维持session
             if (Date.now() - app.timestamp - app.timeOffset >= 240000) {
                 init();
             }
         }, 60000);
+        resize();
         init();
     }
 ]);
