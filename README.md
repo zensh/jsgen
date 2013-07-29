@@ -1,5 +1,5 @@
 {jsGen} <small>0.5.0</small>
-=======
+============================
 **——JavaScript Generated**
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
