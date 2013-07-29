@@ -19,7 +19,7 @@
         <div class="panel pure-hidden-phone">
             <div class="inner text-center">
                 <div class="text-show-large">
-                    <strong>{<span class="success">js</span><span class="hot">G</span><span class="success">en</span>}</strong>
+                    <strong class="hot">{<span class="success">jsGen</span>}</strong>
                 </div>
                 <div class="text-show text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</div>
                 <div class="text-show">
@@ -41,9 +41,10 @@
             <header class="panel-heading muted"><i class="icon-fire"></i>热门评论</header>
             <ul class="media-list comments">
                 <li class="media" ng-repeat="comment in hotComments">
-                    <div class="media-object left"><em class="hot" title="热度">{{comment.hots}}</em></div>
                     <div class="media-body">
-                        <div class="media-content" gen-parse-md="comment.content"></div>
+                        <div class="media-content">
+                            <em class="hot" title="热度">{{comment.hots}}</em>&nbsp;&nbsp;{{comment.content}}
+                        </div>
                         <footer class="media-footer">
                             <a ng-href="{{'#/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'#/'+comment.refer._id}}">{{comment.title}}</a>
                         </footer>

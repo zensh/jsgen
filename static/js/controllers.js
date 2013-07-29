@@ -62,11 +62,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         checkRouteParams();
         getArticleList();
         getList('comment').then(function (data) {
-            data = data.data;
+            data = app.union(data.data);
             app.each(data, function (x, i) {
-                x.content = app.filter('cutText')(x.content, 180);
+                x.content = app.filter('cutText')(app.trim(x.content), 180);
             });
-            $scope.hotComments = data.slice(0, 10);
+            $scope.hotComments = data.slice(0, 6);
         });
     }
 ]).controller('tagCtrl', ['app', '$scope', '$routeParams', 'getList',
@@ -94,11 +94,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         });
 
         getList('comment').then(function (data) {
-            data = data.data;
+            data = app.union(data.data);
             app.each(data, function (x, i) {
-                x.content = app.filter('cutText')(x.content, 180);
+                x.content = app.filter('cutText')(app.trim(x.content), 180);
             });
-            $scope.hotComments = data.slice(0, 10);
+            $scope.hotComments = data.slice(0, 6);
         });
     }
 ]).controller('userLoginCtrl', ['app', '$scope',

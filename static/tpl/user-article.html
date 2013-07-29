@@ -1,6 +1,6 @@
 <div ng-controller="userArticleCtrl">
     <div class="page-header inner">
-        <a class="pure-button list-model right" title="{{parent.listModel&&'简洁模式'||'摘要模式'}}" ng-if="!global.isPocket" ng-class="{'primary-bg':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
+        <a class="pure-button list-model right" title="{{parent.listModel&&'简洁模式'||'摘要模式'}}" ng-if="!global.isPocket" ng-class="{'info-bg':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
         <strong>{{parent.title}}</strong>
     </div>
     <ul class="media-list">
@@ -11,7 +11,7 @@
             <div class="media-body" id="{{article._id}}" ng-class="{muted: article.read}">
                 <header class="media-header">
                     <a ng-href="{{'#/'+article._id}}">
-                        <i class="success" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}" ng-hide="article.isAuthor"></i>{{article.title}}</a>
+                        <i class="primary" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}" ng-hide="article.isAuthor"></i>{{article.title}}</a>
                     <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
                     <a class="pure-button pure-button-link" ng-href="{{'#/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
                     <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>

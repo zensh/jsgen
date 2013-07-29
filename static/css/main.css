@@ -14,7 +14,7 @@ textarea {
     font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 a {
-    color: #0066cc;
+    color: rgb(0, 120, 231);
     cursor: pointer;
 }
 small {
@@ -230,7 +230,7 @@ body > div {
     border: none;
 }
 .pure-button-link {
-    color: #0066cc;
+    color: rgb(0, 120, 231);
     background: transparent;
     padding: .2em .3em;
 }
@@ -402,11 +402,8 @@ body > div {
     list-style: none;
 }
 .media-list > li {
-    border-top: 1px solid rgb(0, 120, 231);
-    padding: 5px 15px;
-}
-.media-list.comments > li {
     border-top: 1px solid #ddd;
+    padding: 5px 15px;
 }
 .media-list.comments > li > a {
     text-decoration: none;
@@ -420,7 +417,7 @@ body > div {
     background-color: #f6f6f6;
 }
 .media-list > li:hover .hover-icon {
-    font-size: 1.5em;
+    font-size: 1.3em;
 }
 .media-list > li:first-child {
     margin-top: 10px;
@@ -766,13 +763,13 @@ body > div {
 }
 
 .invalid-error {
-    border-color: #ff0000 !important;
+    border-color: rgb(202, 60, 60) !important;
 }
 input.invalid-error,
 textarea.invalid-error {
-    border-color: rgb(240, 20, 40) !important;
+    border-color: rgb(202, 60, 60) !important;
     background-color: rgb(252, 210, 214);
-    background-color: rgba(240, 20, 40, 0.2);
+    background-color: rgba(202, 60, 60, 0.2);
 }
 .validate-tooltip.top .tooltip-arrow {
     border-top-color: rgb(202, 60, 60);
@@ -918,7 +915,7 @@ button.close {
 }
 
 .hover-icon:hover {
-    font-size: 1.5em;
+    font-size: 1.3em;
 }
 .list-content {
     color: #666;
@@ -977,11 +974,8 @@ ol.inner {
     padding: 5px 0;
     line-height: 25px;
 }
-.text-show {
-    font-size: 1.1em;
-}
 .text-show-large {
-    font-size: 1.5em;
+    font-size: 2em;
 }
 .img-mini {
     height: 40px;
@@ -1025,19 +1019,19 @@ ol.inner {
     color: rgb(0, 120, 231);
 }
 .hot {
-    color: rgb(240, 20, 40);
+    color: rgb(252, 60, 60);
 }
 .success-bg {
-    background: rgb(28, 184, 65);
+    background-color: rgb(28, 184, 65);
 }
 .error-bg {
-    background: rgb(202, 60, 60);
+    background-color: rgb(202, 60, 60);
 }
 .warning-bg {
-    background: rgb(223, 117, 20);
+    background-color: rgb(223, 117, 20);
 }
 .info-bg {
-    background: rgb(66, 184, 221);
+    background-color: rgb(66, 184, 221);
 }
 .primary-bg {
     background-color: rgb(0, 120, 231);

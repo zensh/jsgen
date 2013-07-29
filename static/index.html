@@ -9,14 +9,17 @@
         <meta name="keywords" content="{{global.keywords}}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-        <link rel="stylesheet" href="/static/?parse=/static/css/pure-min.css|/static/css/prettify.css|/static/css/toastr.min.css&v=_jsGenVersion_" media="screen" type="text/css">
-        <link rel="stylesheet" href="/static/css/main.css?v=_jsGenVersion_" media="screen" type="text/css">
-        <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css?v=_jsGenVersion_" media="screen" type="text/css">
+        <link rel="stylesheet" href="/static/?parse=/static/css/pure-min.css|/static/css/prettify.css|/static/css/toastr.min.css&v=_jsGenVersion_">
+        <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.css?v=_jsGenVersion_">
+        <link rel="stylesheet" href="/static/css/main.css?v=_jsGenVersion_">
+        <!--[if IE 7]>
+            <link rel="stylesheet" href="/static/font-awesome/css/font-awesome-ie7.css">
+        <![endif]-->
         <!--[if lt IE 9]>
-            <script src="/static/js/lib/respond.min.js"></script>
             <script src="/static/js/lib/es5-shim.min.js"></script>
-            <script src="/static/js/lib/html5chiv.min.js"></script>
             <script src="/static/js/lib/json2.min.js"></script>
+            <script src="/static/js/lib/respond.min.js"></script>
+            <script src="/static/js/lib/html5chiv.min.js"></script>
         <![endif]-->
     </head>
     <!--[if lt IE 7]> <body class="ie pure-g-r"> <![endif]-->
@@ -59,18 +62,23 @@
         </div>
         <div class="pure-u-1 footer">
             <div class="wrap">
-                <a class="primary" ng-href="{{global.url}}">{{global.title}}</a> ©2013 Powered by
+                <a class="muted" ng-href="{{global.url}}">{{global.title}}</a> ©2013 Powered by
                 <a href="https://github.com/zensh/jsgen" target="_blank">jsGen {{global.info.version}}<i class="icon-flag hot"></i></a>
-                [<a class="info" href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>&nbsp;
-                <a class="info" href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>&nbsp;
-                <a class="info" href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>]
+                [<a class="muted" href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>&nbsp;
+                <a class="muted" href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>&nbsp;
+                <a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>]
             </div>
         </div>
         <div class="pure-u loading" ng-show="loading.show"></div>
         <script>
             var jsGenVersion ='_jsGenVersion_';
         </script>
-        <script src="/static/js/lib/jquery.js"></script>
+        <!--[if lt IE 10]>
+            <script src="/static/js/lib/jquery.1.7.2.min.js"></script>
+        <![endif]-->
+        <!--[if gt IE 9]><!-->
+            <script src="/static/js/lib/jquery.2.0.3.min.js"></script>
+        <!--<![endif]-->
         <script src="/static/js/lib/underscore.min.js"></script>
         <script src="/static/js/lib/toastr.min.js"></script>
         <script src="/static/js/lib/prettify.min.js"></script>

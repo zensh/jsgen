@@ -45,9 +45,9 @@ factory('tools', function () {
         return true;
     }
 
-    function trim(str) {
+    function trim(str, strict) {
         str = toStr(str);
-        str = str.replace(/ +/g, ' ');
+        str = str.replace(strict&&/\s+/g||/ +/g, ' ');
         str = str.replace(/^\s+/, '');
         str = str.replace(/\s+$/, '');
         return str;

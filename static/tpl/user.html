@@ -46,14 +46,14 @@
                     <strong>{{user.date | formatDate:true}}</strong>注册<br /><strong>{{user.lastLoginDate | formatDate:true}}</strong>最后登录
                 </li>
             </ul>
-            <dl class="inner article-info">
-                <dt> 用户简介：</dt>
-                <dd>{{user.desc}}</dd>
-                <dt> 用户标签：</dt>
-                <dd>
+            <div class="inner article-info">
+                <strong> 用户简介：</strong>
+                <div>{{user.desc}}</div>
+                <strong> 用户标签：</strong>
+                <div>
                     <a ng-repeat="tag in user.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
-                </dd>
-            </dl>
+                </div>
+            </div>
         </div>
         <div class="panel pure-menu pure-menu-open">
             <ul class="text-center" ng-show="parent.isMe">

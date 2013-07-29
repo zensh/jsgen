@@ -8,7 +8,7 @@
                     <i class="icon-time" data-original-title="{{article.date | formatDate:true}}发布" gen-tooltip> {{article.date | formatDate}}</i>
                     <i class="icon-refresh" data-original-title="{{article.updateTime | formatDate:true}}更新" gen-tooltip> {{article.updateTime | formatDate}}</i>
                     <i class="icon-eye-open" data-original-title="访问{{article.visitors}}次" gen-tooltip> {{article.visitors}}</i>
-                    <i class="icon-star-empty" data-original-title="热度{{article.hots}}" gen-tooltip> {{article.hots}}</i>
+                    <i class="icon-star-empty" data-original-title="热度{{article.hots}}" gen-tooltip> <span>{{article.hots}}</span></i>
                     <i class="icon-comments-alt" data-original-title="评论{{article.comments}}条" ng-show="article.comments" gen-tooltip> {{article.comments}}</i>
                     <a ng-repeat="tag in article.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
                     <a class="success" ng-show="article.isAuthor||global.isEditor" ng-href="{{'#/'+article._id+'/edit'}}"><i class="icon-pencil"></i> 编辑</a>
@@ -42,7 +42,7 @@
                         <button class="pure-button pure-button-small info-bg" title="支持" ng-click="setFavor(article)">
                             <i ng-class="{'icon-thumbs-up':article.isFavor,'icon-thumbs-up-alt':!article.isFavor}"></i> {{article.favorsList.length}}
                         </button>
-                        <button class="pure-button pure-button-small primary-bg" title="收藏" ng-click="setMark(article)">
+                        <button class="pure-button pure-button-small info-bg" title="收藏" ng-click="setMark(article)">
                             <i ng-class="{'icon-bookmark':article.isMark,'icon-bookmark-empty':!article.isMark}"></i> {{article.markList.length}}
                         </button>
                         <button class="pure-button pure-button-small info-bg" title="反对" ng-click="setOppose(article)">
@@ -153,7 +153,7 @@
             </div>
             <ul class="inner list-inline article-info">
                 <li>
-                    <strong class="hot">{{article.author.role | match:'role'}}</strong>
+                    <strong class="info">{{article.author.role | match:'role'}}</strong>
                 </li>
                 <li ng-show="article.author.score">
                     积分：<strong>{{article.author.score}}</strong>
@@ -176,7 +176,7 @@
             <header class="panel-heading">作者文章</header>
             <ul class="media-list comments">
                 <li ng-repeat="item in article.author.articlesList">
-                    <mark>{{item.date | formatDate}}</mark>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
+                    <mark class="muted">{{item.date | formatDate}}</mark>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
                 </li>
             </ul>
         </div>
@@ -185,7 +185,7 @@
             <ul class="media-list comments">
                 <li class="media" ng-repeat="item in hotArticles">
                   <div class="media-body" id="{{item._id}}">
-                    <em class="hot" title="热度">{{item.hots}}</em>&nbsp;
+                    <small class="hot" title="热度">{{item.hots}}</small>&nbsp;
                     <span class="media-content"><a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a></span>
                   </div>
                 </li>
