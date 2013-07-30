@@ -38,10 +38,9 @@ filter('placeholder', ['tools',
 ]).filter('cutText', ['utf8', 'tools',
     function (utf8, tools) {
         return function (text, len) {
-            text = tools.toStr(text);
-            text = text.replace(/\s+/g, ' ');
+            text = tools.trim(text);
             var bytes = utf8.stringToBytes(text);
-            len = len || 0;
+            len = len > 0 ? len : 0;
             if (bytes.length > len) {
                 bytes.length = len;
                 text = utf8.bytesToString(bytes);

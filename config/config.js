@@ -1,5 +1,5 @@
 'use strict';
-/*global require, module, Buffer, jsGen*/
+/*global require, module, Buffer, process, jsGen*/
 
 var path = require('path'),
 	processPath = path.dirname(process.argv[1]);//运行node的目录，这里可以方便替换下面baseDir的__dirname,方便用户自己搭建目录，利用node_modules加载rrestjs
@@ -90,5 +90,5 @@ module.exports = {
 	ExceptPath:[],//例外的路径，如果用户访问这个url路径，无论在不在ip过滤列表中，都可以正常使用，白名单才能使用
 	NotAllow:'No permission!', //禁止访问响应给客户端的信息
 //客户端跨域功能
-	isClientPipe:false,//如果为true，则提供给客户端跨域请求的功能
-}
+	isClientPipe:false  //如果为true，则提供给客户端跨域请求的功能
+};

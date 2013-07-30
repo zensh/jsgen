@@ -18,7 +18,9 @@ var union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     IDString = jsGen.lib.json.IDString,
     defautArticle = jsGen.lib.json.Article,
-    globalConfig = jsGen.lib.json.GlobalConfig;
+    globalConfig = jsGen.lib.json.GlobalConfig,
+    callbackFn = jsGen.lib.tools.callbackFn,
+    converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('articles', {
 
@@ -26,22 +28,20 @@ var that = jsGen.dao.db.bind('articles', {
         switch (typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.lib.converter(id, 62, IDString);
-            return id;
+            return converter(id, 62, IDString);
         case 'number':
-            id = jsGen.lib.converter(id, 62, IDString);
+            id = converter(id, 62, IDString);
             while (id.length < 3) {
                 id = '0' + id;
             }
-            id = 'A' + id;
-            return id;
+            return 'A' + id;
         default:
             return null;
         }
     },
 
     getLatestId: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -56,7 +56,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticlesIndex: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.find({}, {
             sort: {
                 _id: 1
@@ -76,7 +76,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticle: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -215,7 +215,7 @@ var that = jsGen.dao.db.bind('articles', {
             newObj = {
                 commentsList: 0
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         intersect(newObj, articleObj);
         if (newObj.commentsList < 0) {
             newObj.commentsList = -newObj.commentsList;
@@ -238,7 +238,7 @@ var that = jsGen.dao.db.bind('articles', {
     setNewArticle: function (articleObj, callback) {
         var article = union(defautArticle),
             newArticle = union(defautArticle);
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         intersect(article, articleObj);
         union(newArticle, article);
 
@@ -263,7 +263,7 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     delArticle: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

@@ -9,7 +9,7 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.5.1-dev';
+jsGen.version = '0.5.2-dev';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -25,11 +25,11 @@ serverDm.run(function () {
     jsGen.module.xss = require('xss');
     jsGen.errlog = jsGen.module.rrestjs.restlog;
     jsGen.lib = {};
+    jsGen.lib.msg = require('./lib/msg.js');
+    jsGen.lib.json = require('./lib/json.js');
     jsGen.lib.tools = require('./lib/tools.js');
     jsGen.lib.CacheLRU = require('./lib/cacheLRU.js');
     jsGen.lib.CacheTL = require('./lib/cacheTL.js');
-    jsGen.lib.msg = require('./lib/msg.js');
-    jsGen.lib.json = require('./lib/json.js');
     jsGen.lib.converter = require('./lib/anyBaseConverter.js');
     jsGen.lib.email = require('./lib/email.js');
     jsGen.Err = jsGen.lib.tools.Err;
@@ -60,6 +60,9 @@ serverDm.run(function () {
             }
 
             function todo(doc) {
+                var each = jsGen.lib.tools.each,
+                    extend = jsGen.lib.tools.extend,
+                    api = ['index', 'user', 'article', 'tag', 'collection', 'message'];
                 that._update(doc);
                 jsGen.cache = {};
                 jsGen.cache.pagination = new jsGen.lib.CacheTL(doc.paginationCache[0] * 1000, doc.paginationCache[1]);
@@ -78,12 +81,12 @@ serverDm.run(function () {
                 jsGen.robot = {};
                 jsGen.robot.reg = new RegExp(doc.robots || 'Baiduspider|Googlebot|BingBot|Slurp!', 'i');
                 jsGen.api = {};
-                jsGen.api.index = require('./api/index.js');
-                jsGen.api.user = require('./api/user.js');
-                jsGen.api.article = require('./api/article.js');
-                jsGen.api.tag = require('./api/tag.js');
-                jsGen.api.collection = require('./api/collection.js');
-                jsGen.api.message = require('./api/message.js');
+                each(api, function (x) {
+                    jsGen.api[x] = {};
+                });
+                each(api, function (x) {
+                    extend(jsGen.api[x], require('./api/' + x + '.js'));
+                });
                 fs.readFile(processPath + '/package.json', 'utf8', serverDm.intercept(function (data) {
                     jsGen.config.info = JSON.parse(data);
                     jsGen.config.info.version = jsGen.version;

@@ -1186,6 +1186,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             pagination.path = app.location.path();
             pagination.pageSize = myConf.pageSize(pagination.pageSize, 'tagAdmin');
             pagination.sizePerPage = [20, 50, 100];
+            $scope.pagination = pagination;
             initTagList(data.data);
         });
     }

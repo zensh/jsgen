@@ -259,11 +259,11 @@ config(['$httpProvider', 'app',
         };
 
         jqWin.resize(applyFn.bind(null, resize));
-        timing(function () { // 保证每300秒内与服务器存在连接，维持session
+        timing(function () { // 保证每360秒内与服务器存在连接，维持session
             if (Date.now() - app.timestamp - app.timeOffset >= 240000) {
                 init();
             }
-        }, 60000);
+        }, 120000);
         resize();
         init();
     }

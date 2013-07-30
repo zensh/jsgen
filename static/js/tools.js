@@ -21,7 +21,7 @@ factory('tools', function () {
     };
 
     function isArray(obj) {
-        return Array.isArray && Array.isArray(obj) || Object.prototype.toString.call(obj) === '[object Array]';
+        return Array.isArray ? Array.isArray(obj) : Object.prototype.toString.call(obj) === '[object Array]';
     }
 
     function isNull(obj) {
@@ -58,7 +58,7 @@ factory('tools', function () {
 
     function trim(str, strict) {
         str = toStr(str);
-        str = str.replace(strict && /\s+/g || / +/g, ' ');
+        str = str.replace(strict ? (/\s+/g) : (/ +/g), ' ');
         str = str.replace(/^\s+/, '');
         str = str.replace(/\s+$/, '');
         return str;
@@ -193,17 +193,17 @@ factory('tools', function () {
         return a;
     }
 
-    function digestArray(array) {
+    function digestArray(list) {
         var result = [];
-        if (isArray(array)) {
-            each(array, function (x) {
+        if (isArray(list)) {
+            each(list, function (x) {
                 if (checkType(x) !== 'undefined') {
                     result.push(x);
                 }
             });
             return result;
         } else {
-            return array;
+            return list;
         }
     }
 });

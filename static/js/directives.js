@@ -344,7 +344,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
         };
     }
 ]).directive('genSrc',
-    function (app) {
+    function () {
         return {
             priority: 99,
             link: function (scope, element, attr) {

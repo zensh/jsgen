@@ -1,6 +1,6 @@
 <ul class="pagination" ng-show="total>perPages[0]">
     <li ng-class="{disabled: !prev}"><a ng-href="{{(path&&prev&&('#'+path+prev))||''}}" title="上一页" ng-click="paginationTo(prev)">&#171;</a></li>
-    <li ng-class="{active: n==pageIndex, disabled: n=='…'}" ng-repeat="n in showPages">
+    <li ng-class="{active: n==pageIndex, disabled: n=='…'}" ng-repeat="n in showPages track by $index">
         <a ng-href="{{(path&&n!='…'&&n!=pageIndex&&('#'+path+n))||''}}" title="{{(n!='…'&&('第'+n+'页'))||''}}" ng-click="paginationTo(n)">{{n}}</a>
     </li>
     <li ng-class="{disabled: !next}"><a ng-href="{{(path&&next&&('#'+path+next))||''}}" title="下一页" ng-click="paginationTo(next)">&#187;</a></li>
