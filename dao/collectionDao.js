@@ -18,7 +18,9 @@
 var union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     IDString = jsGen.lib.json.IDString,
-    defautCollection = jsGen.lib.json.Collection;
+    defautCollection = jsGen.lib.json.Collection,
+    callbackFn = jsGen.lib.tools.callbackFn,
+    converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('collections', {
 
@@ -26,27 +28,25 @@ var that = jsGen.dao.db.bind('collections', {
         switch (typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.lib.converter(id, 62, IDString);
-            return id;
+            return converter(id, 62, IDString);
         case 'number':
-            id = jsGen.lib.converter(id, 62, IDString);
+            id = converter(id, 62, IDString);
             while (id.length < 3) {
                 id = '0' + id;
             }
-            id = 'C' + id;
-            return id;
+            return 'C' + id;
         default:
             return null;
         }
     },
 
     getCollectionsNum: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.count(callback);
     },
 
     getLatestId: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -62,7 +62,7 @@ var that = jsGen.dao.db.bind('collections', {
 
     getCollectionsIndex: function (date, limit, callback) {
         var query = {};
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         if (date > 0) {
             query = {
                 date: {
@@ -86,7 +86,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollectionsList: function (_idArray, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         if (!Array.isArray(_idArray)) {
             _idArray = [_idArray];
         }
@@ -109,7 +109,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollection: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -133,7 +133,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollectionInfo: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -172,7 +172,7 @@ var that = jsGen.dao.db.bind('collections', {
                 articles: 0,
                 comment: true
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         if (!Array.isArray(CollectionObjArray)) {
             CollectionObjArray = [CollectionObjArray];
@@ -262,7 +262,7 @@ var that = jsGen.dao.db.bind('collections', {
     setNewCollection: function (collectionObj, callback) {
         var collection = union(defautCollection),
             newCollection = union(defautCollection);
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = union(collection, newCollection);
@@ -285,7 +285,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     delCollection: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {

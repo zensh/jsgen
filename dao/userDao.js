@@ -28,7 +28,9 @@ var union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     UIDString = jsGen.lib.json.UIDString,
     defautUser = jsGen.lib.json.User,
-    preAllocate = jsGen.lib.json.UserPre;
+    preAllocate = jsGen.lib.json.UserPre,
+    callbackFn = jsGen.lib.tools.callbackFn,
+    converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('users', {
 
@@ -36,27 +38,25 @@ var that = jsGen.dao.db.bind('users', {
         switch (typeof id) {
         case 'string':
             id = id.substring(1);
-            id = jsGen.lib.converter(id, 26, UIDString);
-            return id;
+            return converter(id, 26, UIDString);
         case 'number':
             id = jsGen.lib.converter(id, 26, UIDString);
             while (id.length < 5) {
                 id = 'a' + id;
             }
-            id = 'U' + id;
-            return id;
+            return 'U' + id;
         default:
             return null;
         }
     },
 
     getUsersNum: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.count(callback);
     },
 
     getUsersIndex: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.find({}, {
             sort: {
                 _id: -1
@@ -74,7 +74,7 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     getLatestId: function (callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -89,7 +89,7 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     getAuth: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -104,7 +104,7 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     getSocial: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -117,7 +117,7 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     getUserInfo: function (_id, callback) {
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -156,7 +156,7 @@ var that = jsGen.dao.db.bind('users', {
                 _id: userObj._id
             }, [], setObj, {
                 w: 1,
-                new: true
+                'new': true
             }, callback);
         } else {
             that.update({
@@ -168,7 +168,7 @@ var that = jsGen.dao.db.bind('users', {
     setLoginAttempt: function (userObj) {
         var setObj = {},
             newObj = {
-                loginAttempts: 0,
+                loginAttempts: 0
             };
 
         newObj = intersect(newObj, userObj);
@@ -236,7 +236,7 @@ var that = jsGen.dao.db.bind('users', {
                     }
                 }
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if (newObj.social.weibo) {
@@ -301,7 +301,7 @@ var that = jsGen.dao.db.bind('users', {
             newObj = {
                 followList: 0
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if (newObj.followList < 0) {
@@ -333,7 +333,7 @@ var that = jsGen.dao.db.bind('users', {
             newObj = {
                 articlesList: 0
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if (newObj.articlesList < 0) {
@@ -365,7 +365,7 @@ var that = jsGen.dao.db.bind('users', {
             newObj = {
                 collectionsList: 0
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newObj = intersect(newObj, userObj);
         if (newObj.collectionsList < 0) {
@@ -441,7 +441,6 @@ var that = jsGen.dao.db.bind('users', {
                     receive: 0
                 }
             };
-        callback = callback || jsGen.lib.tools.callbackFn;
 
         newObj = intersect(newObj, userObj);
         if (newObj.messages.article === 0) {
@@ -549,7 +548,7 @@ var that = jsGen.dao.db.bind('users', {
     setNewUser: function (userObj, callback) {
         var user = union(defautUser),
             newUser = union(defautUser);
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
         newUser = intersect(newUser, userObj);
         newUser = union(user, newUser);
@@ -578,7 +577,7 @@ var that = jsGen.dao.db.bind('users', {
                         _id: preAllocate._id
                     }, [], newUser, {
                         w: 1,
-                        new: true
+                        'new': true
                     }, callback);
                 });
         });

@@ -48,7 +48,7 @@
             </ul>
             <div class="inner article-info">
                 <strong> 用户简介：</strong>
-                <div>{{user.desc}}</div>
+                <div gen-parse-md="user.desc"></div>
                 <strong> 用户标签：</strong>
                 <div>
                     <a ng-repeat="tag in user.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
