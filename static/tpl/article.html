@@ -80,7 +80,7 @@
             </div>
             <ul class="media-list comments">
                 <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in article.commentsList">
-                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}">
+                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}" ng-show="!global.isPocket">
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body" id="{{comment._id}}">
@@ -112,7 +112,7 @@
             </ul>
             <ul class="media-list comments"  id="commentForm" gen-moving="commentMoving">
                 <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in referComments">
-                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}">
+                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}" ng-show="!global.isPocket">
                       <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body">

@@ -62,11 +62,13 @@
         </div>
         <div class="pure-u-1 footer">
             <div class="wrap">
-                <a class="muted" ng-href="{{global.url}}">{{global.title}}</a> ©2013 Powered by
+                <a class="muted" ng-href="{{global.url}}">{{global.viewWidth+'/'+global.viewHeight}}{{global.title}}</a> ©2013 Powered by
                 <a href="https://github.com/zensh/jsgen" target="_blank">jsGen {{global.info.version}}<i class="icon-flag hot"></i></a>
-                [<a class="muted" href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>&nbsp;
-                <a class="muted" href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>&nbsp;
-                <a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>]
+                <span ng-show="!global.isPhone">
+                    &nbsp;<a class="muted" href="http://angularjs.org" target="_blank">AngularJS {{global.info.angularjs}}</a>
+                    &nbsp;<a class="muted" href="http://nodejs.org" target="_blank">Node.js {{global.info.nodejs}}</a>
+                    &nbsp;<a class="muted" href="https://github.com/DoubleSpout/rrestjs" target="_blank">rrestjs {{global.info.rrestjs}}</a>
+                </span>
             </div>
         </div>
         <div class="loading" ng-show="loading.show"></div>

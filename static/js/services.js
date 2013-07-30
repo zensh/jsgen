@@ -267,6 +267,12 @@ factory('restAPI', ['$resource',
             }, idPostfix);
             var element = angular.element(document.getElementById('wmd-preview' + idPostfix));
             editor.hooks.chain('onPreviewRefresh', function () {
+                angular.forEach(element.find('code'), function(value){
+                    value = angular.element(value);
+                    if (value.children().length === 0) {
+                        value.addClass('prettyprint');
+                    }
+                });
                 element.find('pre').addClass('prettyprint'); // linenums have bug!
                 pretty();
             });

@@ -12,6 +12,12 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     value = mdParse(value);
                     value = sanitize(value);
                     element.html(value);
+                    angular.forEach(element.find('code'), function (value) {
+                        value = angular.element(value);
+                        if (value.children().length === 0) {
+                            value.addClass('prettyprint');
+                        }
+                    });
                     element.find('pre').addClass('prettyprint'); // linenums have bug!
                     element.find('a').attr('target', function () {
                         if (this.host !== location.host) {
@@ -43,7 +49,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
 }).directive('genPagination', ['getFile',
     function (getFile) {
         // <div gen-pagination="options"></div>
-        // HTML/CSS基于Bootstrap框架
+        // HTML/CSS修改于Bootstrap框架
         // options = {
         //     path: 'pathUrl',
         //     sizePerPage: [25, 50, 100],
@@ -301,37 +307,6 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]).directive('genXeditable', ['getFile',
-    function (getFile) {
-        return {
-            scope: {
-                value: '=genXeditable'
-            },
-            templateUrl: getFile.html('gen-xeditable.html'),
-            link: function (scope, element, attr) {
-                var origin;
-
-                element.bind('click', function () {
-                    origin = scope.value;
-                    scope.isEdit = true;
-                });
-                scope.save = function () {
-                    scope.placeholder = !scope.value;
-                    scope.isEdit = false;
-                    if (attr.save) {
-                        scope.$parent.$eval(attr.save);
-                    }
-                };
-                scope.cancel = function () {
-                    scope.value = origin;
-                    scope.isEdit = false;
-                };
-                element.addClass('gen-xeditable');
-                scope.placeholder = !scope.value;
-                scope.isEdit = false;
-            }
-        };
-    }
 ]).directive('genMoving', ['anchorScroll',
     function (anchorScroll) {
         return {
@@ -369,12 +344,12 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
         };
     }
 ]).directive('genSrc',
-    function () {
+    function (app) {
         return {
             priority: 99,
             link: function (scope, element, attr) {
                 attr.$observe('genSrc', function (value) {
-                    if (value) {
+                    if (value && element.is(':visible')) {
                         var img = new Image();
                         img.onload = function () {
                             attr.$set('src', value);

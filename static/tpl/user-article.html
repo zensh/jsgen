@@ -14,7 +14,7 @@
                         <i class="primary" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}" ng-hide="article.isAuthor"></i>{{article.title}}</a>
                     <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
                     <a class="pure-button pure-button-link" ng-href="{{'#/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
-                    <i class="icon-star-empty right hot hover-icon" title="热度">{{article.hots}}</i>
+                    <i class="icon-star-empty right hot hover-icon" title="热度" ng-show="!global.isPhone">{{article.hots}}</i>
                 </header>
                 <div class="media-content list-content" ng-animate="{show:'fadeIn',hide:'fadeOut'}" ng-hide="parent.listModel" gen-parse-md="article.content"></div>
                 <footer class="media-footer">

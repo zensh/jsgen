@@ -991,7 +991,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             params = {
                 ID: 'admin',
                 p: $routeParams.p,
-                s: $routeParams.s || myConf.pageSize(null, 'userAdmin', 50)
+                s: $routeParams.s || myConf.pageSize(null, 'userAdmin', 20)
             },
             userList = [{
                 _id: '',
@@ -1065,7 +1065,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var pagination = data.pagination || {};
             pagination.path = app.location.path();
             pagination.pageSize = myConf.pageSize(pagination.pageSize, 'userAdmin');
-            pagination.sizePerPage = [50, 100, 200];
+            pagination.sizePerPage = [20, 100, 200];
             $scope.pagination = pagination;
             initUserList(data.data);
         });

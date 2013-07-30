@@ -1,10 +1,10 @@
-{jsGen} <small>0.5.0</small>
+{jsGen} <small>0.5.x</small>
 =======
 **——JavaScript Generated**
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
 
-### 本版更新说明 0.5.0
+### 本版更新说明 0.5.x
 
  1. 兼容IE8。
  2. 放弃Bootstrap 3框架，改用YUI的pure CSS框架，并入部分Bootstrap框架代码，如Modal、Tooltip等。
