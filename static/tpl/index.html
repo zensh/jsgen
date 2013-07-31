@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="panel pure-hidden-phone">
-            <header class="panel-heading muted"><i class="icon-bullhorn"></i>社区帮助</header>
+            <div class="panel-heading muted"><i class="icon-bullhorn"></i>社区帮助</div>
             <ol class="inner">
                 <li>本社区网站不支持IE8以下的浏览器，推荐使用谷歌Chrome。</li>
                 <li>新用户注册后请点击注册邮箱的验证链接，未验证可发表评论，验证后才可表文章。</li>
@@ -38,28 +38,28 @@
             </ol>
         </div>
         <div class="panel pure-hidden-phone" ng-show="hotComments.length>0">
-            <header class="panel-heading muted"><i class="icon-fire"></i>热门评论</header>
+            <div class="panel-heading muted"><i class="icon-fire"></i>热门评论</div>
             <ul class="media-list comments">
                 <li class="media" ng-repeat="comment in hotComments">
                     <div class="media-body">
                         <div class="media-content list-content">
                             <em class="hot" title="热度">{{comment.hots}}</em>&nbsp;&nbsp;{{comment.content}}
                         </div>
-                        <footer class="media-footer">
+                        <div class="media-footer">
                             <a ng-href="{{'#/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'#/'+comment.refer._id}}">{{comment.title}}</a>
-                        </footer>
+                        </div>
                     </div>
                 </li>
             </ul>
         </div>
         <div class="panel">
-            <header class="panel-heading muted"><i class="icon-link"></i>友情链接</header>
+            <div class="panel-heading muted"><i class="icon-link"></i>友情链接</div>
             <ul class="inner list-inline">
                 <li class="muted"><i class="icon-pushpin"></i>仅链接AngularJS框架网站</li>
             </ol>
         </div>
         <div class="panel">
-            <header class="panel-heading muted"><i class="icon-dashboard"></i>网站状态</header>
+            <div class="panel-heading muted"><i class="icon-dashboard"></i>网站状态</div>
             <ul class="inner list-inline">
                 <li>访问总数：{{global.visitors}}</li>
                 <li>文章总数：{{global.articles}}</li>

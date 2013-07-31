@@ -27,20 +27,20 @@
 <ul class="media-list">
     <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="article in articleList">
         <div class="media-body" id="{{article._id}}">
-            <header class="media-header">
+            <div class="media-header">
                 <a ng-href="{{'#/'+article._id}}">
                     <i class="primary" ng-class="{'icon-hand-up':article.status==2, 'icon-external-link':article.status!=2}"></i>{{article.title}}</a>
                 <i ng-show="article.status==1" class="icon-thumbs-up hot" title="推荐"></i>
                 <i class="icon-star-empty right hot hover-icon" title="热度" ng-show="!global.isPhone">{{article.hots}}</i>
-            </header>
+            </div>
             <div class="media-content list-content" ng-animate="{show:'fadeIn',hide:'fadeOut'}" ng-hide="parent.listModel" gen-parse-md="article.content"></div>
-            <footer class="media-footer">
+            <div class="media-footer">
                 <a ng-href="{{'#/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
                 <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>
                 <i class="icon-refresh" title="{{article.updateTime | formatDate:true}}更新"> {{article.updateTime | formatDate}}</i>
                 <i class="icon-comments-alt" title="评论" ng-show="article.comments"> {{article.comments}}</i>
                 <a ng-repeat="tag in article.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
-            </footer>
+            </div>
         </div>
     </li>
 </ul>

@@ -56,7 +56,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var parent = $scope.parent;
             parent.listModel = myConf.listModel(!parent.listModel, 'index');
             myConf.pageSize(parent.listModel ? 20 : 10, 'index');
-            getArticleList();
+            app.location.search({});
         };
 
         checkRouteParams();
@@ -406,10 +406,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var parent = $scope.parent;
             parent.listModel = myConf.listModel(!parent.listModel, 'home');
             myConf.pageSize(parent.listModel ? 20 : 10, 'home');
-            getArticleList();
+            app.location.search({});
         };
         $scope.remove = function (article) {
-            if (article.isAuthor) {
+            if (article.isAuthor||global.isEditor) {
                 $scope.removeArticle = article;
                 $scope.removeArticleModal.modal(true);
             }
@@ -1159,14 +1159,20 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         var updated = [];
                         app.each(data, function (x) {
                             var tag = result.data[x._id];
+                            if (!tag) {
+                                app.some($scope.tagList, function (y, i, list) {
+                                    if (x._id === y._id) {
+                                        list.splice(i, 1);
+                                        return true;
+                                    }
+                                });
+                            }
+                        });
+                        app.each(result.data, function (x) {
                             app.some($scope.tagList, function (y, i, list) {
                                 if (x._id === y._id) {
-                                    if (tag) {
-                                        app.union(y, tag);
-                                        updated.push(tag.tag);
-                                    } else {
-                                        list.splice(i, 1);
-                                    }
+                                    app.union(y, x);
+                                    updated.push(x.tag);
                                     return true;
                                 }
                             });

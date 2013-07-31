@@ -74,7 +74,7 @@ filter('placeholder', ['tools',
         return function (seconds) {
             var re = '',
                 q = 0,
-                o = seconds > 0 ? Math.round(seconds) : Math.floor(Date.now() / 1000),
+                o = seconds > 0 ? Math.round(+seconds) : Math.floor(Date.now() / 1000),
                 TIME = $locale.DATETIME;
 
             function calculate(base) {

@@ -1,23 +1,30 @@
 'use strict';
 /*global require, module, Buffer, jsGen*/
 
-var union = jsGen.lib.tools.union,
+var each = jsGen.lib.tools.each,
+    eachAsync = jsGen.lib.tools.eachAsync,
+    union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
+    removeItem = jsGen.lib.tools.remove,
+    toArray = jsGen.lib.tools.toArray,
     checkID = jsGen.lib.tools.checkID,
     filterTag = jsGen.lib.tools.filterTag,
     MD5 = jsGen.lib.tools.MD5,
     paginationList = jsGen.lib.tools.paginationList,
     tagCache = jsGen.cache.tag,
-    resJson = jsGen.lib.tools.resJson;
+    resJson = jsGen.lib.tools.resJson,
+    callbackFn = jsGen.lib.tools.callbackFn,
+    tagDao = jsGen.dao.tag,
+    paginationCache = jsGen.cache.pagination;
 
 tagCache.getP = function (ID, callback) {
     var that = this,
         doc = this.get(ID);
-    callback = callback || jsGen.lib.tools.callbackFn;
+    callback = callback || callbackFn;
     if (doc) {
         return callback(null, doc);
     } else {
-        jsGen.dao.tag.getTag(ID, function (err, doc) {
+        tagDao.getTag(ID, function (err, doc) {
             if (doc) {
                 that.put(ID, doc);
             }
@@ -53,7 +60,7 @@ cache._remove = function (ID) {
     if (this[ID]) {
         delete this[this[ID].tag.toLowerCase()];
         delete this[ID];
-        this._index.splice(i = this._index.indexOf(ID), i >= 0 ? 1 : 0);
+        removeItem(this._index, ID);
         this._index.sort(function (a, b) {
             return that[b].articles - that[a].articles;
         });
@@ -63,7 +70,7 @@ cache._remove = function (ID) {
 };
 (function () {
     var that = this;
-    jsGen.dao.tag.getTagsIndex(function (err, doc) {
+    tagDao.getTagsIndex(function (err, doc) {
         if (err) {
             throw err;
         }
@@ -75,23 +82,21 @@ cache._remove = function (ID) {
 
 function convertTags(IDArray) {
     var result = [];
-    if (!Array.isArray(IDArray)) {
-        IDArray = [IDArray];
-    }
-    for (var i = 0, len = IDArray.length; i < len; i++) {
-        if (cache[IDArray[i]]) {
+    IDArray = toArray(IDArray);
+    each(IDArray, function (x) {
+        if (cache[x]) {
             result.push({
-                _id: jsGen.dao.tag.convertID(IDArray[i]),
-                tag: cache[IDArray[i]].tag
+                _id: tagDao.convertID(x),
+                tag: cache[x].tag
             });
         }
-    }
+    })
     return result;
 }
 
 function setTag(tagObj, callback) {
     var setKey = null,
-        callback = callback || jsGen.lib.tools.callbackFn;
+        callback = callback || callbackFn;
 
     function setCache(doc) {
         cache._remove(doc._id);
@@ -111,82 +116,73 @@ function setTag(tagObj, callback) {
     }
 
     if (setKey === 'tag') {
+        var tagLower = tagObj.tag.toLowerCase();
         if (tagObj.tag === cache[tagObj._id].tag) {
             return callback(null, null);
-        } else if (cache[tagObj.tag.toLowerCase()] && cache[tagObj.tag.toLowerCase()]._id !== tagObj._id) {
-            var toID = cache[tagObj.tag.toLowerCase()]._id;
+        } else if (cache[tagLower] && cache[tagLower]._id !== tagObj._id) {
+            var toID = cache[tagLower]._id;
             tagCache.getP(tagObj._id, function (err, doc) {
                 if (err) {
                     return callback(err, null);
                 }
-                doc.articlesList.reverse();
-                doc.usersList.reverse();
                 articlesListNext();
 
                 function articlesListNext() {
-                    var article;
-                    if (doc.articlesList.length === 0) {
-                        return usersListNext();
-                    }
-                    article = doc.articlesList.pop();
-                    if (!article) {
-                        return articlesListNext();
-                    }
-                    setTag({
-                        _id: toID,
-                        articlesList: article
+                    eachAsync(doc.articlesList, function (next, x) {
+                        if (x) {
+                            setTag({
+                                _id: toID,
+                                articlesList: x
+                            });
+                            jsGen.cache.list.getP(x, function (err, value) {
+                                if (err) {
+                                    return callback(err, null);
+                                }
+                                if (value.tagsList.indexOf(toID) < 0) {
+                                    value.tagsList.push(toID);
+                                    jsGen.cache.list.put(value._id, value);
+                                    jsGen.cache.article.update(value._id, function (v) {
+                                        v.tagsList = value.tagsList;
+                                        return v;
+                                    });
+                                    jsGen.dao.article.setArticle({
+                                        _id: x,
+                                        tagsList: value.tagsList
+                                    });
+                                }
+                            }, false);
+                        }
+                        return next ? next() : usersListNext();
                     });
-                    jsGen.cache.list.getP(article, function (err, value) {
-                        if (err) {
-                            return callback(err, null);
-                        }
-                        if (value.tagsList.indexOf(toID) < 0) {
-                            value.tagsList.push(toID);
-                            jsGen.cache.list.put(value._id, value);
-                            jsGen.cache.article.update(value._id, function (v) {
-                                v.tagsList = value.tagsList;
-                                return v;
-                            });
-                            jsGen.dao.article.setArticle({
-                                _id: article,
-                                tagsList: value.tagsList
-                            });
-                        }
-                    }, false);
-                    return articlesListNext();
                 };
 
                 function usersListNext() {
-                    var user;
-                    if (doc.usersList.length === 0) {
-                        return delTag();
-                    }
-                    user = doc.usersList.pop();
-                    if (!user) {
-                        return usersListNext();
-                    }
-                    setTag({
-                        _id: toID,
-                        usersList: user
-                    });
-                    jsGen.cache.user.getP(user, function (err, value) {
-                        if (err) {
-                            return callback(err, null);
-                        }
-                        if (value.tagsList.indexOf(toID) < 0) {
-                            value.tagsList.push(toID);
-                            jsGen.cache.user.put(value._id, value);
-                            jsGen.dao.user.setUserInfo({
-                                _id: user,
-                                tagsList: value.tagsList
+                    eachAsync(doc.usersList, function (next, x) {
+                        if (x) {
+                            setTag({
+                                _id: toID,
+                                usersList: x
                             });
+                            jsGen.cache.user.getP(x, function (err, value) {
+                                if (err) {
+                                    return callback(err, null);
+                                }
+                                if (value.tagsList.indexOf(toID) < 0) {
+                                    value.tagsList.push(toID);
+                                    jsGen.cache.user.put(value._id, value);
+                                    jsGen.dao.user.setUserInfo({
+                                        _id: x,
+                                        tagsList: value.tagsList
+                                    });
+                                }
+                            }, false);
                         }
-                    }, false);
-                    return usersListNext();
-                };
+                        return next ? next() : delTag();
+                    });
+                }
 
                 function delTag() {
-                    jsGen.dao.tag.delTag(tagObj._id, function () {
+                    tagDao.delTag(tagObj._id, function () {
                         tagCache.remove(tagObj._id);
                         cache._remove(tagObj._id);
                         tagCache.getP(toID, function (err, doc) {
@@ -196,7 +192,7 @@ function setTag(tagObj, callback) {
                 };
             });
         } else {
-            jsGen.dao.tag.setTag(tagObj, function (err, doc) {
+            tagDao.setTag(tagObj, function (err, doc) {
                 if (doc) {
                     setCache(doc);
                 }
@@ -210,7 +206,7 @@ function setTag(tagObj, callback) {
             }
             var exist = doc[setKey].indexOf(Math.abs(tagObj[setKey]));
             if ((tagObj[setKey] < 0 && exist >= 0) || (tagObj[setKey] > 0 && exist < 0)) {
-                jsGen.dao.tag.setTag(tagObj, function (err, doc) {
+                tagDao.setTag(tagObj, function (err, doc) {
                     if (doc) {
                         setCache(doc);
                     }
@@ -227,41 +223,29 @@ function setTag(tagObj, callback) {
 
 function filterTags(tagArray, callback) {
     var tags = [];
-    callback = callback || jsGen.lib.tools.callbackFn;
+    callback = callback || callbackFn;
 
-    if (!Array.isArray(tagArray)) {
-        tagArray = [tagArray];
-    }
-    if (tagArray.length === 0) {
-        return callback(null, tags);
-    }
-    tagArray.reverse();
-    next();
-
-    function next() {
-        var tag;
-        if (tagArray.length === 0) {
-            return callback(null, tags);
-        }
-        tag = filterTag(tagArray.pop());
-        if (!tag) {
-            return next();
-        }
-        if (cache[tag.toLowerCase()]) {
-            tags.push(cache[tag.toLowerCase()]._id);
-            return next();
+    tagArray = toArray(tagArray);
+    eachAsync(tagArray, function (next, x) {
+        if (x && (x = filterTag(x))) {
+            if (cache[x.toLowerCase()]) {
+                tags.push(cache[x.toLowerCase()]._id);
+                return next ? next() : callback(null, tags);
+            } else {
+                tagDao.setNewTag({
+                    tag: x
+                }, function (err, doc) {
+                    if (doc) {
+                        tags.push(doc._id);
+                        cache._update(doc);
+                    }
+                    return next ? next() : callback(null, tags);
+                });
+            }
         } else {
-            jsGen.dao.tag.setNewTag({
-                tag: tag
-            }, function (err, doc) {
-                if (doc) {
-                    tags.push(doc._id);
-                    cache._update(doc);
-                }
-                return next();
-            });
+            return next ? next() : callback(null, tags);
         }
-    };
+    });
 }
 
 function getTag(req, res, dm) {
@@ -270,7 +254,7 @@ function getTag(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
     if (checkID(tag, 'T')) {
-        tag = jsGen.dao.tag.convertID(tag);
+        tag = tagDao.convertID(tag);
     }
     if (typeof tag === 'string') {
         tag = tag.toLowerCase();
@@ -283,37 +267,34 @@ function getTag(req, res, dm) {
     tagCache.getP(tag, dm.intercept(function (doc) {
         var list, key,
             s = +req.path[3],
-            p = req.getparam.p || req.getparam.pageIndex || 1;
+            p = +req.getparam.p || +req.getparam.pageIndex || 1,
+            listPagination = req.session.listPagination;
 
         if (s > 0) {
-            if (s > 20) {
-                s = 20;
-            }
+            s = s > 20 ? 20 : s;
             req.getparam = req.getparam || {};
-            req.getparam.pageIndex = 1;
-            req.getparam.pageSize = s;
+            req.getparam.p = 1;
+            req.getparam.s = s;
             list = doc.articlesList.slice(-s).reverse();
         } else {
             s = 0;
-            p = +p;
             key = MD5(JSON.stringify(doc.articlesList), 'base64');
-
-            if (!req.session.listPagination) {
-                req.session.listPagination = {
+            if (!listPagination) {
+                listPagination = req.session.listPagination = {
                     key: key
                 };
             }
-            list = jsGen.cache.pagination.get(req.session.listPagination.key);
-            if (!list || (p === 1 && req.session.listPagination.key !== key)) {
-                req.session.listPagination.key = key;
+            list = paginationCache.get(listPagination.key);
+            if (!list || (p === 1 && listPagination.key !== key)) {
+                listPagination.key = key;
                 list = doc.articlesList.reverse();
-                jsGen.cache.pagination.put(req.session.listPagination.key, list);
+                paginationCache.put(listPagination.key, list);
             }
         }
         paginationList(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
-            union(req.session.listPagination, pagination);
+            union(listPagination, pagination);
             if (p === 1 || s > 0) {
-                doc._id = jsGen.dao.tag.convertID(doc._id);
+                doc._id = tagDao.convertID(doc._id);
                 delete doc.articlesList;
                 delete doc.usersList;
             }
@@ -327,34 +308,32 @@ function getTag(req, res, dm) {
 function getTags(req, res, dm) {
     var list,
         s = +req.path[3],
-        p = req.getparam.p || req.getparam.pageIndex || 1;
+        p = +req.getparam.p || +req.getparam.pageIndex || 1,
+        listPagination = req.session.listPagination;
 
     if (s > 0) {
-        if (s > 20) {
-            s = 20;
-        }
+        s = s > 20 ? 20 : s;
         req.getparam = req.getparam || {};
         req.getparam.pageIndex = 1;
         req.getparam.pageSize = s;
         list = cache._index.slice(-s);
     } else {
         s = 0;
-        p = +p;
-        if (!req.session.listPagination) {
-            req.session.listPagination = {
+        if (!listPagination) {
+            listPagination = req.session.listPagination = {
                 key: 'tag' + cache._initTime
             };
         }
-        list = jsGen.cache.pagination.get(req.session.listPagination.key);
-        if (!list || (p === 1 && req.session.listPagination.key !== 'tag' + cache._initTime)) {
-            req.session.listPagination.key = 'tag' + cache._initTime;
+        list = paginationCache.get(listPagination.key);
+        if (!list || (p === 1 && listPagination.key !== 'tag' + cache._initTime)) {
+            listPagination.key = 'tag' + cache._initTime;
             list = cache._index.slice(0);
-            jsGen.cache.pagination.put(req.session.listPagination.key, list);
+            paginationCache.put(listPagination.key, list);
         }
     }
     paginationList(req, list, tagCache, dm.intercept(function (data, pagination) {
         data.forEach(function (tag) {
-            tag._id = jsGen.dao.tag.convertID(tag._id);
+            tag._id = tagDao.convertID(tag._id);
             delete tag.articlesList;
             delete tag.usersList;
         });
@@ -377,33 +356,24 @@ function editTags(req, res, dm) {
     if (!tagArray) {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     }
-    if (!Array.isArray(tagArray)) {
-        tagArray = [tagArray];
-    }
-    tagArray.reverse();
-    next();
-
-    function next() {
-        var tagObj;
-        if (tagArray.length === 0) {
-            return res.sendjson(resJson(null, data));
+    tagArray = toArray(tagArray);
+    eachAsync(tagArray, function (next, x) {
+        if (x && x._id && x.tag) {
+            x = intersect(union(defaultObj), x);
+            x._id = tagDao.convertID(x._id);
+            setTag(x, dm.intercept(function (doc) {
+                if (doc) {
+                    doc._id = tagDao.convertID(doc._id);
+                    delete doc.articlesList;
+                    delete doc.usersList;
+                    data[doc._id] = doc;
+                }
+                return next ? next() : res.sendjson(resJson(null, data));
+            }));
+        } else {
+            return next ? next() : res.sendjson(resJson(null, data));
         }
-        tagObj = tagArray.pop();
-        if (!tagObj || !tagObj._id || !tagObj.tag) {
-            return next();
-        }
-        tagObj = intersect(union(defaultObj), tagObj);
-        tagObj._id = jsGen.dao.tag.convertID(tagObj._id);
-        setTag(tagObj, dm.intercept(function (doc) {
-            if (doc) {
-                doc._id = jsGen.dao.tag.convertID(doc._id);
-                delete doc.articlesList;
-                delete doc.usersList;
-                data[doc._id] = doc;
-            }
-            return next();
-        }));
-    };
+    });
 }
 
 function delTag(req, res, dm) {
@@ -416,7 +386,7 @@ function delTag(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
     if (checkID(tag, 'T')) {
-        tag = jsGen.dao.tag.convertID(tag);
+        tag = tagDao.convertID(tag);
     }
     if (typeof tag === 'string') {
         tag = tag.toLowerCase();
@@ -426,7 +396,7 @@ function delTag(req, res, dm) {
     } else {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
-    jsGen.dao.tag.delTag(tag, dm.intercept(function () {
+    tagDao.delTag(tag, dm.intercept(function () {
         tagCache.remove(tag);
         cache._remove(tag);
         return res.sendjson(resJson());

@@ -14,6 +14,9 @@ pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
 pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
 
 pre.prettyprint, code.prettyprint {
+    font-family: Consolas, "Liberation Mono", Courier, monospace,serif;
+    font-size: 0.95em;
+    line-height: 1.5em;
     background-color: #222;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
