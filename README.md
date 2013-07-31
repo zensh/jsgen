@@ -65,9 +65,9 @@ jsGen的Github源码包括两个分支：`master`和`dev`，默认为master分�
 
 浏览器端输入网址[http://localhost/](http://localhost/)即可访问。
 
-默认的管理员用户名: **admin** 密码: **admin@zensh.com**。
+默认的管理员用户名: **admin** 密码: **admin@jsgen.org**。
 
-Default administrator username: **admin** password: **admin@zensh.com**.
+Default administrator username: **admin** password: **admin@jsgen.org**.
 
 #### 升级 (Update)
 

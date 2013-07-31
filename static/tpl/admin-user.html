@@ -10,12 +10,12 @@
                         <th class="text-left">
                             <input type="checkbox" ng-model="parent.isSelectAll" ng-click="selectAll()">
                         </th>
-                        <th><a ng-click="predicate='name';reverse=!reverse">用户名</a></th>
-                        <th><a ng-click="predicate='email';reverse=!reverse">Email</a></th>
-                        <th><a ng-click="predicate='role';reverse=!reverse">权限</a></th>
-                        <th><a ng-click="predicate='score';reverse=!reverse">积分</a></th>
-                        <th><a ng-click="predicate='date';reverse=!reverse">注册日期</a></th>
-                        <th><a ng-click="predicate='lastLoginDate';reverse=!reverse">登录时间</a></th>
+                        <th><i class="icon-sort-by-alphabet"></i><a ng-click="predicate='name';reverse=!reverse">用户名</a></th>
+                        <th><i class="icon-sort-by-alphabet"></i><a ng-click="predicate='email';reverse=!reverse">Email</a></th>
+                        <th><i class="icon-sort-by-alphabet"></i><a ng-click="predicate='role';reverse=!reverse">权限</a></th>
+                        <th><i class="icon-sort-by-order"></i><a ng-click="predicate='score';reverse=!reverse">积分</a></th>
+                        <th><i class="icon-sort-by-order"></i><a ng-click="predicate='date';reverse=!reverse">注册</a></th>
+                        <th><i class="icon-sort-by-order"></i><a ng-click="predicate='lastLoginDate';reverse=!reverse">登录</a></th>
                     </tr>
                 </thead>
                 <tbody>

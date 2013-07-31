@@ -8,7 +8,7 @@
               <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
           </a>
           <div class="media-body" id="{{user._id}}">
-            <header class="media-heading">
+            <div class="media-heading">
                 <div class="media-heading">
                     <a ng-click="followMe(user)" class="pure-button pure-button-small success-bg right" ng-class="{'success-bg':!user.isFollow,'primary-bg':user.isFollow}" ng-hide="user.isMe">{{user.isFollow | switch:'follow'}}</a>
                     <a ng-href="{{'#/'+user._id}}">{{user.name}}</a>
@@ -40,15 +40,15 @@
                         </li>
                     </ul>
                 </div>
-            </header>
+            </div>
             <div class="media-content" gen-parse-md="user.desc"></div>
-            <footer>
+            <div>
                 <ul class="list-inline">
                     <li ng-repeat="tag in user.tagsList">
                         <a ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-mini">{{tag.tag}}</a>
                     </li>
                 </ul>
-            </footer>
+            </div>
           </div>
         </li>
     </ul>

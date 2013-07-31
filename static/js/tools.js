@@ -57,21 +57,28 @@ factory('tools', function () {
     }
 
     function trim(str, strict) {
-        str = toStr(str);
-        str = str.replace(strict ? (/\s+/g) : (/ +/g), ' ');
-        str = str.replace(/^\s+/, '');
-        str = str.replace(/\s+$/, '');
-        return str;
+        return toStr(str).
+        replace(strict ? (/\s+/g) : (/ +/g), ' ').
+        replace(/^\s+/, '').
+        replace(/\s+$/, '');
     }
 
-    function each(obj, iterator, context, arrayLike) {
+    function each(obj, iterator, context, arrayLike, right) {
         iterator = iterator || angular.noop;
         if (!obj) {
             return;
         } else if (arrayLike || isArray(obj)) {
-            for (var i = 0, l = obj.length; i < l; i++) {
-                if (iterator.call(context, obj[i], i, obj) === breaker) {
-                    return;
+            if (!right) {
+                for (var i = 0, l = obj.length; i < l; i++) {
+                    if (iterator.call(context, obj[i], i, obj) === breaker) {
+                        return;
+                    }
+                }
+            } else {
+                for (var i = obj.length - 1; i >= 0; i--) {
+                    if (iterator.call(context, obj[i], i, obj) === breaker) {
+                        return;
+                    }
                 }
             }
         } else {
@@ -193,17 +200,18 @@ factory('tools', function () {
         return a;
     }
 
+    // 去除数组中的undefined值，修改原数组，返回原数组
+
     function digestArray(list) {
         var result = [];
         if (isArray(list)) {
-            each(list, function (x) {
-                if (checkType(x) !== 'undefined') {
-                    result.push(x);
+            each(list, function (x, i) {
+                if (checkType(x) === 'undefined') {
+                    list.splice(i, 1);
                 }
-            });
-            return result;
-        } else {
-            return list;
+            }, null, true, true);
+
         }
+        return list;
     }
 });

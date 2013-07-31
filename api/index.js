@@ -3,13 +3,22 @@
 
 var url = require('url'),
     os = require('os'),
+    jsGenConfig = jsGen.config,
+    jsGenCache = jsGen.cache,
+    userCache = jsGenCache.user,
+    each = jsGen.lib.tools.each,
+    removeItem = jsGen.lib.tools.remove,
+    toArray = jsGen.lib.tools.toArray,
+    eachAsync = jsGen.lib.tools.eachAsync,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUrl = jsGen.lib.tools.checkUrl,
-    onlineCache = jsGen.cache.online,
-    resJson = jsGen.lib.tools.resJson;
+    onlineCache = jsGenCache.online,
+    resJson = jsGen.lib.tools.resJson,
+    tagAPI = jsGen.api.tag,
+    userAPI = jsGen.api.user;
 
 function updateOnlineCache(req) {
     var now = Date.now();
@@ -21,23 +30,21 @@ function updateOnlineCache(req) {
     } else {
         onlineCache.put(req.session._restsid);
     }
-    jsGen.config.onlineNum = onlineCache.linkedList.length;
-    jsGen.config.onlineUsers = (function () {
+    jsGenConfig.onlineNum = onlineCache.linkedList.length;
+    jsGenConfig.onlineUsers = (function () {
         var i = 0,
             user = onlineCache.linkedList.head;
         while (user && user.key) {
-            if (user.key[0] === 'U') {
-                i += 1;
-            }
+            i += user.key[0] === 'U' ? 1 : 0;
             user = user.p;
         }
         return i;
     }());
-    if (jsGen.config.onlineNum > jsGen.config.maxOnlineNum) {
-        jsGen.config.maxOnlineNum = jsGen.config.onlineNum;
-        jsGen.config.maxOnlineTime = now;
+    if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
+        jsGenConfig.maxOnlineNum = jsGenConfig.onlineNum;
+        jsGenConfig.maxOnlineTime = now;
         jsGen.dao.index.setGlobalConfig({
-            maxOnlineNum: jsGen.config.onlineNum,
+            maxOnlineNum: jsGenConfig.onlineNum,
             maxOnlineTime: now
         });
     }
@@ -74,22 +81,22 @@ function getIndex(req, res, dm) {
         register: true,
         info: {}
     };
-    intersect(config, jsGen.config);
-    config.tagsList = jsGen.api.tag.convertTags(jsGen.api.tag.cache._index.slice(0, 20));
+    intersect(config, jsGenConfig);
+    config.tagsList = tagAPI.convertTags(tagAPI.cache._index.slice(0, 20));
     config.timestamp = Date.now();
     if (req.session.Uid) {
-        jsGen.cache.user.getP(req.session.Uid, dm.intercept(function (doc) {
+        userCache.getP(req.session.Uid, dm.intercept(function (doc) {
             config.user = doc;
             return res.sendjson(resJson(null, config));
         }));
     } else if (req.cookie.autologin) {
-        jsGen.api.user.cookieLogin(req, function (Uid) {
+        userAPI.cookieLogin(req, function (Uid) {
             if (Uid) {
-                jsGen.cache.user.getP(Uid, dm.intercept(function (doc) {
+                userCache.getP(Uid, dm.intercept(function (doc) {
                     req.session.Uid = Uid;
                     req.session.role = doc.role;
                     req.session.logauto = true;
-                    jsGen.api.user.cookieLoginUpdate(Uid, function (cookie) {
+                    userAPI.cookieLoginUpdate(Uid, function (cookie) {
                         if (cookie) {
                             res.cookie('autologin', cookie, {
                                 maxAge: 259200000,
@@ -115,7 +122,7 @@ function getServTime(req, res, dm) {
 }
 
 function getGlobal(req, res, dm) {
-    var body = union(jsGen.config);
+    var body = union(jsGenConfig);
     if (req.session.role < 4) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
@@ -125,15 +132,15 @@ function getGlobal(req, res, dm) {
         platform: process.platform,
         node: process.versions,
         memory: process.memoryUsage(),
-        user: jsGen.cache.user.info(),
-        article: jsGen.cache.article.info(),
-        comment: jsGen.cache.comment.info(),
-        list: jsGen.cache.list.info(),
-        tag: jsGen.cache.tag.info(),
-        collection: jsGen.cache.collection.info(),
-        message: jsGen.cache.message.info(),
-        pagination: jsGen.cache.pagination.info(),
-        timeInterval: jsGen.cache.timeInterval.info()
+        user: userCache.info(),
+        article: jsGenCache.article.info(),
+        comment: jsGenCache.comment.info(),
+        list: jsGenCache.list.info(),
+        tag: jsGenCache.tag.info(),
+        collection: jsGenCache.collection.info(),
+        message: jsGenCache.message.info(),
+        pagination: jsGenCache.pagination.info(),
+        timeInterval: jsGenCache.timeInterval.info()
     };
     delete body.smtp.auth.pass;
     return res.sendjson(resJson(null, body));
@@ -189,10 +196,7 @@ function setGlobal(req, res, dm) {
         };
 
     function checkArray(key, i, array) {
-        key = +key;
-        if (key < 0) {
-            key = 0;
-        }
+        key = key > 0 ? +key : 0;
         array[i] = key;
     }
     var setObj = union(defaultObj);
@@ -215,59 +219,59 @@ function setGlobal(req, res, dm) {
         throw jsGen.Err(jsGen.lib.msg.globalEmailErr);
     }
     if (setObj.UsersScore) {
-        setObj.UsersScore.forEach(checkArray);
+        each(setObj.UsersScore, checkArray);
     }
     if (setObj.ArticleStatus) {
-        setObj.ArticleStatus.forEach(checkArray);
+        each(setObj.ArticleStatus, checkArray);
     }
     if (setObj.ArticleHots) {
-        setObj.ArticleHots.forEach(checkArray);
+        each(setObj.ArticleHots, checkArray);
     }
     if (setObj.paginationCache) {
-        setObj.paginationCache.forEach(checkArray);
+        each(setObj.paginationCache, checkArray);
     }
     if (setObj.TimeInterval && setObj.TimeInterval < 5) {
         setObj.TimeInterval = 5;
     }
-    Object.keys(setObj).forEach(function (key) {
-        if (equal(setObj[key], jsGen.config[key])) {
-            delete setObj[key];
+    each(setObj, function (x, i, list) {
+        if (equal(x, jsGenConfig[i])) {
+            delete list[i];
         }
     });
     if (setObj.userCache) {
-        jsGen.cache.user.capacity = setObj.userCache;
+        userCache.capacity = setObj.userCache;
     }
     if (setObj.articleCache) {
-        jsGen.cache.article.capacity = setObj.articleCache;
+        jsGenCache.article.capacity = setObj.articleCache;
     }
     if (setObj.commentCache) {
-        jsGen.cache.comment.capacity = setObj.commentCache;
+        jsGenCache.comment.capacity = setObj.commentCache;
     }
     if (setObj.listCache) {
-        jsGen.cache.list.capacity = setObj.listCache;
+        jsGenCache.list.capacity = setObj.listCache;
     }
     if (setObj.tagCache) {
-        jsGen.cache.tag.capacity = setObj.tagCache;
+        jsGenCache.tag.capacity = setObj.tagCache;
     }
     if (setObj.collectionCache) {
-        jsGen.cache.collection.capacity = setObj.collectionCache;
+        jsGenCache.collection.capacity = setObj.collectionCache;
     }
     if (setObj.messageCache) {
-        jsGen.cache.message.capacity = setObj.messageCache;
+        jsGenCache.message.capacity = setObj.messageCache;
     }
     if (setObj.paginationCache) {
-        jsGen.cache.pagination.timeLimit = setObj.paginationCache[0] * 1000;
-        jsGen.cache.pagination.capacity = setObj.paginationCache[1];
+        jsGenCache.pagination.timeLimit = setObj.paginationCache[0] * 1000;
+        jsGenCache.pagination.capacity = setObj.paginationCache[1];
     }
     if (setObj.TimeInterval) {
-        jsGen.cache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
+        jsGenCache.timeInterval.timeLimit = setObj.TimeInterval * 1000;
     }
     if (setObj.robots) {
         jsGen.robotReg = new RegExp(setObj.robots, 'i');
     }
     jsGen.dao.index.setGlobalConfig(setObj, dm.intercept(function (doc) {
         doc = intersect(defaultObj, doc);
-        union(jsGen.config, doc);
+        union(jsGenConfig, doc);
         delete doc.smtp.auth.pass;
         return res.sendjson(resJson(null, doc));
     }));

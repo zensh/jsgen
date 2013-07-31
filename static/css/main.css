@@ -121,6 +121,7 @@ body > div {
 .article-content {
     padding: 0 2em;
     min-height: 80px;
+    line-height: 1.62em;
 }
 .article-content > p {
     text-indent: 2em;

@@ -1,7 +1,7 @@
 <div class="pure-g-r wrap">
     <div class="pure-u-3-4">
-        <article class="panel" id="{{article._id}}">
-            <header class="article-header">
+        <div class="panel" id="{{article._id}}">
+            <div class="article-header">
                 <h3>{{article.title}} <small><a ng-show="global.isEditor" ng-click="highlight(article)" ng-class="{info:article.status<2,warning:article.status==2}"><i class="icon-hand-up"></i>{{article.status==2 | switch:'highlight'}}</a></small></h3>
                 <div class="article-info">
                     <a ng-href="{{article.refer.url}}" title="原文"><i class="icon-external-link-sign success"></i>{{article.refer.url | cutText:25}}</a>
@@ -13,10 +13,10 @@
                     <a ng-repeat="tag in article.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
                     <a class="success" ng-show="article.isAuthor||global.isEditor" ng-href="{{'#/'+article._id+'/edit'}}"><i class="icon-pencil"></i> 编辑</a>
                 </div>
-            </header>
+            </div>
             <div class="article-content" gen-parse-md="article.content">
             </div>
-            <footer class="pure-g-r article-footer">
+            <div class="pure-g-r article-footer">
                 <div class="pure-u-1-2 pure-hidden-phone">
                     <div class="article-info" ng-show="article.favorsList">
                         <i class="icon-thumbs-up"> 支持</i>
@@ -53,9 +53,9 @@
                         <button ng-click="reply(article)" class="pure-button pure-button-small success-bg">发表评论<i class="icon-reply"></i></button>
                     </div>
                 </div>
-            </footer>
-        </article>
-        <aside class="panel" id="comments">
+            </div>
+        </div>
+        <div class="panel" id="comments">
             <div class="inner" id="replyForm" gen-moving="replyMoving">
                 <h4>{{comment.title}}</h4>
                 <div class="wmd-preview article-content" ng-show="parent.wmdPreview" gen-parse-md="comment.content">
@@ -84,11 +84,11 @@
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body" id="{{comment._id}}">
-                    <header class="media-heading">
+                    <div class="media-heading">
                         <a ng-click="getComments(comment.refer._id, comment)">{{comment.title}}</a>
-                    </header>
+                    </div>
                     <div class="media-content list-content" gen-parse-md="comment.content"></div>
-                    <footer class="pure-g-r media-footer">
+                    <div class="pure-g-r media-footer">
                         <div class="pure-u-1-2"><a ng-href="{{'#/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
                         <div class="pure-u-1-2 text-right">
                             <div class="pure-button-group">
@@ -106,7 +106,7 @@
                                 <button class="pure-button pure-button-link" ng-click="reply(comment)" class="pure-button pure-button-primary">回复<i class="icon-reply"></i></button>
                             </div>
                         </div>
-                    </footer>
+                    </div>
                   </div>
                 </li>
             </ul>
@@ -116,11 +116,11 @@
                       <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body">
-                    <header class="media-heading">
+                    <div class="media-heading">
                         {{comment.title}}
-                    </header>
+                    </div>
                     <div class="media-content list-content" gen-parse-md="comment.content"></div>
-                    <footer class="pure-g-r media-footer">
+                    <div class="pure-g-r media-footer">
                         <div class="pure-u-1-2"><a ng-href="{{'#/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
                         <div class="pure-u-1-2 text-right">
                             <div class="pure-button-group">
@@ -132,22 +132,22 @@
                                 </button>
                             </div>
                         </div>
-                    </footer>
+                    </div>
                   </div>
                 </li>
             </ul>
-        </aside>
+        </div>
         <div gen-pagination="pagination"></div>
     </div>
     <div class="pure-u-1-4 aside">
         <div class="panel">
-            <header class="panel-heading">作者信息</header>
+            <div class="panel-heading">作者信息</div>
             <div class="media inner">
                 <a class="media-object left" ng-href="{{'#/'+article.author._id}}">
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{article.author.avatar}}">
                 </a>
                 <div class="media-body">
-                    <header class="media-header"><a ng-href="{{'#/'+article.author._id}}">{{article.author.name}}</a></header>
+                    <div class="media-header"><a ng-href="{{'#/'+article.author._id}}">{{article.author.name}}</a></div>
                     <button class="pure-button success-bg" ng-show="!article.author.isMe" ng-click="followMe(article.author)">{{article.author.isFollow | switch:'follow'}}</button>
                 </div>
             </div>
@@ -173,7 +173,7 @@
             </ul>
         </div>
         <div class="panel" ng-show="article.author.articlesList.length>0">
-            <header class="panel-heading">作者文章</header>
+            <div class="panel-heading">作者文章</div>
             <ul class="media-list comments">
                 <li ng-repeat="item in article.author.articlesList">
                     <mark class="muted">{{item.date | formatDate}}</mark>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
@@ -181,7 +181,7 @@
             </ul>
         </div>
         <div class="panel pure-hidden-phone" ng-show="hotArticles.length>0">
-            <header class="panel-heading">热门文章</header>
+            <div class="panel-heading">热门文章</div>
             <ul class="media-list comments">
                 <li class="media" ng-repeat="item in hotArticles">
                   <div class="media-body" id="{{item._id}}">

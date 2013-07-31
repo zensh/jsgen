@@ -106,6 +106,7 @@ config(['$httpProvider', 'app',
             });
         }
 
+        window.app = app; // just for test
         app.q = $q;
         app.toast = toast;
         app.param = param;

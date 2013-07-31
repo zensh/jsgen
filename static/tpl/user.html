@@ -10,7 +10,7 @@
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
                 </a>
                 <div class="media-body">
-                    <header class="media-header"><a ng-href="{{'#/'+user._id}}">{{user.name}}</a></header>
+                    <div class="media-header"><a ng-href="{{'#/'+user._id}}">{{user.name}}</a></div>
                     <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | switch:'follow'}}</button>
                 </div>
             </div>
