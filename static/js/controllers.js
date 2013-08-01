@@ -753,9 +753,9 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                     article.comments += 1;
                     article.updateTime = Date.now();
                     if (replyToComment) {
-                        app.some(article.commentsList, function (x, i) {
+                        app.some(article.commentsList, function (x, i, list) {
                             if (replyToComment === x._id) {
-                                article.commentsList[i].commentsList.push(comment._id);
+                                x.commentsList.push(comment._id);
                                 return true;
                             }
                         });

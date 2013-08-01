@@ -176,7 +176,7 @@
             <div class="panel-heading">作者文章</div>
             <ul class="media-list comments">
                 <li ng-repeat="item in article.author.articlesList">
-                    <mark class="muted">{{item.date | formatDate}}</mark>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
+                    <span class="label">{{item.date | formatDate}}</span>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
                 </li>
             </ul>
         </div>

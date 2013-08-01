@@ -102,7 +102,7 @@ commentCache.getP = function (ID, callback, convert) {
         doc.markList = userAPI.convertUsers(doc.markList);
         doc.refer = convertRefer(doc.refer);
         doc.comments = doc.commentsList.length;
-        doc.commentsList = convertArticleID(doc.commentsList);
+        doc.commentsList = convertArticlesID(doc.commentsList);
     }
 
     callback = callback || callbackFn;
@@ -333,7 +333,7 @@ function hotCommentsList(article) {
     return;
 }
 
-function convertArticleID(IDArray) {
+function convertArticlesID(IDArray) {
     var result = [];
     IDArray = toArray(IDArray);
     each(IDArray, function (x) {

@@ -14,7 +14,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     element.html(value);
                     angular.forEach(element.find('code'), function (value) {
                         value = angular.element(value);
-                        if (value.children().length === 0) {
+                        if (!value.parent().is('pre')) {
                             value.addClass('prettyprint');
                         }
                     });
@@ -181,7 +181,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                 }
 
                 options.cancelFn = options.cancelFn || true;
-                options.backdrop = options.backdrop || 'static';
+                options.backdrop = options.backdrop || true;
                 options.show = options.show || false;
                 options.modal = showModal;
 
@@ -258,7 +258,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                 }
 
                 function initTooltip() {
-                    element.off('.tooltip').removeData('tooltip');
+                    element.off('.tooltip').removeData('bs.tooltip');
                     element.tooltip(option);
                 }
 

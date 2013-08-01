@@ -14,7 +14,7 @@ textarea {
     font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 a {
-    color: rgb(0, 102, 204);
+    color: rgb(66, 139, 202);
     cursor: pointer;
 }
 small {
@@ -185,7 +185,7 @@ body > div {
 .aside .pure-menu a:focus,
 .aside .pure-menu .active > a {
     color: #fff;
-    background-color: rgb(0, 102, 204);
+    background-color: rgb(66, 139, 202);
 }
 
 .footer {
@@ -228,20 +228,19 @@ body > div {
 
 .pure-button {
     border-radius: 4px;
-    border: none;
+    border-color: transparent;
 }
 .pure-button-link {
-    color: rgb(0, 102, 204);
+    color: rgb(66, 139, 202);
     background: transparent;
-    padding: .2em .3em;
+    padding: .2em .4em;
 }
 .pure-button.primary-bg,
 .pure-button.success-bg,
 .pure-button.error-bg,
 .pure-button.warning-bg,
 .pure-button.info-bg {
-    color: white;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    color: #fff;
 }
 .pure-button-mini {
     font-size: .7em;
@@ -764,29 +763,29 @@ body > div {
 }
 
 .invalid-error {
-    border-color: rgb(202, 60, 60) !important;
+    border-color: rgb(217, 83, 79) !important;
 }
 input.invalid-error,
 textarea.invalid-error {
-    border-color: rgb(202, 60, 60) !important;
+    border-color: rgb(217, 83, 79) !important;
     background-color: rgb(252, 210, 214);
-    background-color: rgba(202, 60, 60, 0.2);
+    background-color: rgba(217, 83, 79, 0.2);
 }
 .validate-tooltip.top .tooltip-arrow {
-    border-top-color: rgb(202, 60, 60);
+    border-top-color: rgb(217, 83, 79);
 }
 .validate-tooltip.left .tooltip-arrow {
-    border-left-color: rgb(202, 60, 60);
+    border-left-color: rgb(217, 83, 79);
 }
 .validate-tooltip.bottom .tooltip-arrow {
-    border-bottom-color: rgb(202, 60, 60);
+    border-bottom-color: rgb(217, 83, 79);
 }
 .validate-tooltip.right .tooltip-arrow {
-    border-right-color: rgb(202, 60, 60);
+    border-right-color: rgb(217, 83, 79);
 }
 .validate-tooltip .tooltip-inner {
     text-align: left;
-    background-color: rgb(202, 60, 60);
+    background-color: rgb(217, 83, 79);
 }
 
 .modal-open {
@@ -909,6 +908,29 @@ button.close {
     -webkit-appearance: none;
 }
 
+.label {
+  display: inline;
+  padding: .1em .6em;
+  font-size: 75%;
+  font-weight: 500;
+  line-height: 1;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  background-color: #aaa;
+  border-radius: .25em;
+  letter-spacing: -1px;
+}
+
+.label[href]:hover,
+.label[href]:focus {
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: #808080;
+}
+
 .list-model {
     padding-left: .8em;
     padding-right: .8em;
@@ -1005,37 +1027,42 @@ ol.inner {
     background-color: rgb(230, 255, 230);
 }
 .success {
-    color: rgb(28, 184, 65); /* this is a green */
+    color: rgb(92, 184, 92); /* this is a green */
 }
 .error {
-    color: rgb(202, 60, 60); /* this is a maroon */
+    color: rgb(217, 83, 79); /* this is a maroon */
 }
 .warning {
-    color: rgb(223, 117, 20); /* this is an orange */
+    color: rgb(240, 173, 78); /* this is an orange */
 }
 .info {
-    color: rgb(66, 184, 221); /* this is a light blue */
+    color: rgb(91, 192, 222); /* this is a light blue */
 }
 .primary {
-    color: rgb(0, 102, 204);
+    color: rgb(66, 139, 202);
 }
 .hot {
-    color: rgb(252, 60, 60);
+    color: rgb(212, 73, 80);
 }
 .success-bg {
-    background-color: rgb(28, 184, 65);
+    background-color: rgb(92, 184, 92);
+    border-color: rgb(92, 184, 92);
 }
 .error-bg {
-    background-color: rgb(202, 60, 60);
+    background-color: rgb(217, 83, 79);
+    border-color: rgb(217, 83, 79);
 }
 .warning-bg {
-    background-color: rgb(223, 117, 20);
+    background-color: rgb(240, 173, 78);
+    border-color: rgb(240, 173, 78);
 }
 .info-bg {
-    background-color: rgb(66, 184, 221);
+    background-color: rgb(91, 192, 222);
+    border-color: rgb(91, 192, 222);
 }
 .primary-bg {
-    background-color: rgb(0, 102, 204);
+    background-color: rgb(66, 139, 202);
+    border-color: rgb(66, 139, 202);
 }
 
 @media (min-width: 980px) {
