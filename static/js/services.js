@@ -269,7 +269,7 @@ factory('restAPI', ['$resource',
             editor.hooks.chain('onPreviewRefresh', function () {
                 angular.forEach(element.find('code'), function(value){
                     value = angular.element(value);
-                    if (value.children().length === 0) {
+                    if (!value.parent().is('pre')) {
                         value.addClass('prettyprint');
                     }
                 });
