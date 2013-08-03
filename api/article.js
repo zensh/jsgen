@@ -1046,8 +1046,15 @@ function deleteArticle(req, res, dm) {
         };
         cache._update(setObj);
         articleDao.setArticle(setObj);
-        userCache.update(req.session.Uid, function (user) {
-            removeItem(user.articlesList, ID)
+        if (checkID(article.refer, 'A')) {
+            var referID = convertArticleID(article.refer);
+            articleDao.setComment({
+                _id: referID,
+                commentsList: -article._id
+            });
+        }
+        userCache.update(article.author, function (user) {
+            removeItem(user.articlesList, ID);
             return user;
         });
         jsGen.dao.user.setArticle({
