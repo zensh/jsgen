@@ -25,6 +25,7 @@ var that = jsGen.dao.db.bind('global', {
         var setObj = {},
             newObj = {
                 domain: '',
+                beian: '',
                 title: '',
                 url: '',
                 logo: '',

@@ -53,6 +53,7 @@ function updateOnlineCache(req) {
 function getIndex(req, res, dm) {
     var config = {
         domain: '',
+        beian: '',
         title: '',
         url: '',
         logo: '',
@@ -150,6 +151,7 @@ function setGlobal(req, res, dm) {
     var body = {},
         defaultObj = {
             domain: '',
+            beian: '',
             title: '',
             url: '',
             logo: '',

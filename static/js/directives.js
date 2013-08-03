@@ -8,7 +8,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
         // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
         return function (scope, element, attr) {
             scope.$watch(attr.genParseMd, function (value) {
-                if (value || value === 0) {
+                if (angular.isDefined(value)) {
                     value = mdParse(value);
                     value = sanitize(value);
                     element.html(value);
@@ -25,8 +25,6 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                         }
                     });
                     pretty();
-                } else {
-                    element.html('');
                 }
             });
         };
@@ -61,12 +59,11 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             scope: true,
             templateUrl: getFile.html('gen-pagination.html'),
             link: function (scope, element, attr) {
-                scope.$watchCollection(attr.genPagination, function (value, old) {
+                scope.$watchCollection(attr.genPagination, function (value) {
                     if (!angular.isObject(value)) {
                         return;
                     }
-                    var i = 0,
-                        pageIndex = 1,
+                    var pageIndex = 1,
                         showPages = [],
                         lastPage = Math.ceil(value.total / value.pageSize) || 1;
 
@@ -355,6 +352,18 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                             attr.$set('src', value);
                         };
                         img.src = value;
+                    }
+                });
+            }
+        };
+    }
+).directive('genAspectratio',
+    function () {
+        return {
+            link: function (scope, element, attr) {
+                attr.$observe('aspectRatio', function (value) {
+                    if (value > 0 && element.is(':visible')) {
+                        element.css('height', value * element.width());
                     }
                 });
             }

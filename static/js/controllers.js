@@ -27,7 +27,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var params = {
                 ID: ID,
                 p: $routeParams.p,
-                s: $routeParams.s || myConf.pageSize(null, 'index', 10)
+                s: $routeParams.s || myConf.pageSize(null, 'index', 20)
             };
 
             app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
@@ -47,7 +47,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            listModel: myConf.listModel(global.isPhone || null, 'index', false)
+            listModel: myConf.listModel(null, 'index', true)
         };
         $scope.other = {};
         $scope.pagination = {};
@@ -345,7 +345,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 ID: $routeParams.ID && 'U' + $routeParams.ID || $routeParams.OP,
                 OP: $routeParams.OP || ($routeParams.ID ? 'article' : 'index'),
                 p: $routeParams.p,
-                s: $routeParams.s || myConf.pageSize(null, 'home', 10)
+                s: $routeParams.s || myConf.pageSize(null, 'home', 20)
             };
             app.promiseGet(params, restAPI, app.param(params), app.cache.list).then(function (data) {
                 var newArticles = 0,
@@ -372,7 +372,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         }
 
         $scope.parent = {
-            listModel: myConf.listModel(global.isPhone || null, 'index', false),
+            listModel: myConf.listModel(null, 'index', true),
             title: ''
         };
         $scope.pagination = {};
@@ -598,6 +598,37 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
         $scope.validateTooltip = app.union(app.rootScope.validateTooltip);
         $scope.validateTooltip.placement = 'bottom';
+        $scope.removeCommentModal = {
+            confirmBtn: locale.BTN_TEXT.confirm,
+            confirmFn: function () {
+                var comment = $scope.removeComment;
+                app.restAPI.article.remove({
+                    ID: comment._id
+                }, function () {
+                    app.some($scope.article.commentsList, function (x, i, list) {
+                        if (x._id === comment._id) {
+                            list.splice(i, 1);
+                            $scope.article.comments = list.length;
+                            app.toast.success(locale.ARTICLE.removed + comment.title, locale.RESPONSE.success);
+                            return true;
+                        }
+                    });
+                    $scope.removeComment = null;
+                });
+                return true;
+            },
+            cancelBtn: locale.BTN_TEXT.cancel,
+            cancelFn: function () {
+                $scope.removeComment = null;
+                return true;
+            }
+        };
+        $scope.remove = function (comment) {
+            if (comment.isAuthor||global.isEditor) {
+                $scope.removeComment = comment;
+                $scope.removeCommentModal.modal(true);
+            }
+        };
 
         $scope.wmdHelp = function () {
             getMarkdown.success(function (data) {
@@ -1210,6 +1241,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             lengthFn = filter('length'),
             global = {
                 domain: '',
+                beian: '',
                 title: '',
                 url: '',
                 logo: '',
