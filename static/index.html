@@ -81,9 +81,9 @@
                 reserveLoad(IE8 && '/static/js/lib/pack-ie.js', // if lt IE 9
                     ['http://ajax.googleapis.com/ajax/libs/jquery/' + jqVer + '/jquery.min.js', '/static/js/lib/jquery.' + jqVer + '.min.js', 'jQuery'],
                     ['http://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js', '/static/js/lib/angular.min.js', 'angular'],
-                    ['/static/js/lib/pack-lib.js', null],
-                    ['/static/js/lib/pack-angular.js', null],
-                    ['/static/js/pack-app.js', null],
+                    '/static/js/lib/pack-lib.js',
+                    '/static/js/lib/pack-angular.js',
+                    '/static/js/pack-app.js',
                     function (errorUrl) {
                         if (errorUrl) {
                             alert('Error loading: ' + errorUrl);
