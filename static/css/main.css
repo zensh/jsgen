@@ -24,6 +24,11 @@ mark {
     background-color: rgb(233, 233, 233);
     background-color: rgba(150, 150, 150, 0.2);
 }
+blockquote {
+    margin: 1em 0;
+    padding-left: 2em;
+    border-left: 5px solid #eee;
+}
 :focus{
     outline: none !important;
 }

@@ -5,7 +5,7 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsGen",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
