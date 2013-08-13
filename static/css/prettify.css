@@ -13,8 +13,9 @@ pre .atn, code .atn { color: #bdb76b; } /* html/xml attribute name  - khaki */
 pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
 pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
 
-pre.prettyprint, code.prettyprint {
-    font-family: Consolas, "Liberation Mono", Courier, monospace,serif !important;
+pre.prettyprint,
+code.prettyline {
+    font-family: Consolas, "Liberation Mono", Courier, monospace, serif !important;
     font-size: 0.95em;
     line-height: 1.5em;
     background-color: #222;
@@ -26,8 +27,13 @@ pre.prettyprint, code.prettyprint {
     border-radius: 4px;
 }
 
-code.prettyprint {
-    padding: 2px 5px;
+code.prettyline {
+    padding: 1px 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    background-color: #f8f8f8;
+    color: #d44950;
+    border: 1px solid #ddd;
 }
 
 pre.prettyprint {

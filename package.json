@@ -5,7 +5,7 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsGen",
-    "version": "0.5.6",
+    "version": "0.5.7",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
@@ -15,7 +15,8 @@
     },
     "dependencies": {
         "rrestjs": ">=1.x.x",
-        "mongoskin": ">=0.5.X",
+        "mongoskin": ">=0.5.x",
+        "redis": ">=0.8.x",
         "marked": ">=0.2.x",
         "nodemailer": ">=0.3.x",
         "xss": ">=0.0.3"

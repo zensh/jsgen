@@ -15,7 +15,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     angular.forEach(element.find('code'), function (value) {
                         value = angular.element(value);
                         if (!value.parent().is('pre')) {
-                            value.addClass('prettyprint');
+                            value.addClass('prettyline');
                         }
                     });
                     element.find('pre').addClass('prettyprint'); // linenums have bug!
