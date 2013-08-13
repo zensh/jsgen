@@ -9,7 +9,7 @@ var domain = require('domain'),
 var processPath = path.dirname(process.argv[1]);
 var serverDm = domain.create();
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.5.5-dev';
+jsGen.version = '0.5.7-dev';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -33,6 +33,7 @@ serverDm.run(function () {
     jsGen.lib.converter = require('./lib/anyBaseConverter.js');
     jsGen.lib.email = require('./lib/email.js');
     jsGen.Err = jsGen.lib.tools.Err;
+    jsGen.redis = require('./lib/redis.js');
     jsGen.dao = {};
     jsGen.dao.db = require('./dao/mongoDao.js').db;
     jsGen.dao.article = require('./dao/articleDao.js');
@@ -135,9 +136,6 @@ function createServer() {
         dm.run(function () {
             if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
                 jsGen.api[req.path[1]][req.method.toUpperCase()](req, res, dm);
-                if (req.path[1] === 'index') {
-                    jsGen.api.index.updateOnlineCache(req);
-                }
             } else if (jsGen.robot.reg.test(req.useragent)) {
                 jsGen.api.article.robot(req, res, dm);
             } else {

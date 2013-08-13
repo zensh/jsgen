@@ -4,6 +4,8 @@
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
 
+### 注意，从0.5.7版开始，引入redis！
+
 ### 本版更新说明 0.5.x
 
  1. 兼容IE8。
@@ -42,7 +44,7 @@ Node.js provide REST API server, AngularJS web app gets data from server and gen
 **系统需要Node.js 0.10.x和mongoDB 2.4.x**
 **Windows环境需要Python2.7和VS2012（用于编译node-gyp及其它需要编译的Node.js插件）**
 
-**Dependencies: Node.js 0.10.x and mongoDB 2.4.x.**
+**Dependencies: Node.js 0.10.x, redis 2.6.12, mongoDB 2.4.x.**
 **Windows: Python2.7 and VS2012**
 
 config目录下的config.js配置jsGen运行参数，包括监听端口、数据库等，内有说明。

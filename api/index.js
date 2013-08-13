@@ -1,5 +1,5 @@
 'use strict';
-/*global require, module, Buffer, jsGen*/
+/*global require, module, Buffer, process, jsGen*/
 
 var url = require('url'),
     os = require('os'),
@@ -10,47 +10,17 @@ var url = require('url'),
     removeItem = jsGen.lib.tools.remove,
     toArray = jsGen.lib.tools.toArray,
     eachAsync = jsGen.lib.tools.eachAsync,
+    then = jsGen.lib.tools.then,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUrl = jsGen.lib.tools.checkUrl,
-    onlineCache = jsGenCache.online,
     resJson = jsGen.lib.tools.resJson,
     tagAPI = jsGen.api.tag,
     userAPI = jsGen.api.user;
 
-function updateOnlineCache(req) {
-    var now = Date.now();
-    if (!req.session._restsid) {
-        return;
-    }
-    if (req.session.Uid) {
-        onlineCache.remove(req.session._restsid).put('U' + req.session.Uid);
-    } else {
-        onlineCache.put(req.session._restsid);
-    }
-    jsGenConfig.onlineNum = onlineCache.linkedList.length;
-    jsGenConfig.onlineUsers = (function () {
-        var i = 0,
-            user = onlineCache.linkedList.head;
-        while (user && user.key) {
-            i += user.key[0] === 'U' ? 1 : 0;
-            user = user.p;
-        }
-        return i;
-    }());
-    if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
-        jsGenConfig.maxOnlineNum = jsGenConfig.onlineNum;
-        jsGenConfig.maxOnlineTime = now;
-        jsGen.dao.index.setGlobalConfig({
-            maxOnlineNum: jsGenConfig.onlineNum,
-            maxOnlineTime: now
-        });
-    }
-}
-
-function getIndex(req, res, dm) {
+function getConfig(req) {
     var config = {
         domain: '',
         beian: '',
@@ -82,13 +52,43 @@ function getIndex(req, res, dm) {
         register: true,
         info: {}
     };
-    intersect(config, jsGenConfig);
-    config.tagsList = tagAPI.convertTags(tagAPI.cache._index.slice(0, 20));
-    config.timestamp = Date.now();
+
+    function errorFn(defer, err) {
+        jsGen.errlog.error(err);
+        defer();
+    }
+
+    return then(function (defer) {
+        jsGen.redis.onlineCache(req, defer);
+    }, errorFn).
+    then(function (defer, onlineUser, onlineNum) {
+        jsGenConfig.onlineUsers = onlineUser;
+        jsGenConfig.onlineNum = onlineNum;
+        if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
+            jsGenConfig.maxOnlineNum = jsGenConfig.onlineNum;
+            jsGenConfig.maxOnlineTime = Date.now();
+            jsGen.dao.index.setGlobalConfig({
+                maxOnlineNum: jsGenConfig.onlineNum,
+                maxOnlineTime: jsGenConfig.maxOnlineTime
+            });
+        }
+        defer();
+    }, errorFn).
+    then(function (defer) {
+        intersect(config, jsGenConfig);
+        config.tagsList = tagAPI.convertTags(tagAPI.cache._index.slice(0, 20));
+        config.timestamp = Date.now();
+        defer(null, config);
+    }, errorFn);
+}
+
+function getIndex(req, res, dm) {
     if (req.session.Uid) {
         userCache.getP(req.session.Uid, dm.intercept(function (doc) {
-            config.user = doc;
-            return res.sendjson(resJson(null, config));
+            getConfig(req).then(function (defer, config) {
+                config.user = doc;
+                return res.sendjson(resJson(null, config));
+            });
         }));
     } else if (req.cookie.autologin) {
         userAPI.cookieLogin(req, function (Uid) {
@@ -105,21 +105,23 @@ function getIndex(req, res, dm) {
                                 httpOnly: true
                             });
                         }
-                        config.user = doc;
-                        return res.sendjson(resJson(null, config));
+                        getConfig(req).then(function (defer, config) {
+                            config.user = doc;
+                            return res.sendjson(resJson(null, config));
+                        });
                     });
                 }));
             } else {
-                return res.sendjson(resJson(null, config));
+                getConfig(req).then(function (defer, config) {
+                    return res.sendjson(resJson(null, config));
+                });
             }
         });
     } else {
-        return res.sendjson(resJson(null, config));
+        getConfig(req).then(function (defer, config) {
+            return res.sendjson(resJson(null, config));
+        });
     }
-}
-
-function getServTime(req, res, dm) {
-    return res.sendjson(resJson());
 }
 
 function getGlobal(req, res, dm) {
@@ -281,8 +283,6 @@ function setGlobal(req, res, dm) {
 
 function getFn(req, res, dm) {
     switch (req.path[2]) {
-    case 'time':
-        return getServTime(req, res, dm);
     case 'admin':
         return getGlobal(req, res, dm);
     default:
@@ -299,6 +299,5 @@ function postFn(req, res, dm) {
 
 module.exports = {
     GET: getFn,
-    POST: postFn,
-    updateOnlineCache: updateOnlineCache
+    POST: postFn
 };
