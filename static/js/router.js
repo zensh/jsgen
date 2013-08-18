@@ -1,7 +1,7 @@
 'use strict';
 /*global angular, jsGenVersion*/
 
-angular.module('jsGen.router', []).
+angular.module('jsGen.router', ['ngRoute']).
 constant('app', {
     version: jsGenVersion // 注册内部全局变量app
 }).provider('getFile', ['app',

@@ -1,7 +1,7 @@
 'use strict';
 /*global angular*/
 
-angular.module('jsGen', ['jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
+angular.module('jsGen', ['ngAnimate', 'jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
 config(['$httpProvider', 'app',
     function ($httpProvider, app) {
         // global loading status
