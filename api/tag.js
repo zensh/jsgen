@@ -1,8 +1,10 @@
 'use strict';
 /*global require, module, Buffer, jsGen*/
 
-var each = jsGen.lib.tools.each,
-    eachAsync = jsGen.lib.tools.eachAsync,
+var then = jsGen.module.then,
+    throwError = jsGen.lib.tools.throwError,
+    errorHandler = jsGen.lib.tools.errorHandler,
+    each = jsGen.lib.tools.each,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     removeItem = jsGen.lib.tools.remove,
@@ -17,68 +19,26 @@ var each = jsGen.lib.tools.each,
     tagDao = jsGen.dao.tag,
     paginationCache = jsGen.cache.pagination;
 
-tagCache.getP = function (ID, callback) {
+tagCache.getP = function (ID) {
     var that = this,
+        isCache = false,
         doc = this.get(ID);
-    callback = callback || callbackFn;
-    if (doc) {
-        return callback(null, doc);
-    } else {
-        tagDao.getTag(ID, function (err, doc) {
-            if (doc) {
-                that.put(ID, doc);
-            }
-            return callback(err, doc);
-        });
-    }
+
+    return then(function (defer) {
+        if (doc) {
+            isCache = true;
+            return defer(null, doc);
+        } else {
+            return tagDao.getTag(ID, defer);
+        }
+    }).all(function (defer, err, doc) {
+        if (doc && !isCache) {
+            that.put(ID, doc);
+        }
+        return defer(err, doc);
+    });
 };
 
-jsGen.cache.tagAll = {
-    _initTime: 0,
-    _index: []
-};
-var cache = jsGen.cache.tagAll;
-cache._update = function (obj) {
-    var that = this;
-    if (!this[obj._id]) {
-        this[obj._id] = {};
-        this._index.push(obj._id);
-    }
-    this[obj._id]._id = obj._id;
-    this[obj._id].tag = obj.tag;
-    this[obj._id].articles = obj.articles;
-    this[obj._id].users = obj.users;
-    this[obj.tag.toLowerCase()] = this[obj._id];
-    this._index.sort(function (a, b) {
-        return that[b].articles - that[a].articles;
-    });
-    this._initTime = Date.now();
-    return this;
-};
-cache._remove = function (ID) {
-    var i, that = this;
-    if (this[ID]) {
-        delete this[this[ID].tag.toLowerCase()];
-        delete this[ID];
-        removeItem(this._index, ID);
-        this._index.sort(function (a, b) {
-            return that[b].articles - that[a].articles;
-        });
-        this._initTime = Date.now();
-    }
-    return this;
-};
-(function () {
-    var that = this;
-    tagDao.getTagsIndex(function (err, doc) {
-        if (err) {
-            throw err;
-        }
-        if (doc) {
-            that._update(doc);
-        }
-    });
-}).call(cache);
 
 function convertTags(IDArray) {
     var result = [];
@@ -90,19 +50,20 @@ function convertTags(IDArray) {
                 tag: cache[x].tag
             });
         }
-    })
+    });
     return result;
 }
 
 function setTag(tagObj, callback) {
-    var setKey = null,
-        callback = callback || callbackFn;
+    var setKey = null;
+
+    callback = callback || callbackFn;
 
     function setCache(doc) {
         cache._remove(doc._id);
         cache._update(doc);
         tagCache.put(doc._id, doc);
-    };
+    }
 
     if (!tagObj || !tagObj._id || !cache[tagObj._id]) {
         return callback(null, null);
@@ -121,24 +82,24 @@ function setTag(tagObj, callback) {
             return callback(null, null);
         } else if (cache[tagLower] && cache[tagLower]._id !== tagObj._id) {
             var toID = cache[tagLower]._id;
-            tagCache.getP(tagObj._id, function (err, doc) {
+            tagCache.getP(tagObj._id).all(function (defer, err, doc) {
                 if (err) {
                     return callback(err, null);
+                } else {
+                    articlesListNext();
                 }
-                articlesListNext();
 
                 function articlesListNext() {
-                    eachAsync(doc.articlesList, function (next, x) {
+                    then.each(doc.articlesList, function (next, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 articlesList: x
                             });
-                            jsGen.cache.list.getP(x, function (err, value) {
+                            jsGen.cache.list.getP(x, false).all(function (defer, err, value) {
                                 if (err) {
                                     return callback(err, null);
-                                }
-                                if (value.tagsList.indexOf(toID) < 0) {
+                                } else if (value.tagsList.indexOf(toID) < 0) {
                                     value.tagsList.push(toID);
                                     jsGen.cache.list.put(value._id, value);
                                     jsGen.cache.article.update(value._id, function (v) {
@@ -150,24 +111,23 @@ function setTag(tagObj, callback) {
                                         tagsList: value.tagsList
                                     });
                                 }
-                            }, false);
+                            });
                         }
                         return next ? next() : usersListNext();
                     });
-                };
+                }
 
                 function usersListNext() {
-                    eachAsync(doc.usersList, function (next, x) {
+                    then.each(doc.usersList, function (next, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 usersList: x
                             });
-                            jsGen.cache.user.getP(x, function (err, value) {
+                            jsGen.cache.user.getP(x, false).then(function (defer, err, value) {
                                 if (err) {
                                     return callback(err, null);
-                                }
-                                if (value.tagsList.indexOf(toID) < 0) {
+                                } else if (value.tagsList.indexOf(toID) < 0) {
                                     value.tagsList.push(toID);
                                     jsGen.cache.user.put(value._id, value);
                                     jsGen.dao.user.setUserInfo({
@@ -175,7 +135,7 @@ function setTag(tagObj, callback) {
                                         tagsList: value.tagsList
                                     });
                                 }
-                            }, false);
+                            });
                         }
                         return next ? next() : delTag();
                     });
@@ -185,11 +145,11 @@ function setTag(tagObj, callback) {
                     tagDao.delTag(tagObj._id, function () {
                         tagCache.remove(tagObj._id);
                         cache._remove(tagObj._id);
-                        tagCache.getP(toID, function (err, doc) {
+                        tagCache.getP(toID).all(function (defer, err, doc) {
                             return callback(err, doc);
                         });
                     });
-                };
+                }
             });
         } else {
             tagDao.setTag(tagObj, function (err, doc) {
@@ -200,7 +160,7 @@ function setTag(tagObj, callback) {
             });
         }
     } else if (setKey === 'articlesList' || setKey === 'usersList') {
-        tagCache.getP(tagObj._id, function (err, doc) {
+        tagCache.getP(tagObj._id).all(function (defer, err, doc) {
             if (err) {
                 return callback(err, null);
             }
@@ -221,30 +181,32 @@ function setTag(tagObj, callback) {
     }
 }
 
-function filterTags(tagArray, callback) {
-    var tags = [];
-    callback = callback || callbackFn;
+function filterTags(tagArray) {
 
-    tagArray = toArray(tagArray);
-    eachAsync(tagArray, function (next, x) {
-        if (x && (x = filterTag(x))) {
-            if (cache[x.toLowerCase()]) {
-                tags.push(cache[x.toLowerCase()]._id);
-                return next ? next() : callback(null, tags);
+    return then(function (defer) {
+        var tags = [];
+
+        tagArray = toArray(tagArray);
+        then.each(tagArray, function (next, x) {
+            if (x && (x = filterTag(x))) {
+                if (cache[x.toLowerCase()]) {
+                    tags.push(cache[x.toLowerCase()]._id);
+                    return next ? next() : defer(null, tags);
+                } else {
+                    tagDao.setNewTag({
+                        tag: x
+                    }, function (err, doc) {
+                        if (doc) {
+                            tags.push(doc._id);
+                            cache._update(doc);
+                        }
+                        return next ? next() : defer(null, tags);
+                    });
+                }
             } else {
-                tagDao.setNewTag({
-                    tag: x
-                }, function (err, doc) {
-                    if (doc) {
-                        tags.push(doc._id);
-                        cache._update(doc);
-                    }
-                    return next ? next() : callback(null, tags);
-                });
+                return next ? next() : defer(null, tags);
             }
-        } else {
-            return next ? next() : callback(null, tags);
-        }
+        });
     });
 }
 
@@ -264,7 +226,7 @@ function getTag(req, res, dm) {
     } else {
         throw jsGen.Err(jsGen.lib.msg.tagNone);
     }
-    tagCache.getP(tag, dm.intercept(function (doc) {
+    tagCache.getP(tag).then(function (defer, doc) {
         var list, key,
             s = +req.path[3],
             p = +req.getparam.p || +req.getparam.pageIndex || 1,
@@ -291,18 +253,18 @@ function getTag(req, res, dm) {
                 paginationCache.put(listPagination.key, list);
             }
         }
-        paginationList(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
-            union(listPagination, pagination);
-            if (p === 1 || s > 0) {
-                doc._id = tagDao.convertID(doc._id);
-                delete doc.articlesList;
-                delete doc.usersList;
-            }
-            return res.sendjson(resJson(null, data, pagination, {
-                tag: doc
-            }));
+        paginationList(req, list, jsGen.cache.list, defer);
+    }).then(function (defer, data, pagination) {
+        union(req.session.listPagination, pagination);
+        if (p === 1 || s > 0) {
+            doc._id = tagDao.convertID(doc._id);
+            delete doc.articlesList;
+            delete doc.usersList;
+        }
+        return res.sendjson(resJson(null, data, pagination, {
+            tag: doc
         }));
-    }));
+    }).fail(throwError);
 }
 
 function getTags(req, res, dm) {
@@ -350,14 +312,14 @@ function editTags(req, res, dm) {
         data = {},
         tagArray = req.apibody.data;
 
-    if (req.session.role < 4) {
+    if (!req.session.role || req.session.role < 4) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (!tagArray) {
         throw jsGen.Err(jsGen.lib.msg.requestDataErr);
     }
     tagArray = toArray(tagArray);
-    eachAsync(tagArray, function (next, x) {
+    then.each(tagArray, function (next, x) {
         if (x && x._id && x.tag) {
             x = intersect(union(defaultObj), x);
             x._id = tagDao.convertID(x._id);

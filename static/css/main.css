@@ -17,6 +17,10 @@ a {
     color: rgb(0, 102, 204);
     cursor: pointer;
 }
+p {
+    word-wrap: break-word;
+    word-break: normal;
+}
 small {
     letter-spacing: -1px;
 }
@@ -126,10 +130,10 @@ body > div {
 .article-content {
     padding: 0 2em;
     min-height: 80px;
-    line-height: 1.62em;
 }
 .article-content > p {
     text-indent: 2em;
+    line-height: 1.62em;
 }
 .article-footer {
     padding: 1em;

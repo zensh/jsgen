@@ -20,6 +20,7 @@ var union = jsGen.lib.tools.union,
     IDString = jsGen.lib.json.IDString,
     defautCollection = jsGen.lib.json.Collection,
     callbackFn = jsGen.lib.tools.callbackFn,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('collections', {
@@ -41,12 +42,10 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollectionsNum: function (callback) {
-        callback = callback || callbackFn;
-        that.count(callback);
+        that.count(wrapCallback(callback));
     },
 
     getLatestId: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -57,12 +56,11 @@ var that = jsGen.dao.db.bind('collections', {
             fields: {
                 _id: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     getCollectionsIndex: function (date, limit, callback) {
         var query = {};
-        callback = callback || callbackFn;
         if (date > 0) {
             query = {
                 date: {
@@ -82,11 +80,10 @@ var that = jsGen.dao.db.bind('collections', {
                 _id: 1,
                 updateTime: 1
             }
-        }).toArray(callback);
+        }).toArray(wrapCallback(callback));
     },
 
     getCollectionsList: function (_idArray, callback) {
-        callback = callback || callbackFn;
         if (!Array.isArray(_idArray)) {
             _idArray = [_idArray];
         }
@@ -105,11 +102,10 @@ var that = jsGen.dao.db.bind('collections', {
                 updateTime: 1,
                 collectors: 1
             }
-        }).toArray(callback);
+        }).toArray(wrapCallback(callback));
     },
 
     getCollection: function (_id, callback) {
-        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -129,11 +125,10 @@ var that = jsGen.dao.db.bind('collections', {
                 comments: 1,
                 commentsList: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     getCollectionInfo: function (_id, callback) {
-        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -154,7 +149,7 @@ var that = jsGen.dao.db.bind('collections', {
                 comments: 1,
                 commentsList: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setCollectionInfo: function (CollectionObjArray, callback) {
@@ -262,7 +257,6 @@ var that = jsGen.dao.db.bind('collections', {
     setNewCollection: function (collectionObj, callback) {
         var collection = union(defautCollection),
             newCollection = union(defautCollection);
-        callback = callback || callbackFn;
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = union(collection, newCollection);
@@ -280,17 +274,16 @@ var that = jsGen.dao.db.bind('collections', {
             that.insert(
                 newCollection, {
                     w: 1
-                }, callback);
+                }, wrapCallback(callback));
         });
     },
 
     delCollection: function (_id, callback) {
-        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
-        }, callback);
+        }, wrapCallback(callback));
     }
 });
 

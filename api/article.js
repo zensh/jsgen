@@ -9,11 +9,11 @@ var commentTpl = jsGen.lib.json.Comment,
     listCache = jsGenCache.list,
     articleCache = jsGenCache.article,
     commentCache = jsGenCache.comment,
+    then = jsGen.module.then,
     msg = jsGen.lib.msg,
     each = jsGen.lib.tools.each,
     removeItem = jsGen.lib.tools.remove,
     toArray = jsGen.lib.tools.toArray,
-    eachAsync = jsGen.lib.tools.eachAsync,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     checkID = jsGen.lib.tools.checkID,
@@ -26,6 +26,8 @@ var commentTpl = jsGen.lib.json.Comment,
     checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
     resJson = jsGen.lib.tools.resJson,
     callbackFn = jsGen.lib.tools.callbackFn,
+    throwError = jsGen.lib.tools.throwError,
+    errorHandler = jsGen.lib.tools.errorHandler,
     articleDao = jsGen.dao.article,
     convertArticleID = articleDao.convertID,
     getArticleDao = articleDao.getArticle,
@@ -33,305 +35,143 @@ var commentTpl = jsGen.lib.json.Comment,
     tagAPI = jsGen.api.tag,
     userAPI = jsGen.api.user;
 
-articleCache.getP = function (ID, callback, convert) {
+articleCache.getP = function (ID, convert) {
     var that = this,
+        isCache = false,
         doc = this.get(ID);
 
-    function getConvert(doc) {
-        doc.visitors += 1;
-        calcuHots(doc);
-        union(doc, cache[ID]);
-        that.put(ID, doc);
-        listCache.update(ID, function (value) {
-            value.visitors += 1;
-            return value;
-        });
-        articleDao.setArticle({
-            _id: ID,
-            visitors: doc.visitors,
-            hots: cache[ID].hots
-        });
-        doc._id = convertArticleID(doc._id);
-        doc.tagsList = tagAPI.convertTags(doc.tagsList);
-        doc.author = userAPI.convertUsers(doc.author)[0];
-        doc.favorsList = userAPI.convertUsers(doc.favorsList);
-        doc.opposesList = userAPI.convertUsers(doc.opposesList);
-        doc.markList = userAPI.convertUsers(doc.markList);
-        doc.refer = convertRefer(doc.refer);
-        doc.comments = doc.commentsList.length;
-    }
-
-    callback = callback || callbackFn;
     convert = convert === undefined ? true : convert;
-    if (doc) {
-        if (convert) {
-            getConvert(doc);
-        }
-        return callback(null, doc);
-    } else {
-        getArticleDao(ID, function (err, doc) {
-            if (doc) {
-                that.put(ID, doc);
-                if (convert) {
-                    getConvert(doc);
-                }
-                return callback(null, doc);
-            } else {
-                return callback(err, null);
-            }
-        });
-    }
-};
-
-commentCache.getP = function (ID, callback, convert) {
-    var that = this,
-        doc = this.get(ID);
-
-    function getConvert(doc) {
-        calcuHots(doc);
-        union(doc, cache[ID]);
-        that.put(ID, doc);
-        articleDao.setArticle({
-            _id: ID,
-            hots: cache[ID].hots
-        });
-        doc._id = convertArticleID(doc._id);
-        doc.author = userAPI.convertUsers(doc.author)[0];
-        doc.favorsList = userAPI.convertUsers(doc.favorsList);
-        doc.opposesList = userAPI.convertUsers(doc.opposesList);
-        doc.markList = userAPI.convertUsers(doc.markList);
-        doc.refer = convertRefer(doc.refer);
-        doc.comments = doc.commentsList.length;
-        doc.commentsList = convertArticlesID(doc.commentsList);
-    }
-
-    callback = callback || callbackFn;
-    convert = convert === undefined ? true : convert;
-    if (doc) {
-        if (convert) {
-            getConvert(doc);
-        }
-        return callback(null, doc);
-    } else {
-        getArticleDao(ID, function (err, doc) {
-            if (doc) {
-                doc = intersect(union(commentTpl), doc);
-                that.put(ID, doc);
-                if (convert) {
-                    getConvert(doc);
-                }
-                return callback(null, doc);
-            } else {
-                return callback(err, null);
-            }
-        });
-    }
-};
-
-listCache.getP = function (ID, callback, convert) {
-    var that = this,
-        doc = this.get(ID);
-
-    function getConvert(doc) {
-        union(doc, cache[ID]);
-        doc._id = convertArticleID(doc._id);
-        doc.tagsList = tagAPI.convertTags(doc.tagsList);
-        doc.author = userAPI.convertUsers(doc.author)[0];
-        doc.refer = convertRefer(doc.refer);
-    }
-
-    callback = callback || callbackFn;
-    convert = convert === undefined ? true : convert;
-    if (doc) {
-        if (convert) {
-            getConvert(doc);
-        }
-        return callback(null, doc);
-    } else {
-        getArticleDao(ID, function (err, doc) {
-            if (doc) {
-                doc.content = filterSummary(doc.content);
-                doc.comments = doc.commentsList.length;
-                doc = intersect(union(listArticleTpl), doc);
-                that.put(ID, doc);
-                if (convert) {
-                    getConvert(doc);
-                }
-                return callback(null, doc);
-            } else {
-                return callback(err, null);
-            }
-        });
-    }
-};
-
-jsGenCache.articleAll = {
-    _initTime: 0,
-    _index: []
-};
-var cache = jsGenCache.articleAll;
-cache._update = function (obj) {
-    var ID = obj._id;
-    this[ID] = this[ID] || {
-        _id: ID,
-        status: -1,
-        updateTime: 0,
-        hots: 0
-    };
-    if (obj.display < 2) {
-        if (obj.status > -1) {
-            if (this[ID].status === -1) {
-                this._index.push(ID);
-                this._initTime = Date.now();
-            }
-            if (obj.updateTime > this[ID].updateTime) {
-                setImmediate(updateList, this[ID]);
-            }
-            if (obj.hots > this[ID].hots) {
-                setImmediate(hotsList, this[ID]);
-            }
-        } else if (obj.hots > this[ID].hots) {
-            setImmediate(hotCommentsList, this[ID]);
-        }
-    } else {
-        removeItem(this._index, ID);
-    }
-    this[ID]._id = obj._id;
-    this[ID].display = obj.display;
-    this[ID].status = obj.status;
-    this[ID].updateTime = obj.updateTime;
-    this[ID].date = obj.date;
-    this[ID].hots = obj.hots;
-
-    if (obj.status === 2) {
-        removeItem(this._index, ID);
-        this._index.push(ID);
-    }
-    if (obj.display > 2) {
-        if (removeItem(jsGenCache.updateList, ID)) {
-            this._initTime = Date.now();
-        }
-        removeItem(jsGenCache.hotsList, ID);
-        removeItem(jsGenCache.hotCommentsList, ID);
-    }
-    return this;
-};
-cache._remove = function (ID) {
-    delete this[ID];
-    removeItem(this._index, ID);
-    this._initTime = Date.now();
-    return this;
-};
-(function () {
-    var that = this;
-    jsGenConfig.comments = 0;
-    jsGenConfig.articles = 0;
-    articleDao.getArticlesIndex(function (err, doc) {
-        if (err) {
-            throw err;
-        }
+    return then(function (defer) {
         if (doc) {
-            that._update(doc);
-            jsGenConfig[doc.status === -1 ? 'comments' : 'articles'] += 1;
-        }
-    });
-}).call(cache);
-
-function updateList(article) {
-    var cacheList = jsGenCache.updateList,
-        ID = cacheList[0],
-        articleID = article._id,
-        len = cacheList.length,
-        list = [];
-    if (len === 0 || !ID || article.updateTime > cache[ID].updateTime) {
-        list.push(articleID);
-        articleID = 0;
-    }
-    cacheList.length = len < 500 ? len : 500;
-    each(cacheList, function (x) {
-        if (!x || x === article._id) {
-            return;
-        } else if (articleID > 0 && article.updateTime > cache[x].updateTime) {
-            list.push(articleID);
-            list.push(x);
-            articleID = 0;
+            isCache = true;
+            defer(null, doc);
         } else {
-            list.push(x);
+            getArticleDao(ID, defer);
         }
-    });
-    if (articleID > 0) {
-        list.push(articleID);
-    }
-    jsGenCache.updateList = list;
-    return;
-}
-
-function hotsList(article) {
-    var cacheList = jsGenCache.hotsList,
-        ID = cacheList[0],
-        articleID = article._id,
-        len = cacheList.length,
-        list = [],
-        now = Date.now();
-
-    if (now - article.updateTime > 604800000) {
-        return;
-    }
-    if (len === 0 || !ID || article.hots > cache[ID].hots) {
-        list.push(articleID);
-        articleID = 0;
-    }
-    cacheList.length = len < 200 ? len : 200;
-    each(cacheList, function (x) {
-        if (!x || x === article._id || now - cache[x].updateTime > 604800000) {
-            return;
-        } else if (articleID > 0 && article.hots > cache[x].hots) {
-            list.push(articleID);
-            list.push(x);
-            articleID = 0;
+    }).then(function (defer, doc) {
+        if (!isCache) {
+            that.put(ID, doc);
+        }
+        if (convert) {
+            doc.visitors += 1;
+            calcuHots(doc);
+            union(doc, cache[ID]);
+            that.put(ID, doc);
+            listCache.update(ID, function (value) {
+                value.visitors += 1;
+                return value;
+            });
+            articleDao.setArticle({
+                _id: ID,
+                visitors: doc.visitors,
+                hots: cache[ID].hots
+            });
+            doc._id = convertArticleID(doc._id);
+            doc.tagsList = tagAPI.convertTags(doc.tagsList);
+            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
+                doc.author = userList[0];
+                userAPI.convertUsers(doc.favorsList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.favorsList = userList;
+                userAPI.convertUsers(doc.opposesList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.opposesList = userList;
+                userAPI.convertUsers(doc.markList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.markList = userList;
+                doc.refer = convertRefer(doc.refer);
+                doc.comments = doc.commentsList.length;
+                defer(null, doc);
+            }, errorHandler);
         } else {
-            list.push(x);
+            defer(null, doc);
         }
-    });
-    if (articleID > 0) {
-        list.push(articleID);
-    }
-    jsGenCache.hotsList = list;
-    return;
-}
+    }, errorHandler);
+};
 
-function hotCommentsList(article) {
-    var cacheList = jsGenCache.hotCommentsList,
-        ID = cacheList[0],
-        articleID = article._id,
-        len = cacheList.length,
-        list = [],
-        now = Date.now();
-    if (now - article.updateTime > 604800000) {
-        return;
-    }
-    if (len === 0 || !ID || article.hots > cache[ID].hots) {
-        list.push(articleID);
-        articleID = 0;
-    }
-    cacheList.length = len < 100 ? len : 100;
-    each(cacheList, function (x) {
-        if (!x || x === article._id || now - cache[x].updateTime > 604800000) {
-            return;
-        } else if (articleID > 0 && article.hots > cache[x].hots) {
-            list.push(articleID);
-            list.push(x);
-            articleID = 0;
+commentCache.getP = function (ID, convert) {
+    var that = this,
+        isCache = false,
+        doc = this.get(ID);
+
+    convert = convert === undefined ? true : convert;
+    return then(function (defer) {
+        if (doc) {
+            isCache = true;
+            defer(null, doc);
         } else {
-            list.push(x);
+            getArticleDao(ID, defer);
         }
-    });
-    if (articleID > 0) {
-        list.push(articleID);
-    }
-    jsGenCache.hotCommentsList = list;
-    return;
-}
+    }).then(function (defer, doc) {
+        if (!isCache) {
+            doc = intersect(union(commentTpl), doc);
+            that.put(ID, doc);
+        }
+        if (convert) {
+            calcuHots(doc);
+            union(doc, cache[ID]);
+            that.put(ID, doc);
+            articleDao.setArticle({
+                _id: ID,
+                hots: cache[ID].hots
+            });
+            doc._id = convertArticleID(doc._id);
+            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
+                doc.author = userList[0];
+                userAPI.convertUsers(doc.favorsList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.favorsList = userList;
+                userAPI.convertUsers(doc.opposesList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.opposesList = userList;
+                userAPI.convertUsers(doc.markList).all(defer2);
+            }, errorHandler).then(function (defer2, userList) {
+                doc.markList = userList;
+                doc.refer = convertRefer(doc.refer);
+                doc.comments = doc.commentsList.length;
+                doc.commentsList = convertArticlesID(doc.commentsList);
+                defer(null, doc);
+            }, errorHandler);
+        } else {
+            defer(null, doc);
+        }
+    }, errorHandler);
+};
+
+listCache.getP = function (ID, convert) {
+    var that = this,
+        isCache = false,
+        doc = this.get(ID);
+
+    convert = convert === undefined ? true : convert;
+    return then(function (defer) {
+        if (doc) {
+            isCache = true;
+            defer(null, doc);
+        } else {
+            getArticleDao(ID, defer);
+        }
+    }).then(function (defer, doc) {
+        if (!isCache) {
+            doc.content = filterSummary(doc.content);
+            doc.comments = doc.commentsList.length;
+            doc = intersect(union(listArticleTpl), doc);
+            that.put(ID, doc);
+        }
+        if (convert) {
+            union(doc, cache[ID]);
+            doc._id = convertArticleID(doc._id);
+            doc.tagsList = tagAPI.convertTags(doc.tagsList);
+            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
+                doc.author = userList[0];
+                doc.refer = convertRefer(doc.refer);
+                defer(null, doc);
+            }, errorHandler);
+        } else {
+            defer(null, doc);
+        }
+    }, errorHandler);
+};
 
 function convertArticlesID(IDArray) {
     var result = [];
@@ -348,9 +188,9 @@ function convertArticles(IDArray, callback, mode) {
 
     callback = callback || callbackFn;
     IDArray = toArray(IDArray);
-    eachAsync(IDArray, function (next, id) {
+    then.each(IDArray, function (next, id) {
         if (id) {
-            dataCache.getP(id, function (err, doc) {
+            dataCache.getP(id).all(function (defer, err, doc) {
                 if (err) {
                     return callback(err, null);
                 }
@@ -430,7 +270,7 @@ function filterArticle(articleObj, callback) {
         delete newObj.refer;
     }
     if (newObj.tagsList && newObj.tagsList.length > 0) {
-        tagAPI.filterTags(newObj.tagsList.slice(0, jsGenConfig.ArticleTagsMax), function (err, tagsList) {
+        tagAPI.filterTags(newObj.tagsList.slice(0, jsGenConfig.ArticleTagsMax)).all(function (defer, err, tagsList) {
             if (err) {
                 return callback(err, null);
             }
@@ -440,7 +280,7 @@ function filterArticle(articleObj, callback) {
             if (!articleObj._id) {
                 return callback(null, newObj);
             }
-            articleCache.getP(articleObj._id, function (err, doc) {
+            articleCache.getP(articleObj._id, false).all(function (defer, err, doc) {
                 var tagList = {}, setTagList = [];
                 if (err) {
                     return callback(err, null);
@@ -467,7 +307,7 @@ function filterArticle(articleObj, callback) {
                     tagAPI.setTag(x);
                 });
                 return callback(null, newObj);
-            }, false);
+            });
         });
     } else {
         return callback(null, newObj);
@@ -547,7 +387,7 @@ function getComments(req, res, dm) {
             IDArray[i] = null;
         }
     });
-    eachAsync(IDArray, function (next, id) {
+    then.each(IDArray, function (next, id) {
         if (id && cache[id] && cache[id].status > -1 && cache[id].display > 0) {
             commentCache.getP(id, function (err, doc) {
                 if (err) {

@@ -9,14 +9,13 @@ var url = require('url'),
     each = jsGen.lib.tools.each,
     removeItem = jsGen.lib.tools.remove,
     toArray = jsGen.lib.tools.toArray,
-    eachAsync = jsGen.lib.tools.eachAsync,
-    then = jsGen.lib.tools.then,
     union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     equal = jsGen.lib.tools.equal,
     checkEmail = jsGen.lib.tools.checkEmail,
     checkUrl = jsGen.lib.tools.checkUrl,
     resJson = jsGen.lib.tools.resJson,
+    then = jsGen.module.then,
     tagAPI = jsGen.api.tag,
     userAPI = jsGen.api.user;
 
@@ -59,9 +58,8 @@ function getConfig(req) {
     }
 
     return then(function (defer) {
-        jsGen.redis.onlineCache(req, defer);
-    }, errorFn).
-    then(function (defer, onlineUser, onlineNum) {
+        jsGen.lib.redis.onlineCache(req, defer);
+    }).then(function (defer, onlineUser, onlineNum) {
         jsGenConfig.onlineUsers = onlineUser;
         jsGenConfig.onlineNum = onlineNum;
         if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
@@ -73,8 +71,7 @@ function getConfig(req) {
             });
         }
         defer();
-    }, errorFn).
-    then(function (defer) {
+    }, errorFn).then(function (defer) {
         intersect(config, jsGenConfig);
         config.tagsList = tagAPI.convertTags(tagAPI.cache._index.slice(0, 20));
         config.timestamp = Date.now();
@@ -83,6 +80,7 @@ function getConfig(req) {
 }
 
 function getIndex(req, res, dm) {
+    var Uid;
     if (req.session.Uid) {
         userCache.getP(req.session.Uid, dm.intercept(function (doc) {
             getConfig(req).then(function (defer, config) {
@@ -91,31 +89,30 @@ function getIndex(req, res, dm) {
             });
         }));
     } else if (req.cookie.autologin) {
-        userAPI.cookieLogin(req, function (Uid) {
-            if (Uid) {
-                userCache.getP(Uid, dm.intercept(function (doc) {
-                    req.session.Uid = Uid;
-                    req.session.role = doc.role;
-                    req.session.logauto = true;
-                    userAPI.cookieLoginUpdate(Uid, function (cookie) {
-                        if (cookie) {
-                            res.cookie('autologin', cookie, {
-                                maxAge: 259200000,
-                                path: '/',
-                                httpOnly: true
-                            });
-                        }
-                        getConfig(req).then(function (defer, config) {
-                            config.user = doc;
-                            return res.sendjson(resJson(null, config));
-                        });
-                    });
-                }));
-            } else {
+        userAPI.cookieLogin(req).then(function (defer, _id) {
+            Uid = _id;
+            userCache.getP(Uid, defer);
+        }).then(function (defer, doc) {
+            req.session.Uid = Uid;
+            req.session.role = doc.role;
+            req.session.logauto = true;
+            userAPI.cookieLoginUpdate(Uid).then(function (defer, cookie) {
+                res.cookie('autologin', cookie, {
+                    maxAge: 259200000,
+                    path: '/',
+                    httpOnly: true
+                });
                 getConfig(req).then(function (defer, config) {
+                    config.user = doc;
                     return res.sendjson(resJson(null, config));
                 });
-            }
+            }).fail(function (err) {
+                defer(true);
+            });
+        }).fail(function () {
+            getConfig(req).then(function (defer, config) {
+                return res.sendjson(resJson(null, config));
+            });
         });
     } else {
         getConfig(req).then(function (defer, config) {
@@ -126,7 +123,7 @@ function getIndex(req, res, dm) {
 
 function getGlobal(req, res, dm) {
     var body = union(jsGenConfig);
-    if (req.session.role < 4) {
+    if (!req.session.role || req.session.role < 4) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     body.sys = {
@@ -206,7 +203,7 @@ function setGlobal(req, res, dm) {
     var setObj = union(defaultObj);
     intersect(setObj, req.apibody);
 
-    if (req.session.Uid === 5) {
+    if (req.session.role !== 5) {
         throw jsGen.Err(jsGen.lib.msg.userRoleErr);
     }
     if (setObj.domain && !checkUrl(setObj.domain)) {

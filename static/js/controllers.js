@@ -409,7 +409,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             app.location.search({});
         };
         $scope.remove = function (article) {
-            if (article.isAuthor||global.isEditor) {
+            if (article.isAuthor || global.isEditor) {
                 $scope.removeArticle = article;
                 $scope.removeArticleModal.modal(true);
             }
@@ -624,7 +624,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         };
         $scope.remove = function (comment) {
-            if (comment.isAuthor||global.isEditor) {
+            if (comment.isAuthor || global.isEditor) {
                 $scope.removeComment = comment;
                 $scope.removeCommentModal.modal(true);
             }
@@ -963,7 +963,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         ID: ID || 'index',
                         OP: ID && 'edit'
                     }, data, function (data) {
-                        var article = data.data;
+                        var article = data.data,
+                            old = articleCache.get(article._id);
+
+                        if (old) {
+                            data.data = app.union(old.data, article);
+                        }
                         articleCache.put(article._id, data);
                         initArticle(article);
                         app.toast.success(locale.ARTICLE[ID ? 'updated' : 'added'] + article.title);

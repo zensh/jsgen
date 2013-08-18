@@ -6,19 +6,19 @@
 var union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     globalConfig = jsGen.lib.json.GlobalConfig,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     callbackFn = jsGen.lib.tools.callbackFn;
 
 var that = jsGen.dao.db.bind('global', {
 
     getGlobalConfig: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({
             _id: 'GlobalConfig'
         }, {
             sort: {
                 _id: -1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setGlobalConfig: function (Obj, callback) {
@@ -101,7 +101,7 @@ var that = jsGen.dao.db.bind('global', {
             }, [], setObj, {
                 w: 1,
                 'new': true
-            }, callback);
+            }, wrapCallback(callback));
         } else {
             that.update({
                 _id: 'GlobalConfig'
@@ -110,12 +110,11 @@ var that = jsGen.dao.db.bind('global', {
     },
 
     initGlobalConfig: function (callback) {
-        callback = callback || callbackFn;
         globalConfig.date = Date.now();
         that.insert(
             globalConfig, {
                 w: 1
-            }, callback);
+            }, wrapCallback(callback));
     }
 
 });

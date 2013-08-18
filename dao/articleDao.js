@@ -20,6 +20,7 @@ var union = jsGen.lib.tools.union,
     defautArticle = jsGen.lib.json.Article,
     globalConfig = jsGen.lib.json.GlobalConfig,
     callbackFn = jsGen.lib.tools.callbackFn,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('articles', {
@@ -41,7 +42,6 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getLatestId: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -52,7 +52,7 @@ var that = jsGen.dao.db.bind('articles', {
             fields: {
                 _id: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     getArticlesIndex: function (callback) {
@@ -76,7 +76,6 @@ var that = jsGen.dao.db.bind('articles', {
     },
 
     getArticle: function (_id, callback) {
-        callback = callback || callbackFn;
         that.findOne({
             _id: _id
         }, {
@@ -103,7 +102,7 @@ var that = jsGen.dao.db.bind('articles', {
                 comment: 1,
                 commentsList: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setArticle: function (articleObj, callback) {
@@ -133,7 +132,7 @@ var that = jsGen.dao.db.bind('articles', {
             }, [], setObj, {
                 w: 1,
                 new: true
-            }, callback);
+            }, wrapCallback(callback));
         } else {
             that.update({
                 _id: articleObj._id
@@ -215,7 +214,7 @@ var that = jsGen.dao.db.bind('articles', {
             newObj = {
                 commentsList: 0
             };
-        callback = callback || callbackFn;
+
         intersect(newObj, articleObj);
         if (newObj.commentsList < 0) {
             newObj.commentsList = -newObj.commentsList;
@@ -232,7 +231,7 @@ var that = jsGen.dao.db.bind('articles', {
             _id: articleObj._id
         }, setObj, {
             w: 1
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setNewArticle: function (articleObj, callback) {
@@ -258,17 +257,16 @@ var that = jsGen.dao.db.bind('articles', {
                 w: 1,
                 upsert: true,
                 new: true
-            }, callback);
+            }, wrapCallback(callback));
         });
     },
 
     delArticle: function (_id, callback) {
-        callback = callback || callbackFn;
         that.remove({
             _id: _id
         }, {
             w: 1
-        }, callback);
+        }, wrapCallback(callback));
     }
 });
 
