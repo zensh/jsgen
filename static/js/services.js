@@ -176,7 +176,7 @@ factory('restAPI', ['$resource',
         return function (listType) {
             return promiseGet({
                 ID: listType,
-                OP: 10
+                s: 10
             }, restAPI.article, listType, cache.list);
         };
     }

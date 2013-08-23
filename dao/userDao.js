@@ -89,7 +89,7 @@ var that = jsGen.dao.db.bind('users', {
 
     getAuth: function (_id, callback) {
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             fields: {
                 _id: 1,
@@ -104,7 +104,7 @@ var that = jsGen.dao.db.bind('users', {
 
     getSocial: function (_id, callback) {
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             fields: {
                 name: 1,
@@ -116,7 +116,7 @@ var that = jsGen.dao.db.bind('users', {
 
     getUserInfo: function (_id, callback) {
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             fields: {
                 passwd: 0,

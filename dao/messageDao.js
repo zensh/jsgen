@@ -75,7 +75,7 @@ var that = jsGen.dao.db.bind('messages', {
 
     getMessage: function (_id, callback) {
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             sort: {
                 _id: -1
@@ -139,7 +139,7 @@ var that = jsGen.dao.db.bind('messages', {
 
     delMessage: function (_id, callback) {
         that.remove({
-            _id: _id
+            _id: +_id
         }, {
             w: 1
         }, wrapCallback(callback));

@@ -1,176 +1,196 @@
 'use strict';
 /*global require, module, Buffer, jsGen, setImmediate*/
 
-var commentTpl = jsGen.lib.json.Comment,
-    listArticleTpl = jsGen.lib.json.ListArticle,
-    jsGenConfig = jsGen.config,
-    jsGenCache = jsGen.cache,
-    userCache = jsGenCache.user,
-    listCache = jsGenCache.list,
-    articleCache = jsGenCache.article,
-    commentCache = jsGenCache.comment,
+var msg = jsGen.lib.msg,
     then = jsGen.module.then,
-    msg = jsGen.lib.msg,
+    commentTpl = jsGen.lib.json.Comment,
+    listArticleTpl = jsGen.lib.json.ListArticle,
+    configPublicTpl = jsGen.lib.json.ConfigPublicTpl,
+    MD5 = jsGen.lib.tools.MD5,
     each = jsGen.lib.tools.each,
-    removeItem = jsGen.lib.tools.remove,
-    toArray = jsGen.lib.tools.toArray,
     union = jsGen.lib.tools.union,
-    intersect = jsGen.lib.tools.intersect,
+    resJson = jsGen.lib.tools.resJson,
+    toArray = jsGen.lib.tools.toArray,
     checkID = jsGen.lib.tools.checkID,
     checkUrl = jsGen.lib.tools.checkUrl,
-    MD5 = jsGen.lib.tools.MD5,
+    removeItem = jsGen.lib.tools.remove,
+    intersect = jsGen.lib.tools.intersect,
     filterTitle = jsGen.lib.tools.filterTitle,
+    errorHandler = jsGen.lib.tools.errorHandler,
     filterSummary = jsGen.lib.tools.filterSummary,
     filterContent = jsGen.lib.tools.filterContent,
     paginationList = jsGen.lib.tools.paginationList,
     checkTimeInterval = jsGen.lib.tools.checkTimeInterval,
-    resJson = jsGen.lib.tools.resJson,
-    callbackFn = jsGen.lib.tools.callbackFn,
-    throwError = jsGen.lib.tools.throwError,
-    errorHandler = jsGen.lib.tools.errorHandler,
-    articleDao = jsGen.dao.article,
-    convertArticleID = articleDao.convertID,
-    getArticleDao = articleDao.getArticle,
-    convertUserID = jsGen.dao.user.convertID,
+    jsGenCache = jsGen.cache,
+    jsGenConfig = jsGen.config,
     tagAPI = jsGen.api.tag,
-    userAPI = jsGen.api.user;
+    redis = jsGen.lib.redis,
+    userAPI = jsGen.api.user,
+    userCache = jsGen.cache.user,
+    listCache = jsGen.cache.list,
+    articleDao = jsGen.dao.article,
+    articleCache = jsGen.cache.article,
+    commentCache = jsGen.cache.comment,
+    cache = jsGen.lib.redis.articleCache,
+    convertArticleID = articleDao.convertID,
+    paginationCache = jsGen.cache.pagination;
 
 articleCache.getP = function (ID, convert) {
     var that = this,
-        isCache = false,
-        doc = this.get(ID);
+        inCache = false;
 
     convert = convert === undefined ? true : convert;
     return then(function (defer) {
-        if (doc) {
-            isCache = true;
-            defer(null, doc);
+        if (ID >= 0) {
+            var article = that.get(ID);
+            if (article) {
+                inCache = true;
+                defer(null, article);
+            } else {
+                articleDao.getArticle(ID, defer);
+            }
         } else {
-            getArticleDao(ID, defer);
+            defer(jsGen.Err(msg.articleNone));
         }
-    }).then(function (defer, doc) {
-        if (!isCache) {
-            that.put(ID, doc);
+    }).then(function (defer, article) {
+        if (!inCache) {
+            that.put(ID, article);
         }
         if (convert) {
-            doc.visitors += 1;
-            calcuHots(doc);
-            union(doc, cache[ID]);
-            that.put(ID, doc);
+            article.visitors += 1;
+            calcuHots(article);
+            that.put(ID, article);
             listCache.update(ID, function (value) {
-                value.visitors += 1;
+                value.visitors = article.visitors;
+                value.hots = article.hots;
                 return value;
             });
             articleDao.setArticle({
                 _id: ID,
-                visitors: doc.visitors,
-                hots: cache[ID].hots
+                visitors: article.visitors,
+                hots: article.hots
             });
-            doc._id = convertArticleID(doc._id);
-            doc.tagsList = tagAPI.convertTags(doc.tagsList);
-            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
-                doc.author = userList[0];
-                userAPI.convertUsers(doc.favorsList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.favorsList = userList;
-                userAPI.convertUsers(doc.opposesList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.opposesList = userList;
-                userAPI.convertUsers(doc.markList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.markList = userList;
-                doc.refer = convertRefer(doc.refer);
-                doc.comments = doc.commentsList.length;
-                defer(null, doc);
-            }, errorHandler);
+            userAPI.convertUsers(article.author).then(function (defer2, userList) {
+                article.author = userList[0];
+                userAPI.convertUsers(article.favorsList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.favorsList = userList;
+                userAPI.convertUsers(article.opposesList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.opposesList = userList;
+                userAPI.convertUsers(article.markList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.markList = userList;
+                tagAPI.convertTags(article.tagsList).all(defer2);
+            }).then(function (defer2, tagsList) {
+                article.tagsList = tagsList;
+                convertRefer(article.refer).all(defer2);
+            }).then(function (defer2, refer) {
+                article.refer = refer;
+                article.comments = article.commentsList.length;
+                article._id = convertArticleID(article._id);
+                defer(null, article);
+            }).fail(defer);
         } else {
-            defer(null, doc);
+            defer(null, article);
         }
-    }, errorHandler);
+    }).fail(errorHandler);
 };
 
 commentCache.getP = function (ID, convert) {
     var that = this,
-        isCache = false,
-        doc = this.get(ID);
+        inCache = false;
 
     convert = convert === undefined ? true : convert;
     return then(function (defer) {
-        if (doc) {
-            isCache = true;
-            defer(null, doc);
+        if (ID >= 0) {
+            var article = that.get(ID);
+            if (article) {
+                inCache = true;
+                defer(null, article);
+            } else {
+                articleDao.getArticle(ID, defer);
+            }
         } else {
-            getArticleDao(ID, defer);
+            defer(jsGen.Err(msg.articleNone));
         }
-    }).then(function (defer, doc) {
-        if (!isCache) {
-            doc = intersect(union(commentTpl), doc);
-            that.put(ID, doc);
+    }).then(function (defer, article) {
+        if (!inCache) {
+            article = intersect(union(commentTpl), article);
+            that.put(ID, article);
         }
         if (convert) {
-            calcuHots(doc);
-            union(doc, cache[ID]);
-            that.put(ID, doc);
+            calcuHots(article);
+            that.put(ID, article);
             articleDao.setArticle({
                 _id: ID,
-                hots: cache[ID].hots
+                hots: article.hots
             });
-            doc._id = convertArticleID(doc._id);
-            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
-                doc.author = userList[0];
-                userAPI.convertUsers(doc.favorsList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.favorsList = userList;
-                userAPI.convertUsers(doc.opposesList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.opposesList = userList;
-                userAPI.convertUsers(doc.markList).all(defer2);
-            }, errorHandler).then(function (defer2, userList) {
-                doc.markList = userList;
-                doc.refer = convertRefer(doc.refer);
-                doc.comments = doc.commentsList.length;
-                doc.commentsList = convertArticlesID(doc.commentsList);
-                defer(null, doc);
-            }, errorHandler);
+            userAPI.convertUsers(article.author).then(function (defer2, userList) {
+                article.author = userList[0];
+                userAPI.convertUsers(article.favorsList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.favorsList = userList;
+                userAPI.convertUsers(article.opposesList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.opposesList = userList;
+                userAPI.convertUsers(article.markList).all(defer2);
+            }).then(function (defer2, userList) {
+                article.markList = userList;
+                convertRefer(article.refer).all(defer2);
+            }).then(function (defer2, refer) {
+                article.refer = refer;
+                article.comments = article.commentsList.length;
+                article.commentsList = convertArticlesID(article.commentsList);
+                article._id = convertArticleID(article._id);
+                defer(null, article);
+            }).fail(defer);
         } else {
-            defer(null, doc);
+            defer(null, article);
         }
-    }, errorHandler);
+    }).fail(errorHandler);
 };
 
 listCache.getP = function (ID, convert) {
     var that = this,
-        isCache = false,
-        doc = this.get(ID);
+        inCache = false;
 
     convert = convert === undefined ? true : convert;
     return then(function (defer) {
-        if (doc) {
-            isCache = true;
-            defer(null, doc);
+        if (ID >= 0) {
+            var article = that.get(ID);
+            if (article) {
+                inCache = true;
+                defer(null, article);
+            } else {
+                articleDao.getArticle(ID, defer);
+            }
         } else {
-            getArticleDao(ID, defer);
+            defer(jsGen.Err(msg.articleNone));
         }
-    }).then(function (defer, doc) {
-        if (!isCache) {
-            doc.content = filterSummary(doc.content);
-            doc.comments = doc.commentsList.length;
-            doc = intersect(union(listArticleTpl), doc);
-            that.put(ID, doc);
+    }).then(function (defer, article) {
+        if (!inCache) {
+            article.content = filterSummary(article.content);
+            article.comments = article.commentsList.length;
+            article = intersect(union(listArticleTpl), article);
+            that.put(ID, article);
         }
         if (convert) {
-            union(doc, cache[ID]);
-            doc._id = convertArticleID(doc._id);
-            doc.tagsList = tagAPI.convertTags(doc.tagsList);
-            userAPI.convertUsers(doc.author).then(function (defer2, userList) {
-                doc.author = userList[0];
-                doc.refer = convertRefer(doc.refer);
-                defer(null, doc);
-            }, errorHandler);
+            userAPI.convertUsers(article.author).then(function (defer2, userList) {
+                article.author = userList[0];
+                tagAPI.convertTags(article.tagsList).all(defer2);
+            }).then(function (defer2, tagsList) {
+                article.tagsList = tagsList;
+                convertRefer(article.refer).all(defer2);
+            }).then(function (defer2, refer) {
+                article.refer = refer;
+                article._id = convertArticleID(article._id);
+                defer(null, article);
+            }).fail(defer);
         } else {
-            defer(null, doc);
+            defer(null, article);
         }
-    }, errorHandler);
+    }).fail(errorHandler);
 };
 
 function convertArticlesID(IDArray) {
@@ -182,53 +202,56 @@ function convertArticlesID(IDArray) {
     return result;
 }
 
-function convertArticles(IDArray, callback, mode) {
-    var result = [],
-        dataCache = mode === 'comment' ? commentCache : listCache;
+function convertArticles(IDArray, mode) {
+    return then(function (defer) {
+        var result = [],
+            dataCache = mode === 'comment' ? commentCache : listCache;
 
-    callback = callback || callbackFn;
-    IDArray = toArray(IDArray);
-    then.each(IDArray, function (next, id) {
-        if (id) {
-            dataCache.getP(id).all(function (defer, err, doc) {
-                if (err) {
-                    return callback(err, null);
+        then.each(toArray(IDArray), function (next, ID) {
+            dataCache.getP(ID).all(function (defer2, err, article) {
+                if (article) {
+                    result.push(article);
                 }
-                if (doc) {
-                    result.push(doc);
-                }
-                return next ? next() : callback(null, result);
+                return next ? next() : defer(null, result);
             });
-        } else {
-            return next ? next() : callback(null, result);
-        }
+        });
     });
 }
 
 function convertRefer(refer) {
-    if (checkID(refer, 'A') && cache[convertArticleID(refer)]) {
-        return {
+    return then(function (defer) {
+        if (checkID(refer, 'A')) {
+            cache(convertArticleID(refer), defer);
+        } else {
+            defer(true);
+        }
+    }).then(function (defer, article) {
+        defer(null, {
             _id: refer,
             url: '/' + refer
-        };
-    } else {
-        return {
+        });
+    }, function (defer, err) {
+        defer(null, {
             _id: null,
             url: refer
-        };
-    }
+        });
+    });
 }
 
-function calcuHots(doc) {
+function calcuHots(article) {
     var hots = jsGenConfig.ArticleHots;
-    doc.hots = hots[0] * (doc.visitors ? doc.visitors : 0);
-    doc.hots += hots[1] * (doc.favorsList ? doc.favorsList.length : 0);
-    doc.hots -= hots[1] * (doc.opposesList ? doc.opposesList.length : 0);
-    doc.hots += hots[2] * (doc.commentsList ? doc.commentsList.length : 0);
-    doc.hots += hots[3] * (doc.markList ? doc.markList.length : 0);
-    doc.hots += hots[4] * (doc.status === 2 ? 1 : 0);
-    doc.hots = Math.round(doc.hots);
-    cache._update(doc);
+    article.hots = hots[0] * (article.visitors ? article.visitors : 0);
+    article.hots += hots[1] * (article.favorsList ? article.favorsList.length : 0);
+    article.hots -= hots[1] * (article.opposesList ? article.opposesList.length : 0);
+    article.hots += hots[2] * (article.commentsList ? article.commentsList.length : 0);
+    article.hots += hots[3] * (article.markList ? article.markList.length : 0);
+    article.hots += hots[4] * (article.status === 2 ? 1 : 0);
+    article.hots = Math.round(article.hots);
+    return then(function (defer) {
+        cache.update(article, defer);
+    }).then(function (defer) {
+        cache.clearup(defer);
+    }).fail(errorHandler);
 }
 
 function checkStatus(article) {
@@ -237,59 +260,54 @@ function checkStatus(article) {
     if (status[0] > 0 && article.status === -1 && len >= status[0]) {
         article.status = 0;
         return true;
-    }
-    if (status[1] > 0 && article.status === 0 && len >= status[1]) {
+    } else if (status[1] > 0 && article.status === 0 && len >= status[1]) {
         article.status = 1;
         return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
-function filterArticle(articleObj, callback) {
-    var newObj = {
-        display: 0,
-        refer: '',
-        title: '',
-        cover: '',
-        content: '',
-        tagsList: [''],
-        comment: true
-    };
-    callback = callback || callbackFn;
-    intersect(newObj, articleObj);
-    if (!(newObj.title = filterTitle(newObj.title))) {
-        return callback(jsGen.Err(msg.titleMinErr), null);
-    }
-    if (!(newObj.content = filterContent(newObj.content))) {
-        return callback(jsGen.Err(msg.articleMinErr), null);
-    }
-    if (newObj.cover && !checkUrl(newObj.cover)) {
-        delete newObj.cover;
-    }
-    if (newObj.refer && !checkUrl(newObj.refer) && !checkID(newObj.refer, 'A')) {
-        delete newObj.refer;
-    }
-    if (newObj.tagsList && newObj.tagsList.length > 0) {
-        tagAPI.filterTags(newObj.tagsList.slice(0, jsGenConfig.ArticleTagsMax)).all(function (defer, err, tagsList) {
-            if (err) {
-                return callback(err, null);
-            }
-            if (tagsList) {
-                newObj.tagsList = tagsList;
-            }
-            if (!articleObj._id) {
-                return callback(null, newObj);
-            }
-            articleCache.getP(articleObj._id, false).all(function (defer, err, doc) {
+function filterArticle(articleObj) {
+    return then(function (defer) {
+        var newObj = {
+            display: 0,
+            refer: '',
+            title: '',
+            cover: '',
+            content: '',
+            tagsList: [''],
+            comment: true
+        };
+
+        intersect(newObj, articleObj);
+        if (!(newObj.title = filterTitle(newObj.title))) {
+            return defer(jsGen.Err(msg.titleMinErr));
+        }
+        if (!(newObj.content = filterContent(newObj.content))) {
+            return defer(jsGen.Err(msg.articleMinErr));
+        }
+        if (newObj.cover && !checkUrl(newObj.cover)) {
+            delete newObj.cover;
+        }
+        if (newObj.refer && !checkUrl(newObj.refer) && !checkID(newObj.refer, 'A')) {
+            delete newObj.refer;
+        }
+        if (newObj.tagsList && newObj.tagsList.length > 0) {
+            tagAPI.filterTags(newObj.tagsList.slice(0, jsGenConfig.ArticleTagsMax)).then(function (defer2, tagsList) {
+                if (tagsList) {
+                    newObj.tagsList = tagsList;
+                }
+                if (!articleObj._id) {
+                    defer(null, newObj);
+                } else {
+                    articleCache.getP(articleObj._id, false).all(defer2);
+                }
+            }).then(function (defer2, article) {
                 var tagList = {}, setTagList = [];
-                if (err) {
-                    return callback(err, null);
-                }
-                if (doc) {
-                    each(doc.tagsList, function (x) {
-                        tagList[x] = -articleObj._id;
-                    });
-                }
+                each(article.tagsList, function (x) {
+                    tagList[x] = -articleObj._id;
+                });
                 each(newObj.tagsList, function (x) {
                     if (tagList[x]) {
                         delete tagList[x];
@@ -306,397 +324,158 @@ function filterArticle(articleObj, callback) {
                 each(setTagList, function (x) {
                     tagAPI.setTag(x);
                 });
-                return callback(null, newObj);
-            });
-        });
-    } else {
-        return callback(null, newObj);
-    }
+                defer(null, newObj);
+            }).fail(defer);
+        } else {
+            defer(null, newObj);
+        }
+    });
 }
 
-function getArticle(req, res, dm) {
-    var ID = req.path[2],
-        p = req.getparam.p || req.getparam.pageIndex || 1;
+function getArticleID(req) {
+    return then(function (defer) {
+        var ID = req.path[2];
 
-    if (checkID(ID, 'A')) {
-        ID = convertArticleID(ID);
-    }
-    if (typeof ID !== 'number' || !cache[ID]) {
-        throw jsGen.Err(msg.articleNone);
-    }
-    if (cache[ID].display > 0 && !req.session.Uid) {
-        throw jsGen.Err(msg.userNeedLogin);
-    }
-    if (cache[ID].display > 2 && req.session.role < 4) {
-        throw jsGen.Err(msg.articleDisplay2);
-    }
-    articleCache.getP(ID, dm.intercept(function (article) {
-        var authorUid = convertUserID(article.author._id);
-        if (req.session.Uid !== authorUid && cache[ID].display === 1) {
-            userCache.getP(authorUid, dm.intercept(function (user) {
-                if (user.fansList.indexOf(req.session.Uid) < 0) {
-                    throw jsGen.Err(msg.articleDisplay1);
-                } else {
-                    get();
-                }
-            }), false);
-        } else {
-            get();
+        if (checkID(ID, 'A')) {
+            ID = convertArticleID(ID);
         }
+        cache(ID, defer);
+    }).fail(function (defer) {
+        defer(jsGen.Err(msg.articleNone));
+    });
+}
 
-        function get() {
-            var list = null,
-                commentPagination = req.session.commentPagination;
-            if (req.path[3] === 'comment') {
-                if (!commentPagination) {
-                    return res.sendjson(resJson());
-                }
-                list = jsGenCache.pagination.get(commentPagination.key);
-                if (!list || (p === 1 && commentPagination.key !== article._id + article.updateTime)) {
-                    commentPagination.key = article._id + article.updateTime;
-                    list = article.commentsList.reverse();
-                    jsGenCache.pagination.put(commentPagination.key, list);
-                }
-                paginationList(req, list, commentCache, dm.intercept(function (data, pagination) {
-                    union(commentPagination, pagination);
-                    return res.sendjson(resJson(null, data, pagination));
-                }));
+function addComment(req, ID) {
+    var referID, date = Date.now();
+    return then(function (defer) {
+        checkTimeInterval(req, 'AddComment').all(function (defer2, err, value) {
+            if (value) {
+                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
-                list = article.commentsList.reverse();
-                paginationList(req, list, commentCache, dm.intercept(function (data, pagination) {
-                    article.commentsList = data;
-                    commentPagination = pagination;
-                    commentPagination.key = article._id + article.updateTime;
-                    jsGenCache.pagination.put(commentPagination.key, list);
-                    return res.sendjson(resJson(null, article, pagination));
-                }));
+                filterArticle(req.apibody).all(defer);
             }
-        }
-    }));
-}
-
-function getComments(req, res, dm) {
-    var result = [],
-        IDArray = req.apibody.data;
-
-    IDArray = toArray(IDArray);
-    each(IDArray, function (x, i, list) {
-        if (checkID(x, 'A')) {
-            list[i] = convertArticleID(x);
-        } else {
-            IDArray[i] = null;
-        }
-    });
-    then.each(IDArray, function (next, id) {
-        if (id && cache[id] && cache[id].status > -1 && cache[id].display > 0) {
-            commentCache.getP(id, function (err, doc) {
-                if (err) {
-                    return res.sendjson(resJson(err, null));
-                }
-                if (doc) {
-                    result.push(doc);
-                }
-                return next ? next() : res.sendjson(resJson(null, result));
-            });
-        } else {
-            return next ? next() : res.sendjson(resJson(null, result));
-        }
-    });
-}
-
-function getLatest(req, res, dm) {
-    var list,
-        p = +req.getparam.p || +req.getparam.pageIndex || 1,
-        s = +req.path[3],
-        session = req.session;
-
-    if (req.path[2] === 'latest' && s > 0) {
-        s = s > 20 ? 20 : s;
-        req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.s = s;
-        list = cache._index.slice(-s).reverse();
-    } else {
-        s = 0;
-        session.listPagination = session.listPagination || {
-            key: cache._initTime
-        };
-        list = jsGenCache.pagination.get(session.listPagination.key);
-        if (!list || (p === 1 && session.listPagination.key !== cache._initTime)) {
-            session.listPagination.key = cache._initTime;
-            list = cache._index.slice(0).reverse();
-            jsGenCache.pagination.put(session.listPagination.key, list);
-        }
-    }
-    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
-        union(session.listPagination, pagination);
-        return res.sendjson(resJson(null, data, pagination));
-    }));
-}
-
-function getUpdate(req, res, dm) {
-    var list,
-        p = +req.getparam.p || +req.getparam.pageIndex || 1,
-        s = +req.path[3],
-        key = MD5(JSON.stringify(jsGenCache.updateList), 'base64'),
-        session = req.session;
-
-    if (s > 0) {
-        s = s > 20 ? 20 : s;
-        req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.s = s;
-        list = jsGenCache.updateList.slice(0, s);
-    } else {
-        s = 0;
-        session.listPagination = session.listPagination || {
-            key: key
-        };
-        list = jsGenCache.pagination.get(session.listPagination.key);
-        if (!list || (p === 1 && session.listPagination.key !== key)) {
-            session.listPagination.key = key;
-            list = jsGenCache.updateList.slice(0);
-            jsGenCache.pagination.put(session.listPagination.key, list);
-        }
-    }
-    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
-        union(session.listPagination, pagination);
-        return res.sendjson(resJson(null, data, pagination));
-    }));
-}
-
-function getHots(req, res, dm) {
-    var list,
-        p = +req.getparam.p || +req.getparam.pageIndex || 1,
-        s = +req.path[3],
-        key = MD5(JSON.stringify(jsGenCache.hotsList), 'base64'),
-        session = req.session;
-
-    if (s > 0) {
-        s = s > 20 ? 20 : s;
-        req.getparam = req.getparam || {};
-        req.getparam.p = 1;
-        req.getparam.s = s;
-        list = jsGenCache.hotsList.slice(0, s);
-    } else {
-        s = 0;
-        s = 0;
-        session.listPagination = session.listPagination || {
-            key: key
-        };
-        list = jsGenCache.pagination.get(session.listPagination.key);
-        if (!list || (p === 1 && session.listPagination.key !== key)) {
-            session.listPagination.key = key;
-            list = jsGenCache.hotsList.slice(0);
-            jsGenCache.pagination.put(session.listPagination.key, list);
-        }
-    }
-    paginationList(req, list, listCache, dm.intercept(function (data, pagination) {
-        union(session.listPagination, pagination);
-        return res.sendjson(resJson(null, data, pagination));
-    }));
-}
-
-function getHotComments(req, res, dm) {
-    var list, s = +req.path[3] || 5;
-
-    s = s > 3 ? s : 3;
-    s = s > 50 ? 50 : s;
-    list = jsGenCache.hotCommentsList.slice(0, s);
-    convertArticles(list, dm.intercept(function (doc) {
-        return res.sendjson(resJson(null, doc));
-    }));
-}
-
-function addArticle(req, res, dm) {
-    if (!req.session.Uid) {
-        throw jsGen.Err(msg.userNeedLogin);
-    }
-    if (req.session.role < 2) {
-        throw jsGen.Err(msg.userRoleErr);
-    }
-    if (checkTimeInterval(req, 'Ad')) {
-        throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
-    }
-    filterArticle(req.apibody, dm.intercept(function (article) {
-        article.date = Date.now();
-        article.updateTime = article.date;
-        if (article.display !== 1) {
-            article.display = 0;
-        }
-        article.status = 0;
-        article.author = req.session.Uid;
-        delete article._id;
-        articleDao.setNewArticle(article, dm.intercept(function (doc) {
-            if (doc) {
-                jsGen.dao.user.setArticle({
-                    _id: article.author,
-                    articlesList: doc._id
-                });
-                each(doc.tagsList, function (x) {
-                    jsGen.dao.tag.setTag({
-                        _id: x,
-                        articlesList: doc._id
-                    });
-                });
-                cache._update(doc);
-                articleCache.put(doc._id, doc);
-                jsGenConfig.articles += 1;
-            }
-            checkTimeInterval(req, 'Ad', true);
-            articleCache.getP(doc._id, dm.intercept(function (doc) {
-                return res.sendjson(resJson(null, doc));
-            }));
-        }));
-    }));
-}
-
-function setArticle(req, res, dm) {
-    var ID = req.path[2],
-        date = Date.now();
-
-    if (!req.session.Uid) {
-        throw jsGen.Err(msg.userNeedLogin);
-    }
-    if (checkID(ID, 'A')) {
-        ID = convertArticleID(ID);
-    }
-    if (typeof ID !== 'number' || !cache[ID] || cache[ID].display >= 2) {
-        throw jsGen.Err(msg.articleNone);
-    }
-    if (req.path[3] === 'comment') {
-        if (req.session.role < 1) {
-            throw jsGen.Err(msg.userRoleErr);
-        }
-        if (checkTimeInterval(req, 'Ad')) {
-            throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
-        }
-        filterArticle(req.apibody, dm.intercept(function (comment) {
-            var referID;
-            if (checkID(comment.refer, 'A')) {
-                referID = convertArticleID(comment.refer);
-            }
-            if (!referID || !cache[referID]) {
+        });
+    }).then(function (defer, comment) {
+        referID = checkID(comment.refer, 'A') && convertArticleID(comment.refer);
+        cache(referID, function (err, article) {
+            if (err) {
                 comment.refer = req.path[2];
             }
-            if (comment.refer === req.path[2]) {
-                referID = undefined;
-            }
+            referID = comment.refer === req.path[2] ? null : referID;
             comment.date = date;
             comment.updateTime = date;
             comment.display = 0;
             comment.status = -1;
             comment.author = req.session.Uid;
             delete comment._id;
-            articleDao.setNewArticle(comment, dm.intercept(function (doc) {
-                if (doc) {
-                    articleDao.setComment({
-                        _id: ID,
-                        commentsList: doc._id
-                    });
-                    articleDao.setArticle({
-                        _id: ID,
-                        updateTime: date
-                    });
-                    if (referID) {
-                        articleDao.setComment({
-                            _id: referID,
-                            commentsList: doc._id
-                        });
-                        articleDao.setArticle({
-                            _id: referID,
-                            updateTime: date
-                        });
-                    }
-                    jsGen.dao.user.setArticle({
-                        _id: req.session.Uid,
-                        articlesList: doc._id
-                    });
-                    cache._update(doc);
-                    commentCache.put(doc._id, doc);
-                    jsGenConfig.comments += 1;
-                    listCache.update(ID, function (value) {
-                        value.comments += 1;
-                        return value;
-                    });
-                    articleCache.getP(ID, function (err, value) {
-                        if (!value) {
-                            return;
-                        }
-                        value.commentsList.push(doc._id);
-                        value.updateTime = date;
-                        if (checkStatus(value)) {
-                            articleDao.setArticle({
-                                _id: ID,
-                                status: value.status
-                            });
-                        }
-                        cache._update(value);
-                        articleCache.put(value._id, value);
-                    }, false);
-                    if (referID) {
-                        commentCache.getP(referID, function (err, value) {
-                            if (!value) {
-                                return;
-                            }
-                            value.commentsList.push(doc._id);
-                            value.updateTime = date;
-                            if (checkStatus(value)) {
-                                articleDao.setArticle({
-                                    _id: referID,
-                                    status: value.status
-                                });
-                            }
-                            cache._update(value);
-                            commentCache.put(value._id, value);
-                        }, false);
-                    }
-                }
-                checkTimeInterval(req, 'Ad', true);
-                commentCache.getP(doc._id, dm.intercept(function (doc) {
-                    return res.sendjson(resJson(null, doc));
-                }));
-            }));
-        }));
-    } else if (req.path[3] === 'edit') {
-        if (checkTimeInterval(req, 'Ed')) {
-            throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
-        }
-        articleCache.getP(ID, dm.intercept(function (article) {
-            if (req.session.Uid !== article.author && req.session.role < 4) {
-                throw jsGen.Err(msg.userRoleErr);
+            articleDao.setNewArticle(comment, defer);
+        });
+    }).then(function (defer, comment) {
+        articleDao.setComment({
+            _id: ID,
+            commentsList: comment._id
+        });
+        articleDao.setArticle({
+            _id: ID,
+            updateTime: date
+        });
+        jsGen.dao.user.setArticle({
+            _id: req.session.Uid,
+            articlesList: comment._id
+        });
+        cache.update(comment);
+        commentCache.put(comment._id, comment);
+        jsGenConfig.comments += 1;
+        articleCache.getP(ID, false).then(function (defer2, article) {
+            article.commentsList.push(comment._id);
+            article.updateTime = date;
+            if (checkStatus(article)) {
+                articleDao.setArticle({
+                    _id: ID,
+                    status: article.status
+                });
             }
-            filterArticle(req.apibody, dm.intercept(function (article) {
-                article._id = ID;
+            cache.update(article);
+            articleCache.put(article._id, article);
+            listCache.update(ID, function (value) {
+                value.comments += 1;
+                value.status = article.status;
+                return value;
+            });
+        });
+        if (referID) {
+            articleDao.setComment({
+                _id: referID,
+                commentsList: comment._id
+            });
+            articleDao.setArticle({
+                _id: referID,
+                updateTime: date
+            });
+            commentCache.getP(referID, false).then(function (defer2, article) {
+                article.commentsList.push(comment._id);
                 article.updateTime = date;
-                articleDao.setArticle(article, dm.intercept(function (doc) {
-                    if (doc) {
-                        cache._update(doc);
-                        articleCache.put(doc._id, doc);
-                        var doc2 = intersect(union(listArticleTpl), doc);
-                        doc2.content = filterSummary(doc2.content);
-                        doc2.comments = doc.commentsList.length;
-                        listCache.put(doc._id, doc2);
-                    }
-                    checkTimeInterval(req, 'Ed', true);
-                    articleCache.getP(doc._id, dm.intercept(function (doc) {
-                        return res.sendjson(resJson(null, doc));
-                    }));
-                }));
-            }));
-        }), false);
-    } else if (req.path[3] === 'mark') {
-        if (checkTimeInterval(req, 'Ma')) {
-            throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
+                if (checkStatus(article)) {
+                    articleDao.setArticle({
+                        _id: referID,
+                        status: article.status
+                    });
+                }
+                cache.update(article);
+                commentCache.put(article._id, article);
+            });
         }
-        var mark = !! req.apibody.mark;
-        articleCache.getP(ID, dm.intercept(function (doc) {
-            var index = doc.markList.indexOf(req.session.Uid);
-            if (mark && index >= 0) {
-                throw jsGen.Err(msg.userMarked);
-            } else if (!mark && index < 0) {
-                throw jsGen.Err(msg.userUnmarked);
+        checkTimeInterval(req, 'AddComment', true);
+        commentCache.getP(comment._id).all(defer);
+    }).fail(errorHandler);
+}
+
+function editArticle(req, ID) {
+    return then(function (defer) {
+        checkTimeInterval(req, 'EditArticle').all(function (defer2, err, value) {
+            if (value) {
+                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+            } else {
+                articleCache.getP(ID, false).all(defer);
             }
+        });
+    }).then(function (defer, article) {
+        if (req.session.Uid !== article.author && req.session.role < 4) {
+            defer(jsGen.Err(msg.userRoleErr));
+        } else {
+            filterArticle(req.apibody).all(defer);
+        }
+    }).then(function (defer, article) {
+        article._id = ID;
+        article.updateTime = Date.now();
+        articleDao.setArticle(article, defer);
+    }).then(function (defer, article) {
+        cache.update(article);
+        articleCache.put(article._id, article);
+        listCache.remove(article._id);
+        checkTimeInterval(req, 'EditArticle', true);
+        articleCache.getP(article._id).all(defer);
+    }).fail(errorHandler);
+}
+
+function setMark(req, ID) {
+    var mark = !! req.apibody.mark;
+
+    return then(function (defer) {
+        checkTimeInterval(req, 'SetMark').all(function (defer2, err, value) {
+            if (value) {
+                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+            } else {
+                articleCache.getP(ID, false).all(defer);
+            }
+        });
+    }).then(function (defer, article) {
+        var index = article.markList.indexOf(req.session.Uid);
+        if (mark && index >= 0) {
+            defer(jsGen.Err(msg.userMarked));
+        } else if (!mark && index < 0) {
+            defer(jsGen.Err(msg.userUnmarked));
+        } else {
             articleDao.setMark({
                 _id: ID,
                 markList: mark ? req.session.Uid : -req.session.Uid
@@ -706,243 +485,425 @@ function setArticle(req, res, dm) {
                 markList: mark ? ID : -ID
             });
             if (mark) {
-                doc.markList.push(req.session.Uid);
-            } else if (index >= 0) {
-                doc.markList.splice(index, 1);
+                article.markList.push(req.session.Uid);
+            } else {
+                removeItem(article.markList, req.session.Uid);
             }
-            calcuHots(doc);
-            articleCache.put(ID, doc);
+            calcuHots(article);
+            articleCache.put(ID, article);
             listCache.update(ID, function (value) {
-                value.markList = doc.markList;
+                value.hots = article.hots;
                 return value;
             });
-            commentCache.update(ID, function (value) {
-                value.markList = doc.markList;
-                return value;
-            });
+            commentCache.remove(ID);
             userCache.update(req.session.Uid, function (value) {
-                var i = value.markList.indexOf(ID);
                 if (mark) {
                     value.markList.push(ID);
-                } else if (i >= 0) {
-                    value.markList.splice(i, 1);
+                } else {
+                    removeItem(value.markList, ID);
                 }
                 return value;
             });
-            checkTimeInterval(req, 'Ma', true);
-            return res.sendjson(resJson());
-        }), false);
-    } else if (req.path[3] === 'favor') {
-        if (checkTimeInterval(req, 'Fa')) {
-            throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
+            checkTimeInterval(req, 'SetMark', true);
+            defer(null, mark);
         }
-        var favor = !! req.apibody.favor;
-        articleCache.getP(ID, dm.intercept(function (doc) {
-            var index = doc.favorsList.indexOf(req.session.Uid);
-            if (favor && index >= 0) {
-                throw jsGen.Err(msg.userFavor);
-            } else if (!favor && index < 0) {
-                throw jsGen.Err(msg.userUnfavor);
+    }).fail(errorHandler);
+}
+
+function setFavor(req, ID) {
+    var favor = !! req.apibody.favor;
+
+    return then(function (defer) {
+        checkTimeInterval(req, 'SetFavor').all(function (defer2, err, value) {
+            if (value) {
+                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+            } else {
+                articleCache.getP(ID, false).all(defer);
             }
+        });
+    }).then(function (defer, article) {
+        var index = article.favorsList.indexOf(req.session.Uid);
+        if (favor && index >= 0) {
+            defer(jsGen.Err(msg.userFavor));
+        } else if (!favor && index < 0) {
+            defer(jsGen.Err(msg.userUnoppose));
+        } else {
             articleDao.setFavor({
                 _id: ID,
                 favorsList: favor ? req.session.Uid : -req.session.Uid
             });
             if (favor) {
-                var index2 = doc.opposesList.indexOf(req.session.Uid);
-                if (index2 >= 0) {
-                    doc.opposesList.splice(index2, 1);
+                if (removeItem(article.opposesList, req.session.Uid)) {
                     articleDao.setOppose({
                         _id: ID,
                         opposesList: -req.session.Uid
                     });
                 }
-                doc.favorsList.push(req.session.Uid);
-            } else if (index >= 0) {
-                doc.favorsList.splice(index, 1);
+                article.favorsList.push(req.session.Uid);
+            } else {
+                removeItem(article.favorsList, req.session.Uid);
             }
-            calcuHots(doc);
-            articleCache.put(ID, doc);
+            calcuHots(article);
+            articleCache.put(ID, article);
             listCache.update(ID, function (value) {
-                value.favorsList = doc.favorsList;
+                value.hots = article.hots;
                 return value;
             });
-            commentCache.update(ID, function (value) {
-                value.favorsList = doc.favorsList;
-                return value;
-            });
-            checkTimeInterval(req, 'Fa', true);
-            return res.sendjson(resJson());
-        }), false);
-    } else if (req.path[3] === 'oppose') {
-        if (checkTimeInterval(req, 'Op')) {
-            throw jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]');
+            commentCache.remove(ID);
+            checkTimeInterval(req, 'SetFavor', true);
+            defer(null, favor);
         }
-        var oppose = !! req.apibody.oppose;
-        articleCache.getP(ID, dm.intercept(function (doc) {
-            var index = doc.opposesList.indexOf(req.session.Uid);
-            if (oppose && index >= 0) {
-                throw jsGen.Err(msg.userOppose);
-            } else if (!oppose && index < 0) {
-                throw jsGen.Err(msg.userUnoppose);
+    }).fail(errorHandler);
+}
+
+function setOppose(req, ID) {
+    var oppose = !! req.apibody.oppose;
+
+    return then(function (defer) {
+        checkTimeInterval(req, 'SetOppose').all(function (defer2, err, value) {
+            if (value) {
+                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+            } else {
+                articleCache.getP(ID, false).all(defer);
             }
+        });
+    }).then(function (defer, article) {
+        var index = article.opposesList.indexOf(req.session.Uid);
+        if (oppose && index >= 0) {
+            defer(jsGen.Err(msg.userOppose));
+        } else if (!oppose && index < 0) {
+            defer(jsGen.Err(msg.userUnfavor));
+        } else {
             articleDao.setOppose({
                 _id: ID,
                 opposesList: oppose ? req.session.Uid : -req.session.Uid
             });
             if (oppose) {
-                var index2 = doc.favorsList.indexOf(req.session.Uid);
-                if (index2 >= 0) {
-                    doc.favorsList.splice(index2, 1);
+                if (removeItem(article.favorsList, req.session.Uid)) {
                     articleDao.setFavor({
                         _id: ID,
                         favorsList: -req.session.Uid
                     });
                 }
-                doc.opposesList.push(req.session.Uid);
-            } else if (index >= 0) {
-                doc.opposesList.splice(index, 1);
+                article.opposesList.push(req.session.Uid);
+            } else {
+                removeItem(article.opposesList, req.session.Uid);
             }
-            calcuHots(doc);
-            articleCache.put(ID, doc);
+            calcuHots(article);
+            articleCache.put(ID, article);
             listCache.update(ID, function (value) {
-                value.opposesList = doc.opposesList;
+                value.hots = article.hots;
                 return value;
             });
-            commentCache.update(ID, function (value) {
-                value.opposesList = doc.opposesList;
-                return value;
-            });
-            checkTimeInterval(req, 'Op', true);
-            return res.sendjson(resJson());
-        }), false);
-    } else {
-        throw jsGen.Err(msg.requestDataErr);
-    }
+            commentCache.remove(ID);
+            checkTimeInterval(req, 'SetOppose', true);
+            defer(null, oppose);
+        }
+    }).fail(errorHandler);
 }
 
-function robot(req, res, dm) {
-    var obj = {}, ID = req.path[0];
-    obj.global = union(jsGenConfig);
-    obj.articlesList = cache._index.slice(-200).reverse();
-    if (checkID(ID, 'A')) {
-        ID = convertArticleID(ID);
-    }
-    if (typeof ID !== 'number' || !cache[ID] || cache[ID].display > 0) {
-        var keywords, list = obj.articlesList.slice(0, 50);
-        keywords = tagAPI.convertTags(tagAPI.cache._index.slice(0, 20)).map(function (tag) {
-            return tag.tag;
+function getArticle(req, res) {
+    getArticleID(req).then(function (defer, article) {
+        if (article.display > 0 && !req.session.Uid) {
+            defer(jsGen.Err(msg.userNeedLogin));
+        } else if (article.display === 1 && (article.author !== req.session.Uid || req.session.role < 4)) {
+            defer(jsGen.Err(msg.articleDisplay1));
+        } else if (article.display === 2 && req.session.role !== 5) {
+            defer(jsGen.Err(msg.articleDisplay2));
+        } else {
+            articleCache.getP(article._id).all(defer);
+        }
+    }).then(function (defer, article) {
+        paginationList(req, article.commentsList.reverse(), commentCache, function (err, data, pagination) {
+            defer(err, data, pagination, article);
         });
-        keywords = keywords.concat(obj.global.keywords.split(/[,，\s]/));
-        keywords = jsGen.lib.tools.uniqueArray(keywords);
-        obj.global.keywords = keywords.join();
-        obj.global.title2 = obj.global.description;
-        convertArticles(list, dm.intercept(function (doc) {
-            obj.articlesList = convertArticleID(obj.articlesList);
-            each(doc, function (article, i) {
-                doc[i].content = jsGen.module.marked(article.content);
-                doc[i].date = new Date(article.date).toString();
-            });
-            obj.data = doc;
-            return res.render('/robot-index.ejs', obj);
-        }));
-    } else {
-        articleCache.getP(ID, dm.intercept(function (doc) {
-            doc.content = jsGen.module.marked(doc.content);
-            obj.global.title2 = doc.title;
-            obj.global.keywords = doc.tagsList.map(function (tag) {
-                return tag.tag;
-            }).join();
-            obj.articlesList = convertArticleID(obj.articlesList);
-            convertArticles(doc.commentsList, dm.intercept(function (commentsList) {
-                each(commentsList, function (comment, i) {
-                    commentsList[i].content = jsGen.module.marked(comment.content);
+    }).then(function (defer, data, pagination, article) {
+        if (req.path[3] === 'comment') {
+            return res.sendjson(resJson(null, data, pagination));
+        } else {
+            article.commentsList = data;
+            return res.sendjson(resJson(null, article, pagination));
+        }
+    }).fail(res.throwError);
+}
+
+function getComments(req, res) {
+    then(function (defer) {
+        var IDArray = [];
+
+        then.each(toArray(req.apibody.data), function (next, ID) {
+            if (checkID(ID, 'A')) {
+                cache(convertArticleID(ID), function (err, article) {
+                    if (article && article.status === -1 && article.display === 0) {
+                        IDArray.push(article._id);
+                    }
+                    return next ? next() : defer(null, IDArray);
                 });
-                doc.commentsList = commentsList;
-                obj.article = doc;
-                return res.render('/robot-article.ejs', obj);
-            }), 'comment');
-        }));
-    }
+            } else {
+                return next ? next() : defer(null, IDArray);
+            }
+        });
+    }).then(function (defer, IDArray) {
+        var result = [];
+
+        then.each(IDArray, function (next, ID) {
+            commentCache.getP(ID).all(function (defer2, err, article) {
+                if (article) {
+                    result.push(article);
+                }
+                return next ? next() : res.sendjson(resJson(null, result));
+            });
+        });
+    }).fail(res.throwError);
 }
 
-function deleteArticle(req, res, dm) {
-    var ID = req.path[2];
-    if (!req.session.Uid) throw jsGen.Err(msg.userNeedLogin);
-    if (checkID(ID, 'A')) {
-        ID = convertArticleID(ID);
-    }
-    if (typeof ID !== 'number' || !cache[ID] || cache[ID].display === 2) {
-        throw jsGen.Err(msg.articleNone);
-    }
-    listCache.getP(ID, dm.intercept(function (article) {
-        if (req.session.Uid !== article.author && req.session.role < 4) {
-            throw jsGen.Err(msg.userRoleErr);
+function getList(req, res, type) {
+    var list,
+        p = +req.getparam.p || +req.getparam.pageIndex || 1;
+
+    req.session.paginationKey = req.session.paginationKey || {};
+    then(function (defer) {
+        var list = paginationCache.get(req.session.paginationKey[type]);
+        if (!list || p === 1) {
+            then(function (defer2) {
+                cache[type](0, -1, defer2);
+            }).then(function (defer2, list) {
+                req.session.paginationKey[type] = MD5(JSON.stringify(list.slice(0, 100)), 'base64');
+                paginationCache.put(req.session.paginationKey[type], list);
+                defer(null, list);
+            }).fail(defer);
+        } else {
+            defer(null, list);
         }
-        var setObj = {
-            _id: ID,
-            display: 3,
-            updateTime: Date.now()
-        };
-        cache._update(setObj);
-        articleDao.setArticle(setObj);
-        if (checkID(article.refer, 'A')) {
-            var referID = convertArticleID(article.refer);
-            articleDao.setComment({
-                _id: referID,
-                commentsList: -article._id
+    }).then(function (defer, list) {
+        paginationList(req, list, listCache, defer);
+    }).then(function (defer, data, pagination) {
+        return res.sendjson(resJson(null, data, pagination));
+    }).fail(res.throwError);
+}
+
+function addArticle(req, res) {
+    then(function (defer) {
+        if (!req.session.Uid) {
+            defer(jsGen.Err(msg.userNeedLogin));
+        } else if (req.session.role < 2) {
+            defer(jsGen.Err(msg.userRoleErr));
+        } else {
+            checkTimeInterval(req, 'AddArticle').all(function (defer2, err, value) {
+                if (value) {
+                    defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                } else {
+                    defer();
+                }
             });
         }
-        userCache.update(article.author, function (user) {
-            removeItem(user.articlesList, ID);
-            return user;
-        });
+    }).then(function (defer) {
+        filterArticle(req.apibody).all(defer);
+    }).then(function (defer, article) {
+        article.date = Date.now();
+        article.updateTime = article.date;
+        article.display = 0;
+        article.status = 0;
+        article.author = req.session.Uid;
+        delete article._id;
+        articleDao.setNewArticle(article, defer);
+    }).then(function (defer, article) {
         jsGen.dao.user.setArticle({
-            _id: article.author,
-            articlesList: -ID
+            _id: req.session.Uid,
+            articlesList: article._id
         });
-        return res.sendjson(resJson());
-    }), false);
+        each(article.tagsList, function (x) {
+            jsGen.dao.tag.setTag({
+                _id: x,
+                articlesList: article._id
+            });
+        });
+        cache.update(article);
+        articleCache.put(article._id, article);
+        jsGenConfig.articles += 1;
+        checkTimeInterval(req, 'AddArticle', true);
+        articleCache.getP(article._id).all(defer);
+    }).then(function (defer, article) {
+        return res.sendjson(resJson(null, article));
+    }).fail(res.throwError);
 }
 
-function getFn(req, res, dm) {
-    switch (req.path[2]) {
-    case undefined:
-    case 'index':
-    case 'latest':
-        return getLatest(req, res, dm);
-    case 'hots':
-        return getHots(req, res, dm);
-    case 'update':
-        return getUpdate(req, res, dm);
-    case 'comment':
-        return getHotComments(req, res, dm);
-    default:
-        return getArticle(req, res, dm);
-    }
+function setArticle(req, res) {
+    var ID = req.path[2],
+        date = Date.now();
+
+    getArticleID(req).then(function (defer, article) {
+        if (req.session.role < 1) {
+            defer(jsGen.Err(msg.userRole0));
+        } else if (article.display > 0 && !req.session.Uid) {
+            defer(jsGen.Err(msg.userNeedLogin));
+        } else if (article.display === 1 && (article.author !== req.session.Uid || req.session.role < 4)) {
+            defer(jsGen.Err(msg.articleDisplay1));
+        } else if (article.display === 2 && req.session.role !== 5) {
+            defer(jsGen.Err(msg.articleDisplay2));
+        } else {
+            defer(null, article);
+        }
+    }).then(function (defer, article) {
+        if (req.path[3] === 'comment') {
+            addComment(req, article._id).then(function (defer, comment) {
+                return res.sendjson(resJson(null, comment));
+            }).fail(defer);
+        } else if (req.path[3] === 'edit') {
+            editArticle(req, ID).then(function (defer, comment) {
+                return res.sendjson(resJson(null, comment));
+            }).fail(defer);
+        } else if (req.path[3] === 'mark') {
+            setMark(req, ID).then(function (defer, mark) {
+                return res.sendjson(resJson(null, mark));
+            }).fail(defer);
+        } else if (req.path[3] === 'favor') {
+            setFavor(req, ID).then(function (defer, favor) {
+                return res.sendjson(resJson(null, favor));
+            }).fail(defer);
+        } else if (req.path[3] === 'oppose') {
+            setOppose(req, ID).then(function (defer, oppose) {
+                return res.sendjson(resJson(null, oppose));
+            }).fail(defer);
+        } else {
+            defer(jsGen.Err(msg.requestDataErr));
+        }
+    }).fail(res.throwError);
 }
 
-function postFn(req, res, dm) {
-    switch (req.path[2]) {
-    case undefined:
-    case 'index':
-        return addArticle(req, res, dm);
-    case 'comment':
-        return getComments(req, res, dm);
-    default:
-        return setArticle(req, res, dm);
-    }
+function robot(req, res) {
+    var obj = {}, ID = req.path[0];
+
+    then(function (defer) {
+        obj.global = intersect(union(configPublicTpl), jsGenConfig);
+        cache.index(0, 200, defer);
+    }).then(function (defer, list) {
+        obj.articlesList = convertArticleID(list.slice(0, 20));
+        if (checkID(ID, 'A')) {
+            ID = convertArticleID(ID);
+            then(function (defer2) {
+                cache(ID, defer2);
+            }).then(function (defer2, article) {
+                if (article.display === 0) {
+                    articleCache.getP(ID).all(defer2);
+                } else {
+                    defer(true);
+                }
+            }).then(function (defer2, article) {
+                article.content = jsGen.module.marked(article.content);
+                obj.global.title2 = article.title;
+                obj.global.keywords = article.tagsList.map(function (tag) {
+                    return tag.tag;
+                }).join();
+                obj.article = article;
+                convertArticles(article.commentsList, 'comment').all(defer2);
+            }).then(function (defer2, commentsList) {
+                each(commentsList, function (comment, i, list) {
+                    list[i].content = jsGen.module.marked(comment.content);
+                });
+                obj.article.commentsList = commentsList;
+                return res.render('/robot-article.ejs', obj);
+            }).fail(function () {
+                defer(null, list);
+            });
+        } else {
+            defer(null, list);
+        }
+    }).then(function (defer, list) {
+        then(function (defer2) {
+            redis.tagCache.index(0, 20, defer2);
+        }).then(function (defer2, tags) {
+            tagAPI.convertTags(tags).all(defer2);
+        }).then(function (defer2, tags) {
+            var keywords = tags.map(function (tag) {
+                return tag.tag;
+            });
+            keywords = keywords.concat(obj.global.keywords.split(/[,，\s]/));
+            keywords = jsGen.lib.tools.uniqueArray(keywords);
+            obj.global.keywords = keywords.join();
+            obj.global.title2 = obj.global.description;
+            convertArticles(list).all(defer2);
+        }).then(function (defer2, list) {
+            each(list, function (article, i) {
+                list[i].content = jsGen.module.marked(article.content);
+                list[i].date = new Date(article.date).toString();
+            });
+            obj.data = list;
+            return res.render('/robot-index.ejs', obj);
+        }).fail(defer);
+    }).fail(res.throwError);
 }
 
-function deleteFn(req, res, dm) {
-    return deleteArticle(req, res, dm);
+function deleteArticle(req, res) {
+    getArticleID(req).then(function (defer, article) {
+        if (!req.session.Uid) {
+            defer(jsGen.Err(msg.userNeedLogin));
+        } else if (article.display > 1 && req.session.role !== 5) {
+            defer(jsGen.Err(msg.articleDisplay2));
+        } else {
+            listCache.getP(article._id, false).all(defer);
+        }
+    }, function (defer, err) {
+        defer(jsGen.Err(msg.articleNone));
+    }).then(function (defer, article) {
+        if (req.session.Uid === article.author || req.session.role >= 4) {
+            article.display = 2;
+            article.updateTime = Date.now();
+            cache.update(article);
+            articleDao.setArticle(article);
+            if (checkID(article.refer, 'A')) {
+                articleDao.setComment({
+                    _id: article.refer,
+                    commentsList: -article._id
+                });
+            }
+            userCache.update(article.author, function (user) {
+                removeItem(user.articlesList, article._id);
+                return user;
+            });
+            jsGen.dao.user.setArticle({
+                _id: article.author,
+                articlesList: -article._id
+            });
+            return res.sendjson(resJson());
+        } else {
+            defer(jsGen.Err(msg.userRoleErr));
+        }
+    }).fail(res.throwError);
 }
+
 
 module.exports = {
-    GET: getFn,
-    POST: postFn,
-    DELETE: deleteFn,
+    GET: function (req, res) {
+        switch (req.path[2]) {
+        case undefined:
+        case 'latest':
+        case 'index':
+            return getList(req, res, 'index');
+        case 'hots':
+            return getList(req, res, 'hotsList');
+        case 'update':
+            return getList(req, res, 'updateList');
+        case 'comment':
+            return getList(req, res, 'hotCommentsList');
+        default:
+            return getArticle(req, res);
+        }
+    },
+    POST: function (req, res) {
+        switch (req.path[2]) {
+        case undefined:
+        case 'index':
+            return addArticle(req, res);
+        case 'comment':
+            return getComments(req, res);
+        default:
+            return setArticle(req, res);
+        }
+    },
+    DELETE: function (req, res) {
+        return deleteArticle(req, res);
+    },
     convertArticles: convertArticles,
-    cache: cache,
     robot: robot
 };

@@ -66,6 +66,7 @@ var that = jsGen.dao.db.bind('articles', {
             },
             fields: {
                 _id: 1,
+                author: 1,
                 date: 1,
                 display: 1,
                 status: 1,
@@ -77,7 +78,7 @@ var that = jsGen.dao.db.bind('articles', {
 
     getArticle: function (_id, callback) {
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             sort: {
                 _id: -1
@@ -263,7 +264,7 @@ var that = jsGen.dao.db.bind('articles', {
 
     delArticle: function (_id, callback) {
         that.remove({
-            _id: _id
+            _id: +_id
         }, {
             w: 1
         }, wrapCallback(callback));

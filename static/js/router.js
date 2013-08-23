@@ -92,6 +92,6 @@ constant('app', {
         otherwise({
             redirectTo: '/'
         });
-        // $locationProvider.hashPrefix('!');
+        $locationProvider.html5Mode(true).hashPrefix('!');
     }
 ]);

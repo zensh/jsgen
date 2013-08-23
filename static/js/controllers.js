@@ -20,7 +20,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 restAPI = app.restAPI.article;
                 $scope.parent.viewPath = path[0] || 'latest';
             }
-            ID = $routeParams.TAG || path[0];
+            ID = $routeParams.TAG || path[0] || 'latest';
         }
 
         function getArticleList() {

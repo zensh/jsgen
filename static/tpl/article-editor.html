@@ -30,7 +30,7 @@
                     </span>
                 </label>
                 <div id="wmd-button-bar"></div>
-                <textarea class="wmd-input pure-input-1" id="wmd-input" name="文章内容" placeholder="{{global.isLogin&&'请使用MarkDown语法编辑内容'||'您还没有登录，不能发表文章哦'}}" ng-model="article.content" rows="10" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
+                <textarea class="wmd-input pure-input-1" id="wmd-input" name="文章内容" placeholder="{{global.isLogin?'请使用MarkDown语法编辑内容':'您还没有登录，不能发表文章哦'}}" ng-model="article.content" rows="10" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
                 </textarea>
                 <label>文章标签
                     <span class="info">[最多设置 {{global.ArticleTagsMax}} 个标签]</span>
