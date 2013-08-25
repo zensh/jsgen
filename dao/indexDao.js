@@ -43,7 +43,6 @@ var that = jsGen.dao.db.bind('global', {
                 onlineUsers: 0,
                 maxOnlineNum: 0,
                 maxOnlineTime: 0,
-                visitHistory: 0,
                 TimeInterval: 0,
                 ArticleTagsMax: 0,
                 UserTagsMax: 0,
@@ -66,7 +65,7 @@ var that = jsGen.dao.db.bind('global', {
                 tagCache: 0,
                 collectionCache: 0,
                 messageCache: 0,
-                paginationCache: [0, 0],
+                paginationCache: 0,
                 smtp: {
                     host: '',
                     secureConnection: true,
@@ -82,18 +81,7 @@ var that = jsGen.dao.db.bind('global', {
             };
 
         intersect(newObj, Obj);
-        if (Obj.visitors) {
-            setObj.$inc = {
-                visitors: 1
-            };
-        } else if (Obj.visitHistory) {
-            setObj.$push = {
-                visitHistory: newObj.visitHistory
-            };
-            delete newObj.visitHistory;
-        } else {
-            setObj.$set = newObj;
-        }
+        setObj.$set = newObj;
 
         if (callback) {
             that.findAndModify({

@@ -37,8 +37,6 @@ userCache.getP = function (Uid, convert) {
     var that = this,
         inCache = false;
 
-    convert = convert === undefined ? true : convert;
-
     return then(function (defer) {
         if (Uid >= 0) {
             var user = that.get(Uid);
@@ -56,7 +54,7 @@ userCache.getP = function (Uid, convert) {
             user = intersect(union(UserPrivateTpl), user);
             that.put(Uid, user);
         }
-        if (convert) {
+        if (convert !== false) {
             calcuScore(user).all(function (defer2) {
                 userDao.setUserInfo({
                     _id: Uid,
@@ -180,7 +178,7 @@ function adduser(userObj) {
         userDao.setNewUser(userObj, function (err, user) {
             if (user) {
                 user = setCache(user);
-                jsGen.config.users += 1;
+                jsGen.config.users = 1;
             }
             defer(err, user);
         });
@@ -227,6 +225,8 @@ function userLogin(loginObj) {
                     defer(null, Uid);
                 }
             });
+        } else if (loginObj.logname >= 0) {
+            defer(null, loginObj.logname);
         } else {
             cache.get(loginObj.logname, function (err, Uid) {
                 if (Uid >= 0) {
@@ -451,7 +451,7 @@ function getUser(req, res) {
                     list = [];
                     then.each(user.articlesList.reverse(), function (next, ID) {
                         then(function (defer3) {
-                            redis.articleCache(ID, defer);
+                            redis.articleCache(ID, defer3);
                         }).then(function (defer3, article) {
                             if (article.status > -1 && article.display === 0) {
                                 list.push(ID);
@@ -537,7 +537,7 @@ function getUsers(req, res) {
         if (req.session.role !== 5) {
             defer(jsGen.Err(msg.userRoleErr));
         } else {
-            cache.index(defer);
+            cache.index(0, -1, defer);
         }
     }).then(function (defer, list) {
         paginationList(req, list, userCache, defer);
@@ -868,15 +868,14 @@ function resetUser(req, res) {
 }
 
 function getArticles(req, res) {
-    var key, userID,
+    var key,
         p = +req.getparam.p || +req.getparam.pageIndex || 1;
 
     then(function (defer) {
         if (!req.session.Uid) {
             defer(jsGen.Err(msg.userNeedLogin));
         } else {
-            userID = convertUserID(req.session.Uid);
-            key = userID + req.path[2];
+            key = req.session.Uid + req.path[2];
             paginationCache.get(key, defer);
         }
     }).then(function (defer, list) {
@@ -901,13 +900,13 @@ function getArticles(req, res) {
                         }
                         defer3(true);
                     }).fail(function () {
-                        return next ? next() : defer(null, articlesList.reverse(), commentsList.reverse());
+                        return next ? next() : defer2(null, articlesList.reverse(), commentsList.reverse());
                     });
                 });
             }).then(function (defer2, articlesList, commentsList) {
-                paginationCache.put(userID + 'article', articlesList);
-                paginationCache.put(userID + 'comment', commentsList);
-                defer(null, paginationCache.get(key));
+                paginationCache.put(req.session.Uid + 'article', articlesList);
+                paginationCache.put(req.session.Uid + 'comment', commentsList);
+                defer(null, req.path[2] === 'article' ? articlesList : commentsList);
             }).fail(defer);
         } else {
             defer(null, list);

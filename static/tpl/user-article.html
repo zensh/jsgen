@@ -1,10 +1,10 @@
 <div ng-controller="userArticleCtrl">
     <div class="page-header inner">
-        <a class="pure-button list-model right" title="{{parent.listModel?'简洁模式':'摘要模式'}}" ng-if="!global.isPocket" ng-class="{'info-bg':!parent.listModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
+        <a class="pure-button list-model right" title="{{parent.sumModel?'摘要模式':'简洁模式'}}" ng-if="!global.isPocket" ng-class="{'info-bg':parent.sumModel}" ng-click="setListModel()"><i class="icon-th-large"></i></a>
         <strong>{{parent.title}}</strong>
     </div>
     <ul class="media-list">
-        <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="article in articleList">
+        <li class="media" ng-repeat="article in articleList">
             <a class="media-object left" title="删除文章" ng-show="article.isAuthor||global.isEditor" ng-click="remove(article)">
                 <i class="icon-remove"></i>
             </a>
@@ -16,7 +16,7 @@
                     <a class="pure-button pure-button-link" ng-href="{{'/'+article._id+'/edit'}}" ng-show="isMe"><i class="icon-edit"></i></a>
                     <i class="icon-star-empty right hot hover-icon" title="热度" ng-show="!global.isPhone">{{article.hots}}</i>
                 </div>
-                <div class="media-content list-content" ng-animate="{show:'fadeIn',hide:'fadeOut'}" ng-hide="parent.listModel" gen-parse-md="article.content"></div>
+                <div class="media-content list-content" ng-show="parent.sumModel" gen-parse-md="article.content"></div>
                 <div class="media-footer">
                     <a ng-href="{{'/'+article.author._id}}"><i class="icon-pencil success"></i>{{article.author.name}}</a>
                     <i class="icon-time" title="{{article.date | formatDate:true}}发布"> {{article.date | formatDate}}</i>

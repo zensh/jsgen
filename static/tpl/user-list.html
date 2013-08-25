@@ -3,7 +3,7 @@
         <strong>{{parent.title}}</strong>
     </div>
     <ul class="media-list">
-        <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="user in userList">
+        <li class="media" ng-repeat="user in userList">
           <a class="media-object left" ng-href="{{'/'+user._id}}">
               <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
           </a>

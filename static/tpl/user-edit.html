@@ -44,7 +44,7 @@
         </div>
         <div class="pure-control-group">
             <label>再次输入密码：</label>
-            <input type="password" placeholder="password" name="重复密码" ng-model="user.passwd2" ui-validate="{repasswd:'$value==user.passwd'}" ui-validate-watch="'user.passwd'" gen-tooltip="validateTooltip"/>
+            <input type="password" placeholder="password" name="重复密码" ng-model="user.passwd2" ui-validate="{repasswd:checkPwd}" ui-validate-watch="'user.passwd'" gen-tooltip="validateTooltip"/>
         </div>
         <div class="pure-controls">
             <button class="pure-button success-bg" type="submit" ng-click="submit()">保存</button>

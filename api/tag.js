@@ -232,7 +232,7 @@ function getTag(req, res) {
         tag = doc;
         if (!list || p === 1) {
             then(function (defer2) {
-                tagCache.getP(tag._id).all(defer);
+                tagCache.getP(tag._id).all(defer2);
             }).then(function (defer2, tag) {
                 list = tag.articlesList;
                 req.session.paginationKey[key] = MD5(JSON.stringify(list.slice(0, 100)), 'base64');

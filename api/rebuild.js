@@ -13,15 +13,16 @@ module.exports = {
         return then(function (defer) {
             redis.userCache.removeAll(defer);
         }).then(function (defer) {
-            jsGen.config.users = 0;
+            var users = 0;
             jsGen.dao.user.getUsersIndex(function (err, doc) {
                 if (err) {
                     defer(err);
                 } else if (doc) {
                     redis.userCache.update(doc);
-                    jsGen.config.users += 1;
+                    users += 1;
                 } else {
-                    defer(null, jsGen.config.users);
+                    jsGen.config.users = users;
+                    defer(null, users);
                 }
             });
         }).fail(errorHandler);
@@ -47,19 +48,25 @@ module.exports = {
         return then(function (defer) {
             redis.articleCache.removeAll(defer);
         }).then(function (defer) {
+            var total = {
+                comments: 0,
+                articles: 0
+            };
+
             jsGen.dao.article.getArticlesIndex(function (err, doc) {
                 if (err) {
                     defer(err);
                 } else if (doc) {
                     redis.articleCache.update(doc);
-                    jsGen.config[doc.status === -1 ? 'comments' : 'articles'] += 1;
+                    total[doc.status === -1 ? 'comments' : 'articles'] += 1;
                 } else {
-                    redis.articleCache.clearup(defer);
+                    jsGen.config.comments = total.comments;
+                    jsGen.config.articles = total.articles;
+                    redis.articleCache.clearup();
+                    console.log('redis cache rebuild success!');
+                    defer(null, total.comments + total.articles);
                 }
             });
-        }).then(function (defer, message) {
-            console.log('Clear up ' + message);
-            defer(null, jsGen.config.comments + jsGen.config.articles);
         }).fail(errorHandler);
     },
     GET: function (req, res) {

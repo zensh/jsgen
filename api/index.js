@@ -33,7 +33,7 @@ function getIndex(req, res) {
             userAPI.cookieLogin(req).then(function (defer2, _id) {
                 Uid = _id;
                 userAPI.cookieLoginUpdate(Uid).all(defer2);
-            }).then(function (defer, cookie) {
+            }).then(function (defer2, cookie) {
                 res.cookie('autologin', cookie, {
                     maxAge: 259200000,
                     path: '/',
@@ -58,15 +58,11 @@ function getIndex(req, res) {
         then(function (defer2) {
             redis.onlineCache(req, defer2);
         }).then(function (defer2, onlineUser, onlineNum) {
-            jsGenConfig.onlineUsers = onlineUser;
-            jsGenConfig.onlineNum = onlineNum;
+            jsGenConfig.onlineUsers = onlineUser > 1 ? onlineUser : 2;
+            jsGenConfig.onlineNum = onlineNum > 1 ? onlineNum : 2;
             if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
                 jsGenConfig.maxOnlineNum = jsGenConfig.onlineNum;
                 jsGenConfig.maxOnlineTime = Date.now();
-                jsGen.dao.index.setGlobalConfig({
-                    maxOnlineNum: jsGenConfig.onlineNum,
-                    maxOnlineTime: jsGenConfig.maxOnlineTime
-                });
             }
         });
 
@@ -85,28 +81,36 @@ function getIndex(req, res) {
 
 function getGlobal(req, res) {
     var config = union(jsGenConfig);
-    if (req.session.role >= 4) {
-        config.sys = {
-            uptime: Math.round(process.uptime()),
-            cpus: os.cpus(),
-            platform: process.platform,
-            node: process.versions,
-            memory: process.memoryUsage(),
-            user: userCache.info(),
-            article: jsGenCache.article.info(),
-            comment: jsGenCache.comment.info(),
-            list: jsGenCache.list.info(),
-            tag: jsGenCache.tag.info(),
-            collection: jsGenCache.collection.info(),
-            message: jsGenCache.message.info(),
-            pagination: jsGenCache.pagination.info(),
-            timeInterval: jsGenCache.timeInterval.info()
-        };
+    then(function (defer) {
+        if (req.session.role >= 4) {
+            config.sys = {
+                uptime: Math.round(process.uptime()),
+                cpus: os.cpus(),
+                platform: process.platform,
+                node: process.versions,
+                memory: process.memoryUsage(),
+                user: userCache.info(),
+                article: jsGenCache.article.info(),
+                comment: jsGenCache.comment.info(),
+                list: jsGenCache.list.info(),
+                tag: jsGenCache.tag.info(),
+                collection: jsGenCache.collection.info(),
+                message: jsGenCache.message.info()
+            };
+            jsGenCache.pagination.info(defer);
+        } else {
+            defer(null, jsGen.Err(msg.userRoleErr));
+        }
+    }).then(function (defer, info) {
+        config.sys.pagination = info;
+        jsGenCache.timeInterval.info(defer);
+    }).then(function (defer, info) {
+        config.sys.timeInterval = info;
         delete config.smtp.auth.pass;
-        return res.sendjson(resJson(null, config));
-    } else {
-        res.throwError(null, jsGen.Err(msg.userRoleErr));
-    }
+        return res.sendjson(resJson(null, config, null, {
+            configTpl: union(configSetTpl)
+        }));
+    }).fail(res.throwError);
 }
 
 function setGlobal(req, res) {
@@ -142,11 +146,12 @@ function setGlobal(req, res) {
         each(['UsersScore', 'ArticleStatus', 'ArticleHots', 'paginationCache'], function (x) {
             each(setObj[x], checkArray);
         });
-        each(setObj, function (x, i, list) {
-            if (equal(x, jsGenConfig[i])) {
-                delete list[i];
-            }
-        });
+        if (setObj.robots) {
+            jsGen.robotReg = new RegExp(setObj.robots, 'i');
+        }
+        if (setObj.smtp) {
+            setObj.smtp = union(jsGenConfig.smtp, setObj.smtp);
+        }
         userCache.capacity = setObj.userCache || userCache.capacity;
         jsGenCache.article.capacity = setObj.articleCache || jsGenCache.article.capacity;
         jsGenCache.comment.capacity = setObj.commentCache || jsGenCache.comment.capacity;
@@ -154,15 +159,14 @@ function setGlobal(req, res) {
         jsGenCache.tag.capacity = setObj.tagCache || jsGenCache.tag.capacity;
         jsGenCache.collection.capacity = setObj.collectionCache || jsGenCache.collection.capacity;
         jsGenCache.message.capacity = setObj.messageCache || jsGenCache.message.capacity;
-        jsGenCache.pagination.timeLimit = setObj.paginationCache[0] || jsGenCache.pagination.timeLimit;
-        jsGenCache.timeInterval.timeLimit = setObj.TimeInterval * 1000 || jsGenCache.timeInterval.timeLimit;
-        jsGen.robotReg = new RegExp(setObj.robots, 'i');
-        jsGen.dao.index.setGlobalConfig(setObj, defer);
-    }).then(function (defer, config) {
-        config = intersect(defaultObj, config);
-        union(jsGenConfig, config);
-        delete config.smtp.auth.pass;
-        return res.sendjson(resJson(null, config));
+        jsGenCache.pagination.timeLimit = setObj.paginationCache || jsGenCache.pagination.timeLimit;
+        jsGenCache.timeInterval.timeLimit = setObj.TimeInterval || jsGenCache.timeInterval.timeLimit;
+        each(setObj, function (value, key, list) {
+            jsGenConfig[key] = value;
+        });
+        intersect(defaultObj, jsGenConfig);
+        delete defaultObj.smtp.auth.pass;
+        return res.sendjson(resJson(null, defaultObj));
     }).fail(res.throwError);
 }
 

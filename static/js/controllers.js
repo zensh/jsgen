@@ -47,15 +47,15 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.parent = {
             getTpl: app.getFile.html('index-article.html'),
             viewPath: 'latest',
-            listModel: myConf.listModel(null, 'index', true)
+            sumModel: myConf.sumModel(null, 'index', false)
         };
         $scope.other = {};
         $scope.pagination = {};
 
         $scope.setListModel = function () {
             var parent = $scope.parent;
-            parent.listModel = myConf.listModel(!parent.listModel, 'index');
-            myConf.pageSize(parent.listModel ? 20 : 10, 'index');
+            parent.sumModel = myConf.sumModel(!parent.sumModel, 'index');
+            myConf.pageSize(parent.sumModel ? 20 : 10, 'index');
             app.location.search({});
         };
 
@@ -372,7 +372,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         }
 
         $scope.parent = {
-            listModel: myConf.listModel(null, 'index', true),
+            sumModel: myConf.sumModel(null, 'index', false),
             title: ''
         };
         $scope.pagination = {};
@@ -404,8 +404,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
         $scope.setListModel = function () {
             var parent = $scope.parent;
-            parent.listModel = myConf.listModel(!parent.listModel, 'home');
-            myConf.pageSize(parent.listModel ? 20 : 10, 'home');
+            parent.sumModel = myConf.sumModel(!parent.sumModel, 'home');
+            myConf.pageSize(parent.sumModel ? 20 : 10, 'home');
             app.location.search({});
         };
         $scope.remove = function (article) {
@@ -463,6 +463,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var list = model.$value || '';
             list = angular.isString(list) ? list.split(/[,，、]/) : list;
             return list.length <= global.UserTagsMax;
+        };
+        $scope.checkPwd = function (scope, model) {
+            var passwd = model.$value || '';
+            return passwd === ($scope.user.passwd || '');
         };
         $scope.getTag = function (tag) {
             var tagsList = $scope.user.tagsList;
@@ -593,8 +597,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.commentMoving = {};
         $scope.markdownModal = {
             title: locale.ARTICLE.markdown,
-            cancelBtn: locale.BTN_TEXT.goBack,
-            width: 720
+            cancelBtn: locale.BTN_TEXT.goBack
         };
         $scope.validateTooltip = app.union(app.rootScope.validateTooltip);
         $scope.validateTooltip.placement = 'bottom';
@@ -1238,67 +1241,21 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
     }
 ]).controller('adminGlobalCtrl', ['app', '$scope',
     function (app, $scope) {
-        var originData = {},
+        var globalTpl,
+            originData = {},
             tagsArray = [],
             locale = app.locale,
             filter = app.filter,
             restAPI = app.restAPI.index,
-            lengthFn = filter('length'),
-            global = {
-                domain: '',
-                beian: '',
-                title: '',
-                url: '',
-                logo: '',
-                email: '',
-                description: '',
-                metatitle: '',
-                metadesc: '',
-                keywords: '',
-                robots: '',
-                TimeInterval: 0,
-                ArticleTagsMax: 0,
-                UserTagsMax: 0,
-                TitleMinLen: 0,
-                TitleMaxLen: 0,
-                SummaryMaxLen: 0,
-                ContentMinLen: 0,
-                ContentMaxLen: 0,
-                UserNameMinLen: 0,
-                UserNameMaxLen: 0,
-                register: true,
-                emailVerification: true,
-                UsersScore: [null, null, null, null, null, null],
-                ArticleStatus: [null, null],
-                ArticleHots: [null, null, null, null, null],
-                userCache: 0,
-                articleCache: 0,
-                commentCache: 0,
-                listCache: 0,
-                tagCache: 0,
-                collectionCache: 0,
-                messageCache: 0,
-                paginationCache: [null, null],
-                smtp: {
-                    host: '',
-                    secureConnection: true,
-                    port: 0,
-                    auth: {
-                        user: '',
-                        pass: ''
-                    },
-                    senderName: '',
-                    senderEmail: ''
-                }
-            };
+            lengthFn = filter('length');
 
 
         function initglobal(data) {
             $scope.global = app.union(data);
             originData = app.union(data);
-            originData = app.intersect(app.union(global), originData);
+            originData = app.intersect(app.union(globalTpl), originData);
             $scope.editGlobal = app.union(originData);
-            app.checkDirty(global, originData, $scope.editGlobal);
+            app.checkDirty(globalTpl, originData, $scope.editGlobal);
         }
 
         $scope.parent = {
@@ -1310,7 +1267,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         $scope.submit = function () {
             var data = app.union($scope.editGlobal);
             if (app.validate($scope)) {
-                data = app.checkDirty(global, originData, data);
+                data = app.checkDirty(globalTpl, originData, data);
                 if (app.isEmpty(data)) {
                     app.toast.info(locale.ADMIN.noUpdate);
                 } else {
@@ -1329,11 +1286,12 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
         };
 
         $scope.$watchCollection('editGlobal', function (value) {
-            app.checkDirty(global, originData, value);
+            app.checkDirty(globalTpl, originData, value);
         });
         app.promiseGet({
             OP: 'admin'
         }, restAPI).then(function (data) {
+            globalTpl = data.configTpl;
             initglobal(data.data);
         });
     }
