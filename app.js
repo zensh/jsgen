@@ -11,7 +11,7 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.6.0';
+jsGen.version = '0.6.1';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -45,6 +45,10 @@ serverDm.run(function () {
     jsGen.dao.article = require('./dao/articleDao.js');
     jsGen.dao.message = require('./dao/messageDao.js');
     jsGen.dao.collection = require('./dao/collectionDao.js');
+
+    jsGen.thenErrLog = function (defer, err) {
+        jsGen.serverlog.error(err);
+    };
 
     var redis = jsGen.lib.redis,
         then = jsGen.module.then,
@@ -137,7 +141,6 @@ serverDm.run(function () {
                         });
                     });
                     if (err.hasOwnProperty('name')) {
-                        jsGen.serverlog.error(err);
                         res.sendjson(resJson(err));
                     } else {
                         jsGen.serverlog.error(err);
