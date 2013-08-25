@@ -4,14 +4,14 @@
             <div class="article-header">
                 <h3>{{article.title}} <small><a ng-show="global.isEditor" ng-click="highlight(article)" ng-class="{info:article.status<2,warning:article.status==2}"><i class="icon-hand-up"></i>{{article.status==2 | switch:'highlight'}}</a></small></h3>
                 <div class="article-info">
-                    <a ng-href="{{article.refer.url[0]=='/'&&('#'+article.refer.url)||article.refer.url}}" title="原文"><i class="icon-external-link-sign success"></i>{{article.refer.url | cutText:25}}</a>
+                    <a ng-href="{{article.refer.url[0]=='/'?('#'+article.refer.url):article.refer.url}}" title="原文"><i class="icon-external-link-sign success"></i>{{article.refer.url | cutText:25}}</a>
                     <i class="icon-time" data-original-title="{{article.date | formatDate:true}}发布" gen-tooltip> {{article.date | formatDate}}</i>
                     <i class="icon-refresh" data-original-title="{{article.updateTime | formatDate:true}}更新" gen-tooltip> {{article.updateTime | formatDate}}</i>
                     <i class="icon-eye-open" data-original-title="访问{{article.visitors}}次" gen-tooltip> {{article.visitors}}</i>
                     <i class="icon-star-empty" data-original-title="热度{{article.hots}}" gen-tooltip> <span>{{article.hots}}</span></i>
                     <i class="icon-comments-alt" data-original-title="评论{{article.comments}}条" ng-show="article.comments" gen-tooltip> {{article.comments}}</i>
-                    <a ng-repeat="tag in article.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
-                    <a class="success" ng-show="article.isAuthor||global.isEditor" ng-href="{{'#/'+article._id+'/edit'}}"><i class="icon-pencil"></i> 编辑</a>
+                    <a ng-repeat="tag in article.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                    <a class="success" ng-show="article.isAuthor||global.isEditor" ng-href="{{'/'+article._id+'/edit'}}"><i class="icon-pencil"></i> 编辑</a>
                 </div>
             </div>
             <div class="article-content" gen-parse-md="article.content">
@@ -21,19 +21,19 @@
                     <div class="article-info" ng-show="article.favorsList">
                         <i class="icon-thumbs-up"> 支持</i>
                         <span ng-repeat="user in article.favorsList">
-                            <a ng-href="{{'#/'+user._id}}">{{user.name}}</a>
+                            <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                         </span>
                     </div>
                     <div class="article-info" ng-show="article.opposesList">
                         <i class="icon-thumbs-down"> 反对</i>
                         <span ng-repeat="user in article.opposesList">
-                            <a ng-href="{{'#/'+user._id}}">{{user.name}}</a>
+                            <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                         </span>
                     </div>
                     <div class="article-info" ng-show="article.markList">
                         <i class="icon-bookmark"> 收藏</i>
                         <span ng-repeat="user in article.markList">
-                            <a ng-href="{{'#/'+user._id}}">{{user.name}}</a>
+                            <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
                         </span>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                 </div>
                 <form class="pure-form" ng-hide="parent.wmdPreview">
                     <div id="wmd-button-bar"></div>
-                    <textarea class="wmd-input pure-input-1" id="wmd-input" name="评论内容" placeholder="{{global.isLogin&&'请使用MarkDown语法编辑内容'||'您还没有登录，不能发表评论哦'}}" ng-model="comment.content" rows="6" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
+                    <textarea class="wmd-input pure-input-1" id="wmd-input" name="评论内容" placeholder="{{global.isLogin?'请使用MarkDown语法编辑内容':'您还没有登录，不能发表评论哦'}}" ng-model="comment.content" rows="6" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>
                     </textarea>
                 </form>
                 <div class="article-info">
@@ -74,13 +74,13 @@
                     </div>
                     <div class="pure-button-group">
                         <button class="pure-button pure-button-small info-bg" ng-if="comment.replyToComment" ng-click="reply(article)">返回</button>
-                        <button class="pure-button pure-button-small success-bg" ng-class="{'pure-button-disabled':!global.isLogin}" ng-click="submit()">提交</button>
+                        <button class="pure-button pure-button-small success-bg" ng-click="submit()">提交</button>
                     </div>
                 </div>
             </div>
             <ul class="media-list comments">
-                <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in article.commentsList">
-                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}" ng-show="!global.isPocket">
+                <li class="media" ng-repeat="comment in article.commentsList">
+                  <a class="media-object left" ng-href="{{'/'+comment.author._id}}" ng-show="!global.isPocket">
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body" id="{{comment._id}}">
@@ -92,7 +92,7 @@
                     </div>
                     <div class="media-content list-content" gen-parse-md="comment.content"></div>
                     <div class="pure-g-r media-footer">
-                        <div class="pure-u-1-2"><a ng-href="{{'#/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
+                        <div class="pure-u-1-2"><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
                         <div class="pure-u-1-2 text-right">
                             <div class="pure-button-group">
                                 <button class="pure-button pure-button-link" title="支持" ng-click="setFavor(comment)">
@@ -114,8 +114,8 @@
                 </li>
             </ul>
             <ul class="media-list comments"  id="commentForm" gen-moving="commentMoving">
-                <li class="media" ng-animate="{enter:'fadeInDown',leave:'fadeOutDown'}" ng-repeat="comment in referComments">
-                  <a class="media-object left" ng-href="{{'#/'+comment.author._id}}" ng-show="!global.isPocket">
+                <li class="media" ng-repeat="comment in referComments">
+                  <a class="media-object left" ng-href="{{'/'+comment.author._id}}" ng-show="!global.isPocket">
                       <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body">
@@ -124,7 +124,7 @@
                     </div>
                     <div class="media-content list-content" gen-parse-md="comment.content"></div>
                     <div class="pure-g-r media-footer">
-                        <div class="pure-u-1-2"><a ng-href="{{'#/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
+                        <div class="pure-u-1-2"><a ng-href="{{'/'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div>
                         <div class="pure-u-1-2 text-right">
                             <div class="pure-button-group">
                                 <button class="pure-button pure-button-link" title="支持" ng-click="setFavor(comment)">
@@ -146,11 +146,11 @@
         <div class="panel">
             <div class="panel-heading">作者信息</div>
             <div class="media inner">
-                <a class="media-object left" ng-href="{{'#/'+article.author._id}}">
+                <a class="media-object left" ng-href="{{'/'+article.author._id}}">
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{article.author.avatar}}">
                 </a>
                 <div class="media-body">
-                    <div class="media-header"><a ng-href="{{'#/'+article.author._id}}">{{article.author.name}}</a></div>
+                    <div class="media-header"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></div>
                     <button class="pure-button success-bg" ng-show="!article.author.isMe" ng-click="followMe(article.author)">{{article.author.isFollow | switch:'follow'}}</button>
                 </div>
             </div>
@@ -179,7 +179,7 @@
             <div class="panel-heading">作者文章</div>
             <ul class="media-list comments">
                 <li ng-repeat="item in article.author.articlesList">
-                    <span class="label">{{item.date | formatDate}}</span>&nbsp;<a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
+                    <span class="label">{{item.date | formatDate}}</span>&nbsp;<a ng-href="{{'/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a>
                 </li>
             </ul>
         </div>
@@ -189,7 +189,7 @@
                 <li class="media" ng-repeat="item in hotArticles">
                   <div class="media-body" id="{{item._id}}">
                     <small class="hot" title="热度">{{item.hots}}</small>&nbsp;
-                    <span class="media-content"><a ng-href="{{'#/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a></span>
+                    <span class="media-content"><a ng-href="{{'/'+item._id}}" title="{{item.author.name+'发表'}}">{{item.title}}</a></span>
                   </div>
                 </li>
             </ul>

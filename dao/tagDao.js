@@ -16,6 +16,7 @@ var union = jsGen.lib.tools.union,
     IDString = jsGen.lib.json.IDString,
     defautTag = jsGen.lib.json.Tag,
     callbackFn = jsGen.lib.tools.callbackFn,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('tags', {
@@ -37,12 +38,10 @@ var that = jsGen.dao.db.bind('tags', {
     },
 
     getTagsNum: function (callback) {
-        callback = callback || callbackFn;
-        that.count(callback);
+        that.count(wrapCallback(callback));
     },
 
     getLatestId: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -53,7 +52,7 @@ var that = jsGen.dao.db.bind('tags', {
             fields: {
                 _id: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     getTagsIndex: function (callback) {
@@ -75,9 +74,8 @@ var that = jsGen.dao.db.bind('tags', {
     },
 
     getTag: function (_id, callback) {
-        callback = callback || callbackFn;
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             sort: {
                 _id: -1
@@ -89,7 +87,7 @@ var that = jsGen.dao.db.bind('tags', {
                 users: 1,
                 usersList: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setTag: function (tagObj, callback) {
@@ -147,7 +145,7 @@ var that = jsGen.dao.db.bind('tags', {
             }, [], setObj, {
                 w: 1,
                 'new': true
-            }, callback);
+            }, wrapCallback(callback));
         } else {
             that.update({
                 _id: tagObj._id
@@ -178,17 +176,16 @@ var that = jsGen.dao.db.bind('tags', {
                 w: 1,
                 upsert: true,
                 'new': true
-            }, callback);
+            }, wrapCallback(callback));
         });
     },
 
     delTag: function (_id, callback) {
-        callback = callback || callbackFn;
         that.remove({
-            _id: _id
+            _id: +_id
         }, {
             w: 1
-        }, callback);
+        }, wrapCallback(callback));
     }
 });
 

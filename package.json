@@ -4,8 +4,8 @@
         "email": "admin@zensh.com",
         "url": "http://weibo.com/zensh"
     },
-    "name": "jsGen",
-    "version": "0.5.8",
+    "name": "jsgen",
+    "version": "0.6.0-dev",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
@@ -19,6 +19,7 @@
         "redis": ">=0.8.x",
         "marked": ">=0.2.x",
         "nodemailer": ">=0.3.x",
+        "thenjs": ">=0.6.0",
         "xss": ">=0.0.3"
     },
     "scripts": {

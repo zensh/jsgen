@@ -1,441 +1,351 @@
 'use strict';
 /*global require, module, Buffer, jsGen*/
 
-var each = jsGen.lib.tools.each,
-    eachAsync = jsGen.lib.tools.eachAsync,
+var msg = jsGen.lib.msg,
+    MD5 = jsGen.lib.tools.MD5,
+    each = jsGen.lib.tools.each,
     union = jsGen.lib.tools.union,
-    intersect = jsGen.lib.tools.intersect,
-    removeItem = jsGen.lib.tools.remove,
+    resJson = jsGen.lib.tools.resJson,
     toArray = jsGen.lib.tools.toArray,
     checkID = jsGen.lib.tools.checkID,
+    removeItem = jsGen.lib.tools.remove,
+    intersect = jsGen.lib.tools.intersect,
     filterTag = jsGen.lib.tools.filterTag,
-    MD5 = jsGen.lib.tools.MD5,
+    errorHandler = jsGen.lib.tools.errorHandler,
     paginationList = jsGen.lib.tools.paginationList,
-    tagCache = jsGen.cache.tag,
-    resJson = jsGen.lib.tools.resJson,
-    callbackFn = jsGen.lib.tools.callbackFn,
     tagDao = jsGen.dao.tag,
+    redis = jsGen.lib.redis,
+    then = jsGen.module.then,
+    tagCache = jsGen.cache.tag,
+    cache = jsGen.lib.redis.tagCache,
     paginationCache = jsGen.cache.pagination;
 
-tagCache.getP = function (ID, callback) {
+tagCache.getP = function (ID) {
     var that = this,
-        doc = this.get(ID);
-    callback = callback || callbackFn;
-    if (doc) {
-        return callback(null, doc);
-    } else {
-        tagDao.getTag(ID, function (err, doc) {
-            if (doc) {
-                that.put(ID, doc);
+        inCache = false;
+
+    return then(function (defer) {
+        if (ID >= 0) {
+            var tag = that.get(ID);
+            if (tag) {
+                inCache = true;
+                return defer(null, tag);
+            } else {
+                return tagDao.getTag(ID, defer);
             }
-            return callback(err, doc);
-        });
-    }
+        } else {
+            defer(jsGen.Err(msg.tagNone));
+        }
+    }).then(function (defer, tag) {
+        if (!inCache) {
+            that.put(ID, tag);
+        }
+        defer(null, tag);
+    }).fail(errorHandler);
 };
 
-jsGen.cache.tagAll = {
-    _initTime: 0,
-    _index: []
-};
-var cache = jsGen.cache.tagAll;
-cache._update = function (obj) {
-    var that = this;
-    if (!this[obj._id]) {
-        this[obj._id] = {};
-        this._index.push(obj._id);
-    }
-    this[obj._id]._id = obj._id;
-    this[obj._id].tag = obj.tag;
-    this[obj._id].articles = obj.articles;
-    this[obj._id].users = obj.users;
-    this[obj.tag.toLowerCase()] = this[obj._id];
-    this._index.sort(function (a, b) {
-        return that[b].articles - that[a].articles;
-    });
-    this._initTime = Date.now();
-    return this;
-};
-cache._remove = function (ID) {
-    var i, that = this;
-    if (this[ID]) {
-        delete this[this[ID].tag.toLowerCase()];
-        delete this[ID];
-        removeItem(this._index, ID);
-        this._index.sort(function (a, b) {
-            return that[b].articles - that[a].articles;
-        });
-        this._initTime = Date.now();
-    }
-    return this;
-};
-(function () {
-    var that = this;
-    tagDao.getTagsIndex(function (err, doc) {
-        if (err) {
-            throw err;
-        }
-        if (doc) {
-            that._update(doc);
-        }
-    });
-}).call(cache);
 
 function convertTags(IDArray) {
-    var result = [];
-    IDArray = toArray(IDArray);
-    each(IDArray, function (x) {
-        if (cache[x]) {
-            result.push({
-                _id: tagDao.convertID(x),
-                tag: cache[x].tag
+    return then(function (defer) {
+        var result = [];
+        IDArray = toArray(IDArray);
+        then.each(IDArray, function (next, x) {
+            cache(x, function (err, tag) {
+                if (tag) {
+                    result.push({
+                        _id: tagDao.convertID(tag._id),
+                        tag: tag.tag,
+                        articles: tag.articles,
+                        users: tag.users
+                    });
+                }
+                return next ? next() : defer(null, result);
             });
-        }
-    })
-    return result;
+        });
+    });
 }
 
-function setTag(tagObj, callback) {
-    var setKey = null,
-        callback = callback || callbackFn;
+function setTag(tagObj) {
+    var setKey = null;
 
-    function setCache(doc) {
-        cache._remove(doc._id);
-        cache._update(doc);
-        tagCache.put(doc._id, doc);
-    };
-
-    if (!tagObj || !tagObj._id || !cache[tagObj._id]) {
-        return callback(null, null);
-    }
-    if (tagObj.tag) {
-        setKey = 'tag';
-    } else if (tagObj.articlesList) {
-        setKey = 'articlesList';
-    } else if (tagObj.usersList) {
-        setKey = 'usersList';
-    }
-
-    if (setKey === 'tag') {
-        var tagLower = tagObj.tag.toLowerCase();
-        if (tagObj.tag === cache[tagObj._id].tag) {
-            return callback(null, null);
-        } else if (cache[tagLower] && cache[tagLower]._id !== tagObj._id) {
-            var toID = cache[tagLower]._id;
-            tagCache.getP(tagObj._id, function (err, doc) {
-                if (err) {
-                    return callback(err, null);
+    return then(function (defer) {
+        if (!tagObj || !tagObj._id) {
+            defer(true);
+        } else if (tagObj.tag) {
+            setKey = 'tag';
+        } else if (tagObj.articlesList) {
+            setKey = 'articlesList';
+        } else if (tagObj.usersList) {
+            setKey = 'usersList';
+        }
+        cache(tagObj._id, defer);
+    }).then(function (defer, tag) {
+        if (setKey === 'tag') {
+            then(function (defer2) {
+                if (tagObj.tag === tag.tag) {
+                    defer(true);
+                } else {
+                    cache.get(tagObj.tag, defer2);
                 }
-                articlesListNext();
-
-                function articlesListNext() {
-                    eachAsync(doc.articlesList, function (next, x) {
+            }).all(function (defer2, err, ID) {
+                if (!err && ID !== tagObj._id) {
+                    defer2(null, ID)
+                } else {
+                    defer2(true);
+                }
+            }).then(function (defer2, toID) {
+                tagCache.getP(tagObj._id).then(function (defer3, tag) {
+                    then.each(tag.articlesList, function (next, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 articlesList: x
                             });
-                            jsGen.cache.list.getP(x, function (err, value) {
-                                if (err) {
-                                    return callback(err, null);
-                                }
-                                if (value.tagsList.indexOf(toID) < 0) {
-                                    value.tagsList.push(toID);
-                                    jsGen.cache.list.put(value._id, value);
-                                    jsGen.cache.article.update(value._id, function (v) {
-                                        v.tagsList = value.tagsList;
-                                        return v;
+                            jsGen.cache.list.getP(x, false).then(function (defer4, article) {
+                                removeItem(article.tagsList, tagObj._id);
+                                if (article.tagsList.indexOf(toID) < 0) {
+                                    article.tagsList.push(toID);
+                                    jsGen.cache.list.put(article._id, article);
+                                    jsGen.cache.article.update(article._id, function (value) {
+                                        value.tagsList = article.tagsList;
+                                        return value;
                                     });
                                     jsGen.dao.article.setArticle({
                                         _id: x,
-                                        tagsList: value.tagsList
+                                        tagsList: article.tagsList
                                     });
                                 }
-                            }, false);
+                            });
                         }
-                        return next ? next() : usersListNext();
+                        return next ? next() : defer3(null, tag);
                     });
-                };
-
-                function usersListNext() {
-                    eachAsync(doc.usersList, function (next, x) {
+                }).then(function (defer3, tag) {
+                    then.each(tag.usersList, function (next, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 usersList: x
                             });
-                            jsGen.cache.user.getP(x, function (err, value) {
-                                if (err) {
-                                    return callback(err, null);
-                                }
-                                if (value.tagsList.indexOf(toID) < 0) {
-                                    value.tagsList.push(toID);
-                                    jsGen.cache.user.put(value._id, value);
+                            jsGen.cache.user.getP(x, false).then(function (defer4, user) {
+                                removeItem(user.tagsList, tagObj._id);
+                                if (user.tagsList.indexOf(toID) < 0) {
+                                    user.tagsList.push(toID);
+                                    jsGen.cache.user.put(user._id, user);
                                     jsGen.dao.user.setUserInfo({
                                         _id: x,
-                                        tagsList: value.tagsList
+                                        tagsList: user.tagsList
                                     });
                                 }
-                            }, false);
+                            });
                         }
-                        return next ? next() : delTag();
+                        return next ? next() : defer3(null, tag);
                     });
-                }
-
-                function delTag() {
-                    tagDao.delTag(tagObj._id, function () {
-                        tagCache.remove(tagObj._id);
-                        cache._remove(tagObj._id);
-                        tagCache.getP(toID, function (err, doc) {
-                            return callback(err, doc);
-                        });
-                    });
-                };
-            });
-        } else {
-            tagDao.setTag(tagObj, function (err, doc) {
-                if (doc) {
-                    setCache(doc);
-                }
-                return callback(err, doc);
-            });
-        }
-    } else if (setKey === 'articlesList' || setKey === 'usersList') {
-        tagCache.getP(tagObj._id, function (err, doc) {
-            if (err) {
-                return callback(err, null);
-            }
-            var exist = doc[setKey].indexOf(Math.abs(tagObj[setKey]));
-            if ((tagObj[setKey] < 0 && exist >= 0) || (tagObj[setKey] > 0 && exist < 0)) {
-                tagDao.setTag(tagObj, function (err, doc) {
-                    if (doc) {
-                        setCache(doc);
+                }).then(function (defer3, tag) {
+                    tagDao.delTag(tagObj._id, defer3);
+                }).then(function (defer3) {
+                    tagCache.remove(tagObj._id);
+                    cache.remove(tagObj._id);
+                    tagCache.getP(toID).all(defer);
+                }).fail(defer);
+            }, function (defer2) {
+                tagDao.setTag(tagObj, function (err, tag) {
+                    if (tag) {
+                        cache.update(tag);
+                        tagCache.put(tag._id, tag);
                     }
-                    return callback(err, doc);
+                    defer(err, tag);
                 });
-            } else {
-                return callback(null, null);
-            }
-        });
-    } else {
-        return callback(null, null);
-    }
-}
-
-function filterTags(tagArray, callback) {
-    var tags = [];
-    callback = callback || callbackFn;
-
-    tagArray = toArray(tagArray);
-    eachAsync(tagArray, function (next, x) {
-        if (x && (x = filterTag(x))) {
-            if (cache[x.toLowerCase()]) {
-                tags.push(cache[x.toLowerCase()]._id);
-                return next ? next() : callback(null, tags);
-            } else {
-                tagDao.setNewTag({
-                    tag: x
-                }, function (err, doc) {
-                    if (doc) {
-                        tags.push(doc._id);
-                        cache._update(doc);
-                    }
-                    return next ? next() : callback(null, tags);
-                });
-            }
+            }).fail(defer);
+        } else if (setKey === 'articlesList' || setKey === 'usersList') {
+            tagCache.getP(tagObj._id).then(function (defer2, tag) {
+                var exist = tag[setKey].indexOf(Math.abs(tagObj[setKey]));
+                if ((tagObj[setKey] < 0 && exist >= 0) || (tagObj[setKey] > 0 && exist < 0)) {
+                    tagDao.setTag(tagObj, defer2);
+                } else {
+                    defer2(true);
+                }
+            }).then(function (defer2, tag) {
+                cache.update(tag);
+                tagCache.put(tag._id, tag);
+            }).fail(defer);
         } else {
-            return next ? next() : callback(null, tags);
+            defer(true);
         }
+    }).fail(function (defer, err) {
+        defer(err === true ? jsGen.Err(msg.requestDataErr) : err);
     });
 }
 
-function getTag(req, res, dm) {
-    var tag = decodeURI(req.path[2]);
-    if (tag[0] === '_') {
-        throw jsGen.Err(jsGen.lib.msg.tagNone);
-    }
-    if (checkID(tag, 'T')) {
-        tag = tagDao.convertID(tag);
-    }
-    if (typeof tag === 'string') {
-        tag = tag.toLowerCase();
-    }
-    if (cache[tag]) {
-        tag = cache[tag]._id;
-    } else {
-        throw jsGen.Err(jsGen.lib.msg.tagNone);
-    }
-    tagCache.getP(tag, dm.intercept(function (doc) {
-        var list, key,
-            s = +req.path[3],
-            p = +req.getparam.p || +req.getparam.pageIndex || 1,
-            listPagination = req.session.listPagination;
+function filterTags(tagArray) {
+    return then(function (defer) {
+        var tags = [];
 
-        if (s > 0) {
-            s = s > 20 ? 20 : s;
-            req.getparam = req.getparam || {};
-            req.getparam.p = 1;
-            req.getparam.s = s;
-            list = doc.articlesList.slice(-s).reverse();
-        } else {
-            s = 0;
-            key = MD5(JSON.stringify(doc.articlesList), 'base64');
-            if (!listPagination) {
-                listPagination = req.session.listPagination = {
-                    key: key
-                };
+        tagArray = toArray(tagArray);
+        then.each(tagArray, function (next, x) {
+            if (x && (x = filterTag(x))) {
+                then(function (defer2) {
+                    cache.get(x, defer2);
+                }).then(function (defer2, ID) {
+                    tags.push(ID);
+                    return next ? next() : defer(null, tags);
+                }, function (defer2, err) {
+                    tagDao.setNewTag({
+                        tag: x
+                    }, function (err, tag) {
+                        if (tag) {
+                            tags.push(tag._id);
+                            cache.update(tag);
+                        }
+                        return next ? next() : defer(null, tags);
+                    });
+                });
+            } else {
+                return next ? next() : defer(null, tags);
             }
-            list = paginationCache.get(listPagination.key);
-            if (!list || (p === 1 && listPagination.key !== key)) {
-                listPagination.key = key;
-                list = doc.articlesList.reverse();
-                paginationCache.put(listPagination.key, list);
-            }
-        }
-        paginationList(req, list, jsGen.cache.list, dm.intercept(function (data, pagination) {
-            union(listPagination, pagination);
-            if (p === 1 || s > 0) {
-                doc._id = tagDao.convertID(doc._id);
-                delete doc.articlesList;
-                delete doc.usersList;
-            }
-            return res.sendjson(resJson(null, data, pagination, {
-                tag: doc
-            }));
-        }));
-    }));
+        });
+    });
 }
 
-function getTags(req, res, dm) {
+function getTagID(req) {
+    var tag = decodeURI(req.path[2]);
+    return then(function (defer) {
+        if (checkID(tag, 'T')) {
+            defer(null, tagDao.convertID(tag));
+        } else {
+            cache.get(tag, function (err, ID) {
+                defer(err ? jsGen.Err(msg.tagNone) : null, ID);
+            });
+        }
+    }).then(function (defer, ID) {
+        cache(ID, defer);
+    }).fail(errorHandler);
+}
+
+function getTag(req, res) {
+    var tag,
+        p = +req.getparam.p || +req.getparam.pageIndex || 1;
+
+    req.session.paginationKey = req.session.paginationKey || {};
+    getTagID(req).then(function (defer, doc) {
+        var key = 'Tag' + doc.tag,
+            list = paginationCache.get(req.session.paginationKey[key]);
+        tag = doc;
+        if (!list || p === 1) {
+            then(function (defer2) {
+                tagCache.getP(tag._id).all(defer2);
+            }).then(function (defer2, tag) {
+                list = tag.articlesList;
+                req.session.paginationKey[key] = MD5(JSON.stringify(list.slice(0, 100)), 'base64');
+                paginationCache.put(req.session.paginationKey[key], list);
+                defer(null, list);
+            }).fail(defer);
+        } else {
+            defer(null, list);
+        }
+    }).then(function (defer, list) {
+        paginationList(req, list, jsGen.cache.list, defer);
+    }).then(function (defer, data, pagination) {
+        tag._id = tagDao.convertID(tag._id);
+        return res.sendjson(resJson(null, data, pagination, {
+            tag: tag
+        }));
+    }).fail(res.throwError);
+}
+
+function getTags(req, res) {
     var list,
         s = +req.path[3],
         p = +req.getparam.p || +req.getparam.pageIndex || 1,
         listPagination = req.session.listPagination;
 
-    if (s > 0) {
-        s = s > 20 ? 20 : s;
-        req.getparam = req.getparam || {};
-        req.getparam.pageIndex = 1;
-        req.getparam.pageSize = s;
-        list = cache._index.slice(-s);
-    } else {
-        s = 0;
-        if (!listPagination) {
-            listPagination = req.session.listPagination = {
-                key: 'tag' + cache._initTime
-            };
-        }
-        list = paginationCache.get(listPagination.key);
-        if (!list || (p === 1 && listPagination.key !== 'tag' + cache._initTime)) {
-            listPagination.key = 'tag' + cache._initTime;
-            list = cache._index.slice(0);
-            paginationCache.put(listPagination.key, list);
-        }
-    }
-    paginationList(req, list, tagCache, dm.intercept(function (data, pagination) {
-        data.forEach(function (tag) {
+    then(function (defer) {
+        cache.index(0, -1, defer);
+    }).then(function (defer, list) {
+        paginationList(req, list, tagCache, defer);
+    }).then(function (defer, data, pagination) {
+        each(data, function (tag) {
             tag._id = tagDao.convertID(tag._id);
             delete tag.articlesList;
             delete tag.usersList;
         });
-        union(req.session.listPagination, pagination);
         return res.sendjson(resJson(null, data, pagination));
-    }));
+    }).fail(res.throwError);
 }
 
-function editTags(req, res, dm) {
+function editTags(req, res) {
     var defaultObj = {
         _id: '',
         tag: ''
     },
-        data = {},
-        tagArray = req.apibody.data;
+        result = {};
 
-    if (req.session.role < 4) {
-        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    }
-    if (!tagArray) {
-        throw jsGen.Err(jsGen.lib.msg.requestDataErr);
-    }
-    tagArray = toArray(tagArray);
-    eachAsync(tagArray, function (next, x) {
-        if (x && x._id && x.tag) {
+    then(function (defer) {
+        if (!req.session.role || req.session.role < 4) {
+            defer(jsGen.Err(msg.userRoleErr));
+        } else {
+            defer(null, toArray(req.apibody.data));
+        }
+    }).then(function (defer, list) {
+        then.each(list, function (next, x) {
             x = intersect(union(defaultObj), x);
             x._id = tagDao.convertID(x._id);
-            setTag(x, dm.intercept(function (doc) {
-                if (doc) {
-                    doc._id = tagDao.convertID(doc._id);
-                    delete doc.articlesList;
-                    delete doc.usersList;
-                    data[doc._id] = doc;
+            setTag(x).all(function (defer, err, tag) {
+                if (tag) {
+                    tag._id = tagDao.convertID(tag._id);
+                    delete tag.articlesList;
+                    delete tag.usersList;
+                    result[tag._id] = tag;
                 }
-                return next ? next() : res.sendjson(resJson(null, data));
-            }));
+                return next ? next() : res.sendjson(resJson(null, result));
+            });
+        });
+    }).fail(res.throwError);
+}
+
+function delTag(req, res) {
+    var ID;
+    getTagID(req).then(function (defer, tag) {
+        if (req.session.role !== 5) {
+            defer(jsGen.Err(msg.userRoleErr));
         } else {
-            return next ? next() : res.sendjson(resJson(null, data));
+            ID = tag._id;
+            tagDao.delTag(ID, defer);
         }
-    });
-}
-
-function delTag(req, res, dm) {
-    var tag = decodeURI(req.path[2]);
-
-    if (req.session.role !== 5) {
-        throw jsGen.Err(jsGen.lib.msg.userRoleErr);
-    }
-    if (tag[0] === '_') {
-        throw jsGen.Err(jsGen.lib.msg.tagNone);
-    }
-    if (checkID(tag, 'T')) {
-        tag = tagDao.convertID(tag);
-    }
-    if (typeof tag === 'string') {
-        tag = tag.toLowerCase();
-    }
-    if (cache[tag]) {
-        tag = cache[tag]._id;
-    } else {
-        throw jsGen.Err(jsGen.lib.msg.tagNone);
-    }
-    tagDao.delTag(tag, dm.intercept(function () {
-        tagCache.remove(tag);
-        cache._remove(tag);
+    }).then(function (defer) {
+        tagCache.remove(ID);
+        cache.remove(ID);
         return res.sendjson(resJson());
-    }));
+    }).fail(res.throwError);
 }
 
-function getFn(req, res, dm) {
-    switch (req.path[2]) {
-    case undefined:
-    case 'index':
-    case 'hots':
-        return getTags(req, res, dm);
-    default:
-        return getTag(req, res, dm);
-    }
-}
 
-function postFn(req, res, dm) {
-    switch (req.path[2]) {
-    case undefined:
-    case 'index':
-        return getTags(req, res, dm);
-    case 'admin':
-        return editTags(req, res, dm);
-    default:
-        return res.r404();
-    }
-}
-
-function deleteFn(req, res, dm) {
-    return delTag(req, res, dm);
-}
 
 module.exports = {
-    GET: getFn,
-    POST: postFn,
-    DELETE: deleteFn,
+    GET: function (req, res) {
+        switch (req.path[2]) {
+        case undefined:
+        case 'index':
+        case 'hots':
+            return getTags(req, res);
+        default:
+            return getTag(req, res);
+        }
+    },
+    POST: function (req, res) {
+        switch (req.path[2]) {
+        case undefined:
+        case 'index':
+            return getTags(req, res);
+        case 'admin':
+            return editTags(req, res);
+        default:
+            return res.r404();
+        }
+    },
+    DELETE: function (req, res) {
+        return delTag(req, res);
+    },
     filterTags: filterTags,
     setTag: setTag,
-    cache: cache,
     convertTags: convertTags
 };

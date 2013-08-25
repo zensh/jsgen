@@ -10,7 +10,7 @@
                     <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
                 </a>
                 <div class="media-body">
-                    <div class="media-header"><a ng-href="{{'#/'+user._id}}">{{user.name}}</a></div>
+                    <div class="media-header"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></div>
                     <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | switch:'follow'}}</button>
                 </div>
             </div>
@@ -51,40 +51,40 @@
                 <div gen-parse-md="user.desc"></div>
                 <strong> 用户标签：</strong>
                 <div>
-                    <a ng-repeat="tag in user.tagsList" ng-href="{{'#/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                    <a ng-repeat="tag in user.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
                 </div>
             </div>
         </div>
         <div class="panel pure-menu pure-menu-open">
             <ul class="text-center" ng-show="parent.isMe">
                 <li ng-class="{active: parent.viewPath=='index'}">
-                    <a href="#/home"><i class="icon-chevron-left left"></i>我的主页</a>
+                    <a href="/home"><i class="icon-chevron-left left"></i>我的主页</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='follow'}">
-                    <a href="#/home/follow"><i class="icon-chevron-left left"></i>我的关注</a>
+                    <a href="/home/follow"><i class="icon-chevron-left left"></i>我的关注</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='fans'}">
-                    <a href="#/home/fans"><i class="icon-chevron-left left"></i>我的粉丝</a>
+                    <a href="/home/fans"><i class="icon-chevron-left left"></i>我的粉丝</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='mark'}">
-                    <a href="#/home/mark"><i class="icon-chevron-left left"></i>我的收藏</a>
+                    <a href="/home/mark"><i class="icon-chevron-left left"></i>我的收藏</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='article'}">
-                    <a href="#/home/article"><i class="icon-chevron-left left"></i>我的文章</a>
+                    <a href="/home/article"><i class="icon-chevron-left left"></i>我的文章</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='comment'}">
-                    <a href="#/home/comment"><i class="icon-chevron-left left"></i>我的评论</a>
+                    <a href="/home/comment"><i class="icon-chevron-left left"></i>我的评论</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='detail'}">
-                    <a href="#/home/detail"><i class="icon-chevron-left left"></i>用户设置</a>
+                    <a href="/home/detail"><i class="icon-chevron-left left"></i>用户设置</a>
                 </li>
             </ul>
             <ul class="text-center" ng-hide="parent.isMe">
                 <li ng-class="{active: parent.viewPath=='article'}">
-                    <a ng-href="#/{{user._id}}/article"><i class="icon-chevron-left left"></i>{{user.name}}的文章</a>
+                    <a ng-href="/{{user._id}}/article"><i class="icon-chevron-left left"></i>{{user.name}}的文章</a>
                 </li>
                 <li ng-class="{active: parent.viewPath=='fans'}">
-                    <a ng-href="#/{{user._id}}/fans"><i class="icon-chevron-left left"></i>{{user.name}}的粉丝</a>
+                    <a ng-href="/{{user._id}}/fans"><i class="icon-chevron-left left"></i>{{user.name}}的粉丝</a>
                 </li>
             </ul>
         </div>

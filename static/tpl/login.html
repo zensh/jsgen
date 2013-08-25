@@ -34,7 +34,7 @@
                         <input id="auto-login" type="checkbox" ng-model="login.logauto">3天内自动登录
                     </label>
                     <button class="pure-button primary-bg" ng-click="submit()">登录</button>
-                    <a class="pure-button warning-bg" ng-show="reset.title" ng-href="{{'#/reset?type='+reset.type}}">{{reset.title}}</a>
+                    <a class="pure-button warning-bg" ng-show="reset.title" ng-href="{{'/reset?type='+reset.type}}">{{reset.title}}</a>
                     </div>
                 </div>
             </form>

@@ -1,33 +1,22 @@
-{jsGen} <small>0.5.x</small>
+{jsGen} <small>0.6.x</small>
 =======
 **——JavaScript Generated**
 
 ### 在线演示及交流社区：[AngularJS中文社区][2]
 
-### 注意，从0.5.7版开始，引入redis！
+### 注意，从0.6.x版使用了redis！
 
-### 本版更新说明 0.5.x
+### 0.6.x更新说明
 
- 1. 兼容IE8。
- 2. 放弃Bootstrap 3框架，改用YUI的pure CSS框架，并入部分Bootstrap框架代码，如Modal、Tooltip等。
- 3. 使用超酷的Icon：Font-Awesome。
- 4. 动画效果，文章列表精简/摘要模式切换。
- 5. toastr信息提示条，用于显示错误或成功的请求信息。
- 6. 优化响应式设计，手机、平板浏览器可完美访问。
- 7. 分离语言机制，可方便切换成其它语言（模板中的语言暂未分离，待完成）。
- 8. 完全重构AngularJS代码，各种很酷的功能代码如下。
- 9. 全局Loading检测，自动响应loading状态，默认延迟1秒响应loading。可响应AngularJS内部所有http请求，如API请求、html模板请求等。
- 10. 全局Error检测，自动过滤错误响应（即进入到controlller中的都是成功响应），包括服务器自身的错误响应如404、500等和服务器定义的错误响应，toastr显示错误信息。
- 11. 统一的Validation验证机制，通过`genTooltip`指令收集并提示无效输入，配合`uiValidate`可对输入完成任何自定义验证。主要应用于用户登录、用户注册、用户信息修改、发表文章、发表评论，管理后台配置等。
- 12. 统一的Dirty检测机制，通过`genModal`指令和`union/intersect`函数实现，在发表/编辑文章页面、用户信息配置页面、后台管理页面等修改了数据时，若未保存离开，提示警告信息。
- 13. 通用的`genPagination`指令，效果仿Github，可实现有链接和无链接分页导航。前者生成url，可产生导航记录（浏览器前进后退），具体效果见文章列表。后者通过事件机制实现，不改变url，无导航记录（不能前进后退），具体效果见文章详情页面中的评论分页导航。
- 14. 图片预占位异步加载`genSrc`指令，目前主要用于用户头像。jsGen使用Gavatar，再用户的Gavatar没用加载完成之前，显示本地服务器的占位图像，加载完成后自动替换成用户头像。
- 15. 还有其他很酷的代码如定时器触发器`timing`，自动定位页面元素的`anchorScroll`（动画效果，方便好使，取代AngularJS内置的$anchorScroll），无须担心digest错误的`applyFn`（代替$apply）,通用的Cookies存储服务`myConf`等
+ 1. 将原有的内存缓存全改成redis缓存，使得jsGen可以多进程、多机运行。
+ 2. 使用then.js处理异步任务，完全重写异步任务代码，代码逻辑更清晰、更容易扩展。
+ 3. 修复部分Bug。
+ 4. 暂停动画效果。
 
-### 下版开发目标 0.6.0
 
- 1. 优化重构服务器端node.js代码；
- 2. 添加消息系统；
+### 0.7.0版开发目标
+
+ 内容搜索、消息系统、后台文章和评论管理。
 
 ### 简介 (Introduction)
 
@@ -78,7 +67,7 @@ Default administrator username: **admin** password: **admin@jsgen.org**.
     npm start           //重启jsGen
 
 ### 更新 (Changelog)
-
+ + 2013/08/25 jsGen v0.6.0 完全重构Node.js服务器端代码。使用redis作为缓存，使用then.js处理异步任务。
  + 2013/07/29 jsGen v0.5.0 完全重构AngularJS客户端部分，服务器端代码做相应调整。使用pure CSS框架，优化UI，兼容IE8！重写并优化AngularJS代码，添加若干很酷的功能代码，在学习AngularJS的码农不妨看看！
  + 2013/06/01 jsGen v0.3.5 修复若干bug，标签允许空格。
  + 2013/05/26 jsGen v0.3.4 修复管理后台不出现网站设置的bug，管理后台增加邮箱验证设置，默认关闭邮箱验证。
@@ -100,6 +89,24 @@ Default administrator username: **admin** password: **admin@jsgen.org**.
  + 2013/03/31 jsGen v0.1.2 修正bug，添加加载进度条。
  + 2013/03/30 jsGen v0.1.1 修正几个bug，添加forever启动脚本。
  + 2013/03/29 jsGen v0.1.0 测试版发布。
+
+### 0.5.x更新说明
+
+ 1. 兼容IE8。
+ 2. 放弃Bootstrap 3框架，改用YUI的pure CSS框架，并入部分Bootstrap框架代码，如Modal、Tooltip等。
+ 3. 使用超酷的Icon：Font-Awesome。
+ 4. 动画效果，文章列表精简/摘要模式切换。
+ 5. toastr信息提示条，用于显示错误或成功的请求信息。
+ 6. 优化响应式设计，手机、平板浏览器可完美访问。
+ 7. 分离语言机制，可方便切换成其它语言（模板中的语言暂未分离，待完成）。
+ 8. 完全重构AngularJS代码，各种很酷的功能代码如下。
+ 9. 全局Loading检测，自动响应loading状态，默认延迟1秒响应loading。可响应AngularJS内部所有http请求，如API请求、html模板请求等。
+ 10. 全局Error检测，自动过滤错误响应（即进入到controlller中的都是成功响应），包括服务器自身的错误响应如404、500等和服务器定义的错误响应，toastr显示错误信息。
+ 11. 统一的Validation验证机制，通过`genTooltip`指令收集并提示无效输入，配合`uiValidate`可对输入完成任何自定义验证。主要应用于用户登录、用户注册、用户信息修改、发表文章、发表评论，管理后台配置等。
+ 12. 统一的Dirty检测机制，通过`genModal`指令和`union/intersect`函数实现，在发表/编辑文章页面、用户信息配置页面、后台管理页面等修改了数据时，若未保存离开，提示警告信息。
+ 13. 通用的`genPagination`指令，效果仿Github，可实现有链接和无链接分页导航。前者生成url，可产生导航记录（浏览器前进后退），具体效果见文章列表。后者通过事件机制实现，不改变url，无导航记录（不能前进后退），具体效果见文章详情页面中的评论分页导航。
+ 14. 图片预占位异步加载`genSrc`指令，目前主要用于用户头像。jsGen使用Gavatar，再用户的Gavatar没用加载完成之前，显示本地服务器的占位图像，加载完成后自动替换成用户头像。
+ 15. 还有其他很酷的代码如定时器触发器`timing`，自动定位页面元素的`anchorScroll`（动画效果，方便好使，取代AngularJS内置的$anchorScroll），无须担心digest错误的`applyFn`（代替$apply）,通用的Cookies存储服务`myConf`等
 
 ### 目录和文件 (menus and files)
 

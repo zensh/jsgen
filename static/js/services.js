@@ -48,7 +48,7 @@ factory('restAPI', ['$resource',
         }
         return {
             pageSize: myCookies('PageSize', 10),
-            listModel: myCookies('ListModel', false)
+            sumModel: myCookies('sumModel', false)
         };
     }
 ]).factory('anchorScroll', function () {
@@ -96,6 +96,11 @@ factory('restAPI', ['$resource',
     return {
         toView: toView,
         inView: inView
+    };
+}).factory('isVisible', function () {
+    return function (element) {
+        var rect = element[0].getBoundingClientRect();
+        return !!(rect.bottom - rect.top);
     };
 }).factory('applyFn', ['$rootScope',
     function ($rootScope) {
@@ -176,7 +181,7 @@ factory('restAPI', ['$resource',
         return function (listType) {
             return promiseGet({
                 ID: listType,
-                OP: 10
+                s: 10
             }, restAPI.article, listType, cache.list);
         };
     }
@@ -267,7 +272,7 @@ factory('restAPI', ['$resource',
             }, idPostfix);
             var element = angular.element(document.getElementById('wmd-preview' + idPostfix));
             editor.hooks.chain('onPreviewRefresh', function () {
-                angular.forEach(element.find('code'), function(value){
+                angular.forEach(element.find('code'), function (value) {
                     value = angular.element(value);
                     if (!value.parent().is('pre')) {
                         value.addClass('prettyline');

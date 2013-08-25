@@ -6,19 +6,19 @@
 var union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     globalConfig = jsGen.lib.json.GlobalConfig,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     callbackFn = jsGen.lib.tools.callbackFn;
 
 var that = jsGen.dao.db.bind('global', {
 
     getGlobalConfig: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({
             _id: 'GlobalConfig'
         }, {
             sort: {
                 _id: -1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setGlobalConfig: function (Obj, callback) {
@@ -43,7 +43,6 @@ var that = jsGen.dao.db.bind('global', {
                 onlineUsers: 0,
                 maxOnlineNum: 0,
                 maxOnlineTime: 0,
-                visitHistory: 0,
                 TimeInterval: 0,
                 ArticleTagsMax: 0,
                 UserTagsMax: 0,
@@ -66,7 +65,7 @@ var that = jsGen.dao.db.bind('global', {
                 tagCache: 0,
                 collectionCache: 0,
                 messageCache: 0,
-                paginationCache: [0, 0],
+                paginationCache: 0,
                 smtp: {
                     host: '',
                     secureConnection: true,
@@ -82,18 +81,7 @@ var that = jsGen.dao.db.bind('global', {
             };
 
         intersect(newObj, Obj);
-        if (Obj.visitors) {
-            setObj.$inc = {
-                visitors: 1
-            };
-        } else if (Obj.visitHistory) {
-            setObj.$push = {
-                visitHistory: newObj.visitHistory
-            };
-            delete newObj.visitHistory;
-        } else {
-            setObj.$set = newObj;
-        }
+        setObj.$set = newObj;
 
         if (callback) {
             that.findAndModify({
@@ -101,7 +89,7 @@ var that = jsGen.dao.db.bind('global', {
             }, [], setObj, {
                 w: 1,
                 'new': true
-            }, callback);
+            }, wrapCallback(callback));
         } else {
             that.update({
                 _id: 'GlobalConfig'
@@ -110,12 +98,11 @@ var that = jsGen.dao.db.bind('global', {
     },
 
     initGlobalConfig: function (callback) {
-        callback = callback || callbackFn;
         globalConfig.date = Date.now();
         that.insert(
             globalConfig, {
                 w: 1
-            }, callback);
+            }, wrapCallback(callback));
     }
 
 });

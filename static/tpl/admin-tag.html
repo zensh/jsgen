@@ -12,7 +12,7 @@
             <div class="pure-u-1-2 edit-tag" ng-repeat="tag in tagList | orderBy:predicate:reverse" id="{{tag._id}}">
                 <a title="删除标签" ng-click="remove(tag)" gen-tooltip><i class="icon-remove"></i></a>
                 <input class="pure-input-1-2 input-flat" type="text" name="标签" ng-model="tag.tag" ui-validate="{tag:checkTag,minlength:checkTagMin}" gen-tooltip="validateTooltip" required>
-                <small class="muted"><a ng-href="#/{{tag._id}}">文章 {{tag.articles}}/会员 {{tag.users}}</a></small>
+                <small class="muted"><a ng-href="/{{tag._id}}">文章 {{tag.articles}}/会员 {{tag.users}}</a></small>
             </div>
         </form>
         <div class="inner well text-right" ng-show="parent.editSave">

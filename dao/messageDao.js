@@ -16,6 +16,7 @@ var union = jsGen.lib.tools.union,
     IDString = jsGen.lib.json.IDString,
     defautMessage = jsGen.lib.json.Message,
     callbackFn = jsGen.lib.tools.callbackFn,
+    wrapCallback = jsGen.lib.tools.wrapCallback,
     converter = jsGen.lib.converter;
 
 var that = jsGen.dao.db.bind('messages', {
@@ -37,12 +38,10 @@ var that = jsGen.dao.db.bind('messages', {
     },
 
     getMessagesNum: function (callback) {
-        callback = callback || callbackFn;
-        that.count(callback);
+        that.count(wrapCallback(callback));
     },
 
     getLatestId: function (callback) {
-        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -53,11 +52,10 @@ var that = jsGen.dao.db.bind('messages', {
             fields: {
                 _id: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     getMessagesList: function (_idArray, callback) {
-        callback = callback || callbackFn;
         if (!Array.isArray(_idArray)) {
             _idArray = [_idArray];
         }
@@ -72,13 +70,12 @@ var that = jsGen.dao.db.bind('messages', {
                 title: 1,
                 content: 1
             }
-        }).toArray(callback);
+        }).toArray(wrapCallback(callback));
     },
 
     getMessage: function (_id, callback) {
-        callback = callback || callbackFn;
         that.findOne({
-            _id: _id
+            _id: +_id
         }, {
             sort: {
                 _id: -1
@@ -90,7 +87,7 @@ var that = jsGen.dao.db.bind('messages', {
                 title: 1,
                 content: 1
             }
-        }, callback);
+        }, wrapCallback(callback));
     },
 
     setMessage: function (messageObj) {
@@ -136,17 +133,16 @@ var that = jsGen.dao.db.bind('messages', {
             that.insert(
                 newMessage, {
                     w: 1
-                }, callback);
+                }, wrapCallback(callback));
         });
     },
 
     delMessage: function (_id, callback) {
-        callback = callback || callbackFn;
         that.remove({
-            _id: _id
+            _id: +_id
         }, {
             w: 1
-        }, callback);
+        }, wrapCallback(callback));
     }
 });
 

@@ -7,7 +7,7 @@
     <div class="pure-u-1-4">
         <div class="panel pure-hidden-phone">
             <div class="inner text-center">
-                <img src="/static/img/angularjs.png" alt="angularjs" gen-aspectratio="0.282">
+                <img src="/static/img/angularjs.png" alt="AngularJS">
                 <div class="text-show text-left">使用超动感HTML &amp; JS开发WEB应用！</div>
                 <div class="text-show text-hot">QQ交流群 <strong class="hot">278252889</strong></div>
                 <div class="text-show">
@@ -19,7 +19,7 @@
         <div class="panel pure-hidden-phone">
             <div class="inner text-center">
                 <div class="text-show-large">
-                    <strong class="muted">{<span class="primary">jsGen</span>}</strong>
+                    <strong>{jsGen}</strong>
                 </div>
                 <div class="text-show text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</div>
                 <div class="text-show">
@@ -46,7 +46,7 @@
                             <em class="hot" title="热度">{{comment.hots}}</em>&nbsp;&nbsp;{{comment.content}}
                         </div>
                         <div class="media-footer">
-                            <a ng-href="{{'#/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'#/'+comment.refer._id}}">{{comment.title}}</a>
+                            <a ng-href="{{'/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a>
                         </div>
                     </div>
                 </li>

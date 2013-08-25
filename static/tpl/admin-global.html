@@ -84,11 +84,11 @@
         <div ng-switch-when="tab2">
             <form class="pure-form pure-form-aligned" novalidate>
                 <div class="pure-control-group">
-                    <label>文章允许最多标签数量：</label>
+                    <label>文章最多标签数量：</label>
                     <input type="number" ng-model="editGlobal.ArticleTagsMax"/>
                 </div>
                 <div class="pure-control-group">
-                    <label>用户允许最多标签数量：</label>
+                    <label>用户最多标签数量：</label>
                     <input type="number" ng-model="editGlobal.UserTagsMax"/>
                 </div>
                 <div class="pure-control-group">
@@ -167,7 +167,7 @@
                     <input type="number" ng-model="editGlobal.commentCache"/>
                 </div>
                 <div class="pure-control-group">
-                    <label>文章列表缓存容量：</label>
+                    <label>列表缓存容量：</label>
                     <input type="number" ng-model="editGlobal.listCache"/>
                 </div>
                 <div class="pure-control-group">
@@ -184,18 +184,17 @@
                 </div>
                 <div class="pure-control-group">
                     <label>分页导航缓存：</label>
-                    <input type="text" ng-model="editGlobal.paginationCache" ng-list="/[,，、]/"/>
+                    <input type="number" ng-model="editGlobal.paginationCache"/>
                 </div>
                 <div class="pure-controls-group">
-                    <small>有效期<strong>{{editGlobal.paginationCache[0]}}</strong>秒
-                    ，最大容量<strong>{{editGlobal.paginationCache[1]}}</strong></small>
+                    <small>分页导航缓存有效期<strong>{{editGlobal.paginationCache}}</strong>秒</small>
                 </div>
                 <div class="pure-control-group">
                     <label>操作限时缓存：</label>
                     <input type="number" ng-model="editGlobal.TimeInterval"/>
                 </div>
                 <div class="pure-controls-group">
-                    <small>秒，搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为3秒</small>
+                    <small>搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为3秒</small>
                 </div>
                 <div class="pure-controls">
                     <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>

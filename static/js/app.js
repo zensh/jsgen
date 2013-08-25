@@ -72,9 +72,9 @@ config(['$httpProvider', 'app',
         });
     }
 ]).run(['app', '$q', '$rootScope', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'applyFn', 'param',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'isVisible', 'applyFn', 'param',
     function (app, $q, $rootScope, $location, $timeout, $filter, $locale,
-        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, applyFn, param) {
+        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, isVisible, applyFn, param) {
         var unSave = {
                 stopUnload: false,
                 nextUrl: ''
@@ -118,6 +118,7 @@ config(['$httpProvider', 'app',
         app.filter = $filter;
         app.locale = $locale;
         app.anchorScroll = anchorScroll;
+        app.isVisible = isVisible;
         app.getFile = getFile;
         app.cache = cache;
         app.restAPI = restAPI;

@@ -2,12 +2,22 @@
 /*global angular, $*/
 
 angular.module('jsGen.directives', []).
-directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
-    function (mdParse, sanitize, pretty) {
+directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout',
+    function (mdParse, sanitize, pretty, isVisible, $timeout) {
         // <div gen-parse-md="document"></div>
         // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
         return function (scope, element, attr) {
             scope.$watch(attr.genParseMd, function (value) {
+                if (isVisible(element)) {
+                    parseDoc(value);
+                } else {
+                    $timeout(function () {
+                        parseDoc(value);
+                    }, 500);
+                }
+            });
+
+            function parseDoc(value) {
                 if (angular.isDefined(value)) {
                     value = mdParse(value);
                     value = sanitize(value);
@@ -26,7 +36,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     });
                     pretty();
                 }
-            });
+            }
         };
     }
 ]).directive('genTabClick', function () {
@@ -113,8 +123,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]).directive('genModal', ['getFile', '$timeout',
-    function (getFile, $timeout) {
+]).directive('genModal', ['getFile', '$timeout', 'isVisible',
+    function (getFile, $timeout, isVisible) {
         //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
@@ -152,17 +162,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                         top = (jqWin.height() - element.outerHeight()) * 0.382,
                         css = {};
 
-                    top = top > 0 ? top : 0;
-                    css.top = top;
-                    if (options.width > 0) {
-                        var width = jqWin.width() - 20;
-                        options.width = Math.min(options.width, width);
-                        css.width = options.width;
-                        css.marginLeft = -options.width / 2;
-                        if (css.width === width) {
-                            css.paddingLeft = css.paddingRight = 0;
-                        }
-                    }
+                    css.marginTop = top > 0 ? top : 0;
                     element.css(css);
                 }
 
@@ -173,7 +173,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     }
                 }
 
-                if (!element.is(':visible')) {
+                if (!isVisible(element)) {
                     return;
                 }
 
@@ -199,11 +199,9 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                 });
 
                 modalElement.on('shown.bs.modal', function (event) {
-                    event.stopPropagation();
                     modalStatus = true;
                 });
                 modalElement.on('hidden.bs.modal', function (event) {
-                    event.stopPropagation();
                     if (modalStatus && isFunction(options.cancelFn)) {
                         options.cancelFn(); // when hide by other way, run cancelFn;
                     }
@@ -213,8 +211,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]).directive('genTooltip', ['$timeout',
-    function ($timeout) {
+]).directive('genTooltip', ['$timeout', 'isVisible',
+    function ($timeout, isVisible) {
         //<div data-original-title="tootip title" gen-tooltip="tootipOption"></div>
         // tootipOption = {
         //     validate: false, // if true, use for AngularJS validation
@@ -231,7 +229,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                     option = scope.$eval(attr.genTooltip) || {};
 
                 function invalidMsg(invalid) {
-                    ctrl.validate = enable && option.validate && element.is(':visible');
+                    ctrl.validate = enable && option.validate && isVisible(element);
                     if (ctrl.validate) {
                         var title = (ctrl.$name && ctrl.$name + ' ') || '';
                         if (invalid && option.validateMsg) {
@@ -284,6 +282,10 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
                             return attr.originalTitle || attr.dataOriginalTitle;
                         }, showTooltip);
                     }
+                    element.bind('focus', function () {
+                        element.trigger('input');
+                        element.trigger('change');
+                    });
                     scope.$on('genTooltipValidate', function (event, collect, turnoff) {
                         enable = !turnoff;
                         if (ctrl) {
@@ -340,13 +342,13 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-]).directive('genSrc',
-    function () {
+]).directive('genSrc', ['isVisible',
+    function (isVisible) {
         return {
             priority: 99,
             link: function (scope, element, attr) {
                 attr.$observe('genSrc', function (value) {
-                    if (value && element.is(':visible')) {
+                    if (value && isVisible(element)) {
                         var img = new Image();
                         img.onload = function () {
                             attr.$set('src', value);
@@ -357,16 +359,4 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty',
             }
         };
     }
-).directive('genAspectratio',
-    function () {
-        return {
-            link: function (scope, element, attr) {
-                attr.$observe('aspectRatio', function (value) {
-                    if (value > 0 && element.is(':visible')) {
-                        element.css('height', value * element.width());
-                    }
-                });
-            }
-        };
-    }
-);
+]);
