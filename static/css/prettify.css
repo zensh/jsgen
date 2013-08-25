@@ -15,7 +15,7 @@ pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
 
 pre.prettyprint,
 code.prettyline {
-    font-family: Consolas, "Liberation Mono", Courier, monospace, serif !important;
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace, serif !important;
     font-size: 0.95em;
     line-height: 1.5em;
     background-color: #222;
