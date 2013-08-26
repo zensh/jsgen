@@ -839,6 +839,46 @@ function robot(req, res) {
     }).fail(res.throwError);
 }
 
+function sitemap(req, res) {
+    then(function (defer) {
+        cache.index(0, -1, defer);
+    }).then(function (defer, list) {
+        var data = [{
+            url: jsGenConfig.url,
+            date: new Date().toISOString(),
+            freq: 'hourly', // always hourly daily weekly monthly yearly never
+            priority: 1
+        }];
+
+        function toSiteMap(article) {
+            return {
+                url: jsGenConfig.url + '/' + convertArticleID(article._id),
+                date: new Date(article.updateTime).toISOString(),
+                freq: 'daily', // always hourly daily weekly monthly yearly never
+                priority: 0.8
+            };
+        }
+
+        then.each(list, function (next, ID) {
+            then(function (defer2) {
+                cache(ID, defer2);
+            }).all(function (defer2, err, article) {
+                if (article && article.display <= 1) {
+                    data.push(toSiteMap(article));
+                }
+                return next ? next() : defer(null, data);
+            });
+        });
+    }).then(function (defer, list) {
+        res.compiletemp('/sitemap.ejs', {
+            sitemap: list
+        }, defer);
+    }).then(function (defer, html) {
+        res.setHeader('Content-Type', 'application/xml');
+        res.send(html);
+    }).fail(res.throwError);
+}
+
 function deleteArticle(req, res) {
     getArticleID(req).then(function (defer, article) {
         if (!req.session.Uid) {
@@ -911,5 +951,6 @@ module.exports = {
         return deleteArticle(req, res);
     },
     convertArticles: convertArticles,
+    sitemap: sitemap,
     robot: robot
 };
