@@ -156,8 +156,6 @@ serverDm.run(function () {
             function router(req, res) {
                 if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
                     jsGen.api[req.path[1]][req.method.toUpperCase()](req, res); // 处理api请求
-                } else if (jsGen.robotReg.test(req.useragent)) {
-                    jsGen.api.article.robot(req, res); // 处理搜索引擎请求
                 } else if (req.path[0].toLowerCase() === 'sitemap.xml') {
                     jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
                 } else if (req.path[0].slice(-3).toLowerCase() === 'txt') {
@@ -168,6 +166,8 @@ serverDm.run(function () {
                         res.setHeader('Content-Type', 'text/plain');
                         res.send(txt);
                     }).fail(res.throwError);
+                } else if (jsGen.robotReg.test(req.useragent)) {
+                    jsGen.api.article.robot(req, res); // 处理搜索引擎请求
                 } else {
                     jsGen.config.visitors = 1; // 访问次数+1
                     res.setHeader('Content-Type', 'text/html');
