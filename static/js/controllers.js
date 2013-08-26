@@ -854,7 +854,8 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
     }
 ]).controller('articleEditorCtrl', ['app', '$scope', '$routeParams', 'mdEditor', 'getMarkdown',
     function (app, $scope, $routeParams, mdEditor, getMarkdown) {
-        var ID = $routeParams.ID && 'A' + $routeParams.ID,
+        var oldArticle,
+            ID = $routeParams.ID && 'A' + $routeParams.ID,
             toStr = app.toStr,
             locale = app.locale,
             global = app.rootScope.global,
@@ -950,7 +951,6 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 $scope.article.tagsList = tagsList.concat(tag.tag); // 此处push方法不会更新tagsList视图
             }
         };
-
         $scope.wmdPreview = function () {
             var parent = $scope.parent;
             parent.wmdPreview = !parent.wmdPreview;
@@ -966,11 +966,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         ID: ID || 'index',
                         OP: ID && 'edit'
                     }, data, function (data) {
-                        var article = data.data,
-                            old = articleCache.get(article._id);
+                        var article = data.data;
 
-                        if (old) {
-                            data.data = app.union(old.data, article);
+                        if (oldArticle) {
+                            delete article.commentsList;
+                            article = data.data = app.union(oldArticle.data, article);
                         }
                         articleCache.put(article._id, data);
                         initArticle(article);
@@ -992,6 +992,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 
         mdEditor().run();
         if (ID) {
+            oldArticle = articleCache.get(ID);
             app.promiseGet({
                 ID: ID
             }, restAPI, ID, articleCache).then(function (data) {

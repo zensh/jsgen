@@ -11,7 +11,7 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.6.1';
+jsGen.version = '0.6.2';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -155,14 +155,24 @@ serverDm.run(function () {
 
             function router(req, res) {
                 if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
-                    jsGen.api[req.path[1]][req.method.toUpperCase()](req, res);  // 处理api请求
+                    jsGen.api[req.path[1]][req.method.toUpperCase()](req, res); // 处理api请求
                 } else if (jsGen.robotReg.test(req.useragent)) {
-                    jsGen.api.article.robot(req, res);  // 处理搜索引擎请求
+                    jsGen.api.article.robot(req, res); // 处理搜索引擎请求
+                } else if (req.path[0].toLowerCase() === 'sitemap.xml') {
+                    jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
+                } else if (req.path[0].slice(-3).toLowerCase() === 'txt') {
+                    // 直接响应static目录的txt文件，如robots.txt
+                    then(function (defer) {
+                        fs.readFile(processPath + '/static/' + req.path[0], 'utf8', defer);
+                    }).then(function (defer, txt) {
+                        res.setHeader('Content-Type', 'text/plain');
+                        res.send(txt);
+                    }).fail(res.throwError);
                 } else {
                     jsGen.config.visitors = 1; // 访问次数+1
-                    res.setHeader("Content-Type", "text/html");
+                    res.setHeader('Content-Type', 'text/html');
                     if (jsGen.cache.indexTpl) {
-                        res.send(jsGen.cache.indexTpl);  // 响应首页index.html
+                        res.send(jsGen.cache.indexTpl); // 响应首页index.html
                     } else {
                         then(function (defer) {
                             fs.readFile(processPath + '/static/index.html', 'utf8', defer);
@@ -184,7 +194,7 @@ serverDm.run(function () {
                 errHandler(err, res, dm);
             });
             dm.run(function () {
-                router(req, res);  // 运行
+                router(req, res); // 运行
             });
         }).listen(jsGen.module.rrestjs.config.listenPort);
         console.log('jsGen start!');
