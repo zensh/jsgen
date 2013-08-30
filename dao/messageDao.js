@@ -42,6 +42,7 @@ var that = jsGen.dao.db.bind('messages', {
     },
 
     getLatestId: function (callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -52,7 +53,7 @@ var that = jsGen.dao.db.bind('messages', {
             fields: {
                 _id: 1
             }
-        }, wrapCallback(callback));
+        }, callback);
     },
 
     getMessagesList: function (_idArray, callback) {

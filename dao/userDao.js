@@ -74,6 +74,7 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     getLatestId: function (callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -84,7 +85,7 @@ var that = jsGen.dao.db.bind('users', {
             fields: {
                 _id: 1
             }
-        }, wrapCallback(callback));
+        }, callback);
     },
 
     getAuth: function (_id, callback) {
