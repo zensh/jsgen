@@ -34,7 +34,7 @@ tagCache.getP = function (ID) {
                 return tagDao.getTag(ID, defer);
             }
         } else {
-            defer(jsGen.Err(msg.tagNone));
+            defer(jsGen.Err(msg.TAG.tagNone));
         }
     }).then(function (defer, tag) {
         if (!inCache) {
@@ -172,7 +172,7 @@ function setTag(tagObj) {
             defer(true);
         }
     }).fail(function (defer, err) {
-        defer(err === true ? jsGen.Err(msg.requestDataErr) : err);
+        defer(err === true ? jsGen.Err(msg.MAIN.requestDataErr) : err);
     });
 }
 
@@ -213,7 +213,7 @@ function getTagID(req) {
             defer(null, tagDao.convertID(tag));
         } else {
             cache.get(tag, function (err, ID) {
-                defer(err ? jsGen.Err(msg.tagNone) : null, ID);
+                defer(err ? jsGen.Err(msg.TAG.tagNone) : null, ID);
             });
         }
     }).then(function (defer, ID) {
@@ -281,7 +281,7 @@ function editTags(req, res) {
 
     then(function (defer) {
         if (!req.session.role || req.session.role < 4) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else {
             defer(null, toArray(req.apibody.data));
         }
@@ -306,7 +306,7 @@ function delTag(req, res) {
     var ID;
     getTagID(req).then(function (defer, tag) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else {
             ID = tag._id;
             tagDao.delTag(ID, defer);

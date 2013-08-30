@@ -47,7 +47,7 @@ userCache.getP = function (Uid, convert) {
                 userDao.getUserInfo(Uid, defer);
             }
         } else {
-            defer(jsGen.Err(msg.UidNone));
+            defer(jsGen.Err(msg.USER.UidNone));
         }
     }).then(function (defer, user) {
         if (!inCache) {
@@ -145,18 +145,18 @@ function setCache(user) {
 function adduser(userObj) {
     return then(function (defer) {
         if (typeof userObj !== 'object') {
-            defer(jsGen.Err(msg.userNone));
+            defer(jsGen.Err(msg.USER.userNone));
         } else if (!checkEmail(userObj.email)) {
-            defer(jsGen.Err(msg.userEmailErr));
+            defer(jsGen.Err(msg.USER.userEmailErr));
         } else if (!checkUserName(userObj.name)) {
-            defer(jsGen.Err(msg.userNameErr));
+            defer(jsGen.Err(msg.USER.userNameErr));
         } else {
             defer();
         }
     }).then(function (defer) {
         cache.get(userObj.email, function (err, Uid) {
             if (Uid) {
-                defer(jsGen.Err(msg.userEmailExist));
+                defer(jsGen.Err(msg.USER.userEmailExist));
             } else {
                 defer();
             }
@@ -164,7 +164,7 @@ function adduser(userObj) {
     }).then(function (defer) {
         cache.get(userObj.name, function (err, Uid) {
             if (Uid) {
-                defer(jsGen.Err(msg.userNameExist));
+                defer(jsGen.Err(msg.USER.userNameExist));
             } else {
                 defer();
             }
@@ -213,14 +213,14 @@ function userLogin(loginObj) {
 
     return then(function (defer) {
         if (typeof loginObj !== 'object') {
-            defer(jsGen.Err(msg.requestDataErr));
+            defer(jsGen.Err(msg.MAIN.requestDataErr));
         } else if (date - loginObj.logtime > 259200000) {
-            defer(jsGen.Err(msg.requestOutdate));
+            defer(jsGen.Err(msg.MAIN.requestOutdate));
         } else if (checkUserID(loginObj.logname)) {
             var Uid = convertUserID(loginObj.logname);
             cache(Uid, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.UidNone));
+                    defer(jsGen.Err(msg.USER.UidNone));
                 } else {
                     defer(null, Uid);
                 }
@@ -233,11 +233,11 @@ function userLogin(loginObj) {
                     defer(null, Uid);
                 } else {
                     if (checkEmail(loginObj.logname)) {
-                        defer(jsGen.Err(msg.userEmailNone));
+                        defer(jsGen.Err(msg.USER.userEmailNone));
                     } else if (checkUserName(loginObj.logname)) {
-                        defer(jsGen.Err(msg.userNameNone));
+                        defer(jsGen.Err(msg.USER.userNameNone));
                     } else {
-                        defer(jsGen.Err(msg.logNameErr));
+                        defer(jsGen.Err(msg.USER.logNameErr));
                     }
                 }
             });
@@ -245,9 +245,9 @@ function userLogin(loginObj) {
     }).then(function (defer, Uid) {
         userDao.getAuth(Uid, function (err, user) {
             if (!user) {
-                defer(jsGen.Err(msg.dbErr));
+                defer(jsGen.Err(msg.MAIN.dbErr));
             } else if (user.locked) {
-                defer(jsGen.Err(msg.userLocked, 'locked'));
+                defer(jsGen.Err(msg.USER.userLocked, 'locked'));
             } else if (user.loginAttempts >= 5) {
                 userDao.setUserInfo({
                     _id: Uid,
@@ -258,7 +258,7 @@ function userLogin(loginObj) {
                         loginAttempts: 0
                     });
                 });
-                defer(jsGen.Err(msg.loginAttempts));
+                defer(jsGen.Err(msg.USER.loginAttempts));
             } else if (loginObj.logpwd === HmacSHA256(user.passwd, loginObj.logname + ':' + loginObj.logtime)) {
                 if (user.loginAttempts > 0) {
                     userDao.setLoginAttempt({
@@ -280,7 +280,7 @@ function userLogin(loginObj) {
                     _id: Uid,
                     loginAttempts: 1
                 });
-                return defer(jsGen.Err(msg.userPasswd, 'passwd'));
+                return defer(jsGen.Err(msg.USER.userPasswd, 'passwd'));
             }
         });
     }).fail(errorHandler);
@@ -327,7 +327,7 @@ function getUserID(req) {
             Uid = convertUserID(userID);
             cache(Uid, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.UidNone));
+                    defer(jsGen.Err(msg.USER.UidNone));
                 } else {
                     defer(null, Uid);
                 }
@@ -339,11 +339,11 @@ function getUserID(req) {
                     userID = convertUserID(Uid);
                     defer(null, Uid);
                 } else {
-                    defer(jsGen.Err(msg.userNameNone));
+                    defer(jsGen.Err(msg.USER.userNameNone));
                 }
             });
         } else {
-            defer(jsGen.Err(msg.UidNone));
+            defer(jsGen.Err(msg.USER.UidNone));
         }
     });
 }
@@ -394,11 +394,11 @@ function register(req, res) {
 
     then(function (defer) {
         if (!jsGen.config.register) {
-            defer(jsGen.Err(msg.registerClose));
+            defer(jsGen.Err(msg.MAIN.registerClose));
         } else {
             checkTimeInterval(req, 'Register').all(function (defer2, err, value) {
                 if (value) {
-                    defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
+                    defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
                 } else {
                     defer();
                 }
@@ -478,13 +478,13 @@ function getUser(req, res) {
 function setUser(req, res) {
     getUserID(req).then(function (defer, Uid) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (req.session.Uid === Uid || !req.apibody) {
-            defer(jsGen.Err(msg.requestDataErr));
+            defer(jsGen.Err(msg.MAIN.requestDataErr));
         } else {
             checkTimeInterval(req, 'Follow').all(function (defer2, err, value) {
                 if (value) {
-                    defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
+                    defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
                 } else {
                     defer(null, Uid);
                 }
@@ -494,9 +494,9 @@ function setUser(req, res) {
         var follow = !! req.apibody.follow;
         userCache.getP(req.session.Uid, false).then(function (defer2, user) {
             if (follow && user.followList.indexOf(Uid) >= 0) {
-                return defer(jsGen.Err(msg.userFollowed));
+                return defer(jsGen.Err(msg.USER.userFollowed));
             } else if (!follow && user.followList.indexOf(Uid) < 0) {
-                return defer(jsGen.Err(msg.userUnfollowed));
+                return defer(jsGen.Err(msg.USER.userUnfollowed));
             } else {
                 userDao.setFollow({
                     _id: req.session.Uid,
@@ -535,7 +535,7 @@ function setUser(req, res) {
 function getUsers(req, res) {
     then(function (defer) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else {
             cache.index(0, -1, defer);
         }
@@ -558,7 +558,7 @@ function getUserInfo(req, res) {
 
     then(function (defer) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else {
             userID = convertUserID(req.session.Uid);
             req.session.paginationKey = req.session.paginationKey || {};
@@ -627,14 +627,14 @@ function editUser(req, res) {
     userObj._id = req.session.Uid;
     then(function (defer) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (userObj.name) {
             if (!checkUserName(userObj.name)) {
-                defer(jsGen.Err(msg.userNameErr));
+                defer(jsGen.Err(msg.USER.userNameErr));
             } else {
                 cache.get(userObj.name, function (err, user) {
                     if (user && user._id !== req.session.Uid) {
-                        defer(jsGen.Err(msg.userNameExist));
+                        defer(jsGen.Err(msg.USER.userNameExist));
                     } else {
                         defer();
                     }
@@ -707,9 +707,9 @@ function editUsers(req, res) {
 
     then(function (defer) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else if (!userArray) {
-            defer(jsGen.Err(msg.requestDataErr));
+            defer(jsGen.Err(msg.MAIN.requestDataErr));
         } else {
             defer(null, toArray(userArray));
         }
@@ -751,17 +751,17 @@ function getReset(req, res) {
     resetObj.r = req.apibody.request;
     then(function (defer) {
         if (!resetObj.r || ['locked', 'email', 'passwd', 'role'].indexOf(resetObj.r) === -1) {
-            defer(jsGen.Err(msg.resetInvalid));
+            defer(jsGen.Err(msg.MAIN.resetInvalid));
         } else if (resetObj.r === 'email') {
             if (!req.session.Uid) {
-                defer(jsGen.Err(msg.userNeedLogin));
+                defer(jsGen.Err(msg.USER.userNeedLogin));
             } else if (!checkEmail(req.apibody.email)) {
-                defer(jsGen.Err(msg.userEmailErr));
+                defer(jsGen.Err(msg.USER.userEmailErr));
             } else {
                 resetObj.e = req.apibody.email;
                 cache.get(resetObj.e, function (err, _id) {
                     if (_id) {
-                        defer(jsGen.Err(msg.userEmailExist));
+                        defer(jsGen.Err(msg.USER.userEmailExist));
                     } else {
                         resetObj.u = req.session.Uid;
                         defer();
@@ -770,7 +770,7 @@ function getReset(req, res) {
             }
         } else if (resetObj.r === 'role') {
             if (!req.session.Uid) {
-                defer(jsGen.Err(msg.userNeedLogin));
+                defer(jsGen.Err(msg.USER.userNeedLogin));
             } else {
                 resetObj.u = req.session.Uid;
                 defer();
@@ -781,20 +781,20 @@ function getReset(req, res) {
                     defer2(null, convertUserID(req.apibody.name));
                 } else if (checkUserName(req.apibody.name)) {
                     cache.get(req.apibody.name, function (err, Uid) {
-                        defer2(Uid ? null : jsGen.Err(msg.userEmailExist), Uid);
+                        defer2(Uid ? null : jsGen.Err(msg.USER.userEmailExist), Uid);
                     });
                 } else {
-                    defer2(jsGen.Err(msg.userNameNone));
+                    defer2(jsGen.Err(msg.USER.userNameNone));
                 }
             }).then(function (defer2, Uid) {
                 cache(Uid, function (err, user) {
-                    defer2(user ? null : jsGen.Err(msg.UidNone), user);
+                    defer2(user ? null : jsGen.Err(msg.USER.UidNone), user);
                 });
             }).then(function (defer2, user) {
                 resetObj.u = user._id;
                 resetObj.e = user.email;
                 if (req.apibody.email.toLowerCase() !== resetObj.e.toLowerCase()) {
-                    defer2(jsGen.Err(msg.userEmailNotMatch));
+                    defer2(jsGen.Err(msg.USER.userEmailNotMatch));
                 } else {
                     defer();
                 }
@@ -814,11 +814,11 @@ function resetUser(req, res) {
         reset = new Buffer(req.path[3], 'base64').toString();
         reset = isJSON(reset) && JSON.parse(reset);
         if (typeof reset !== 'object' || !reset.u || !reset.r || !reset.k) {
-            defer(jsGen.Err(msg.resetInvalid));
+            defer(jsGen.Err(msg.MAIN.resetInvalid));
         } else {
             cache(reset.u, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.resetInvalid));
+                    defer(jsGen.Err(msg.MAIN.resetInvalid));
                 } else {
                     defer(null, user._id);
                 }
@@ -848,16 +848,16 @@ function resetUser(req, res) {
                     userObj.passwd = SHA256(reset.e);
                     break;
                 default:
-                    defer(jsGen.Err(msg.resetInvalid));
+                    defer(jsGen.Err(msg.MAIN.resetInvalid));
                 }
                 userObj.resetDate = now;
                 userObj.resetKey = '';
                 userDao.setUserInfo(userObj, defer);
             } else {
-                defer(jsGen.Err(msg.resetInvalid));
+                defer(jsGen.Err(msg.MAIN.resetInvalid));
             }
         } else {
-            defer(jsGen.Err(msg.resetOutdate));
+            defer(jsGen.Err(msg.MAIN.resetOutdate));
         }
     }).then(function (defer, user) {
         setCache(user);
@@ -873,7 +873,7 @@ function getArticles(req, res) {
 
     then(function (defer) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else {
             key = req.session.Uid + req.path[2];
             paginationCache.get(key, defer);
@@ -924,7 +924,7 @@ function getUsersList(req, res) {
 
     then(function (defer) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else {
             userCache.getP(req.session.Uid, false).all(defer);
         }
@@ -934,7 +934,7 @@ function getUsersList(req, res) {
         } else if (req.path[2] === 'follow') {
             list = user.followList;
         } else {
-            defer(jsGen.Err(msg.requestDataErr));
+            defer(jsGen.Err(msg.MAIN.requestDataErr));
         }
         paginationList(req, list, userCache, defer);
     }).then(function (defer, data, pagination) {
