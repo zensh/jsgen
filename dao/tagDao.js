@@ -42,6 +42,7 @@ var that = jsGen.dao.db.bind('tags', {
     },
 
     getLatestId: function (callback) {
+        callback = callback || callbackFn;
         that.findOne({}, {
             sort: {
                 _id: -1
@@ -52,7 +53,7 @@ var that = jsGen.dao.db.bind('tags', {
             fields: {
                 _id: 1
             }
-        }, wrapCallback(callback));
+        }, callback);
     },
 
     getTagsIndex: function (callback) {
