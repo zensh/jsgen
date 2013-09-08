@@ -11,6 +11,7 @@ var msg = jsGen.lib.msg,
     removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
     filterTag = jsGen.lib.tools.filterTag,
+    digestArray = jsGen.lib.tools.digestArray,
     errorHandler = jsGen.lib.tools.errorHandler,
     paginationList = jsGen.lib.tools.paginationList,
     tagDao = jsGen.dao.tag,
@@ -45,23 +46,19 @@ tagCache.getP = function (ID) {
 };
 
 
-function convertTags(IDArray) {
-    return then(function (defer) {
-        var result = [];
-        IDArray = toArray(IDArray);
-        then.each(IDArray, function (next, x) {
-            cache(x, function (err, tag) {
-                if (tag) {
-                    result.push({
-                        _id: tagDao.convertID(tag._id),
-                        tag: tag.tag,
-                        articles: tag.articles,
-                        users: tag.users
-                    });
-                }
-                return next ? next() : defer(null, result);
-            });
+function convertTags(IDArray, idd) {
+    return then.each(toArray(IDArray), function (defer, x) {
+        cache(x, function (err, tag) {
+            tag = tag && {
+                _id: tagDao.convertID(tag._id),
+                tag: tag.tag,
+                articles: tag.articles,
+                users: tag.users
+            };
+            defer(null, tag || null);
         });
+    }).all(function (defer, err, list) {
+        defer(null, digestArray(list, null));
     });
 }
 
@@ -95,13 +92,13 @@ function setTag(tagObj) {
                 }
             }).then(function (defer2, toID) {
                 tagCache.getP(tagObj._id).then(function (defer3, tag) {
-                    then.each(tag.articlesList, function (next, x) {
+                    then.each(tag.articlesList, function (defer4, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 articlesList: x
                             });
-                            jsGen.cache.list.getP(x, false).then(function (defer4, article) {
+                            jsGen.cache.list.getP(x, false).then(function (defer5, article) {
                                 removeItem(article.tagsList, tagObj._id);
                                 if (article.tagsList.indexOf(toID) < 0) {
                                     article.tagsList.push(toID);
@@ -117,16 +114,14 @@ function setTag(tagObj) {
                                 }
                             });
                         }
-                        return next ? next() : defer3(null, tag);
-                    });
-                }).then(function (defer3, tag) {
-                    then.each(tag.usersList, function (next, x) {
+                        defer4();
+                    }).each(tag.usersList, function (defer4, x) {
                         if (x) {
                             setTag({
                                 _id: toID,
                                 usersList: x
                             });
-                            jsGen.cache.user.getP(x, false).then(function (defer4, user) {
+                            jsGen.cache.user.getP(x, false).then(function (defer5, user) {
                                 removeItem(user.tagsList, tagObj._id);
                                 if (user.tagsList.indexOf(toID) < 0) {
                                     user.tagsList.push(toID);
@@ -138,9 +133,8 @@ function setTag(tagObj) {
                                 }
                             });
                         }
-                        return next ? next() : defer3(null, tag);
+                        defer4();
                     });
-                }).then(function (defer3, tag) {
                     tagDao.delTag(tagObj._id, defer3);
                 }).then(function (defer3) {
                     tagCache.remove(tagObj._id);
@@ -177,32 +171,24 @@ function setTag(tagObj) {
 }
 
 function filterTags(tagArray) {
-    return then(function (defer) {
-        var tags = [];
-
-        tagArray = toArray(tagArray);
-        then.each(tagArray, function (next, x) {
-            if (x && (x = filterTag(x))) {
-                then(function (defer2) {
-                    cache.get(x, defer2);
-                }).then(function (defer2, ID) {
-                    tags.push(ID);
-                    return next ? next() : defer(null, tags);
-                }, function (defer2, err) {
-                    tagDao.setNewTag({
-                        tag: x
-                    }, function (err, tag) {
-                        if (tag) {
-                            tags.push(tag._id);
-                            cache.update(tag);
-                        }
-                        return next ? next() : defer(null, tags);
-                    });
+    return then.each(toArray(tagArray), function (defer, x) {
+        if (x && (x = filterTag(x))) {
+            then(function (defer2) {
+                cache.get(x, defer2);
+            }).then(function (defer2, ID) {
+                defer(null, ID);
+            }, function (defer2, err) {
+                tagDao.setNewTag({
+                    tag: x
+                }, function (err, tag) {
+                    defer(null, tag ? (cache.update(tag), tag._id) : null);
                 });
-            } else {
-                return next ? next() : defer(null, tags);
-            }
-        });
+            });
+        } else {
+            defer(null, null);
+        }
+    }).then(function (defer, IDArray) {
+        defer(null, digestArray(IDArray, null));
     });
 }
 
@@ -285,8 +271,7 @@ function editTags(req, res) {
         } else {
             defer(null, toArray(req.apibody.data));
         }
-    }).then(function (defer, list) {
-        then.each(list, function (next, x) {
+    }).each(null, function (defer, x) {
             x = intersect(union(defaultObj), x);
             x._id = tagDao.convertID(x._id);
             setTag(x).all(function (defer, err, tag) {
@@ -296,9 +281,10 @@ function editTags(req, res) {
                     delete tag.usersList;
                     result[tag._id] = tag;
                 }
-                return next ? next() : res.sendjson(resJson(null, result));
+                defer();
             });
-        });
+    }).then(function (defer) {
+        res.sendjson(resJson(null, result));
     }).fail(res.throwError);
 }
 

@@ -123,8 +123,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genModal', ['getFile', '$timeout', 'isVisible',
-    function (getFile, $timeout, isVisible) {
+]).directive('genModal', ['getFile', '$timeout',
+    function (getFile, $timeout) {
         //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
@@ -171,10 +171,6 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
                     if (value) {
                         $timeout(resize);
                     }
-                }
-
-                if (!isVisible(element)) {
-                    return;
                 }
 
                 options.cancelFn = options.cancelFn || true;

@@ -37,9 +37,9 @@ factory('tools', function () {
     }
 
     function isEmpty(obj) {
-        for (var key in obj) {
-            if (hasOwn(obj, key)) {
-                return false;
+        if (obj) {
+            for (var key in obj) {
+                return !hasOwn(obj, key);
             }
         }
         return true;

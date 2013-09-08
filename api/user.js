@@ -18,6 +18,7 @@ var msg = jsGen.lib.msg,
     removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
     checkEmail = jsGen.lib.tools.checkEmail,
+    digestArray = jsGen.lib.tools.digestArray,
     checkUserID = jsGen.lib.tools.checkUserID,
     errorHandler = jsGen.lib.tools.errorHandler,
     checkUserName = jsGen.lib.tools.checkUserName,
@@ -83,7 +84,6 @@ userCache.getP = function (Uid, convert) {
 function convertUsers(UidArray, mode) {
     return then(function (defer) {
         var result = [];
-
         UidArray = toArray(UidArray);
         if (mode === 'Uid') {
             each(UidArray, function (x) {
@@ -91,18 +91,18 @@ function convertUsers(UidArray, mode) {
             });
             defer(null, result);
         } else {
-            then.each(UidArray, function (next, x) {
+            then.each(UidArray, function (defer2, x) {
                 cache(x, function (err, user) {
-                    if (user) {
-                        result.push({
-                            _id: convertUserID(user._id),
-                            name: user.name,
-                            avatar: user.avatar,
-                            score: user.score
-                        });
-                    }
-                    return next ? next() : defer(null, result);
+                    user = user && {
+                        _id: convertUserID(user._id),
+                        name: user.name,
+                        avatar: user.avatar,
+                        score: user.score
+                    };
+                    defer2(err, user || null);
                 });
+            }).all(function (defer2, err, users) {
+                defer(err, digestArray(users, null));
             });
         }
     }).fail(errorHandler);
@@ -117,17 +117,15 @@ function calcuScore(user) {
     user.score += UsersScore[3] * (+user.fans);
     user.score += UsersScore[5] * Math.floor((Date.now() - user.date) / 86400000);
 
-    return then(function (defer) {
-        then.each(user.articlesList, function (next, x) {
-            then(function (defer2) {
-                redis.articleCache(x, defer2);
-            }).all(function (defer2, err, article) {
-                if (article) {
-                    user.score += UsersScore[+(article.status !== -1)];
-                    user.score += UsersScore[4] * (+article.hots);
-                }
-                return next ? next() : defer();
-            });
+    return then.each(user.articlesList, function (defer, x) {
+        then(function (defer2) {
+            redis.articleCache(x, defer2);
+        }).all(function (defer2, err, article) {
+            if (article) {
+                user.score += UsersScore[+(article.status !== -1)];
+                user.score += UsersScore[4] * (+article.hots);
+            }
+            defer();
         });
     }).then(function (defer) {
         user.score = Math.round(user.score);
@@ -449,21 +447,20 @@ function getUser(req, res) {
                     defer2(null, list, userCache);
                 } else {
                     list = [];
-                    then.each(user.articlesList.reverse(), function (next, ID) {
-                        then(function (defer3) {
-                            redis.articleCache(ID, defer3);
-                        }).then(function (defer3, article) {
-                            if (article.status > -1 && article.display === 0) {
-                                list.push(ID);
-                            }
-                            defer3(true);
-                        }).fail(function () {
-                            return next ? next() : (paginationCache.put(key, list), defer2(null, list, jsGen.cache.list));
+                    then.each(user.articlesList.reverse(), function (defer3, ID) {
+                        then(function (defer4) {
+                            redis.articleCache(ID, defer4);
+                        }).all(function (defer4, err, article) {
+                            defer3(null, article && article.status > -1 && article.display === 0 ? ID : null);
                         });
+                    }).all(function (defer3, err, list) {
+                        digestArray(list, null);
+                        paginationCache.put(key, list);
+                        defer2(null, list, jsGen.cache.list);
                     });
                 }
             } else {
-                defer2(null, list, jsGen.cache.list);
+                defer2(null, list, req.path[3] === 'fans' ? userCache : jsGen.cache.list);
             }
         }).then(function (defer2, list, listCache) {
             paginationList(req, list, listCache, defer2);
@@ -571,22 +568,20 @@ function getUserInfo(req, res) {
         if (!list || p === 1) {
             then(function (defer2) {
                 redis.articleCache.updateList(0, -1, defer2);
-            }).then(function (defer2, updateList) {
-                list = [];
-                then.each(updateList, function (next, x) {
-                    jsGen.cache.list.getP(x, false).then(function (defer3, article) {
-                        if (req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0 || user.tagsList.some(function (x) {
-                            if (article.tagsList.indexOf(x) >= 0) {
-                                return true;
-                            }
-                        })) {
-                            list.push(x);
+            }).each(null, function (defer2, x) {
+                jsGen.cache.list.getP(x, false).all(function (defer3, err, article) {
+                    var ok = article && req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0;
+                    ok = ok && user.tagsList.some(function (x) {
+                        if (article.tagsList.indexOf(x) >= 0) {
+                            return true;
                         }
-                        defer3(true);
-                    }).fail(function () {
-                        return next ? next() : (paginationCache.put(req.session.paginationKey.home, list), defer(null, list));
                     });
+                    defer2(err, ok ? x : null);
                 });
+            }).then(function (defer2, list) {
+                digestArray(list, null);
+                paginationCache.put(req.session.paginationKey.home, list);
+                defer(null, list);
             }).fail(defer);
         } else {
             defer(null, list);
@@ -702,8 +697,7 @@ function editUsers(req, res) {
         locked: false,
         role: 0
     },
-        userArray = req.apibody.data,
-        result = [];
+        userArray = req.apibody.data;
 
     then(function (defer) {
         if (req.session.role !== 5) {
@@ -713,36 +707,35 @@ function editUsers(req, res) {
         } else {
             defer(null, toArray(userArray));
         }
-    }).then(function (defer, userArray) {
-        then.each(userArray, function (next, user) {
-            var userID;
-
-            then(function (defer2) {
-                user = intersect(union(defaultObj), user);
-                if (!user._id) {
-                    defer2(true);
-                } else {
-                    userID = user._id;
-                    user._id = convertUserID(userID);
-                    cache(user._id, defer2);
-                }
-            }).then(function (defer2) {
-                user.role = Math.floor(user.role || -1);
-                if (user.role < 0 || user.role > 5) {
-                    delete user.role;
-                }
-                userDao.setUserInfo(user, defer2);
-            }).then(function (defer2, user) {
-                setCache(user);
-                var data = intersect(union(UserPublicTpl), user);
-                data.email = user.email;
-                data._id = userID;
-                result.push(data);
+    }).each(null, function (defer, user) {
+        var userID;
+        then(function (defer2) {
+            user = intersect(union(defaultObj), user);
+            if (!user._id) {
                 defer2(true);
-            }).fail(function () {
-                return next ? next() : res.sendjson(resJson(null, result));
-            });
+            } else {
+                userID = user._id;
+                user._id = convertUserID(userID);
+                cache(user._id, defer2);
+            }
+        }).then(function (defer2) {
+            user.role = Math.floor(user.role || -1);
+            if (user.role < 0 || user.role > 5) {
+                delete user.role;
+            }
+            userDao.setUserInfo(user, defer2);
+        }).then(function (defer2, user) {
+            setCache(user);
+            var data = intersect(union(UserPublicTpl), user);
+            data.email = user.email;
+            data._id = userID;
+            defer(null, data);
+        }).fail(function () {
+            defer(null, null);
         });
+    }).then(function (defer, users) {
+        digestArray(users, null);
+        res.sendjson(resJson(null, users));
     }).fail(res.throwError);
 }
 
@@ -891,22 +884,24 @@ function getArticles(req, res) {
             }).then(function (defer2, user) {
                 var articlesList = [],
                     commentsList = [];
-                then.each(user.articlesList, function (next, x) {
-                    jsGen.cache.list.getP(x, false).then(function (defer3, article) {
-                        if (article.status > -1) {
-                            articlesList.push(x);
-                        } else {
-                            commentsList.push(x);
+                then.each(user.articlesList, function (defer3, x) {
+                    jsGen.cache.list.getP(x, false).then(function (defer4, article) {
+                        if (article) {
+                            if (article.status > -1) {
+                                articlesList.push(x);
+                            } else {
+                                commentsList.push(x);
+                            }
                         }
-                        defer3(true);
-                    }).fail(function () {
-                        return next ? next() : defer2(null, articlesList.reverse(), commentsList.reverse());
+                        defer3();
+                    }, function () {
+                        defer3();
                     });
+                }).all(function (defer3) {
+                    paginationCache.put(req.session.Uid + 'article', articlesList);
+                    paginationCache.put(req.session.Uid + 'comment', commentsList);
+                    defer(null, req.path[2] === 'article' ? articlesList : commentsList);
                 });
-            }).then(function (defer2, articlesList, commentsList) {
-                paginationCache.put(req.session.Uid + 'article', articlesList);
-                paginationCache.put(req.session.Uid + 'comment', commentsList);
-                defer(null, req.path[2] === 'article' ? articlesList : commentsList);
             }).fail(defer);
         } else {
             defer(null, list);

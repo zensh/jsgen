@@ -15,6 +15,7 @@ var msg = jsGen.lib.msg,
     checkUrl = jsGen.lib.tools.checkUrl,
     removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
+    digestArray = jsGen.lib.tools.digestArray,
     filterTitle = jsGen.lib.tools.filterTitle,
     errorHandler = jsGen.lib.tools.errorHandler,
     filterSummary = jsGen.lib.tools.filterSummary,
@@ -177,7 +178,7 @@ listCache.getP = function (ID, convert) {
         if (convert !== false) {
             userAPI.convertUsers(article.author).then(function (defer2, userList) {
                 article.author = userList[0];
-                tagAPI.convertTags(article.tagsList).all(defer2);
+                tagAPI.convertTags(article.tagsList, ID).all(defer2);
             }).then(function (defer2, tagsList) {
                 article.tagsList = tagsList;
                 convertRefer(article.refer).all(defer2);
@@ -202,18 +203,14 @@ function convertArticlesID(IDArray) {
 }
 
 function convertArticles(IDArray, mode) {
-    return then(function (defer) {
-        var result = [],
-            dataCache = mode === 'comment' ? commentCache : listCache;
+    var dataCache = mode === 'comment' ? commentCache : listCache;
 
-        then.each(toArray(IDArray), function (next, ID) {
-            dataCache.getP(ID).all(function (defer2, err, article) {
-                if (article) {
-                    result.push(article);
-                }
-                return next ? next() : defer(null, result);
-            });
+    return then.each(toArray(IDArray), function (defer, ID) {
+        dataCache.getP(ID).all(function (defer2, err, article) {
+            defer(null, article || null);
         });
+    }).then(function (defer, list) {
+        defer(null, digestArray(list, null));
     });
 }
 
@@ -634,32 +631,23 @@ function getArticle(req, res) {
 }
 
 function getComments(req, res) {
-    then(function (defer) {
-        var IDArray = [];
-
-        then.each(toArray(req.apibody.data), function (next, ID) {
-            if (checkID(ID, 'A')) {
-                cache(convertArticleID(ID), function (err, article) {
-                    if (article && article.status === -1 && article.display === 0) {
-                        IDArray.push(article._id);
-                    }
-                    return next ? next() : defer(null, IDArray);
-                });
-            } else {
-                return next ? next() : defer(null, IDArray);
-            }
-        });
-    }).then(function (defer, IDArray) {
-        var result = [];
-
-        then.each(IDArray, function (next, ID) {
-            commentCache.getP(ID).all(function (defer2, err, article) {
-                if (article) {
-                    result.push(article);
-                }
-                return next ? next() : res.sendjson(resJson(null, result));
+    then.each(toArray(req.apibody.data), function (defer, ID) {
+        if (checkID(ID, 'A')) {
+            cache(convertArticleID(ID), function (err, article) {
+                defer(null, article && article.status === -1 && article.display === 0 ? article._id : null);
             });
+        } else {
+            defer(null, null);
+        }
+    }).then(function (defer, IDArray) {
+        defer(null, digestArray(IDArray, null));
+    }).each(null, function (defer, ID) {
+        commentCache.getP(ID).all(function (defer2, err, article) {
+            defer(null, article || null);
         });
+    }).then(function (defer, comments) {
+        digestArray(comments, null);
+        res.sendjson(resJson(null, comments));
     }).fail(res.throwError);
 }
 
@@ -840,36 +828,31 @@ function robot(req, res) {
 }
 
 function sitemap(req, res) {
+
+    function toSiteMap(article) {
+        return {
+            url: jsGenConfig.url + '/' + convertArticleID(article._id),
+            date: new Date(article.updateTime).toISOString(),
+            freq: 'daily', // always hourly daily weekly monthly yearly never
+            priority: 0.8
+        };
+    }
+
     then(function (defer) {
         cache.index(0, -1, defer);
+    }).each(null, function (defer, ID) {
+        then(function (defer2) {
+            cache(ID, defer2);
+        }).all(function (defer2, err, article) {
+            defer(null, article && article.display <= 1 ? toSiteMap(article) : null);
+        });
     }).then(function (defer, list) {
-        var data = [{
+        list.unshift({
             url: jsGenConfig.url,
             date: new Date().toISOString(),
             freq: 'hourly', // always hourly daily weekly monthly yearly never
             priority: 1
-        }];
-
-        function toSiteMap(article) {
-            return {
-                url: jsGenConfig.url + '/' + convertArticleID(article._id),
-                date: new Date(article.updateTime).toISOString(),
-                freq: 'daily', // always hourly daily weekly monthly yearly never
-                priority: 0.8
-            };
-        }
-
-        then.each(list, function (next, ID) {
-            then(function (defer2) {
-                cache(ID, defer2);
-            }).all(function (defer2, err, article) {
-                if (article && article.display <= 1) {
-                    data.push(toSiteMap(article));
-                }
-                return next ? next() : defer(null, data);
-            });
         });
-    }).then(function (defer, list) {
         res.compiletemp('/sitemap.ejs', {
             sitemap: list
         }, defer);
