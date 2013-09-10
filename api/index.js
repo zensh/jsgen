@@ -99,7 +99,7 @@ function getGlobal(req, res) {
             };
             jsGenCache.pagination.info(defer);
         } else {
-            defer(null, jsGen.Err(msg.userRoleErr));
+            defer(null, jsGen.Err(msg.USER.userRoleErr));
         }
     }).then(function (defer, info) {
         config.sys.pagination = info;
@@ -125,20 +125,20 @@ function setGlobal(req, res) {
 
     then(function (defer) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         }
         if (setObj.domain && !checkUrl(setObj.domain)) {
-            defer(jsGen.Err(msg.globalDomainErr));
+            defer(jsGen.Err(msg.MAIN.globalDomainErr));
         }
         if (setObj.url) {
             if (!checkUrl(setObj.url)) {
-                defer(jsGen.Err(msg.globalUrlErr));
+                defer(jsGen.Err(msg.MAIN.globalUrlErr));
             } else {
                 setObj.url = setObj.url.replace(/(\/)+$/, '');
             }
         }
         if (setObj.email && !checkEmail(setObj.email)) {
-            defer(jsGen.Err(msg.globalEmailErr));
+            defer(jsGen.Err(msg.MAIN.globalEmailErr));
         }
         if (setObj.TimeInterval && setObj.TimeInterval < 5) {
             setObj.TimeInterval = 5;

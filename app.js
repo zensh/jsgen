@@ -11,7 +11,7 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.6.4';
+jsGen.version = '0.6.5';
 
 serverDm.on('error', function (err) {
     delete err.domain;
@@ -144,7 +144,7 @@ serverDm.run(function () {
                         res.sendjson(resJson(err));
                     } else {
                         jsGen.serverlog.error(err);
-                        res.sendjson(resJson(jsGen.Err(jsGen.lib.msg.requestDataErr)));
+                        res.sendjson(resJson(jsGen.Err(jsGen.lib.msg.MAIN.requestDataErr)));
                     }
                 } catch (error) {
                     delete error.domain;
@@ -185,7 +185,7 @@ serverDm.run(function () {
             }
 
             res.throwError = function (defer, err) { // 处理then.js捕捉的错误
-                if (typeof err !== 'object') {
+                if (!util.isError(err)) {
                     err = jsGen.Err(err);
                 }
                 errHandler(err, res, dm);

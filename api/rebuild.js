@@ -73,7 +73,7 @@ module.exports = {
         var that = this;
         then(function (defer) {
             if (req.session.role !== 5) {
-                defer(jsGen.Err(jsGen.lib.msg.userRoleErr));
+                defer(jsGen.Err(jsGen.lib.msg.USER.userRoleErr));
             } else if (['user', 'tag', 'article'].indexOf(req.path[2]) >= 0) {
                 that[req.path[2]].then(function (defer2, num) {
                     return res.sendjson(resJson(null, {
@@ -81,7 +81,7 @@ module.exports = {
                     }));
                 }).fail(defer);
             } else {
-                defer(jsGen.Err(jsGen.lib.msg.resetInvalid));
+                defer(jsGen.Err(jsGen.lib.msg.MAIN.resetInvalid));
             }
         }).fail(res.throwError);
     }

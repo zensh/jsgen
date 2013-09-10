@@ -124,7 +124,8 @@ var that = jsGen.dao.db.bind('users', {
                 resetKey: 0,
                 resetDate: 0,
                 loginAttempts: 0,
-                login: 0
+                login: 0,
+                allmsg: 0
             }
         }, wrapCallback(callback));
     },
@@ -410,82 +411,40 @@ var that = jsGen.dao.db.bind('users', {
     },
 
     setMessages: function (userObj) {
-        var setObj = {
-            $set: {
-                'messages.article': 0,
-                'messages.collection': 0,
-                'messages.comment': 0,
-                'messages.fan': 0,
-                'messages.receive': 0
-            },
-            $push: {
-                'messages.article': 0,
-                'messages.collection': 0,
-                'messages.comment': 0,
-                'messages.fan': 0,
-                'messages.receive': 0
-            }
-        },
+        var setObj = {},
             newObj = {
-                messages: {
-                    article: 0,
-                    collection: 0,
-                    comment: 0,
-                    fan: 0,
-                    receive: 0
-                }
+                unread: {},
+                allmsg: {}
             };
 
         newObj = intersect(newObj, userObj);
-        if (newObj.messages.article === 0) {
-            setObj.$set['messages.article'] = [];
+        setObj.$push = {
+            unread: newObj.unread,
+            allmsg: newObj.allmsg
+        };
+
+        that.update({
+            _id: userObj._id
+        }, setObj);
+    },
+
+    delMessages: function (userObj) {
+        var setObj = {},
+            newObj = {
+                unread: {},
+                allmsg: {}
+            };
+
+        newObj = intersect(newObj, userObj);
+        if (newObj.receiveList < 0) {
+            newObj.receiveList = -newObj.receiveList;
+            setObj.$pull = {
+                receiveList: newObj.receiveList
+            };
         } else {
-            delete setObj.$set['messages.article'];
-        }
-        if (newObj.messages.article > 0) {
-            setObj.$push['messages.article'] = newObj.messages.article;
-        } else {
-            delete setObj.$push['messages.article'];
-        }
-        if (newObj.messages.collection === 0) {
-            setObj.$set['messages.collection'] = [];
-        } else {
-            delete setObj.$set['messages.collection'];
-        }
-        if (newObj.messages.collection > 0) {
-            setObj.$push['messages.collection'] = newObj.messages.collection;
-        } else {
-            delete setObj.$push['messages.collection'];
-        }
-        if (newObj.messages.comment === 0) {
-            setObj.$set['messages.comment'] = [];
-        } else {
-            delete setObj.$set['messages.comment'];
-        }
-        if (newObj.messages.comment > 0) {
-            setObj.$push['messages.comment'] = newObj.messages.comment;
-        } else {
-            delete setObj.$push['messages.comment'];
-        }
-        if (newObj.messages.fan === 0) {
-            setObj.$set['messages.fan'] = [];
-        } else {
-            delete setObj.$set['messages.fan'];
-        }
-        if (newObj.messages.fan > 0) {
-            setObj.$push['messages.fan'] = newObj.messages.fan;
-        } else {
-            delete setObj.$push['messages.fan'];
-        }
-        if (newObj.messages.receive === 0) {
-            setObj.$set['messages.receive'] = [];
-        } else {
-            delete setObj.$set['messages.receive'];
-        }
-        if (newObj.messages.receive > 0) {
-            setObj.$push['messages.receive'] = newObj.messages.receive;
-        } else {
-            delete setObj.$push['messages.receive'];
+            setObj.$push = {
+                receiveList: newObj.receiveList
+            };
         }
 
         that.update({

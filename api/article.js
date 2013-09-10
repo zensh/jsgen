@@ -15,6 +15,7 @@ var msg = jsGen.lib.msg,
     checkUrl = jsGen.lib.tools.checkUrl,
     removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
+    digestArray = jsGen.lib.tools.digestArray,
     filterTitle = jsGen.lib.tools.filterTitle,
     errorHandler = jsGen.lib.tools.errorHandler,
     filterSummary = jsGen.lib.tools.filterSummary,
@@ -49,7 +50,7 @@ articleCache.getP = function (ID, convert) {
                 articleDao.getArticle(ID, defer);
             }
         } else {
-            defer(jsGen.Err(msg.articleNone));
+            defer(jsGen.Err(msg.ARTICLE.articleNone));
         }
     }).then(function (defer, article) {
         if (!inCache) {
@@ -112,7 +113,7 @@ commentCache.getP = function (ID, convert) {
                 articleDao.getArticle(ID, defer);
             }
         } else {
-            defer(jsGen.Err(msg.articleNone));
+            defer(jsGen.Err(msg.ARTICLE.articleNone));
         }
     }).then(function (defer, article) {
         if (!inCache) {
@@ -165,7 +166,7 @@ listCache.getP = function (ID, convert) {
                 articleDao.getArticle(ID, defer);
             }
         } else {
-            defer(jsGen.Err(msg.articleNone));
+            defer(jsGen.Err(msg.ARTICLE.articleNone));
         }
     }).then(function (defer, article) {
         if (!inCache) {
@@ -177,7 +178,7 @@ listCache.getP = function (ID, convert) {
         if (convert !== false) {
             userAPI.convertUsers(article.author).then(function (defer2, userList) {
                 article.author = userList[0];
-                tagAPI.convertTags(article.tagsList).all(defer2);
+                tagAPI.convertTags(article.tagsList, ID).all(defer2);
             }).then(function (defer2, tagsList) {
                 article.tagsList = tagsList;
                 convertRefer(article.refer).all(defer2);
@@ -202,18 +203,14 @@ function convertArticlesID(IDArray) {
 }
 
 function convertArticles(IDArray, mode) {
-    return then(function (defer) {
-        var result = [],
-            dataCache = mode === 'comment' ? commentCache : listCache;
+    var dataCache = mode === 'comment' ? commentCache : listCache;
 
-        then.each(toArray(IDArray), function (next, ID) {
-            dataCache.getP(ID).all(function (defer2, err, article) {
-                if (article) {
-                    result.push(article);
-                }
-                return next ? next() : defer(null, result);
-            });
+    return then.each(toArray(IDArray), function (defer, ID) {
+        dataCache.getP(ID).all(function (defer2, err, article) {
+            defer(null, article || null);
         });
+    }).then(function (defer, list) {
+        defer(null, digestArray(list, null));
     });
 }
 
@@ -281,10 +278,10 @@ function filterArticle(articleObj) {
 
         intersect(newObj, articleObj);
         if (!(newObj.title = filterTitle(newObj.title))) {
-            return defer(jsGen.Err(msg.titleMinErr));
+            return defer(jsGen.Err(msg.ARTICLE.titleMinErr));
         }
         if (!(newObj.content = filterContent(newObj.content))) {
-            return defer(jsGen.Err(msg.articleMinErr));
+            return defer(jsGen.Err(msg.ARTICLE.articleMinErr));
         }
         if (newObj.cover && !checkUrl(newObj.cover)) {
             delete newObj.cover;
@@ -340,7 +337,7 @@ function getArticleID(req) {
         }
         cache(ID, defer);
     }).fail(function (defer) {
-        defer(jsGen.Err(msg.articleNone));
+        defer(jsGen.Err(msg.ARTICLE.articleNone));
     });
 }
 
@@ -349,7 +346,7 @@ function addComment(req, ID) {
     return then(function (defer) {
         checkTimeInterval(req, 'AddComment').all(function (defer2, err, value) {
             if (value) {
-                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
                 filterArticle(req.apibody).all(defer);
             }
@@ -433,14 +430,14 @@ function editArticle(req, ID) {
     return then(function (defer) {
         checkTimeInterval(req, 'EditArticle').all(function (defer2, err, value) {
             if (value) {
-                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
                 articleCache.getP(ID, false).all(defer);
             }
         });
     }).then(function (defer, article) {
         if (req.session.Uid !== article.author && req.session.role < 4) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else {
             filterArticle(req.apibody).all(defer);
         }
@@ -463,7 +460,7 @@ function setMark(req, ID) {
     return then(function (defer) {
         checkTimeInterval(req, 'SetMark').all(function (defer2, err, value) {
             if (value) {
-                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
                 articleCache.getP(ID, false).all(defer);
             }
@@ -471,9 +468,9 @@ function setMark(req, ID) {
     }).then(function (defer, article) {
         var index = article.markList.indexOf(req.session.Uid);
         if (mark && index >= 0) {
-            defer(jsGen.Err(msg.userMarked));
+            defer(jsGen.Err(msg.USER.userMarked));
         } else if (!mark && index < 0) {
-            defer(jsGen.Err(msg.userUnmarked));
+            defer(jsGen.Err(msg.USER.userUnmarked));
         } else {
             articleDao.setMark({
                 _id: ID,
@@ -515,7 +512,7 @@ function setFavor(req, ID) {
     return then(function (defer) {
         checkTimeInterval(req, 'SetFavor').all(function (defer2, err, value) {
             if (value) {
-                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
                 articleCache.getP(ID, false).all(defer);
             }
@@ -523,9 +520,9 @@ function setFavor(req, ID) {
     }).then(function (defer, article) {
         var index = article.favorsList.indexOf(req.session.Uid);
         if (favor && index >= 0) {
-            defer(jsGen.Err(msg.userFavor));
+            defer(jsGen.Err(msg.USER.userFavor));
         } else if (!favor && index < 0) {
-            defer(jsGen.Err(msg.userUnoppose));
+            defer(jsGen.Err(msg.USER.userUnoppose));
         } else {
             articleDao.setFavor({
                 _id: ID,
@@ -561,7 +558,7 @@ function setOppose(req, ID) {
     return then(function (defer) {
         checkTimeInterval(req, 'SetOppose').all(function (defer2, err, value) {
             if (value) {
-                defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
             } else {
                 articleCache.getP(ID, false).all(defer);
             }
@@ -569,9 +566,9 @@ function setOppose(req, ID) {
     }).then(function (defer, article) {
         var index = article.opposesList.indexOf(req.session.Uid);
         if (oppose && index >= 0) {
-            defer(jsGen.Err(msg.userOppose));
+            defer(jsGen.Err(msg.USER.userOppose));
         } else if (!oppose && index < 0) {
-            defer(jsGen.Err(msg.userUnfavor));
+            defer(jsGen.Err(msg.USER.userUnfavor));
         } else {
             articleDao.setOppose({
                 _id: ID,
@@ -604,11 +601,11 @@ function setOppose(req, ID) {
 function getArticle(req, res) {
     getArticleID(req).then(function (defer, article) {
         if (article.display > 0 && !req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (article.display === 1 && (article.author !== req.session.Uid || req.session.role < 4)) {
-            defer(jsGen.Err(msg.articleDisplay1));
+            defer(jsGen.Err(msg.ARTICLE.articleDisplay1));
         } else if (article.display === 2 && req.session.role !== 5) {
-            defer(jsGen.Err(msg.articleDisplay2));
+            defer(jsGen.Err(msg.ARTICLE.articleDisplay2));
         } else {
             articleCache.getP(article._id).all(defer);
         }
@@ -634,32 +631,23 @@ function getArticle(req, res) {
 }
 
 function getComments(req, res) {
-    then(function (defer) {
-        var IDArray = [];
-
-        then.each(toArray(req.apibody.data), function (next, ID) {
-            if (checkID(ID, 'A')) {
-                cache(convertArticleID(ID), function (err, article) {
-                    if (article && article.status === -1 && article.display === 0) {
-                        IDArray.push(article._id);
-                    }
-                    return next ? next() : defer(null, IDArray);
-                });
-            } else {
-                return next ? next() : defer(null, IDArray);
-            }
-        });
-    }).then(function (defer, IDArray) {
-        var result = [];
-
-        then.each(IDArray, function (next, ID) {
-            commentCache.getP(ID).all(function (defer2, err, article) {
-                if (article) {
-                    result.push(article);
-                }
-                return next ? next() : res.sendjson(resJson(null, result));
+    then.each(toArray(req.apibody.data), function (defer, ID) {
+        if (checkID(ID, 'A')) {
+            cache(convertArticleID(ID), function (err, article) {
+                defer(null, article && article.status === -1 && article.display === 0 ? article._id : null);
             });
+        } else {
+            defer(null, null);
+        }
+    }).then(function (defer, IDArray) {
+        defer(null, digestArray(IDArray, null));
+    }).each(null, function (defer, ID) {
+        commentCache.getP(ID).all(function (defer2, err, article) {
+            defer(null, article || null);
         });
+    }).then(function (defer, comments) {
+        digestArray(comments, null);
+        res.sendjson(resJson(null, comments));
     }).fail(res.throwError);
 }
 
@@ -691,13 +679,13 @@ function getList(req, res, type) {
 function addArticle(req, res) {
     then(function (defer) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (req.session.role < 2) {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         } else {
             checkTimeInterval(req, 'AddArticle').all(function (defer2, err, value) {
                 if (value) {
-                    defer(jsGen.Err(msg.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
+                    defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGenConfig.TimeInterval + 's]'));
                 } else {
                     defer();
                 }
@@ -725,6 +713,10 @@ function addArticle(req, res) {
             });
         });
         cache.update(article);
+        userCache.update(req.session.Uid, function (user) {
+            user.articlesList.push(article._id);
+            return user;
+        });
         articleCache.put(article._id, article);
         jsGenConfig.articles = 1;
         checkTimeInterval(req, 'AddArticle', true);
@@ -739,13 +731,13 @@ function setArticle(req, res) {
 
     getArticleID(req).then(function (defer, article) {
         if (req.session.role < 1) {
-            defer(jsGen.Err(msg.userRole0));
+            defer(jsGen.Err(msg.USER.userRole0));
         } else if (article.display > 0 && !req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (article.display === 1 && (article.author !== req.session.Uid || req.session.role < 4)) {
-            defer(jsGen.Err(msg.articleDisplay1));
+            defer(jsGen.Err(msg.ARTICLE.articleDisplay1));
         } else if (article.display === 2 && req.session.role !== 5) {
-            defer(jsGen.Err(msg.articleDisplay2));
+            defer(jsGen.Err(msg.ARTICLE.articleDisplay2));
         } else {
             defer(null, article);
         }
@@ -771,7 +763,7 @@ function setArticle(req, res) {
                 return res.sendjson(resJson(null, oppose));
             }).fail(defer);
         } else {
-            defer(jsGen.Err(msg.requestDataErr));
+            defer(jsGen.Err(msg.MAIN.requestDataErr));
         }
     }).fail(res.throwError);
 }
@@ -840,36 +832,31 @@ function robot(req, res) {
 }
 
 function sitemap(req, res) {
+
+    function toSiteMap(article) {
+        return {
+            url: jsGenConfig.url + '/' + convertArticleID(article._id),
+            date: new Date(article.updateTime).toISOString(),
+            freq: 'daily', // always hourly daily weekly monthly yearly never
+            priority: 0.8
+        };
+    }
+
     then(function (defer) {
         cache.index(0, -1, defer);
+    }).each(null, function (defer, ID) {
+        then(function (defer2) {
+            cache(ID, defer2);
+        }).all(function (defer2, err, article) {
+            defer(null, article && article.display <= 1 ? toSiteMap(article) : null);
+        });
     }).then(function (defer, list) {
-        var data = [{
+        list.unshift({
             url: jsGenConfig.url,
             date: new Date().toISOString(),
             freq: 'hourly', // always hourly daily weekly monthly yearly never
             priority: 1
-        }];
-
-        function toSiteMap(article) {
-            return {
-                url: jsGenConfig.url + '/' + convertArticleID(article._id),
-                date: new Date(article.updateTime).toISOString(),
-                freq: 'daily', // always hourly daily weekly monthly yearly never
-                priority: 0.8
-            };
-        }
-
-        then.each(list, function (next, ID) {
-            then(function (defer2) {
-                cache(ID, defer2);
-            }).all(function (defer2, err, article) {
-                if (article && article.display <= 1) {
-                    data.push(toSiteMap(article));
-                }
-                return next ? next() : defer(null, data);
-            });
         });
-    }).then(function (defer, list) {
         res.compiletemp('/sitemap.ejs', {
             sitemap: list
         }, defer);
@@ -882,14 +869,14 @@ function sitemap(req, res) {
 function deleteArticle(req, res) {
     getArticleID(req).then(function (defer, article) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.userNeedLogin));
+            defer(jsGen.Err(msg.USER.userNeedLogin));
         } else if (article.display > 1 && req.session.role !== 5) {
-            defer(jsGen.Err(msg.articleDisplay2));
+            defer(jsGen.Err(msg.ARTICLE.articleDisplay2));
         } else {
             listCache.getP(article._id, false).all(defer);
         }
     }, function (defer, err) {
-        defer(jsGen.Err(msg.articleNone));
+        defer(jsGen.Err(msg.ARTICLE.articleNone));
     }).then(function (defer, article) {
         if (req.session.Uid === article.author || req.session.role >= 4) {
             article.display = 2;
@@ -913,7 +900,7 @@ function deleteArticle(req, res) {
             userCache.remove(article.author);
             return res.sendjson(resJson());
         } else {
-            defer(jsGen.Err(msg.userRoleErr));
+            defer(jsGen.Err(msg.USER.userRoleErr));
         }
     }).fail(res.throwError);
 }
