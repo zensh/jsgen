@@ -67,7 +67,7 @@ var that = jsGen.dao.db.bind('collections', {
                 date: {
                     $gt: date
                 }
-            }
+            };
         }
         that.find(query, {
             sort: {
@@ -163,7 +163,7 @@ var that = jsGen.dao.db.bind('collections', {
                 subsection: [{
                     title: '',
                     summary: '',
-                    topics: []
+                    articles: []
                 }],
                 articles: 0,
                 comment: true

@@ -4,7 +4,7 @@
             <div class="article-header">
                 <h3>{{article.title}} <small><a ng-show="global.isEditor" ng-click="highlight(article)" ng-class="{info:article.status<2,warning:article.status==2}"><i class="icon-hand-up"></i>{{article.status==2 | switch:'highlight'}}</a></small></h3>
                 <div class="article-info">
-                    <a ng-href="{{article.refer.url[0]=='/'?('#'+article.refer.url):article.refer.url}}" title="原文"><i class="icon-external-link-sign success"></i>{{article.refer.url | cutText:25}}</a>
+                    <a ng-href="{{article.refer.url}}" title="原文"><i class="icon-external-link-sign success"></i>{{article.refer.url | cutText:25}}</a>
                     <i class="icon-time" data-original-title="{{article.date | formatDate:true}}发布" gen-tooltip> {{article.date | formatDate}}</i>
                     <i class="icon-refresh" data-original-title="{{article.updateTime | formatDate:true}}更新" gen-tooltip> {{article.updateTime | formatDate}}</i>
                     <i class="icon-eye-open" data-original-title="访问{{article.visitors}}次" gen-tooltip> {{article.visitors}}</i>

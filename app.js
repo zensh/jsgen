@@ -11,7 +11,7 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.6.2-dev';
+jsGen.version = '0.6.5-dev';
 
 serverDm.on('error', function (err) {
     delete err.domain;

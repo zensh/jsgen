@@ -23,7 +23,7 @@
                 <label>文章来源
                     <span class="info">[如转载文章，请填完整的原文URL地址]</span>
                 </label>
-                <input class="pure-input-1" type="url" placeholder="文章来源URL" name="文章来源" ng-model="article.refer" gen-tooltip="validateTooltip"/>
+                <input class="pure-input-1" type="text" placeholder="文章来源URL" name="文章来源" ng-model="article.refer"/>
                 <label>文章内容
                     <span class="info">
                         [使用<a class="hot" ng-click="wmdPreview()">MarkDown语法</a>，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong class="hot">{{parent.contentBytes}}</strong>字节]

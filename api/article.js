@@ -713,6 +713,10 @@ function addArticle(req, res) {
             });
         });
         cache.update(article);
+        userCache.update(req.session.Uid, function (user) {
+            user.articlesList.push(article._id);
+            return user;
+        });
         articleCache.put(article._id, article);
         jsGenConfig.articles = 1;
         checkTimeInterval(req, 'AddArticle', true);

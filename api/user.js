@@ -408,9 +408,10 @@ function register(req, res) {
         checkTimeInterval(req, 'Register', true);
         req.session.Uid = doc._id;
         req.session.role = doc.role;
+        doc._id = convertUserID(doc._id);
         if (jsGen.config.emailVerification) {
             setReset({
-                u: doc._id,
+                u: req.session.Uid,
                 r: 'role'
             }).then(function () {
                 emailToAdmin(doc);
@@ -418,7 +419,6 @@ function register(req, res) {
         } else {
             emailToAdmin(doc);
         }
-        doc._id = convertUserID(doc._id);
         return res.sendjson(resJson(null, doc));
     }).fail(res.throwError);
 }
