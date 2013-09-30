@@ -162,7 +162,7 @@ config(['$httpProvider', 'app',
                         delete list[key];
                     }
                 });
-                data = app.digestArray(data);
+                app.remove(data, undefined);
                 unSave.stopUnload = !app.isEmpty(data);
             } else {
                 unSave.stopUnload = false;

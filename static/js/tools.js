@@ -17,7 +17,7 @@ factory('tools', function () {
         isArray: isArray,
         intersect: intersect,
         checkType: checkType,
-        digestArray: digestArray
+        remove: remove
     };
 
     function isArray(obj) {
@@ -200,18 +200,23 @@ factory('tools', function () {
         return a;
     }
 
-    // 去除数组中的undefined值，修改原数组，返回原数组
-
-    function digestArray(list) {
-        var result = [];
+    function remove(list, item) {
+        var removed = 0;
         if (isArray(list)) {
             each(list, function (x, i) {
-                if (checkType(x) === 'undefined') {
+                if (x === item) {
                     list.splice(i, 1);
+                    removed += 1;
                 }
             }, null, true, true);
-
+        } else {
+            each(list, function (x, i) {
+                if (x === item) {
+                    delete list[i];
+                    removed += 1;
+                }
+            }, null, false);
         }
-        return list;
+        return removed;
     }
 });

@@ -13,9 +13,8 @@ var msg = jsGen.lib.msg,
     toArray = jsGen.lib.tools.toArray,
     checkID = jsGen.lib.tools.checkID,
     checkUrl = jsGen.lib.tools.checkUrl,
-    removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
-    digestArray = jsGen.lib.tools.digestArray,
+    removeItem = jsGen.lib.tools.removeItem,
     filterTitle = jsGen.lib.tools.filterTitle,
     errorHandler = jsGen.lib.tools.errorHandler,
     filterSummary = jsGen.lib.tools.filterSummary,
@@ -210,7 +209,8 @@ function convertArticles(IDArray, mode) {
             defer(null, article || null);
         });
     }).then(function (defer, list) {
-        defer(null, digestArray(list, null));
+        removeItem(list, null);
+        defer(null, list);
     });
 }
 
@@ -640,13 +640,14 @@ function getComments(req, res) {
             defer(null, null);
         }
     }).then(function (defer, IDArray) {
-        defer(null, digestArray(IDArray, null));
+        removeItem(IDArray, null);
+        defer(null, IDArray);
     }).each(null, function (defer, ID) {
         commentCache.getP(ID).all(function (defer2, err, article) {
             defer(null, article || null);
         });
     }).then(function (defer, comments) {
-        digestArray(comments, null);
+        removeItem(comments, null);
         res.sendjson(resJson(null, comments));
     }).fail(res.throwError);
 }

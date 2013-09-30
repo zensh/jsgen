@@ -11,7 +11,7 @@ input,
 button,
 select,
 textarea {
-    font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Microsoft YaHei", "微软雅黑", Helvetica, Tahoma, Arial, STXihei, "华文细黑", SimSun, "宋体", Heiti, "黑体", sans-serif;
 }
 a {
     color: rgb(0, 102, 204);

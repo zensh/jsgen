@@ -8,10 +8,9 @@ var msg = jsGen.lib.msg,
     resJson = jsGen.lib.tools.resJson,
     toArray = jsGen.lib.tools.toArray,
     checkID = jsGen.lib.tools.checkID,
-    removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
     filterTag = jsGen.lib.tools.filterTag,
-    digestArray = jsGen.lib.tools.digestArray,
+    removeItem = jsGen.lib.tools.removeItem,
     errorHandler = jsGen.lib.tools.errorHandler,
     paginationList = jsGen.lib.tools.paginationList,
     tagDao = jsGen.dao.tag,
@@ -58,7 +57,8 @@ function convertTags(IDArray, idd) {
             defer(null, tag || null);
         });
     }).all(function (defer, err, list) {
-        defer(null, digestArray(list, null));
+        removeItem(list, null);
+        defer(null, list);
     });
 }
 
@@ -188,7 +188,8 @@ function filterTags(tagArray) {
             defer(null, null);
         }
     }).then(function (defer, IDArray) {
-        defer(null, digestArray(IDArray, null));
+        removeItem(IDArray, null);
+        defer(null, IDArray);
     });
 }
 

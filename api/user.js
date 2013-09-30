@@ -15,10 +15,9 @@ var msg = jsGen.lib.msg,
     toArray = jsGen.lib.tools.toArray,
     checkUrl = jsGen.lib.tools.checkUrl,
     gravatar = jsGen.lib.tools.gravatar,
-    removeItem = jsGen.lib.tools.remove,
     intersect = jsGen.lib.tools.intersect,
     checkEmail = jsGen.lib.tools.checkEmail,
-    digestArray = jsGen.lib.tools.digestArray,
+    removeItem = jsGen.lib.tools.removeItem,
     checkUserID = jsGen.lib.tools.checkUserID,
     errorHandler = jsGen.lib.tools.errorHandler,
     checkUserName = jsGen.lib.tools.checkUserName,
@@ -102,7 +101,8 @@ function convertUsers(UidArray, mode) {
                     defer2(err, user || null);
                 });
             }).all(function (defer2, err, users) {
-                defer(err, digestArray(users, null));
+                removeItem(users, null);
+                defer(err, users);
             });
         }
     }).fail(errorHandler);
@@ -454,7 +454,7 @@ function getUser(req, res) {
                             defer3(null, article && article.status > -1 && article.display === 0 ? ID : null);
                         });
                     }).all(function (defer3, err, list) {
-                        digestArray(list, null);
+                        removeItem(list, null);
                         paginationCache.put(key, list);
                         defer2(null, list, jsGen.cache.list);
                     });
@@ -579,7 +579,7 @@ function getUserInfo(req, res) {
                     defer2(err, ok ? x : null);
                 });
             }).then(function (defer2, list) {
-                digestArray(list, null);
+                removeItem(list, null);
                 paginationCache.put(req.session.paginationKey.home, list);
                 defer(null, list);
             }).fail(defer);
@@ -734,7 +734,7 @@ function editUsers(req, res) {
             defer(null, null);
         });
     }).then(function (defer, users) {
-        digestArray(users, null);
+        removeItem(users, null);
         res.sendjson(resJson(null, users));
     }).fail(res.throwError);
 }
