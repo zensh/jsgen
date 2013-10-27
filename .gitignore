@@ -16,6 +16,8 @@ node_modules/
 test/
 json/
 scss/
+static/node_modules/
+static/src/bower_components/
 
 npm-debug.log
 .DS_Store

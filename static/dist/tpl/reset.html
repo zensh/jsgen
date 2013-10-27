@@ -1,0 +1,39 @@
+<div class="pure-g-r wrap">
+    <div class="pure-u-1-2">
+        <div class="panel pure-hidden-phone">
+            <div class="page-header text-center">
+                <span class="hot">欢迎来到AngularJS中文社区</span>
+            </div>
+            <div class="inner text-center">
+                <img src="/static/img/angularjs.png" alt="angularjs">
+                <div class="text-show">使用超动感HTML &amp; JS开发WEB应用！</div>
+                <div class="text-show text-hot">QQ交流群 <strong>278252889</strong></div>
+                <div class="text-show">
+                    <a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a>
+                    <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pure-u-1-2" ng-show="parent.title">
+        <div class="panel transparent">
+            <div class="page-header inner">
+                <strong class="warning">{{parent.title}}</strong>
+            </div>
+            <form class="pure-form pure-form-aligned inner" novalidate>
+                <div class="pure-control-group">
+                    <label>用户名/Uid：</label>
+                    <input type="text" placeholder="name or Uid" name="用户名/Uid" ng-model="reset.name" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>邮箱：</label>
+                    <input type="email" placeholder="email" name="邮箱" ng-model="reset.email" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-controls">
+                    <button class="pure-button warning-bg" ng-click="submit()">提交</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div gen-modal="timingModal">{{parent.timing}}秒钟后自动返回首页</div>
+</div>

@@ -1,0 +1,13 @@
+<div>
+    <div class="panel">
+        <div class="inner page-header">
+            <strong>消息批量管理</strong>
+        </div>
+        <div class="inner well text-right" ng-show="parent.editSave">
+            <button class="pure-button success-bg" ng-click="submit()">保存</button>
+            <button class="pure-button info-bg" ng-click="reset()">重置</button>
+        </div>
+    </div>
+    <div gen-pagination="pagination"></div>
+</div>
+<div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>

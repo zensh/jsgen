@@ -1,0 +1,92 @@
+<div class="pure-g-r wrap">
+    <div class="pure-u-3-4">
+        <div class="panel" ng-include src="parent.getTpl">
+        </div>
+    </div>
+    <div class="pure-u-1-4 aside">
+        <div class="panel">
+            <div class="media inner">
+                <a class="media-object left">
+                    <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
+                </a>
+                <div class="media-body">
+                    <div class="media-header"><a ng-href="{{'/'+user._id}}">{{user.name}}</a></div>
+                    <button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | switch:'follow'}}</button>
+                </div>
+            </div>
+            <ul class="inner list-inline article-info">
+                <li>
+                    <strong class="hot">{{user.role | match:'role'}}</strong>
+                </li>
+                <li ng-show="user.email">
+                    Email：<strong>{{user.email}}</strong>
+                </li>
+                <li ng-show="user.sex">
+                    性别：<strong>{{user.sex | match:'gender'}}</strong>
+                </li>
+                <li ng-show="user.score">
+                    积分：<strong>{{user.score}}</strong>
+                </li>
+                <li ng-show="user.fans">
+                    粉丝：<strong>{{user.fans}}</strong>
+                </li>
+                <li ng-show="user.follow">
+                    关注：<strong>{{user.follow}}</strong>
+                </li>
+                <li ng-show="user.collect">
+                    收藏：<strong>{{user.collect}}</strong>
+                </li>
+                <li ng-show="user.articles">
+                    文章/评论：<strong>{{user.articles}}</strong>
+                </li>
+                <li ng-show="user.collections">
+                    合集：<strong>{{user.collections}}</strong>
+                </li>
+                <li ng-show="user.date">
+                    <strong>{{user.date | formatDate:true}}</strong>注册<br /><strong>{{user.lastLoginDate | formatDate:true}}</strong>最后登录
+                </li>
+            </ul>
+            <div class="inner article-info">
+                <strong> 用户简介：</strong>
+                <div gen-parse-md="user.desc"></div>
+                <strong> 用户标签：</strong>
+                <div>
+                    <a ng-repeat="tag in user.tagsList" ng-href="{{'/'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a>
+                </div>
+            </div>
+        </div>
+        <div class="panel pure-menu pure-menu-open">
+            <ul class="text-center" ng-show="parent.isMe">
+                <li ng-class="{active: parent.viewPath=='index'}">
+                    <a href="/home"><i class="fa fa-chevron-left left"></i>我的主页</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='follow'}">
+                    <a href="/home/follow"><i class="fa fa-chevron-left left"></i>我的关注</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='fans'}">
+                    <a href="/home/fans"><i class="fa fa-chevron-left left"></i>我的粉丝</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='mark'}">
+                    <a href="/home/mark"><i class="fa fa-chevron-left left"></i>我的收藏</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='article'}">
+                    <a href="/home/article"><i class="fa fa-chevron-left left"></i>我的文章</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='comment'}">
+                    <a href="/home/comment"><i class="fa fa-chevron-left left"></i>我的评论</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='detail'}">
+                    <a href="/home/detail"><i class="fa fa-chevron-left left"></i>用户设置</a>
+                </li>
+            </ul>
+            <ul class="text-center" ng-hide="parent.isMe">
+                <li ng-class="{active: parent.viewPath=='article'}">
+                    <a ng-href="/{{user._id}}/article"><i class="fa fa-chevron-left left"></i>{{user.name}}的文章</a>
+                </li>
+                <li ng-class="{active: parent.viewPath=='fans'}">
+                    <a ng-href="/{{user._id}}/fans"><i class="fa fa-chevron-left left"></i>{{user.name}}的粉丝</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

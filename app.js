@@ -11,14 +11,21 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.6.6';
+jsGen.version = '0.7.0';
+module.exports.conf = jsGen.conf = require('./config/config'); // 注册rrestjs配置文件
 
 serverDm.on('error', function (err) {
     delete err.domain;
     jsGen.serverlog.error(err);
 });
 serverDm.run(function () {
-    jsGen.conf = module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
+    if (process.env.DEV) {
+        jsGen.conf.staticFolder = '/static/src';
+        jsGen.conf.tempFolder = '/static/src/tpl';
+    } else {
+        jsGen.conf.staticFolder = '/static/dist';
+        jsGen.conf.tempFolder = '/static/dist/tpl';
+    }
     jsGen.module = {};
     jsGen.module.os = require('os');
     jsGen.module.xss = require('xss');
@@ -161,7 +168,7 @@ serverDm.run(function () {
                 } else if (req.path[0].slice(-3).toLowerCase() === 'txt') {
                     // 直接响应static目录的txt文件，如robots.txt
                     then(function (defer) {
-                        fs.readFile(processPath + '/static/' + req.path[0], 'utf8', defer);
+                        fs.readFile(processPath + jsGen.conf.staticFolder + req.path[0], 'utf8', defer);
                     }).then(function (defer, txt) {
                         res.setHeader('Content-Type', 'text/plain');
                         res.send(txt);
@@ -175,7 +182,7 @@ serverDm.run(function () {
                         res.send(jsGen.cache.indexTpl); // 响应首页index.html
                     } else {
                         then(function (defer) {
-                            fs.readFile(processPath + '/static/index.html', 'utf8', defer);
+                            fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', defer);
                         }).then(function (defer, tpl) {
                             jsGen.cache.indexTpl = tpl.replace(/_jsGenVersion_/g, jsGen.version);
                             res.send(jsGen.cache.indexTpl);
@@ -196,8 +203,8 @@ serverDm.run(function () {
             dm.run(function () {
                 router(req, res); // 运行
             });
-        }).listen(jsGen.module.rrestjs.config.listenPort);
-        console.log('jsGen start!');
+        }).listen(jsGen.conf.listenPort);
+        console.log('jsGen start at ' + jsGen.conf.listenPort);
     }).fail(function (defer, err) {
         throw err;
     });

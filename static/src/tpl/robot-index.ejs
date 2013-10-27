@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="fragment" content="!">
+        <title><%- global.title + global.title2 %></title>
+        <meta http-equiv="content-type" content="text/html">
+        <meta name="title" content="<%- global.metatitle %>">
+        <meta name="description" content="<%- global.metadesc %>">
+        <meta name="keywords" content="<%- global.keywords %>">
+    </head>
+
+    <body>
+        <header>
+            <ul>
+                <% articlesList.forEach(function(article){ %>
+                <li>
+                    <a href="<%- '/'+article %>"><%- article %></a>
+                </li>
+                <% }); %>
+            </ul>
+        </header>
+        <div>
+                <ul>
+                    <% data.forEach(function(article){ %>
+                    <li>
+                        <header>
+                            <h5><a href="<%- '/'+article._id %>"><%- article.title %></a></h5>
+                            <i>热度<%- article.hots %></i>
+                        </header>
+                        <section ><%- article.content %></section>
+                        <footer>
+                            <ul>
+                                <li><strong><%- article.author.name %></strong>&nbsp;<%- article.date%>发表</li>
+                                <li><%- article.visitors %>次访问</li>
+                                <% article.tagsList.forEach(function(tag){ %>
+                                <li>
+                                    <%- tag.tag %>
+                                </li>
+                                <% }); %>
+                            </ul>
+                        </footer>
+                    </li>
+                    <% }); %>
+                </ul>
+        </div>
+        <footer>
+            <div>
+                <p>
+                    <a href="<%- global.url %>"><%- global.title %></a>
+                    ©2013 Powered by
+                    <a href="https://github.com/zensh/jsgen">jsGen <%- global.info.version %></a>
+                    [
+                    <a href="https://angularjs.org">AngularJS <%- global.info.angularjs %></a>
+                    ,&nbsp;
+                    <a href="https://nodejs.org">Node.js <%- global.info.nodejs %></a>
+                    ]
+                </p>
+            </div>
+        </footer>
+    </body>
+
+</html>

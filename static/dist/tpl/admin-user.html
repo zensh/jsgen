@@ -1,0 +1,47 @@
+<div ng-controller="adminUserCtrl">
+    <div class="panel">
+        <div class="inner page-header">
+            <strong>用户批量查询/设置</strong>
+        </div>
+        <div class="inner">
+            <table class="pure-table pure-table-horizontal">
+                <thead>
+                    <tr>
+                        <th class="text-left">
+                            <input type="checkbox" ng-model="parent.isSelectAll" ng-click="selectAll()">
+                        </th>
+                        <th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate='name';reverse=!reverse">用户名</a></th>
+                        <th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate='email';reverse=!reverse">Email</a></th>
+                        <th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate='role';reverse=!reverse">权限</a></th>
+                        <th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate='score';reverse=!reverse">积分</a></th>
+                        <th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate='date';reverse=!reverse">注册</a></th>
+                        <th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate='lastLoginDate';reverse=!reverse">登录</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="user in userList | orderBy:predicate:reverse">
+                        <td>
+                            <input type="checkbox" ng-model="user.isSelect"/>
+                        </td>
+                        <td><a ng-href="/{{user._id}}">{{user.name}}</a><a ng-show="user.locked" title="该用户已被锁定，点击保存后解锁" ng-click="user.locked=false" gen-tooltip>
+                            <i class="fa fa-minus-circle"></a></td>
+                        <td>{{user.email}}</td>
+                        <td>
+                            <select class="" ng-model="user.role" ng-options="role | match:'role' for role in roleArray">
+                            </select>
+                        </td>
+                        <td class="text-center">{{user.score}}</td>
+                        <td class="text-center">{{user.date | date:'yy-MM-dd'}}</td>
+                        <td class="text-center">{{user.lastLoginDate | date:'yy-MM-dd'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="inner well text-right" ng-show="parent.editSave">
+            <button class="pure-button success-bg" ng-click="submit()">保存</button>
+            <button class="pure-button info-bg" ng-click="reset()">重置</button>
+        </div>
+    </div>
+    <div gen-pagination="pagination"></div>
+</div>
+<div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>

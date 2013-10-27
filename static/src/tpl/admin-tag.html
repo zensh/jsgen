@@ -1,0 +1,26 @@
+<div ng-controller="adminTagCtrl">
+    <div class="panel">
+        <div class="inner page-header">
+            <strong>标签管理</strong>
+            <small class="right">
+                <button class="pure-button pure-button-link" ng-click="predicate='tag';reverse=!reverse"><i class="fa fa-sort-alpha-asc"></i>名称</button>
+                <button class="pure-button pure-button-link" ng-click="predicate='articles';reverse=!reverse"><i class="fa fa-sort-amount-asc"></i>文章</button>
+                <button class="pure-button pure-button-link" ng-click="predicate='users';reverse=!reverse"><i class="fa fa-sort-amount-asc"></i>用户</button>
+            </small>
+        </div>
+        <form class="pure-form pure-g-r inner">
+            <div class="pure-u-1-2 edit-tag" ng-repeat="tag in tagList | orderBy:predicate:reverse" id="{{tag._id}}">
+                <a title="删除标签" ng-click="remove(tag)" gen-tooltip><i class="fa fa-trash-o"></i></a>
+                <input class="pure-input-1-2 input-flat" type="text" name="标签" ng-model="tag.tag" ui-validate="{tag:checkTag,minlength:checkTagMin}" gen-tooltip="validateTooltip" required>
+                <small class="muted"><a ng-href="/{{tag._id}}">文章 {{tag.articles}}/会员 {{tag.users}}</a></small>
+            </div>
+        </form>
+        <div class="inner well text-right" ng-show="parent.editSave">
+            <button class="pure-button success-bg" ng-click="submit()">保存</button>
+            <button class="pure-button info-bg" ng-click="reset()">重置</button>
+        </div>
+    </div>
+    <div gen-pagination="pagination"></div>
+    <div gen-modal="removeTagModal">确定要删除标签 {{removeTag.tag}}？</div>
+</div>
+<div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>
