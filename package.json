@@ -5,11 +5,15 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsgen",
-    "version": "0.6.6",
+    "version": "0.7.0",
     "description": "",
     "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
     "main": "app.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zensh/jsgen.git"
+    },
     "engines": {
         "node": ">=0.10.x"
     },
@@ -23,6 +27,7 @@
         "xss": ">=0.0.3"
     },
     "scripts": {
-        "start": "node app.js"
+        "start": "node app.js",
+        "test": "DEV=1 node app.js"
     }
 }

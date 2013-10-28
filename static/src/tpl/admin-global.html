@@ -1,0 +1,244 @@
+<div class="panel" ng-controller="adminGlobalCtrl">
+    <div class="inner page-header">
+        <strong>网站设置</strong>
+    </div>
+    <ul class="nav nav-tabs inner">
+        <li class="active" gen-tab-click="active">
+            <a ng-click="parent.switchTab='tab1'">基本设置</a>
+        </li>
+        <li gen-tab-click="active">
+            <a ng-click="parent.switchTab='tab2'">参数设置</a>
+        </li>
+        <li gen-tab-click="active">
+            <a ng-click="parent.switchTab='tab3'">缓存设置</a>
+        </li>
+        <li gen-tab-click="active">
+            <a ng-click="parent.switchTab='tab4'">SMTP设置</a>
+        </li>
+    </ul>
+    <div class="inner well" ng-switch on="parent.switchTab">
+        <div ng-switch-default>
+            <form class="pure-form pure-form-aligned" novalidate>
+                <div class="pure-control-group">
+                    <label>网站域名：</label>
+                    <input type="text" class="pure-input-1-2" name="网站域名" ng-model="editGlobal.domain" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>ICP备案：</label>
+                    <input type="text" class="pure-input-1-2" name="ICP备案" ng-model="editGlobal.beian"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站网址[含http://]：</label>
+                    <input type="url" class="pure-input-1-2" name="网站网址" ng-model="editGlobal.url" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站Logo：</label>
+                    <input type="text" class="pure-input-1-2" name="logo" ng-model="editGlobal.logo" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>管理员Email[不公开]：</label>
+                    <input type="email" name="管理员Email" ng-model="editGlobal.email" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站名称：</label>
+                    <input type="text" class="pure-input-1-2" name="网站名称" ng-model="editGlobal.title" ng-maxlength="20" gen-tooltip="validateTooltip" required/>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站副标题：</label>
+                    <input type="text" class="pure-input-1-2" ng-model="editGlobal.description"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站Meta标题[SEO]：</label>
+                    <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.metatitle">
+                    </textarea>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站Meta描述[SEO]：</label>
+                    <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.metadesc">
+                    </textarea>
+                </div>
+                <div class="pure-control-group">
+                    <label>网站Meta关键词[SEO]：</label>
+                    <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.keywords">
+                    </textarea>
+                </div>
+                <div class="pure-control-group">
+                    <label>搜索引擎机器人：</label>
+                    <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.robots">
+                    </textarea>
+                </div>
+                <div class="pure-control-group">
+                    <label>用户注册：</label>
+                    <input type="button" class="pure-button pure-button-small" ng-class="{'primary-bg':editGlobal.register}" ng-click="editGlobal.register=!editGlobal.register" value="{{!editGlobal.register | switch:'turn'}}">
+                </div>
+                <div class="pure-control-group">
+                    <label>邮箱验证：</label>
+                    <input type="button" class="pure-button pure-button-small" ng-class="{'primary-bg':editGlobal.emailVerification}" ng-click="editGlobal.emailVerification=!editGlobal.emailVerification" value="{{!editGlobal.emailVerification | switch:'turn'}}">
+                </div>
+                <div class="pure-controls">
+                    <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>
+                    <button class="pure-button info-bg" ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+        <div ng-switch-when="tab2">
+            <form class="pure-form pure-form-aligned" novalidate>
+                <div class="pure-control-group">
+                    <label>文章最多标签数量：</label>
+                    <input type="number" ng-model="editGlobal.ArticleTagsMax"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>用户最多标签数量：</label>
+                    <input type="number" ng-model="editGlobal.UserTagsMax"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>标题最短字节数：</label>
+                    <input type="number" ng-model="editGlobal.TitleMinLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>标题最长字节数：</label>
+                    <input type="number" ng-model="editGlobal.TitleMaxLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>摘要最长字节数：</label>
+                    <input type="number" ng-model="editGlobal.SummaryMaxLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>文章最短字节数：</label>
+                    <input type="number" ng-model="editGlobal.ContentMinLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>文章最长字节数：</label>
+                    <input type="number" ng-model="editGlobal.ContentMaxLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>用户名最短字节数：</label>
+                    <input type="number" ng-model="editGlobal.UserNameMinLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>用户名最长字节数：</label>
+                    <input type="number" ng-model="editGlobal.UserNameMaxLen"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>用户积分系数：</label>
+                    <input type="text" ng-model="editGlobal.UsersScore" ng-list="/[,，、]/"/>
+                </div>
+                <div class="pure-controls-group">
+                    <small>评论×<strong>{{editGlobal.UsersScore[0]}}</strong>
+                    ，文章×<strong>{{editGlobal.UsersScore[1]}}</strong>，关注×<strong>{{editGlobal.UsersScore[2]}}</strong>
+                    ，粉丝×<strong>{{editGlobal.UsersScore[3]}}</strong>，文章热度×<strong>{{editGlobal.UsersScore[4]}}</strong>，
+                    注册时长天数×<strong>{{editGlobal.UsersScore[5]}}</strong></small>
+                </div>
+                <div class="pure-control-group">
+                    <label>评论提升系数：</label>
+                    <input type="text" ng-model="editGlobal.ArticleStatus" ng-list="/[,，、]/"/>
+                </div>
+                <div class="pure-controls-group">
+                    <small>评论的评论数达到<strong>{{editGlobal.ArticleStatus[0]}}</strong>时，自动提升正常文章，
+                    达到<strong>{{editGlobal.ArticleStatus[1]}}</strong>时，自动提升为推荐文章</small>
+                </div>
+                <div class="pure-control-group">
+                    <label>文章热度系数：</label>
+                    <input type="text" ng-model="editGlobal.ArticleHots" ng-list="/[,，、]/"/>
+                </div>
+                <div class="pure-controls-group">
+                    <small>访问+<strong>{{editGlobal.ArticleHots[0]}}</strong>，支持/反对±<strong>
+                    {{editGlobal.ArticleHots[1]}}</strong>，评论+<strong>{{editGlobal.ArticleHots[2]}}</strong>，收藏+
+                    <strong>{{editGlobal.ArticleHots[3]}}</strong>，推荐+<strong>{{editGlobal.ArticleHots[4]}}</strong></small>
+                </div>
+                <div class="pure-controls">
+                    <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>
+                    <button class="pure-button info-bg" ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+        <div ng-switch-when="tab3">
+            <form class="pure-form pure-form-aligned" novalidate>
+                <div class="pure-control-group">
+                    <label>用户缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.userCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>文章缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.articleCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>评论缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.commentCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>列表缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.listCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>标签缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.tagCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>合集缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.collectionCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>消息缓存容量：</label>
+                    <input type="number" ng-model="editGlobal.messageCache"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>分页导航缓存：</label>
+                    <input type="number" ng-model="editGlobal.paginationCache"/>
+                </div>
+                <div class="pure-controls-group">
+                    <small>分页导航缓存有效期<strong>{{editGlobal.paginationCache}}</strong>秒</small>
+                </div>
+                <div class="pure-control-group">
+                    <label>操作限时缓存：</label>
+                    <input type="number" ng-model="editGlobal.TimeInterval"/>
+                </div>
+                <div class="pure-controls-group">
+                    <small>搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为3秒</small>
+                </div>
+                <div class="pure-controls">
+                    <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>
+                    <button class="pure-button info-bg" ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+        <div ng-switch-when="tab4">
+            <form class="pure-form pure-form-aligned" novalidate>
+                <div class="pure-control-group">
+                    <label>服务器地址：</label>
+                    <input type="text" ng-model="editGlobal.smtp.host" />
+                </div>
+                <div class="pure-control-group">
+                    <label>服务器端口：</label>
+                    <input type="number" ng-model="editGlobal.smtp.port" />
+                </div>
+                <div class="pure-control-group">
+                    <label>SMTP用户名：</label>
+                    <input type="text" ng-model="editGlobal.smtp.auth.user"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>SMTP用户密码：</label>
+                    <input type="password" ng-model="editGlobal.smtp.auth.pass"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>发送人名称：</label>
+                    <input type="text" ng-model="editGlobal.smtp.senderName"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>发送人Email：</label>
+                    <input type="text" ng-model="editGlobal.smtp.senderEmail"/>
+                    <small>部分SMTP服务器要求其与用户名一致</small>
+                </div>
+                <div class="pure-control-group">
+                    <label>是否开启SSL：</label>
+                    <input type="button" class="pure-button pure-button-small" ng-class="{'primary-bg':editGlobal.smtp.secureConnection}" ng-click="editGlobal.smtp.secureConnection=!editGlobal.smtp.secureConnection" value="{{!editGlobal.smtp.secureConnection | switch:'turn'}}">
+                </div>
+                <div class="pure-controls">
+                    <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>
+                    <button class="pure-button info-bg" ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>

@@ -1,0 +1,57 @@
+<div ng-controller="userListCtrl">
+    <div class="page-header inner">
+        <strong>{{parent.title}}</strong>
+    </div>
+    <ul class="media-list">
+        <li class="media" ng-repeat="user in userList">
+          <a class="media-object left" ng-href="{{'/'+user._id}}">
+              <img class="img-small" src="/static/img/avatar.png" gen-src="{{user.avatar}}">
+          </a>
+          <div class="media-body" id="{{user._id}}">
+            <div class="media-heading">
+                <div class="media-heading">
+                    <a ng-click="followMe(user)" class="pure-button pure-button-small success-bg right" ng-class="{'success-bg':!user.isFollow,'primary-bg':user.isFollow}" ng-hide="user.isMe">{{user.isFollow | switch:'follow'}}</a>
+                    <a ng-href="{{'/'+user._id}}">{{user.name}}</a>
+                    <small class="muted">{{user.date | formatDate:true}}注册 / {{user.lastLoginDate | formatDate:true}}最后登录</small>
+                    <ul class="inner list-inline article-info">
+                        <li>
+                            <strong class="hot">{{user.role | match:'role'}}</strong>
+                        </li>
+                        <li ng-show="user.email">
+                            UID：<strong>{{user._id}}</strong>
+                        </li>
+                        <li ng-show="user.sex">
+                            性别：<strong>{{user.sex | match:'gender'}}</strong>
+                        </li>
+                        <li ng-show="user.score">
+                            积分：<strong>{{user.score}}</strong>
+                        </li>
+                        <li ng-show="user.fans">
+                            粉丝：<strong>{{user.fans}}</strong>
+                        </li>
+                        <li ng-show="user.follow">
+                            关注：<strong>{{user.follow}}</strong>
+                        </li>
+                        <li ng-show="user.articles">
+                            文章/评论：<strong>{{user.articles}}</strong>
+                        </li>
+                        <li ng-show="user.collections">
+                            合集：<strong>{{user.collections}}</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="media-content" gen-parse-md="user.desc"></div>
+            <div>
+                <ul class="list-inline">
+                    <li ng-repeat="tag in user.tagsList">
+                        <a ng-href="{{'/'+tag._id}}" class="pure-button pure-button-mini">{{tag.tag}}</a>
+                    </li>
+                </ul>
+            </div>
+          </div>
+        </li>
+    </ul>
+    <p class="inner" ng-show="userList.length==0">暂无</p>
+    <div gen-pagination="pagination"></div>
+</div>

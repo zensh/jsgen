@@ -1,0 +1,66 @@
+<div class="pure-g-r wrap">
+    <div class="pure-u-3-4">
+        <div class="panel" ng-include src="parent.getTpl">
+        </div>
+        <div gen-pagination="pagination"></div>
+    </div>
+    <div class="pure-u-1-4">
+        <div class="panel pure-hidden-phone">
+            <div class="inner text-center">
+                <img src="/static/img/angularjs.png" alt="AngularJS">
+                <div class="text-show text-left">使用超动感HTML &amp; JS开发WEB应用！</div>
+                <div class="text-show text-hot">QQ交流群 <strong class="hot">278252889</strong></div>
+                <div class="text-show">
+                    <a href="https://github.com/angular/angular.js" class="pure-button pure-button-link" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a>
+                    <a href="http://weibo.com/angularjs/" class="pure-button pure-button-link" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a>
+                </div>
+            </div>
+        </div>
+        <div class="panel pure-hidden-phone">
+            <div class="inner text-center">
+                <div class="text-show-large">
+                    <strong>{jsGen}</strong>
+                </div>
+                <div class="text-show text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</div>
+                <div class="text-show">
+                    <a href="https://github.com/zensh/jsgen" class="pure-button pure-button-link" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a>
+                    <a href="http://weibo.com/zensh" class="pure-button pure-button-link" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a>
+                </div>
+            </div>
+        </div>
+        <div class="panel pure-hidden-phone" ng-show="hotComments.length>0">
+            <div class="panel-heading muted"><i class="fa fa-fire"></i>热门评论</div>
+            <ul class="media-list comments">
+                <li class="media" ng-repeat="comment in hotComments">
+                    <div class="media-body">
+                        <div class="media-content list-content">
+                            <em class="hot" title="热度">{{comment.hots}}</em>&nbsp;&nbsp;{{comment.content}}
+                        </div>
+                        <div class="media-footer">
+                            <a ng-href="{{'/'+comment.author._id}}"><strong>{{comment.author.name}}</strong></a>&nbsp;<a ng-href="{{'/'+comment.refer._id}}">{{comment.title}}</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="panel">
+            <div class="panel-heading muted"><i class="fa fa-link"></i>友情链接</div>
+            <ul class="inner list-inline">
+                <li class="muted"><i class="fa fa-thumb-tack"></i>仅链接AngularJS框架网站</li>
+            </ol>
+        </div>
+        <div class="panel">
+            <div class="panel-heading muted"><i class="fa fa-dashboard"></i>网站状态</div>
+            <ul class="inner list-inline">
+                <li>访问总数：{{global.visitors}}</li>
+                <li>文章总数：{{global.articles}}</li>
+                <li>评论总数：{{global.comments}}</li>
+                <li>会员总数：{{global.users}}</li>
+                <li>在线访客：{{global.onlineNum}}</li>
+                <li>在线会员：{{global.onlineUsers}}</li>
+                <li>在线记录：{{global.maxOnlineNum}}</li>
+                <li>时间：{{global.maxOnlineTime  | date:'yy-MM-dd HH:mm'}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
