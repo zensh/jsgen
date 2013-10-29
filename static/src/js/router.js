@@ -2,9 +2,7 @@
 /*global angular, jsGenVersion*/
 
 angular.module('jsGen.router', ['ngRoute']).
-constant('app', {
-    version: jsGenVersion // 注册内部全局变量app
-}).provider('getFile', ['app',
+constant('app', {}).provider('getFile', ['app',
     function (app) {
         this.html = function (fileName) {
             return '/static/tpl/' + fileName + '?v=' + (app.version || '');

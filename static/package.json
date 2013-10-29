@@ -5,7 +5,7 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsgen-cli",
-    "version": "0.6.6",
+    "version": "0.7.1",
     "description": "jsgen-cli",
     "keywords": ["jsGen"],
     "homepage": "https://github.com/zensh/jsgen",
@@ -24,6 +24,11 @@
         "grunt-contrib-copy": "~0.4.1",
         "grunt-contrib-jshint": "~0.6.0",
         "grunt-contrib-uglify": "~0.2.2",
+        "grunt-hash-url": "~0.1.0",
         "grunt-recess": "~0.4.0"
+    },
+    "scripts": {
+        "install": "bower install",
+        "update": "bower update"
     }
 }

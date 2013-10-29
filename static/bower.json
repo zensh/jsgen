@@ -1,6 +1,6 @@
 {
   "name": "jsGen",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "main": "index.html",
   "dependencies": {
     "angular": ">=1.2.0-rc.3",

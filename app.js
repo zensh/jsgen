@@ -11,7 +11,6 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-jsGen.version = '0.7.0';
 module.exports.conf = jsGen.conf = require('./config/config'); // 注册rrestjs配置文件
 
 serverDm.on('error', function (err) {
@@ -114,7 +113,6 @@ serverDm.run(function () {
         fs.readFile(processPath + '/package.json', 'utf8', defer); // 读取软件信息
     }).then(function (defer, data) {
         data = JSON.parse(data);
-        data.version = jsGen.version;
         data.nodejs = process.versions.node;
         data.rrestjs = _restConfig._version;
         jsGen.config.info = data;
@@ -184,7 +182,7 @@ serverDm.run(function () {
                         then(function (defer) {
                             fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', defer);
                         }).then(function (defer, tpl) {
-                            jsGen.cache.indexTpl = tpl.replace(/_jsGenVersion_/g, jsGen.version);
+                            jsGen.cache.indexTpl = tpl;
                             res.send(jsGen.cache.indexTpl);
                         }).fail(res.throwError);
                     }

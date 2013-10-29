@@ -160,6 +160,17 @@ module.exports = function(grunt) {
         dest: 'dist/md/',
         src: ['src/md/*']
       }
+    },
+
+    hash: {
+      index: {
+        options: {
+          algorithm: 'md5',
+          urlCwd: 'dist/'
+        },
+        dest: 'dist/index.html',
+        src: 'src/index_src.html'
+      }
     }
 
   });
@@ -171,8 +182,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-hash-url');
   grunt.loadNpmTasks('grunt-recess');
 
   // Default task.
-  grunt.registerTask('default', ['clean', 'jshint', 'concat', 'uglify', 'recess', 'copy']);
+  grunt.registerTask('default', ['clean', 'jshint', 'concat', 'uglify', 'recess', 'copy', 'hash']);
 };
