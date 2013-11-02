@@ -9,9 +9,10 @@
     <meta name="description" content="{{global.metadesc}}">
     <meta name="keywords" content="{{global.keywords}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="/static/favicon.ico"/>
     <link rel="stylesheet" href="/static/{{_css/jsgen.min.css_}}">
-    <link href="/static/{{_css/font-awesome.min.css_}}" rel="stylesheet">
+    <link rel="stylesheet" href="/static/{{_css/font-awesome.min.css_}}">
+    <script src="/static/{{_js/reserveLoad.min.js_}}"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
@@ -65,17 +66,13 @@
     </div>
     <div class="loading" ng-show="loading.show"></div>
     <script>
-      'use strict';
-
-      // v0.4.1 https://github.com/zensh/reserveLoad.js
-      (function(g){function q(){}function k(a){return"function"===typeof a}function r(a,e,d){for(var c=0,b=a.length;c<b;c++)e.call(d,a[c],c,a)}function s(a,e,d){function c(){b+=1;e.call(d,b<h?c:null,a[b],b,a)}var b=-1,h=a.length-1;return c()}function t(a,e,d){var c=null;d&&(l[d]?c=l[d]:k(e)?(c=e(),l[d]=c):e&&"string"===typeof e&&(c=a||g,r(e.split("."),function(b){c&&(c=c[b])}),l[d]=c));return c}function v(a,e,d){var c=w.test(a),b=n.createElement(c?"link":"script"),h=c||!e;!a||!c&&t(g,e,a)||(b.onload=b.onerror=b.onreadystatechange=function(){x.test(b.readyState+"")&&(c||p.removeChild(b),b=b.onload=b.onerror=b.onreadystatechange=null,d(h||!!t(g,e,a)))},c?(b.rel="stylesheet",b.href=a):(b.async=1,b.src=a),m=a,p[u?"insertBefore":"appendChild"](b,u))}function y(a){function e(a,e){if(e||c===b)return r(h,function(a,c){h[c]=l[a]||a}),h.unshift(e),f.apply(null,h);if(k(a))return a()}function d(a,b){function d(a,f,g){v(a,f,function(d){c+=+d;!d&&g?g():(h.push(a),e(b,d?null:a))})}if(Array.isArray?Array.isArray(a):"[object Array]"===Object.prototype.toString.call(a)){var f;1<a.length&&(f=a.pop());s(a,function(a,b){d(b,f,a)})}else a&&"string"===typeof a?d(a,null):(c+=1,e(b,null))}var c=0,b=a.length,h=[],f=a[b-1];k(f)?(b-=1,a.pop()):f=q;s(a,function(a,b){d(b,a)})}var n=g.document,f=g.define,p=n.getElementsByTagName("head")[0]||n.documentElement,u=p.getElementsByTagName("base")[0],z=[].slice,w=/\.css(?:\?|$)/i,x=/^(?:loaded|complete|undefined)$/,m=null,l={};(g.reserveLoad=function(){y(z.call(arguments))}).version="v0.4.0";f=k(f)?f._originalDefine?f._originalDefine:f:null;(g.define=function(a,e,d){d=k(d)?d:k(e)?e:k(a)?a:q;m?(l[m]=d(),m=null):f&&f(a,e,d)})._originalDefine=f})(window);
-
       (function () {
         var IE8 = !-[1,],
           jqVer = IE8 ? '1.7.2' : '2.0.3',
           jqVer2 = IE8 ? 'old' : 'min';
 
-        reserveLoad(IE8 && '/static/js/ie.min.js', // if lt IE 9
+        reserveLoad(
+          IE8 && '/static/{{_js/ie.min.js_}}', // load it if lt IE 9
           ['http://cdn.staticfile.org/jquery/' + jqVer + '/jquery.min.js', '/static/js/jquery.' + jqVer2 + '.js', 'jQuery'],
           ['/static/{{_js/angular.min.js_}}', 'angular'],
           '/static/{{_js/angular-lib.min.js_}}',

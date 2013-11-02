@@ -1,16 +1,18 @@
-**Online demonstration and Exchange community: [AngularJS.cn](http://angularjs.cn/)**
+{jsGen} <small>0.7.x</small>
+=======
+**——JavaScript Generated**
 
-## Note that from version 0.6.x uses the REDIS!
+### Demo and community: [AngularJS.cn](http://angularjs.cn/)
 
-### 0.6.x updates description
-1. the original memory cache to REDIS cache, so that jsGen can run multiple processes, multiple computer.
-2. then.js processing asynchronous tasks asynchronous task code completely rewritten, code logic clearer, easier to extend.
-3. fix some Bug.
-4. suspended animation.
+### Note that from version 0.6.x uses the REDIS!
 
-### version 0.7.0 development goals
+### 0.7.x updates description(Developing...)
 
-Content search, news articles and comment management system, the background.
+ 1. Adjust the front-end code framework, the use of bower and gruntjs management code;
+ 2. use localStorage in article editor;
+ 3. Online mode and development mode's port have changed to `3000`, development mode command:
+
+     node app.js --dev
 
 ## Introduction
 
@@ -35,17 +37,11 @@ Systems need to be mongoDB 2.4.x and Node.js 0.10.x, Windows environment needs t
     npm install node-gyp //Windows you need to run this command, Linux does not need
                          //This command depend on Python and vs2012, please refer to https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
 
-    npm install  //Windows runs under npm install --msvs_version=2012
+    npm install          //Windows runs under npm install --msvs_version=2012
 
-    npm start //boot jsgen (or node app.js)
+    node app.js install  //Boot jsGen First time, parameter `install` use to initialize MongoDB
 
-
-JsGen Github source code includes two branches: master and dev, default master branch:
-
-1. Master merge branch after compression of Javascript code, used to running on the line, access ports for **80**;
-
-2. Dev branch for the development branch, can be used for studying, access ports to **3000**.
-
+    npm start            //boot jsgen normally (or node app.js)
 
 Browser-side enter the URL [http://localhost/](http://localhost/) will access master.
 
@@ -56,9 +52,6 @@ The default administrator **username: admin  password: admin@jsgen.org.**
     git pull origin //update jsGen
 
     npm update //update Node.js module
-
-    npm start //reset jsGen
-
 
 ## Update (Changelog)
 

@@ -1,39 +1,27 @@
-{jsGen} <small>0.7.0</small>
+{jsGen} <small>0.7.x</small>
 =======
 **——JavaScript Generated**
 
+### [ENGLISH README][12]
+
 ### 在线演示及交流社区：[AngularJS中文社区][2]
 
-### 注意，从0.6.x版使用了redis！
+### 注意，从0.6.x版使用了redis！请先安装redis再启动jsGen！
 
-### 0.7.0更新说明
+### 0.7.x更新说明（开发中）
 
- 1. 调整前端代码框架，使用gruntjs管理。
- 2. 端口统一为3000，进入开发模式的命令为
+ 1. 调整前端代码框架，使用bower和gruntjs管理代码;
+ 2. **第一次启动需带`install`参数，用于初始化MongoDB数据库;**
+ 3. 文章编辑页面增加localStorage本地存储;
+ 4. 线上模式和开发模式的端口统一为3000，进入开发模式的命令为:
 
-    DEV=true node app.js
-
-### 0.6.x更新说明
-
- 1. 将原有的内存缓存全改成redis缓存，使得jsGen可以多进程、多机运行。
- 2. 使用then.js处理异步任务，完全重写异步任务代码，代码逻辑更清晰、更容易扩展。
- 3. 修复部分Bug。
- 4. 暂停动画效果。
-
-
-### 0.7.x版开发目标
-
- 内容搜索、消息系统、后台文章和评论管理。
+    node app.js --dev
 
 ### 简介 (Introduction)
 
 [JsGen][1]是用纯JavaScript编写的新一代开源社区网站系统，主要用于搭建SNS类型的专业社区，对客户端AngularJS应用稍作修改也可变成多用户博客系统、论坛或者CMS内容管理系统。
 
 jsGen基于NodeJS编写服务器端程序，提供静态文件响应和REST API接口服务。基于AngularJS编写浏览器端应用，构建交互式网页UI视图。基于MongoDB编写数据存储系统。
-
-[JsGen][1] is a next generation，free, open source web software that you can generate a powerful website, such as blog, forum, etc. It is coded by pure JavaScript, based on Node.js, AngularJS, MongoDB.
-
-Node.js provide REST API server, AngularJS web app gets data from server and generate the view to user.
 
 #### 安装 (Installation)
 
@@ -53,13 +41,9 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
                             //此命令依赖python和vs2012，请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
     npm install             //npm安装依赖模块，请确保依赖模块全部安装好。
                             //windows下请运行 npm install --msvs_version=2012
-    npm start               //启动jsgen（或者 node app.js）
+    node app.js install     //第一次启动jsGen，'install'参数用于初始化MongoDB数据库
 
-jsGen的Github源码包括两个分支：`master`和`dev`，默认为master分支：
-
- 1. master分支的Javascript代码经过了压缩合并，用于线上运行，访问端口为**80**；
-
- 2. dev分支为开发分支，可用于参观学习，访问端口为**3000**。
+    npm start               //正常启动，或 `node app.js`
 
 浏览器端输入网址[http://localhost/](http://localhost/)即可访问。
 
@@ -69,12 +53,13 @@ Default administrator username: **admin** password: **admin@jsgen.org**.
 
 #### 升级 (Update)
 
-    git pull            //更新jsGen
+    git pull origin     //更新jsGen
     npm update          //更新Node.js模块
-    npm start           //重启jsGen
 
 ### 更新 (Changelog)
- + 2013/08/25 jsGen v0.6.0 完全重构Node.js服务器端代码。使用redis作为缓存，使用then.js处理异步任务。
+### 0.6.x更新说明
+ + 2013/11/02 jsGen v0.7.0 调整前端代码结构，使用bower和grunt管理前端代码，增加localStorage。
+ + 2013/08/25 jsGen v0.6.x 完全重构Node.js服务器端代码。使用redis作为缓存，使用then.js处理异步任务，重构服务后台代码。
  + 2013/07/29 jsGen v0.5.0 完全重构AngularJS客户端部分，服务器端代码做相应调整。使用pure CSS框架，优化UI，兼容IE8！重写并优化AngularJS代码，添加若干很酷的功能代码，在学习AngularJS的码农不妨看看！
  + 2013/06/01 jsGen v0.3.5 修复若干bug，标签允许空格。
  + 2013/05/26 jsGen v0.3.4 修复管理后台不出现网站设置的bug，管理后台增加邮箱验证设置，默认关闭邮箱验证。
@@ -211,3 +196,4 @@ Default administrator username: **admin** password: **admin@jsgen.org**.
   [9]: https://github.com/kissjs/node-mongoskin
   [10]: https://github.com/leizongmin/js-xss
   [11]: http://cnodejs.org/
+  [12]: https://github.com/zensh/jsgen/blob/master/README_en.md

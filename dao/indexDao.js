@@ -99,10 +99,14 @@ var that = jsGen.dao.db.bind('global', {
 
     initGlobalConfig: function (callback) {
         globalConfig.date = Date.now();
-        that.insert(
-            globalConfig, {
-                w: 1
-            }, wrapCallback(callback));
+        that.update({
+            _id: 'GlobalConfig'
+        }, globalConfig, {
+            w: 1,
+            upsert: true
+        }, function (err, reply) {
+            callback(err, reply ? globalConfig : null);
+        });
     }
 
 });

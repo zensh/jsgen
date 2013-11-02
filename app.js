@@ -11,20 +11,14 @@ var fs = require('fs'),
     processPath = path.dirname(process.argv[1]);
 
 global.jsGen = {}; // 注册全局变量jsGen
-module.exports.conf = jsGen.conf = require('./config/config'); // 注册rrestjs配置文件
+module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
+module.exports.conf_dev = require('./config/config_dev'); // 注册开发模式配置文件
 
 serverDm.on('error', function (err) {
     delete err.domain;
     jsGen.serverlog.error(err);
 });
 serverDm.run(function () {
-    if (process.env.DEV) {
-        jsGen.conf.staticFolder = '/static/src';
-        jsGen.conf.tempFolder = '/static/src/tpl';
-    } else {
-        jsGen.conf.staticFolder = '/static/dist';
-        jsGen.conf.tempFolder = '/static/dist/tpl';
-    }
     jsGen.module = {};
     jsGen.module.os = require('os');
     jsGen.module.xss = require('xss');
@@ -34,6 +28,7 @@ serverDm.run(function () {
     jsGen.module.mongoskin = require('mongoskin');
     jsGen.module.nodemailer = require('nodemailer');
     jsGen.serverlog = jsGen.module.rrestjs.restlog;
+    jsGen.conf = jsGen.module.rrestjs.config;
     jsGen.lib = {};
     jsGen.lib.msg = require('./lib/msg.js');
     jsGen.lib.json = require('./lib/json.js');
@@ -68,27 +63,18 @@ serverDm.run(function () {
         redis.initConfig(jsGen.lib.json.GlobalConfig, defer); // 初始化config缓存
     }).then(function (defer, config) {
         jsGen.config = config;
-        if (!jsGen.config.date) { // config缓存未赋值，则从MongoDB取值
-            then(function (defer2) {
-                jsGen.dao.index.getGlobalConfig(defer2);
-            }).then(function (defer2, config) {
-                defer2(null, config);
-            }, function (defer2, err) {
-                // MongoDB无值，初始化数据库
-                require('./api/install.js')().then(function () {
-                    defer2(null, jsGen.lib.json.GlobalConfig);
-                }).fail(defer2);
-            }).then(function (defer2, config) {
-                each(jsGen.config, function (value, key, list) {
-                    if (key in config) {
-                        list[key] = config[key]; // 写入config缓存
-                    }
-                });
-                defer(null, jsGen.config);
-            }).fail(defer);
-        } else {
-            defer(null, config);
+        if (process.argv.indexOf('install') > 0) { // 带'install'参数启动则初始化MongoDB
+            require('./api/install.js')().all(defer);
+        } else { // Redis config缓存未赋值，则从MongoDB取值
+            jsGen.dao.index.getGlobalConfig(defer);
         }
+    }).then(function (defer, config) {
+        each(jsGen.config, function (value, key, list) {
+            if (key in config) {
+                list[key] = config[key]; // 写入config缓存
+            }
+        });
+        defer(null, jsGen.config);
     }).then(function (defer, config) {
         var api = ['index', 'user', 'article', 'tag', 'collection', 'message', 'rebuild'];
 

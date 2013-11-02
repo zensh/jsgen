@@ -5,10 +5,10 @@ angular.module('jsGen.router', ['ngRoute']).
 constant('app', {}).provider('getFile', ['app',
     function (app) {
         this.html = function (fileName) {
-            return '/static/tpl/' + fileName + '?v=' + (app.version || '');
+            return '/static/tpl/' + fileName + '?v=' + app.version;
         };
         this.md = function (fileName) {
-            return '/static/md/' + fileName + '?v=' + (app.version || '');
+            return '/static/md/' + fileName + '?v=' + app.version;
         };
         this.$get = function () {
             return {

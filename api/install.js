@@ -5,6 +5,7 @@ var then = jsGen.module.then,
     errorHandler = jsGen.lib.tools.errorHandler;
 
 module.exports = function () {
+    var globalConfig;
     return then(function (defer) {
         jsGen.dao.db.createCollection('global', {
             w: 1
@@ -17,7 +18,8 @@ module.exports = function () {
         }, defer);
     }).then(function (defer) {
         jsGen.dao.index.initGlobalConfig(defer);
-    }).then(function (defer) {
+    }).then(function (defer, config) {
+        globalConfig = config;
         jsGen.dao.db.createCollection("articles", {
             w: 1
         }, defer);
@@ -102,5 +104,7 @@ module.exports = function () {
             avatar: jsGen.lib.tools.gravatar('admin@jsgen.org'), // 超级管理员的gravatar头像，请自行修改
             desc: '梦造互联网 By ZENSH' // 超级管理员的个人简介，请自行修改
         }, defer);
+    }).then(function (defer) {
+        defer(null, globalConfig);
     }).fail(errorHandler);
 };

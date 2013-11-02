@@ -885,9 +885,14 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 });
                 data.refer = data.refer && data.refer.url;
                 app.intersect(originData, data);
+                $scope.article = app.union(originData);
+                app.checkDirty(article, originData, $scope.article);
+            } else {
+                $scope.article = {};
+                app.each(article, function (value, key) {
+                    $scope.article[key] = app.store.get('article.' + key) || value;
+                });
             }
-            $scope.article = app.union(originData);
-            app.checkDirty(article, originData, $scope.article);
             preview(data);
         }
 
@@ -917,7 +922,10 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
 
         $scope.validateTooltip = app.union(app.rootScope.validateTooltip);
         $scope.validateTooltip.placement = 'bottom';
-
+        $scope.store = function (key) {
+            var value = $scope.article[key];
+            app.store.set('article.' + key, value);
+        };
         $scope.checkTitleMin = function (scope, model) {
             var length = lengthFn(model.$value);
             $scope.parent.titleBytes = length;
@@ -949,6 +957,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             var tagsList = $scope.article.tagsList;
             if (tagsList.indexOf(tag.tag) < 0 && tagsList.length < global.ArticleTagsMax) {
                 $scope.article.tagsList = tagsList.concat(tag.tag); // 此处push方法不会更新tagsList视图
+                $scope.store('tagsList');
             }
         };
         $scope.wmdPreview = function () {
@@ -979,6 +988,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                         timing.then(function () {
                             app.location.search({}).path('/' + article._id);
                         });
+                        app.store.clear();
                     });
                 } else {
                     app.toast.info(locale.ARTICLE.noUpdate);
@@ -986,9 +996,11 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             }
         };
 
-        $scope.$watchCollection('article', function (value) {
-            app.checkDirty(article, originData, value);
-        });
+        if (!app.store.enabled) {
+            $scope.$watchCollection('article', function (value) {
+                app.checkDirty(article, originData, value);
+            });
+        }
 
         mdEditor().run();
         if (ID) {

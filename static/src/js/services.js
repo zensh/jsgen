@@ -1,5 +1,5 @@
 'use strict';
-/*global angular, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8*/
+/*global angular, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8, store*/
 
 angular.module('jsGen.services', ['ngResource', 'ngCookies']).
 factory('restAPI', ['$resource',
@@ -235,6 +235,8 @@ factory('restAPI', ['$resource',
     return CryptoJS;
 }).factory('utf8', function () {
     return utf8;
+}).factory('store', function () {
+    return store;
 }).factory('mdParse', ['tools',
     function (tools) {
         return function (html) {

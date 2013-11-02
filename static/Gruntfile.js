@@ -58,6 +58,10 @@ module.exports = function(grunt) {
       options: {
         banner: '<%= banner %>'
       },
+      reserveLoad: {
+        dest: 'dist/js/reserveLoad.min.js',
+        src: 'src/bower_components/reserveLoadjs/reserveLoad.js'
+      },
       ie: {
         dest: 'dist/js/ie.min.js',
         src: [
@@ -83,6 +87,7 @@ module.exports = function(grunt) {
           'src/js/lib/hmac-sha256.js',
           'src/js/lib/Markdown.Editor.js',
           'src/js/lib/sanitize.js',
+          'src/js/lib/store.js',
           'src/js/lib/utf8.js'
         ]
       },

@@ -72,9 +72,9 @@ config(['$httpProvider', 'app',
         });
     }
 ]).run(['app', '$q', '$rootScope', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'isVisible', 'applyFn', 'param',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'isVisible', 'applyFn', 'param', 'store',
     function (app, $q, $rootScope, $location, $timeout, $filter, $locale,
-        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, isVisible, applyFn, param) {
+        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, isVisible, applyFn, param, store) {
         var unSave = {
                 stopUnload: false,
                 nextUrl: ''
@@ -82,7 +82,8 @@ config(['$httpProvider', 'app',
             global = $rootScope.global = {
                 isAdmin: false,
                 isEditor: false,
-                isLogin: false
+                isLogin: false,
+                info: {}
             },
             jqWin = $(window);
 
@@ -102,12 +103,14 @@ config(['$httpProvider', 'app',
                 data.title2 = data.description;
                 data.info.angularjs = angular.version.full;
                 app.union(global, data);
+                app.version = global.info.version || '';
                 app.checkUser();
             });
         }
 
         window.app = app; // just for test
         app.q = $q;
+        app.store = store;
         app.toast = toast;
         app.param = param;
         app.timing = timing;
