@@ -38,22 +38,6 @@ module.exports = function(grunt) {
       }
     },
 
-    concat: {
-      options: {
-        banner: '<%= banner %>',
-        stripBanners: false
-      },
-      angular: {
-        dest: 'dist/js/angular-lib.min.js',
-        src: [
-          'src/bower_components/angular-animate/angular-animate.min.js',
-          'src/bower_components/angular-cookies/angular-cookies.min.js',
-          'src/bower_components/angular-resource/angular-resource.min.js',
-          'src/bower_components/angular-route/angular-route.min.js'
-        ]
-      }
-    },
-
     uglify: {
       options: {
         banner: '<%= banner %>'
@@ -74,6 +58,16 @@ module.exports = function(grunt) {
       jquery: {
         dest: 'dist/js/jquery.old.js',
         src: ['src/bower_components/jquery.old/jquery.js']
+      },
+      angular: {
+        dest: 'dist/js/angular-all.min.js',
+        src: [
+          'src/bower_components/angular/angular.js',
+          'src/bower_components/angular-animate/angular-animate.js',
+          'src/bower_components/angular-cookies/angular-cookies.js',
+          'src/bower_components/angular-resource/angular-resource.js',
+          'src/bower_components/angular-route/angular-route.js'
+        ]
       },
       lib: {
         dest: 'dist/js/lib.min.js',
@@ -135,12 +129,6 @@ module.exports = function(grunt) {
         dest: 'dist/css/',
         src: ['src/bower_components/font-awesome/css/font-awesome.min.css']
       },
-      angular: {
-        expand: true,
-        flatten: true,
-        dest: 'dist/js/',
-        src: ['src/bower_components/angular/angular.min.js']
-      },
       jquery: {
         expand: true,
         flatten: true,
@@ -183,7 +171,7 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  // grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -191,5 +179,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-recess');
 
   // Default task.
-  grunt.registerTask('default', ['clean', 'jshint', 'concat', 'uglify', 'recess', 'copy', 'hash']);
+  grunt.registerTask('default', ['clean', 'jshint', 'uglify', 'recess', 'copy', 'hash']);
 };

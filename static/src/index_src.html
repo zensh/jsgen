@@ -74,8 +74,7 @@
         reserveLoad(
           IE8 && '/static/{{_js/ie.min.js_}}', // load it if lt IE 9
           ['http://cdn.staticfile.org/jquery/' + jqVer + '/jquery.min.js', '/static/js/jquery.' + jqVer2 + '.js', 'jQuery'],
-          ['/static/{{_js/angular.min.js_}}', 'angular'],
-          '/static/{{_js/angular-lib.min.js_}}',
+          ['/static/{{_js/angular-all.min.js_}}', 'angular'],
           '/static/{{_js/lib.min.js_}}',
           '/static/{{_js/jsgen.min.js_}}',
           function (errorUrl) {

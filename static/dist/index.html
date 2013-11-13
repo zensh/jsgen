@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/static/favicon.ico"/>
     <link rel="stylesheet" href="/static/css/jsgen.min.css?v=5943e6b9fe99e6ddb72b87da3919a84a">
-    <link rel="stylesheet" href="/static/css/font-awesome.min.css?v=181d733a72e8b381d13c1785370ddd77">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
     <script src="/static/js/reserveLoad.min.js?v=2b8dce315b63fdc272eb2e81e81253fd"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
@@ -74,9 +74,8 @@
         reserveLoad(
           IE8 && '/static/js/ie.min.js?v=44851dcd64cbae544068e596aef8093f', // load it if lt IE 9
           ['http://cdn.staticfile.org/jquery/' + jqVer + '/jquery.min.js', '/static/js/jquery.' + jqVer2 + '.js', 'jQuery'],
-          ['/static/js/angular.min.js?v=5c99d9aecd0058389b9e175ff1d3521c', 'angular'],
-          '/static/js/angular-lib.min.js?v=8662d467cfd5375ac6da6ddb1243e3c6',
-          '/static/js/lib.min.js?v=13275f31f6d08eb274228773fc919d2d',
+          ['/static/js/angular-all.min.js?v=a7aa1a332e17fcf6a24f5a503beefb24', 'angular'],
+          '/static/js/lib.min.js?v=340d381dbe76f13d9acd38a1be1cbb5e',
           '/static/js/jsgen.min.js?v=385d2c5aa652b2da2609affec26b50dd',
           function (errorUrl) {
             if (errorUrl) {
