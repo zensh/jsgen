@@ -860,6 +860,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             locale = app.locale,
             global = app.rootScope.global,
             filter = app.filter,
+            upyun = app.upyun,
             lengthFn = filter('length'),
             cutTextFn = filter('cutText'),
             restAPI = app.restAPI.article,
@@ -918,6 +919,16 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             titleBytes: 0,
             title: '',
             content: ''
+        };
+        $scope.uploaderOptions = {
+            scope: $scope,
+            allowFileType: upyun.allowFileType,
+            url: upyun.url,
+            policy: upyun.policy,
+            signature: upyun.signature,
+            success: function (response, file) {
+                $scope.article.content += '\n' + '![' + file.name + '](' + app.rootScope.global.cloudDomian + response.url + ')\n';
+            }
         };
 
         $scope.validateTooltip = app.union(app.rootScope.validateTooltip);

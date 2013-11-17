@@ -104,6 +104,7 @@ config(['$httpProvider', 'app',
                 data.info.angularjs = angular.version.full;
                 app.union(global, data);
                 app.version = global.info.version || '';
+                app.upyun = global.user && global.user.upyun;
                 app.checkUser();
             });
         }

@@ -10,16 +10,17 @@ var tagAPI = jsGen.api.tag,
     userCache = jsGenCache.user,
     msg = jsGen.lib.msg,
     redis = jsGen.lib.redis,
-    each = jsGen.lib.tools.each,
-    union = jsGen.lib.tools.union,
-    equal = jsGen.lib.tools.equal,
-    resJson = jsGen.lib.tools.resJson,
-    toArray = jsGen.lib.tools.toArray,
-    checkUrl = jsGen.lib.tools.checkUrl,
-    intersect = jsGen.lib.tools.intersect,
-    checkEmail = jsGen.lib.tools.checkEmail,
-    removeItem = jsGen.lib.tools.removeItem,
-    errorHandler = jsGen.lib.tools.errorHandler,
+    tools = jsGen.lib.tools,
+    each = tools.each,
+    union = tools.union,
+    equal = tools.equal,
+    resJson = tools.resJson,
+    toArray = tools.toArray,
+    checkUrl = tools.checkUrl,
+    intersect = tools.intersect,
+    checkEmail = tools.checkEmail,
+    removeItem = tools.removeItem,
+    errorHandler = tools.errorHandler,
     configSetTpl = jsGen.lib.json.ConfigSetTpl,
     configPublicTpl = jsGen.lib.json.ConfigPublicTpl;
 
@@ -45,7 +46,16 @@ function getIndex(req, res) {
             defer();
         }
     }).all(function (defer, err, user) {
-        var config = union(configPublicTpl);
+        var config = union(configPublicTpl),
+            upyun = union(jsGen.conf.upyun);
+        upyun.expiration += Math.ceil(Date.now() / 1000);
+        upyun['save-key'] = '/' + user._id + upyun['save-key'];
+        user.upyun = {
+            url: jsGenConfig.upyun.url + (jsGenConfig.upyun.bucket || upyun.bucket),
+            policy: tools.base64(JSON.stringify(upyun)),
+            allowFileType: jsGen.conf.upyun['allow-file-type']
+        };
+        user.upyun.signature = tools.MD5(user.upyun.policy + '&' + jsGenConfig.upyun.form_api_secret);
 
         // 自动登录更新session
         if (Uid && !req.session.Uid && user) {
@@ -151,6 +161,9 @@ function setGlobal(req, res) {
         }
         if (setObj.smtp) {
             setObj.smtp = union(jsGenConfig.smtp, setObj.smtp);
+        }
+        if (setObj.upyun) {
+            setObj.upyun = union(jsGenConfig.upyun, setObj.upyun);
         }
         userCache.capacity = setObj.userCache || userCache.capacity;
         jsGenCache.article.capacity = setObj.articleCache || jsGenCache.article.capacity;

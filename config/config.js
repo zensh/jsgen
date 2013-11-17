@@ -90,5 +90,20 @@ module.exports = {
     ExceptPath: [],//例外的路径，如果用户访问这个url路径，无论在不在ip过滤列表中，都可以正常使用，白名单才能使用
     NotAllow: 'No permission!', //禁止访问响应给客户端的信息
 //客户端跨域功能
-	isClientPipe: false  //如果为true，则提供给客户端跨域请求的功能
+	isClientPipe: false,  //如果为true，则提供给客户端跨域请求的功能
+    upyun: {  // upyun 表单上传API配置，更多配置选项请参考upyun.com
+        'bucket': 'angularjs',
+        'expiration': 600, // 授权过期时间：以页面加载完毕开始计时，10分钟内有效
+        'save-key': '/{year}{mon}{day}/{filemd5}_{filename}{.suffix}', // 保存路径：最终将以"/用户ID/年月日/upload_待上传文件名"的形式进行保存
+        'allow-file-type': 'jpg,gif,png', // 文件类型限制：仅允许上传扩展名为 jpg,gif,png 三种类型的文件
+        'image-width-range': '0,2048', // 图片宽度限制：仅允许上传宽度在 0～1024px 范围的图片文件
+        'image-height-range': '0,2048', // 图片高度限制：仅允许上传高度在 0～1024px 范围的图片文件
+        // 同步跳转 url：表单上传完成后，使用 http 302 的方式跳转到该 URL
+        // 'return-url': 'http://localhost/return.php',
+        // 异步回调 url：表单上传完成后，云存储服务端主动把上传结果 POST 到该 URL
+        // 请注意该地址必须公网可以正常访问
+        // 'notify-url': 'http://www.demobucket.com/notify.php',
+        'x-gmkerl-type': 'fix_max', // 缩略类型：限定最长边，短边自适应
+        'x-gmkerl-value': '800' // 保证最终的图片宽度不超过800
+    }
 };

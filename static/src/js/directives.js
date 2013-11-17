@@ -1,7 +1,7 @@
 'use strict';
 /*global angular, $*/
 
-angular.module('jsGen.directives', []).
+angular.module('jsGen.directives', ['angularFileUpload']).
 directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout',
     function (mdParse, sanitize, pretty, isVisible, $timeout) {
         // <div gen-parse-md="document"></div>
@@ -351,6 +351,66 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
                         };
                         img.src = value;
                     }
+                });
+            }
+        };
+    }
+]).directive('genUploader', ['getFile', '$fileUploader', 'app',
+    function (getFile, $fileUploader, app) {
+        // <div gen-pagination="options"></div>
+        // HTML/CSS修改于Bootstrap框架
+        // options = {
+        //     path: 'pathUrl',
+        //     sizePerPage: [25, 50, 100],
+        //     pageSize: 25,
+        //     pageIndex: 1,
+        //     total: 10
+        // };
+        return {
+            scope: true,
+            templateUrl: getFile.html('gen-uploader.html'),
+            link: function (scope, element, attr) {
+                var options = scope.$eval(attr.genUploader);
+                var fileType = options.fileType;
+                scope.triggerUpload = function () {
+                    element.find('input').click();
+                };
+
+                // create a uploader with options
+                var uploader = scope.uploader = $fileUploader.create({
+                    scope: options.scope || scope,
+                    url: options.url,
+                    formData: [{
+                        policy: options.policy,
+                        signature: options.signature
+                    }],
+                    filters: [
+                        function (file) {
+                            var judge = true,
+                                parts = file.name.split('.');
+                            parts = parts.length > 1 ? parts.slice(-1)[0] : '';
+                            if (!parts || options.allowFileType.indexOf(parts) < 0) {
+                                judge = false;
+                                app.toast.warning(app.locale.UPLOAD.fileType);
+                            }
+                            return judge;
+                        }
+                    ]
+                });
+
+                // REGISTER HANDLERS
+
+                uploader.bind('success', function (event, xhr, item) {
+                    var response = JSON.parse(xhr.response) || {};
+                    if (options.success) {
+                        options.success(response, item.file);
+                    }
+                });
+                uploader.bind('error', function (event, xhr, item) {
+                    var response = JSON.parse(xhr.response) || {};
+                    item.isUploaded = false;
+                    item.progress = 0;
+                    app.toast.warning(response.message, response.code);
                 });
             }
         };

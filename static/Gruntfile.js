@@ -72,6 +72,7 @@ module.exports = function(grunt) {
       lib: {
         dest: 'dist/js/lib.min.js',
         src: [
+          'src/bower_components/angular-file-upload/angular-file-upload.js',
           'src/bower_components/google-code-prettify/src/prettify.js',
           'src/bower_components/marked/lib/marked.js',
           'src/bower_components/toastr/toastr.js',
@@ -113,6 +114,17 @@ module.exports = function(grunt) {
           'src/css/prettify.css',
           'src/css/main.css'
         ]
+      }
+    },
+
+    htmlmin: {
+      dist: {
+        options: {
+          removeComments: true,
+          collapseWhitespace: true
+        },
+        dest: 'dist/tpl/',
+        src: ['src/tpl/*.html']
       }
     },
 
@@ -171,7 +183,8 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-clean');
-  // grunt.loadNpmTasks('grunt-contrib-concat');
+  // grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  // grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');

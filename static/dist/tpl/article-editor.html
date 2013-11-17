@@ -9,7 +9,7 @@
         </div>
     </div>
     <div ng-class="{'pure-u-1-2':global.isDesktop,'pure-u-1':!global.isDesktop}">
-        <div class="panel">
+        <div class="panel file-drop" ng-file-drop ng-file-over="file-drop-over">
             <div class="page-header inner">
                 <strong>{{parent.edit | switch:'edit'}}文章</strong>
             </div>
@@ -39,6 +39,7 @@
                 </textarea>
                 <mark>热门标签：</mark>
                 <a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a>
+                <div class="well" gen-uploader="uploaderOptions" ng-if="global.upload"></div>
                 <div class="well">
                     <button class="pure-button pure-button-small info-bg" ng-click="wmdPreview()">MarkDown语法 / 文章预览</button>
                     <button type="submit" class="pure-button pure-button-small success-bg" ng-class="{'pure-button-disabled':!global.isLogin}" ng-click="submit()">提交</button>

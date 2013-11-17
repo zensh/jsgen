@@ -15,6 +15,9 @@
         <li gen-tab-click="active">
             <a ng-click="parent.switchTab='tab4'">SMTP设置</a>
         </li>
+        <li gen-tab-click="active">
+            <a ng-click="parent.switchTab='tab5'">云存储设置</a>
+        </li>
     </ul>
     <div class="inner well" ng-switch on="parent.switchTab">
         <div ng-switch-default>
@@ -232,6 +235,30 @@
                 <div class="pure-control-group">
                     <label>是否开启SSL：</label>
                     <input type="button" class="pure-button pure-button-small" ng-class="{'primary-bg':editGlobal.smtp.secureConnection}" ng-click="editGlobal.smtp.secureConnection=!editGlobal.smtp.secureConnection" value="{{!editGlobal.smtp.secureConnection | switch:'turn'}}">
+                </div>
+                <div class="pure-controls">
+                    <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>
+                    <button class="pure-button info-bg" ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+        <div ng-switch-when="tab5">
+            <form class="pure-form pure-form-aligned" novalidate>
+                <div class="pure-control-group">
+                    <label>云存储空间绑定域名：</label>
+                    <input type="text" ng-model="editGlobal.cloudDomian" />
+                </div>
+                <div class="pure-control-group">
+                    <label>又拍云bucket：</label>
+                    <input type="text" ng-model="editGlobal.upyun.bucket" />
+                </div>
+                <div class="pure-control-group">
+                    <label>又拍云表单密匙：</label>
+                    <input type="password" ng-model="editGlobal.upyun.form_api_secret"/>
+                </div>
+                <div class="pure-control-group">
+                    <label>是否开启图片上传：</label>
+                    <input type="button" class="pure-button pure-button-small" ng-class="{'primary-bg':editGlobal.upload}" ng-click="editGlobal.upload=!editGlobal.upload" value="{{!editGlobal.upload | switch:'turn'}}">
                 </div>
                 <div class="pure-controls">
                     <button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button>

@@ -124,6 +124,9 @@ run(['$locale',
                 hourAgo: '小时前',
                 minuteAgo: '分钟前',
                 secondAgo: '刚刚'
+            },
+            UPLOAD: {
+                fileType: '文件类型无效，仅允许png、gif、jpg文件！'
             }
         });
     }

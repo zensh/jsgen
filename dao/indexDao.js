@@ -77,7 +77,16 @@ var that = jsGen.dao.db.bind('global', {
                     senderName: '',
                     senderEmail: ''
                 },
-                info: {}
+                info: {},
+                upload: false,
+                cloudDomian: '',
+                upyun: {
+                    url: '',
+                    bucket: '',
+                    user: '',
+                    passwd: '',
+                    form_api_secret: ''
+                }
             };
 
         intersect(newObj, Obj);
