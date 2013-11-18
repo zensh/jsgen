@@ -3,11 +3,11 @@
   "version": "0.7.2",
   "main": "index.html",
   "dependencies": {
-    "angular": ">=1.2.0-rc.3",
-    "angular-animate": ">=1.2.0-rc.3",
-    "angular-cookies": ">=1.2.0-rc.3",
-    "angular-resource": ">=1.2.0-rc.3",
-    "angular-route": ">=1.2.0-rc.3",
+    "angular": ">=1.2.0",
+    "angular-animate": ">=1.2.0",
+    "angular-cookies": ">=1.2.0",
+    "angular-resource": ">=1.2.0",
+    "angular-route": ">=1.2.0",
     "pure": ">=0.3.0",
     "font-awesome": ">=3.2.1",
     "jquery": ">=2.0.3",
@@ -17,6 +17,8 @@
     "json2": "",
     "marked": ">=0.2.9",
     "toastr": ">=2.0.1",
-    "google-code-prettify": ">=1.0.0"
+    "google-code-prettify": ">=1.0.0",
+    "angular-file-upload": "v0.2.8.7",
+    "reserveLoadjs": ">=0.4.1"
   }
 }

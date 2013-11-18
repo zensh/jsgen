@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico"/>
     <link rel="stylesheet" href="/static/css/jsgen.min.css?v=60571f1a2e5a3b877f32265556117786">
     <link rel="stylesheet" href="/static/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
-    <script src="/static/js/reserveLoad.min.js?v=2b8dce315b63fdc272eb2e81e81253fd"></script>
+    <script src="/static/js/reserveLoad.min.js?v=30d3fd1997d9116fa1f0c78f74544ac1"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
@@ -72,11 +72,11 @@
           jqVer2 = IE8 ? 'old' : 'min';
 
         reserveLoad(
-          IE8 && '/static/js/ie.min.js?v=44851dcd64cbae544068e596aef8093f', // load it if lt IE 9
+          IE8 && '/static/js/ie.min.js?v=78dea147a2b03c3da78bfaef03dd4878', // load it if lt IE 9
           ['http://cdn.staticfile.org/jquery/' + jqVer + '/jquery.min.js', '/static/js/jquery.' + jqVer2 + '.js', 'jQuery'],
-          ['/static/js/angular-all.min.js?v=a7aa1a332e17fcf6a24f5a503beefb24', 'angular'],
-          '/static/js/lib.min.js?v=9fdcf8e4b1d7147c9221f58609c1c793',
-          '/static/js/jsgen.min.js?v=677c1371e1e55cd097fd22dda59d642a',
+          ['/static/js/angular-all.min.js?v=960fc01db8d372821ee1d4efd5f6093f', 'angular'],
+          '/static/js/lib.min.js?v=15bd02a628d5425411faa1fb12f7bab0',
+          '/static/js/jsgen.min.js?v=6b9e605f9fc2586bea943a22646b7a96',
           function (errorUrl) {
             if (errorUrl) {
               alert('Error loading: ' + errorUrl);

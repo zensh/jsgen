@@ -874,7 +874,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             originData = app.union(article);
 
         if (!global.isLogin) {
-            app.location.search({}).path('/');
+            return app.location.search({}).path('/');
         }
 
         function initArticle(data) {
@@ -920,6 +920,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             title: '',
             content: ''
         };
+
         $scope.uploaderOptions = {
             scope: $scope,
             allowFileType: upyun.allowFileType,

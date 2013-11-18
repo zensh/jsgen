@@ -46,22 +46,24 @@ function getIndex(req, res) {
             defer();
         }
     }).all(function (defer, err, user) {
-        var config = union(configPublicTpl),
-            upyun = union(jsGen.conf.upyun);
-        upyun.expiration += Math.ceil(Date.now() / 1000);
-        upyun['save-key'] = '/' + user._id + upyun['save-key'];
-        user.upyun = {
-            url: jsGenConfig.upyun.url + (jsGenConfig.upyun.bucket || upyun.bucket),
-            policy: tools.base64(JSON.stringify(upyun)),
-            allowFileType: jsGen.conf.upyun['allow-file-type']
-        };
-        user.upyun.signature = tools.MD5(user.upyun.policy + '&' + jsGenConfig.upyun.form_api_secret);
+        var config = union(configPublicTpl);
 
         // 自动登录更新session
         if (Uid && !req.session.Uid && user) {
             req.session.Uid = Uid;
             req.session.role = user.role;
             req.session.logauto = true;
+        }
+        if (user) {
+            var upyun = union(jsGen.conf.upyun);
+            upyun.expiration += Math.ceil(Date.now() / 1000);
+            upyun['save-key'] = '/' + user._id + upyun['save-key'];
+            user.upyun = {
+                url: jsGenConfig.upyun.url + (jsGenConfig.upyun.bucket || upyun.bucket),
+                policy: tools.base64(JSON.stringify(upyun)),
+                allowFileType: jsGen.conf.upyun['allow-file-type']
+            };
+            user.upyun.signature = tools.MD5(user.upyun.policy + '&' + jsGenConfig.upyun.form_api_secret);
         }
 
         // 更新在线用户
