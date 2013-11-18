@@ -93,11 +93,12 @@ module.exports = {
 	isClientPipe: false,  //如果为true，则提供给客户端跨域请求的功能
     upyun: {  // upyun 表单上传API配置，更多配置选项请参考upyun.com
         'bucket': 'angularjs',
+        'content-length-range': '1024,4096000',
         'expiration': 600, // 授权过期时间：以页面加载完毕开始计时，10分钟内有效
         'save-key': '/{year}{mon}{day}/{filemd5}_{filename}{.suffix}', // 保存路径：最终将以"/用户ID/年月日/upload_待上传文件名"的形式进行保存
         'allow-file-type': 'jpg,gif,png', // 文件类型限制：仅允许上传扩展名为 jpg,gif,png 三种类型的文件
-        'image-width-range': '0,2048', // 图片宽度限制：仅允许上传宽度在 0～1024px 范围的图片文件
-        'image-height-range': '0,2048', // 图片高度限制：仅允许上传高度在 0～1024px 范围的图片文件
+        'image-width-range': '0,3072', // 图片宽度限制：仅允许上传宽度在 0～1024px 范围的图片文件
+        'image-height-range': '0,3072', // 图片高度限制：仅允许上传高度在 0～1024px 范围的图片文件
         // 同步跳转 url：表单上传完成后，使用 http 302 的方式跳转到该 URL
         // 'return-url': 'http://localhost/return.php',
         // 异步回调 url：表单上传完成后，云存储服务端主动把上传结果 POST 到该 URL

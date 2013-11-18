@@ -920,15 +920,16 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
             title: '',
             content: ''
         };
-
+        var baseUrl = global.cloudDomian || global.url;
         $scope.uploaderOptions = {
             scope: $scope,
             allowFileType: upyun.allowFileType,
             url: upyun.url,
+            baseUrl: baseUrl,
             policy: upyun.policy,
             signature: upyun.signature,
-            success: function (response, file) {
-                $scope.article.content += '\n' + '![' + file.name + '](' + app.rootScope.global.cloudDomian + response.url + ')\n';
+            clickImage: function (file) {
+                $scope.article.content += '\n' + '![' + file.name + '](' + file.url + ')\n';
             }
         };
 

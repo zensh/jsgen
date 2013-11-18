@@ -81,7 +81,7 @@
             <ul class="media-list comments">
                 <li class="media" ng-repeat="comment in article.commentsList">
                   <a class="media-object left" ng-href="{{'/'+comment.author._id}}" ng-show="!global.isPocket">
-                    <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
+                    <img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body" id="{{comment._id}}">
                     <div class="media-heading">
@@ -116,7 +116,7 @@
             <ul class="media-list comments"  id="commentForm" gen-moving="commentMoving">
                 <li class="media" ng-repeat="comment in referComments">
                   <a class="media-object left" ng-href="{{'/'+comment.author._id}}" ng-show="!global.isPocket">
-                      <img class="img-small" src="/static/img/avatar.png" gen-src="{{comment.author.avatar}}">
+                      <img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{comment.author.avatar}}">
                   </a>
                   <div class="media-body">
                     <div class="media-heading">
@@ -147,7 +147,7 @@
             <div class="panel-heading">作者信息</div>
             <div class="media inner">
                 <a class="media-object left" ng-href="{{'/'+article.author._id}}">
-                    <img class="img-small" src="/static/img/avatar.png" gen-src="{{article.author.avatar}}">
+                    <img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{article.author.avatar}}">
                 </a>
                 <div class="media-body">
                     <div class="media-header"><a ng-href="{{'/'+article.author._id}}">{{article.author.name}}</a></div>

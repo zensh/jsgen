@@ -1,10 +1,9 @@
 <table class="pure-table pure-table-horizontal file-upload-info" ng-show="uploader.queue.length">
     <thead>
         <tr>
-            <th width="30%">名称</th>
+            <th width="35%">名称</th>
             <th width="15%">大小</th>
             <th width="30%">进度</th>
-            <th width="5%"></th>
             <th width="20%">总数：{{ uploader.queue.length }}</th>
         </tr>
     </thead>
@@ -17,11 +16,8 @@
                     <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
                 </div>
             </td>
-            <td>
-                <i class="fa fa-check" ng-show="item.isUploaded"></i>
-            </td>
             <td nowrap>
-                <button type="button" class="pure-button pure-button-xsmall success-bg" ng-click="item.upload()" ng-disabled="item.isUploaded">
+                <button type="button" class="pure-button pure-button-xsmall success-bg" ng-click="item.upload()" ng-disabled="item.isUploading">
                     <span class="fa fa-upload"></span>上传
                 </button>
                 <button type="button" class="pure-button pure-button-xsmall warning-bg" ng-click="item.remove()">
@@ -33,11 +29,10 @@
 </table>
 <div class="progress" ng-show="uploader.queue.length">
     <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
-    </div>
-    <div>
-    <button type="button" class="pure-button pure-button-small info-bg upload-button" ng-click="triggerUpload()">
-        <span class="fa fa-plus-square-o"></span> 添加图片
-        <input class="upload-input" ng-file-select type="file" multiple/>
+</div>
+<div>
+    <button type="button" class="pure-button pure-button-small info-bg" ng-click="triggerUpload()">
+        <span class="fa fa-plus-square-o"></span> 上传图片<input class="upload-input" ng-file-select type="file" multiple/>
     </button>
     <button type="button" class="pure-button pure-button-small success-bg" ng-click="uploader.uploadAll()" ng-show="uploader.queue.length" ng-disabled="!uploader.getNotUploadedItems().length">
         <span class="fa fa-upload"></span> 上传所有
@@ -46,3 +41,8 @@
         <span class="fa fa-trash-o"></span> 删除所有
     </button>
 </div>
+<ul class="nav file-uploaded" ng-show="uploaded.length">
+    <li ng-repeat="file in uploaded">
+        <a class="file-thumbnail" style="background-image: url({{file.url}});" ng-click="clickImage(file)" title="{{file.name}}"></a>
+    </li>
+</ul>

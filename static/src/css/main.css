@@ -136,6 +136,9 @@ body > div {
     text-indent: 2em;
     line-height: 1.62em;
 }
+.article-content > p > img {
+    margin-left: -2em;
+}
 .article-footer {
     padding: 1em;
     margin: 2em 0 1em;
@@ -447,6 +450,9 @@ body > div {
 }
 .media-content > p {
     text-indent: 2em;
+}
+.media-content > p > img {
+    margin-left: -2em;
 }
 .comments .media-content > p {
     margin: .5em 0;
@@ -1169,6 +1175,21 @@ ol.inner {
 }
 input.upload-input {
     display: none;
+}
+.file-uploaded  li {
+    display: block;
+    float: left;
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #E6E6E6;
+}
+.file-uploaded .file-thumbnail {
+    display: block;
+    height: 100px;
+    width: 100px;
+    background-size: 100%;
+    background-repeat:no-repeat;
+    background-position: center;
 }
 
 @media (min-width: 980px) {

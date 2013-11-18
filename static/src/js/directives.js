@@ -373,8 +373,12 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
                 var options = scope.$eval(attr.genUploader);
                 var fileType = options.fileType;
                 scope.triggerUpload = function () {
-                    element.find('input').click();
+                    setTimeout(function () {
+                        element.find('.upload-input').click();
+                    });
                 };
+                scope.clickImage = options.clickImage || angular.noop;
+                var uploaded = scope.uploaded = [];
 
                 // create a uploader with options
                 var uploader = scope.uploader = $fileUploader.create({
@@ -389,7 +393,7 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
                             var judge = true,
                                 parts = file.name.split('.');
                             parts = parts.length > 1 ? parts.slice(-1)[0] : '';
-                            if (!parts || options.allowFileType.indexOf(parts) < 0) {
+                            if (!parts || options.allowFileType.indexOf(parts.toLowerCase()) < 0) {
                                 judge = false;
                                 app.toast.warning(app.locale.UPLOAD.fileType);
                             }
@@ -398,19 +402,17 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
                     ]
                 });
 
-                // REGISTER HANDLERS
-
-                uploader.bind('success', function (event, xhr, item) {
-                    var response = JSON.parse(xhr.response) || {};
-                    if (options.success) {
-                        options.success(response, item.file);
+                uploader.bind('complete', function (event, xhr, item) {
+                    var response = app.parseJSON(xhr.response) || {};
+                    if (~[200, 201].indexOf(xhr.status)) {
+                        var file = app.union(item.file, response);
+                        file.url = options.baseUrl + file.url;
+                        uploaded.push(file);
+                        item.remove();
+                    } else {
+                        item.progress = 0;
+                        app.toast.warning(response.message, response.code);
                     }
-                });
-                uploader.bind('error', function (event, xhr, item) {
-                    var response = JSON.parse(xhr.response) || {};
-                    item.isUploaded = false;
-                    item.progress = 0;
-                    app.toast.warning(response.message, response.code);
                 });
             }
         };

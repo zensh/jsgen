@@ -17,7 +17,8 @@ factory('tools', function () {
         isArray: isArray,
         intersect: intersect,
         checkType: checkType,
-        remove: remove
+        remove: remove,
+        parseJSON: parseJSON
     };
 
     function isArray(obj) {
@@ -219,5 +220,14 @@ factory('tools', function () {
             }, null, false);
         }
         return removed;
+    }
+
+    function parseJSON(json) {
+        try {
+            return JSON.parse(json);
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
     }
 });

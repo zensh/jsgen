@@ -9,17 +9,17 @@
     <meta name="description" content="{{global.metadesc}}">
     <meta name="keywords" content="{{global.keywords}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/static/favicon.ico"/>
-    <link rel="stylesheet" href="/static/css/jsgen.min.css?v=60571f1a2e5a3b877f32265556117786">
-    <link rel="stylesheet" href="/static/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
-    <script src="/static/js/reserveLoad.min.js?v=30d3fd1997d9116fa1f0c78f74544ac1"></script>
+    <link rel="shortcut icon" href="http://cdn.angularjs.cn/favicon.ico"/>
+    <link rel="stylesheet" href="http://cdn.angularjs.cn/css/jsgen.min.css?v=e4f60e1cab9e76ad8971176fb094723d">
+    <link rel="stylesheet" href="http://cdn.angularjs.cn/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
+    <script src="http://cdn.angularjs.cn/js/reserveLoad.min.js?v=2705a15c3cc4944573e63191b6143aab"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
     <div class="pure-u-1 menu">
       <div class="pure-menu pure-menu-open pure-menu-horizontal wrap">
         <ul class="pure-menu-logo">
-          <li><a class="pure-menu-img" href="/"><img height="50" ng-src="{{global.logo}}"/></a></li>
+          <li><a class="pure-menu-img" href="/"><img height="50" src="http://cdn.angularjs.cn/img/logo.png"/></a></li>
           <li><a href="/">{{global.title}}</a></li>
         </ul>
         <ul ng-if="!global.isPhone">
@@ -33,7 +33,7 @@
           <li><a href="/login"><i class="fa fa-signin"></i>登录</a></li>
         </ul>
         <ul class="right user" ng-if="global.isLogin">
-          <li><a class="pure-menu-img" href="/home"><img class="img-mini" src="/static/img/avatar.png" gen-src="{{global.user.avatar}}"/></a></li>
+          <li><a class="pure-menu-img" href="/home"><img class="img-mini" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{global.user.avatar}}"/></a></li>
           <li ng-if="global.isDesktop"><a href="/home"><i class="fa fa-home"></i>{{global.user.name}}</a></li>
           <li ng-if="global.isEditor"><a href="/admin"><i class="fa fa-gear"></i>管理</a></li>
           <li ng-if="global.isDesktop"><a ng-click="logout()"><i class="fa fa-signout"></i>退出</a></li>
@@ -45,7 +45,7 @@
     <![endif]-->
     <!--[if lt IE 8]>
       <div class="pure-u ie-logo text-center">
-        <img src="/static/img/angularjs.png" />
+        <img src="http://cdn.angularjs.cn/img/angularjs.png" />
         <h1>AngularJS中文社区</h1>
       </div>
     <![endif]-->
@@ -68,15 +68,14 @@
     <script>
       (function () {
         var IE8 = !-[1,],
-          jqVer = IE8 ? '1.7.2' : '2.0.3',
-          jqVer2 = IE8 ? 'old' : 'min';
+          jqVer = IE8 ? 'old' : 'min';
 
         reserveLoad(
-          IE8 && '/static/js/ie.min.js?v=78dea147a2b03c3da78bfaef03dd4878', // load it if lt IE 9
-          ['http://cdn.staticfile.org/jquery/' + jqVer + '/jquery.min.js', '/static/js/jquery.' + jqVer2 + '.js', 'jQuery'],
-          ['/static/js/angular-all.min.js?v=960fc01db8d372821ee1d4efd5f6093f', 'angular'],
-          '/static/js/lib.min.js?v=15bd02a628d5425411faa1fb12f7bab0',
-          '/static/js/jsgen.min.js?v=6b9e605f9fc2586bea943a22646b7a96',
+          IE8 && 'http://cdn.angularjs.cn/js/ie.min.js?v=6a543e0e9943953b990864a6d12f0042', // load it if lt IE 9
+          'http://cdn.angularjs.cn/js/jquery.' + jqVer + '.js',
+          'http://cdn.angularjs.cn/js/angular-all.min.js?v=031460d2cf7d39d88b05fa6965ff6238',
+          'http://cdn.angularjs.cn/js/lib.min.js?v=e3b9eac55d22254901870bd056c8807c',
+          'http://cdn.angularjs.cn/js/jsgen.min.js?v=860b78f7aee28f30d13b2b72bfb0259d',
           function (errorUrl) {
             if (errorUrl) {
               alert('Error loading: ' + errorUrl);
