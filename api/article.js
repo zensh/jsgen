@@ -776,7 +776,7 @@ function robot(req, res) {
         obj.global = intersect(union(configPublicTpl), jsGenConfig);
         cache.index(0, 200, defer);
     }).then(function (defer, list) {
-        obj.articlesList = convertArticlesID(list.slice(0, 20));
+        obj.articlesList = convertArticlesID(list.slice(0, 50));
         if (checkID(ID, 'A')) {
             ID = convertArticleID(ID);
             then(function (defer2) {

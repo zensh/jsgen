@@ -34,7 +34,10 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },
       src: {
-        src: ['src/js/*.js']
+        src: 'src/js/*.js'
+      },
+      server: {
+        src: ['../app.js', '../app.js', '../api/*.js', '../dao/*.js', '../lib/*.js']
       }
     },
 
@@ -192,5 +195,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-recess');
 
   // Default task.
-  grunt.registerTask('default', ['clean', 'jshint', 'uglify', 'recess', 'copy', 'hash']);
+  grunt.registerTask('default', ['jshint', 'clean', 'uglify', 'recess', 'copy', 'hash']);
 };

@@ -86,7 +86,7 @@ function setTag(tagObj) {
                 }
             }).all(function (defer2, err, ID) {
                 if (!err && ID !== tagObj._id) {
-                    defer2(null, ID)
+                    defer2(null, ID);
                 } else {
                     defer2(true);
                 }

@@ -1,6 +1,6 @@
 'use strict';
 /*global angular*/
-
+window.jsGen = true;
 angular.module('jsGen', ['ngAnimate', 'jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
 config(['$httpProvider', 'app',
     function ($httpProvider, app) {
@@ -109,7 +109,7 @@ config(['$httpProvider', 'app',
             });
         }
 
-        window.app = app; // just for test
+        window.jsGen = app;
         app.q = $q;
         app.store = store;
         app.toast = toast;
