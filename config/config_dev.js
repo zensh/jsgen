@@ -58,7 +58,7 @@ module.exports = {
     ZlibArray: ['text/plain', 'application/javascript', 'text/css', 'application/xml', 'text/html'], //只压缩数组中的content-type响应
 //logger log4js 配置
     isLog: true, //是否开启日志，过多的记录日志会影响性能，但是能记录系统运行情况
-    logLevel: 'error',//['trace','debug','info','warn','error', 'fatal'] 日志等级
+    logLevel: 'debug',//['trace','debug','info','warn','error', 'fatal'] 日志等级
     logPath: '/mylogs', // "/mylogs" 日志存放目录
     logMaxSize: 1024*1024*10, //单个日志文件大小
     logFileNum: 10, //当单个日志文件大小达标时，自动切分，这里设置最多切分多少个日志文件

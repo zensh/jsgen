@@ -9,4 +9,6 @@ module.exports = {
     db: jsGen.module.mongoskin.db(mongoIp + ':' + mongoPort + '/?auto_reconnect=true', {
         database: mongoDbName
     })
+
+    //TODO:支持MongoDB集群,设置DB连接参数
 };
