@@ -24,7 +24,8 @@
         "marked": ">=0.2.x",
         "nodemailer": ">=0.3.x",
         "thenjs": ">=0.9.2",
-        "xss": ">=0.0.3"
+        "xss": ">=0.0.3",
+        "log4js":">=0.6.9"
     },
     "scripts": {
         "start": "node app.js",

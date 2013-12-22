@@ -47,7 +47,7 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
 
 浏览器端输入网址[http://localhost/](http://localhost/)即可访问。
 
-默认的管理员用户名: **admin** 密码: **admin@jsgen.org**。
+	默认的管理员用户名: **admin** 密码: **admin@jsgen.org**。
 
 Default administrator username: **admin** password: **admin@jsgen.org**.
 
