@@ -63,7 +63,7 @@ serverDm.run(function () {
         resJson = jsGen.lib.tools.resJson,
         TimeLimitCache = jsGen.lib.redis.TimeLimitCache;
 
-    then(function (defer) {
+    redis.connect().then(function (defer) {
         redis.initConfig(jsGen.lib.json.GlobalConfig, defer); // 初始化config缓存
     }).then(function (defer, config) {
             jsGen.config = config;

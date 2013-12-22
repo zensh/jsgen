@@ -68,14 +68,15 @@
     <script>
       (function () {
         var IE8 = !-[1,],
-          jqVer = IE8 ? 'old' : 'min';
+          jqVer = IE8 ? 'old' : 'min',
+          cdn = 'http://cdn.angularjs.cn/';
 
         reserveLoad(
-          IE8 && 'http://cdn.angularjs.cn/{{_js/ie.min.js_}}', // load it if lt IE 9
-          'http://cdn.angularjs.cn/js/jquery.' + jqVer + '.js',
-          'http://cdn.angularjs.cn/{{_js/angular-all.min.js_}}',
-          'http://cdn.angularjs.cn/{{_js/lib.min.js_}}',
-          'http://cdn.angularjs.cn/{{_js/jsgen.min.js_}}',
+          IE8 && [cdn + '{{_js/ie.min.js_}}', '/static/{{_js/ie.min.js_}}', 'JSON'], // load it if lt IE 9
+          [cdn + 'js/jquery.' + jqVer + '.js', '/static/js/jquery.' + jqVer + '.js', '$'],
+          [cdn + '{{_js/angular-all.min.js_}}', '/static/{{_js/angular-all.min.js_}}', 'angular'],
+          [cdn + '{{_js/lib.min.js_}}', '/static/{{_js/lib.min.js_}}', 'Sanitize'],
+          [cdn + '{{_js/jsgen.min.js_}}', '/static/{{_js/jsgen.min.js_}}', 'jsGen'],
           function (errorUrl) {
             if (errorUrl) {
               alert('Error loading: ' + errorUrl);
