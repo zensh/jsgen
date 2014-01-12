@@ -101,7 +101,7 @@ config(['$httpProvider', 'app',
                 app.timeOffset = Date.now() - data.timestamp;
                 data = data.data;
                 data.title2 = data.description;
-                data.info.angularjs = angular.version.full;
+                data.info.angularjs = angular.version.full.replace(/\-build.*$/, '');
                 app.union(global, data);
                 app.version = global.info.version || '';
                 app.upyun = global.user && global.user.upyun;

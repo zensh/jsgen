@@ -5,7 +5,7 @@
         "url": "http://weibo.com/zensh"
     },
     "name": "jsgen-cli",
-    "version": "0.7.4",
+    "version": "0.7.5",
     "description": "jsgen-cli",
     "keywords": ["jsGen"],
     "homepage": "https://github.com/zensh/jsgen",

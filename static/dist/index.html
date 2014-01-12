@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="http://cdn.angularjs.cn/favicon.ico"/>
     <link rel="stylesheet" href="http://cdn.angularjs.cn/css/jsgen.min.css?v=09daaa452ec53c3c309c8f6f9199deb8">
     <link rel="stylesheet" href="http://cdn.angularjs.cn/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
-    <script src="http://cdn.angularjs.cn/js/reserveLoad.min.js?v=b1051703bcf0561dba57ec7ee7dda548"></script>
+    <script src="http://cdn.angularjs.cn/js/reserveLoad.min.js?v=63aecc31222d868e720eeca519da10b6"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
@@ -72,11 +72,11 @@
           cdn = 'http://cdn.angularjs.cn/';
 
         reserveLoad(
-          IE8 && [cdn + 'js/ie.min.js?v=fd4a45a663e121ea2e16729694afb254', '/static/js/ie.min.js?v=fd4a45a663e121ea2e16729694afb254', 'JSON'], // load it if lt IE 9
+          IE8 && [cdn + 'js/ie.min.js?v=2f6dbfde9c68c501dcd0f3c5fcac18bd', '/static/js/ie.min.js?v=2f6dbfde9c68c501dcd0f3c5fcac18bd', 'JSON'], // load it if lt IE 9
           [cdn + 'js/jquery.' + jqVer + '.js', '/static/js/jquery.' + jqVer + '.js', '$'],
-          [cdn + 'js/angular-all.min.js?v=2f4cba8219b3fcb96444967ecbf1c77d', '/static/js/angular-all.min.js?v=2f4cba8219b3fcb96444967ecbf1c77d', 'angular'],
-          [cdn + 'js/lib.min.js?v=78f8ab3d18e384003136aff4de970b00', '/static/js/lib.min.js?v=78f8ab3d18e384003136aff4de970b00', 'Sanitize'],
-          [cdn + 'js/jsgen.min.js?v=d3d9aad70179572b920dca5ec574cc0a', '/static/js/jsgen.min.js?v=d3d9aad70179572b920dca5ec574cc0a', 'jsGen'],
+          [cdn + 'js/angular-all.min.js?v=2a7c2947176f5bb8135ed6c1bffd5157', '/static/js/angular-all.min.js?v=2a7c2947176f5bb8135ed6c1bffd5157', 'angular'],
+          [cdn + 'js/lib.min.js?v=5e92737acbaebe2a57e94dadcabb6b9a', '/static/js/lib.min.js?v=5e92737acbaebe2a57e94dadcabb6b9a', 'Sanitize'],
+          [cdn + 'js/jsgen.min.js?v=af21cb5dbbad8a88ed60f89c9190ee32', '/static/js/jsgen.min.js?v=af21cb5dbbad8a88ed60f89c9190ee32', 'jsGen'],
           function (errorUrl) {
             if (errorUrl) {
               alert('Error loading: ' + errorUrl);
