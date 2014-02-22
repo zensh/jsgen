@@ -75,7 +75,7 @@ module.exports = {
             if (req.session.role !== 5) {
                 defer(jsGen.Err(jsGen.lib.msg.USER.userRoleErr));
             } else if (['user', 'tag', 'article'].indexOf(req.path[2]) >= 0) {
-                that[req.path[2]].then(function (defer2, num) {
+                that[req.path[2]]().then(function (defer2, num) {
                     return res.sendjson(resJson(null, {
                         update: num
                     }));
