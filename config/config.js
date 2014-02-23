@@ -69,7 +69,7 @@ module.exports = {
     tempCacheTime: 0,//模版缓存时间
     tempCacheFolder: '/tmp/tpl', //模版缓存 存放目录
 //mongodb 配置
-    isMongodb: true, //是否开启mongodb支持，注意：如果使用数据库存储session，这里必须开启
+    isMongodb: false, //是否开启mongodb支持，注意：如果使用数据库存储session，这里必须开启
     MongodbIp: '127.0.0.1', //mongodb地址
     MongodbRC: false,//如果是false表示不使用mongodb的副本集，否则为字符串，表示副本集的名称
     MongodbRChost: [],//表示mongodb副本集的ip:port数组。

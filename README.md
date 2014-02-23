@@ -41,7 +41,8 @@ api目录下的install.js是jsGen运行初始化文件，设置管理员初始�
                             //此命令依赖python和vs2012，请参考 https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
     npm install             //npm安装依赖模块，请确保依赖模块全部安装好。
                             //windows下请运行 npm install --msvs_version=2012
-    node app.js install     //第一次启动jsGen，'install'参数用于初始化MongoDB数据库
+    node app.js install     //启动jsGen之前，初始化MongoDB数据库
+    node app.js [recache]   //正式启动，可选参数 `recache`，启动时重建redis缓存
 
     npm start               //正常启动，或 `node app.js`
 

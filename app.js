@@ -25,7 +25,6 @@ serverDm.run(function () {
     jsGen.module.then = require('thenjs');
     jsGen.module.marked = require('marked');
     jsGen.module.rrestjs = require('rrestjs');
-    jsGen.module.mongoskin = require('mongoskin');
     jsGen.module.nodemailer = require('nodemailer');
     jsGen.serverlog = jsGen.module.rrestjs.restlog;
     jsGen.conf = jsGen.module.rrestjs.config;
@@ -59,24 +58,55 @@ serverDm.run(function () {
         resJson = jsGen.lib.tools.resJson,
         TimeLimitCache = jsGen.lib.redis.TimeLimitCache;
 
-    redis.connect().then(function (defer) {
-        redis.initConfig(jsGen.lib.json.GlobalConfig, defer); // 初始化config缓存
+    function exit() {
+        redis.close();
+        jsGen.dao.db.close();
+        jsGen.serverlog.error(error);
+        return process.exit(1);
+    }
+
+    // 带'install'参数启动则初始化MongoDB，完成后退出
+    if (process.argv.indexOf('install') > 0) {
+        require('./lib/install.js')().then(function () {
+            console.log('jsGen installed!');
+            return exit();
+        }).fail(jsGen.thenErrLog);
+        return;
+    }
+
+    then.parallel([function (defer) {
+        jsGen.dao.index.getGlobalConfig(defer);
+    }, function (defer) {
+        redis.connect().all(defer);
+    }]).then(function (defer, result) {
+        // 初始化config缓存
+        redis.initConfig(result[0], defer);
+    }, function (defer, error) {
+        // redis 或者 mongodb 链接错误则退出
+        jsGen.serverlog.error(error);
+        return exit();
     }).then(function (defer, config) {
         jsGen.config = config;
-        if (process.argv.indexOf('install') > 0) { // 带'install'参数启动则初始化MongoDB
-            require('./api/install.js')().all(defer);
-        } else { // Redis config缓存未赋值，则从MongoDB取值
-            jsGen.dao.index.getGlobalConfig(defer);
-        }
-    }).then(function (defer, config) {
-        each(jsGen.config, function (value, key, list) {
-            if (key in config) {
-                list[key] = config[key]; // 写入config缓存
+        redis.userCache.index.total(function (error, users) {
+            if (!users || process.argv.indexOf('recache') > 0) {
+                // user缓存为空，则判断redis缓存为空，需要初始化
+                // 启动时指定了recache
+                var recache = require('./lib/recache.js');
+                recache().then(function (defer2, result) {
+                    console.log('Redis cache rebuild success:', result);
+                    defer();
+                }, function (defer2, error) {
+                    // redis 缓存重建失败则退出
+                    jsGen.serverlog.error(error);
+                    return exit();
+                });
+            } else {
+                defer();
             }
-        });
-        defer(null, jsGen.config);
-    }).then(function (defer, config) {
-        var api = ['index', 'user', 'article', 'tag', 'collection', 'message', 'rebuild'];
+        }); // 读取user缓存
+    }).then(function (defer) {
+        var api = ['index', 'user', 'article', 'tag', 'collection', 'message'],
+            config = jsGen.config;
 
         jsGen.cache = {};
         jsGen.cache.tag = new CacheLRU(config.tagCache);
@@ -102,78 +132,63 @@ serverDm.run(function () {
         data.nodejs = process.versions.node;
         data.rrestjs = _restConfig._version;
         jsGen.config.info = data;
-        redis.userCache.index.total(defer); // 读取user缓存
-    }).then(function (defer, users) {
-        var rebuild = jsGen.api.rebuild;
-        if (!users) { // user缓存为空，则判断redis缓存为空，需要初始化
-            // 初始化redis缓存
-            then(function (defer2) {
-                rebuild.user().all(defer2);
-            }).then(function (defer2) {
-                rebuild.tag().all(defer2);
-            }).then(function (defer2) {
-                rebuild.article().all(defer);
-            }).fail(defer);
-        } else {
-            defer();
+
+        function errHandler(err, res, dm) {
+            delete err.domain;
+
+            try {
+                res.on('finish', function () {
+                    //jsGen.dao.db.close();
+                    process.nextTick(function () {
+                        dm.dispose();
+                    });
+                });
+                if (err.hasOwnProperty('name')) {
+                    res.sendjson(resJson(err));
+                } else {
+                    jsGen.serverlog.error(err);
+                    res.sendjson(resJson(jsGen.Err(jsGen.lib.msg.MAIN.requestDataErr)));
+                }
+            } catch (error) {
+                delete error.domain;
+                jsGen.serverlog.error(error);
+                dm.dispose();
+            }
         }
-    }).then(function (defer) {
+
+        function router(req, res) {
+            if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
+                jsGen.api[req.path[1]][req.method.toUpperCase()](req, res); // 处理api请求
+            } else if (req.path[0].toLowerCase() === 'sitemap.xml') {
+                jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
+            } else if (req.path[0].slice(-3).toLowerCase() === 'txt') {
+                // 直接响应static目录的txt文件，如robots.txt
+                then(function (defer) {
+                    fs.readFile(processPath + jsGen.conf.staticFolder + req.path[0], 'utf8', defer);
+                }).then(function (defer, txt) {
+                    res.setHeader('Content-Type', 'text/plain');
+                    res.send(txt);
+                }).fail(res.throwError);
+            } else if (jsGen.robotReg.test(req.useragent)) {
+                jsGen.api.article.robot(req, res); // 处理搜索引擎请求
+            } else {
+                jsGen.config.visitors = 1; // 访问次数+1
+                res.setHeader('Content-Type', 'text/html');
+                if (jsGen.cache.indexTpl) {
+                    res.send(jsGen.cache.indexTpl); // 响应首页index.html
+                } else {
+                    then(function (defer) {
+                        fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', defer);
+                    }).then(function (defer, tpl) {
+                        jsGen.cache.indexTpl = tpl;
+                        res.send(jsGen.cache.indexTpl);
+                    }).fail(res.throwError);
+                }
+            }
+        }
+
         http.createServer(function (req, res) {
             var dm = domain.create();
-
-            function errHandler(err, res, dm) {
-                delete err.domain;
-
-                try {
-                    res.on('finish', function () {
-                        //jsGen.dao.db.close();
-                        process.nextTick(function () {
-                            dm.dispose();
-                        });
-                    });
-                    if (err.hasOwnProperty('name')) {
-                        res.sendjson(resJson(err));
-                    } else {
-                        jsGen.serverlog.error(err);
-                        res.sendjson(resJson(jsGen.Err(jsGen.lib.msg.MAIN.requestDataErr)));
-                    }
-                } catch (error) {
-                    delete error.domain;
-                    jsGen.serverlog.error(error);
-                    dm.dispose();
-                }
-            }
-
-            function router(req, res) {
-                if (req.path[0] === 'api' && jsGen.api[req.path[1]]) {
-                    jsGen.api[req.path[1]][req.method.toUpperCase()](req, res); // 处理api请求
-                } else if (req.path[0].toLowerCase() === 'sitemap.xml') {
-                    jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
-                } else if (req.path[0].slice(-3).toLowerCase() === 'txt') {
-                    // 直接响应static目录的txt文件，如robots.txt
-                    then(function (defer) {
-                        fs.readFile(processPath + jsGen.conf.staticFolder + req.path[0], 'utf8', defer);
-                    }).then(function (defer, txt) {
-                        res.setHeader('Content-Type', 'text/plain');
-                        res.send(txt);
-                    }).fail(res.throwError);
-                } else if (jsGen.robotReg.test(req.useragent)) {
-                    jsGen.api.article.robot(req, res); // 处理搜索引擎请求
-                } else {
-                    jsGen.config.visitors = 1; // 访问次数+1
-                    res.setHeader('Content-Type', 'text/html');
-                    if (jsGen.cache.indexTpl) {
-                        res.send(jsGen.cache.indexTpl); // 响应首页index.html
-                    } else {
-                        then(function (defer) {
-                            fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', defer);
-                        }).then(function (defer, tpl) {
-                            jsGen.cache.indexTpl = tpl;
-                            res.send(jsGen.cache.indexTpl);
-                        }).fail(res.throwError);
-                    }
-                }
-            }
 
             res.throwError = function (defer, err) { // 处理then.js捕捉的错误
                 if (!util.isError(err)) {
