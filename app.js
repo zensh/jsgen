@@ -47,6 +47,7 @@ serverDm.run(function () {
     jsGen.dao.collection = require('./dao/collectionDao.js');
 
     jsGen.thenErrLog = function (defer, err) {
+        console.error(err);
         jsGen.serverlog.error(err);
     };
 
@@ -61,7 +62,6 @@ serverDm.run(function () {
     function exit() {
         redis.close();
         jsGen.dao.db.close();
-        jsGen.serverlog.error(error);
         return process.exit(1);
     }
 
@@ -69,6 +69,14 @@ serverDm.run(function () {
     if (process.argv.indexOf('install') > 0) {
         require('./lib/install.js')().then(function () {
             console.log('jsGen installed!');
+            return exit();
+        }).fail(jsGen.thenErrLog);
+        return;
+    }
+
+    // v0.7.5升级至v0.7.6 更新账号密码
+    if (process.argv.indexOf('update-passwd') > 0) {
+        require('./patch/passwd_0.7.5-0.7.6.js')().then(function () {
             return exit();
         }).fail(jsGen.thenErrLog);
         return;

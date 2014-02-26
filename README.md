@@ -17,6 +17,8 @@
 
     node app.js --dev
 
+**v0.7.7版 升级了账号密码系统，v0.7.6及之前的版本升级后需更新数据库，请运行 `node app.js update-passwd` **
+
 ### 简介 (Introduction)
 
 [JsGen][1]是用纯JavaScript编写的新一代开源社区网站系统，主要用于搭建SNS类型的专业社区，对客户端AngularJS应用稍作修改也可变成多用户博客系统、论坛或者CMS内容管理系统。

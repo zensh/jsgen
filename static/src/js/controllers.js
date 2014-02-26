@@ -120,6 +120,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 var data = app.union($scope.login);
                 data.logtime = Date.now() - app.timeOffset;
                 data.logpwd = app.CryptoJS.SHA256(data.logpwd).toString();
+                data.logpwd = app.CryptoJS.HmacSHA256(data.logpwd, 'jsGen').toString();
                 data.logpwd = app.CryptoJS.HmacSHA256(data.logpwd, data.logname + ':' + data.logtime).toString();
 
                 app.restAPI.user.save({
@@ -230,6 +231,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                     email: user.email
                 };
                 data.passwd = app.CryptoJS.SHA256(user.passwd).toString();
+                data.passwd = app.CryptoJS.HmacSHA256(data.passwd, 'jsGen').toString();
 
                 app.restAPI.user.save({
                     ID: 'register'

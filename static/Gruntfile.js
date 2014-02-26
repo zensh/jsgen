@@ -37,7 +37,7 @@ module.exports = function(grunt) {
         src: 'src/js/*.js'
       },
       server: {
-        src: ['../app.js', '../app.js', '../api/*.js', '../dao/*.js', '../lib/*.js']
+        src: ['../app.js', '../app.js', '../api/*.js', '../dao/*.js', '../lib/*.js', '../patch/*.js']
       }
     },
 

@@ -73,6 +73,18 @@ var that = jsGen.dao.db.bind('users', {
         }).each(callback);
     },
 
+    getFullUsersIndex: function (callback) {
+        callback = callback || callbackFn;
+        that.find({}, {
+            sort: {
+                _id: -1
+            },
+            hint: {
+                _id: 1
+            }
+        }).each(callback);
+    },
+
     getLatestId: function (callback) {
         callback = callback || callbackFn;
         that.findOne({}, {
@@ -541,6 +553,7 @@ module.exports = {
     convertID: that.convertID,
     getUsersNum: that.getUsersNum,
     getUsersIndex: that.getUsersIndex,
+    getFullUsersIndex: that.getFullUsersIndex,
     getLatestId: that.getLatestId,
     getAuth: that.getAuth,
     getSocial: that.getSocial,
