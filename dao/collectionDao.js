@@ -15,15 +15,17 @@
     setNewCollection(collectionObj, callback);
     delCollection(_idArray, callback);
  */
-var union = jsGen.lib.tools.union,
+var noop = jsGen.lib.tools.noop,
+    union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     IDString = jsGen.lib.json.IDString,
     defautCollection = jsGen.lib.json.Collection,
     callbackFn = jsGen.lib.tools.callbackFn,
     wrapCallback = jsGen.lib.tools.wrapCallback,
-    converter = jsGen.lib.converter;
+    converter = jsGen.lib.converter,
+    collections = jsGen.dao.db.bind('collections');
 
-var that = jsGen.dao.db.bind('collections', {
+collections.bind({
 
     convertID: function (id) {
         switch (typeof id) {
@@ -42,12 +44,12 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollectionsNum: function (callback) {
-        that.count(wrapCallback(callback));
+        this.count(wrapCallback(callback));
     },
 
     getLatestId: function (callback) {
         callback = callback || callbackFn;
-        that.findOne({}, {
+        this.findOne({}, {
             sort: {
                 _id: -1
             },
@@ -69,7 +71,7 @@ var that = jsGen.dao.db.bind('collections', {
                 }
             };
         }
-        that.find(query, {
+        this.find(query, {
             sort: {
                 _id: -1
             },
@@ -88,7 +90,7 @@ var that = jsGen.dao.db.bind('collections', {
         if (!Array.isArray(_idArray)) {
             _idArray = [_idArray];
         }
-        that.find({
+        this.find({
             _id: {
                 $in: _idArray
             }
@@ -107,7 +109,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollection: function (_id, callback) {
-        that.findOne({
+        this.findOne({
             _id: +_id
         }, {
             sort: {
@@ -130,7 +132,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     getCollectionInfo: function (_id, callback) {
-        that.findOne({
+        this.findOne({
             _id: +_id
         }, {
             sort: {
@@ -154,7 +156,8 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     setCollectionInfo: function (CollectionObjArray, callback) {
-        var result = 0,
+        var that = this,
+            result = 0,
             resulterr = null,
             defaultObj = {
                 title: '',
@@ -221,9 +224,9 @@ var that = jsGen.dao.db.bind('collections', {
         setObj.$push = {
             update: newObj.update
         };
-        that.update({
+        this.update({
             _id: collectionObj._id
-        }, setObj);
+        }, setObj, noop);
     },
 
     setComments: function (collectionObj) {
@@ -250,20 +253,21 @@ var that = jsGen.dao.db.bind('collections', {
             };
         }
 
-        that.update({
+        this.update({
             _id: collectionObj._id
-        }, setObj);
+        }, setObj, noop);
     },
 
     setNewCollection: function (collectionObj, callback) {
-        var collection = union(defautCollection),
+        var that = this,
+            collection = union(defautCollection),
             newCollection = union(defautCollection);
 
         newCollection = intersect(newCollection, collectionObj);
         newCollection = union(collection, newCollection);
         newCollection.date = Date.now();
 
-        that.getLatestId(function (err, doc) {
+        this.getLatestId(function (err, doc) {
             if (err) {
                 return callback(err, null);
             }
@@ -280,7 +284,7 @@ var that = jsGen.dao.db.bind('collections', {
     },
 
     delCollection: function (_id, callback) {
-        that.remove({
+        this.remove({
             _id: +_id
         }, {
             w: 1
@@ -289,16 +293,16 @@ var that = jsGen.dao.db.bind('collections', {
 });
 
 module.exports = {
-    convertID: that.convertID,
-    getCollectionsNum: that.getCollectionsNum,
-    getCollectionsIndex: that.getCollectionsIndex,
-    getLatestId: that.getLatestId,
-    getCollectionsList: that.getCollectionsList,
-    getCollection: that.getCollection,
-    getCollectionInfo: that.getCollectionInfo,
-    setCollectionInfo: that.setCollectionInfo,
-    setUpdate: that.setUpdate,
-    setComments: that.setComments,
-    setNewCollection: that.setNewCollection,
-    delCollection: that.delCollection
+    convertID: collections.convertID,
+    getCollectionsNum: collections.getCollectionsNum,
+    getCollectionsIndex: collections.getCollectionsIndex,
+    getLatestId: collections.getLatestId,
+    getCollectionsList: collections.getCollectionsList,
+    getCollection: collections.getCollection,
+    getCollectionInfo: collections.getCollectionInfo,
+    setCollectionInfo: collections.setCollectionInfo,
+    setUpdate: collections.setUpdate,
+    setComments: collections.setComments,
+    setNewCollection: collections.setNewCollection,
+    delCollection: collections.delCollection
 };

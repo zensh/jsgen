@@ -16,6 +16,7 @@ module.exports.conf_dev = require('./config/config_dev'); // 注册开发模式�
 
 serverDm.on('error', function (err) {
     delete err.domain;
+    console.error(err)
     jsGen.serverlog.error(err);
 });
 serverDm.run(function () {

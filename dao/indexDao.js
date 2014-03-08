@@ -3,16 +3,18 @@
 
 /*
  */
-var union = jsGen.lib.tools.union,
+var noop = jsGen.lib.tools.noop,
+    union = jsGen.lib.tools.union,
     intersect = jsGen.lib.tools.intersect,
     globalConfig = jsGen.lib.json.GlobalConfig,
     wrapCallback = jsGen.lib.tools.wrapCallback,
-    callbackFn = jsGen.lib.tools.callbackFn;
+    callbackFn = jsGen.lib.tools.callbackFn,
+    globalCollection = jsGen.dao.db.bind('global');
 
-var that = jsGen.dao.db.bind('global', {
+globalCollection.bind({
 
     getGlobalConfig: function (callback) {
-        that.findOne({
+        this.findOne({
             _id: 'GlobalConfig'
         }, {
             sort: {
@@ -93,22 +95,22 @@ var that = jsGen.dao.db.bind('global', {
         setObj.$set = newObj;
 
         if (callback) {
-            that.findAndModify({
+            this.findAndModify({
                 _id: 'GlobalConfig'
             }, [], setObj, {
                 w: 1,
                 'new': true
             }, wrapCallback(callback));
         } else {
-            that.update({
+            this.update({
                 _id: 'GlobalConfig'
-            }, setObj);
+            }, setObj, noop);
         }
     },
 
     initGlobalConfig: function (callback) {
         globalConfig.date = Date.now();
-        that.update({
+        this.update({
             _id: 'GlobalConfig'
         }, globalConfig, {
             w: 1,
@@ -121,7 +123,7 @@ var that = jsGen.dao.db.bind('global', {
 });
 
 module.exports = {
-    getGlobalConfig: that.getGlobalConfig,
-    setGlobalConfig: that.setGlobalConfig,
-    initGlobalConfig: that.initGlobalConfig
+    getGlobalConfig: globalCollection.getGlobalConfig,
+    setGlobalConfig: globalCollection.setGlobalConfig,
+    initGlobalConfig: globalCollection.initGlobalConfig
 };
