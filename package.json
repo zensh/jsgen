@@ -23,7 +23,7 @@
         "redis": ">=0.10.x",
         "marked": ">=0.3.x",
         "nodemailer": ">=0.6.x",
-        "thenjs": ">=0.9.x",
+        "thenjs": ">=0.10.x",
         "xss": ">=0.1.x"
     },
     "scripts": {

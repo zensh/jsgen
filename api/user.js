@@ -10,7 +10,7 @@ var msg = jsGen.lib.msg,
     SHA256 = jsGen.lib.tools.SHA256,
     HmacMD5 = jsGen.lib.tools.HmacMD5,
     HmacSHA256 = jsGen.lib.tools.HmacSHA256,
-    isJSON = jsGen.lib.tools.isJSON,
+    parseJSON = jsGen.lib.tools.parseJSON,
     resJson = jsGen.lib.tools.resJson,
     toArray = jsGen.lib.tools.toArray,
     checkUrl = jsGen.lib.tools.checkUrl,
@@ -299,7 +299,8 @@ function cookieLoginUpdate(Uid) {
 function cookieLogin(req) {
     return then(function (defer) {
         var data = new Buffer(req.cookie.autologin, 'base64').toString();
-        if (isJSON(data)) {
+        data = parseJSON(data);
+        if (data) {
             data = JSON.parse(data);
             data.logname = data.n;
             data.logtime = data.t;
@@ -805,8 +806,8 @@ function resetUser(req, res) {
 
     then(function (defer) {
         reset = new Buffer(req.path[3], 'base64').toString();
-        reset = isJSON(reset) && JSON.parse(reset);
-        if (typeof reset !== 'object' || !reset.u || !reset.r || !reset.k) {
+        reset = parseJSON(reset);
+        if (!reset || !reset.u || !reset.r || !reset.k) {
             defer(jsGen.Err(msg.MAIN.resetInvalid));
         } else {
             cache(reset.u, function (err, user) {
