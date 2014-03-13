@@ -2,7 +2,9 @@
 /*global angular, jsGenVersion*/
 
 angular.module('jsGen.router', ['ngRoute']).
-constant('app', {}).provider('getFile', ['app',
+constant('app', {
+    version: Date.now()
+}).provider('getFile', ['app',
     function (app) {
         this.html = function (fileName) {
             return '/static/tpl/' + fileName + '?v=' + app.version;
