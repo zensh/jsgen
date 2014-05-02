@@ -497,6 +497,7 @@ controller('indexCtrl', ['app', '$scope', '$routeParams', 'getList',
                 } else {
                     if (data.passwd) {
                         data.passwd = app.CryptoJS.SHA256(data.passwd).toString();
+                        data.passwd = app.CryptoJS.HmacSHA256(data.passwd, 'jsGen').toString();
                     }
                     if (data.email) {
                         app.restAPI.user.save({

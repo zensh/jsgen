@@ -10,9 +10,9 @@
     <meta name="keywords" content="{{global.keywords}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="http://cdn.angularjs.cn/favicon.ico"/>
-    <link rel="stylesheet" href="http://cdn.angularjs.cn/css/jsgen.min.css?v=9513ac1c7029ce1ee7b19cd43c75e070">
+    <link rel="stylesheet" href="http://cdn.angularjs.cn/css/jsgen.min.css?v=41a21fca7e87272cbe84d1b4912a9724">
     <link rel="stylesheet" href="http://cdn.angularjs.cn/css/font-awesome.min.css?v=fa6868c22ceca7f65191ec25c68a9bb5">
-    <script src="http://cdn.angularjs.cn/js/reserveLoad.min.js?v=102719b3d11f3bbcb583a36297058f62"></script>
+    <script src="http://cdn.angularjs.cn/js/reserveLoad.min.js?v=6a77361c578f56a95e6f523925a43bd0"></script>
   </head>
   <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
@@ -72,11 +72,11 @@
           cdn = 'http://cdn.angularjs.cn/';
 
         reserveLoad(
-          IE8 && [cdn + 'js/ie.min.js?v=5247730709520e02fffc88b2e07cfca8', '/static/js/ie.min.js?v=5247730709520e02fffc88b2e07cfca8', 'JSON'], // load it if lt IE 9
+          IE8 && [cdn + 'js/ie.min.js?v=d19c12bdf9322bc65ad9b5ebfbb06462', '/static/js/ie.min.js?v=d19c12bdf9322bc65ad9b5ebfbb06462', 'JSON'], // load it if lt IE 9
           [cdn + 'js/jquery.' + jqVer + '.js', '/static/js/jquery.' + jqVer + '.js', '$'],
-          [cdn + 'js/angular-all.min.js?v=dc9585e1d6e0d4442bd11c311f7de181', '/static/js/angular-all.min.js?v=dc9585e1d6e0d4442bd11c311f7de181', 'angular'],
-          [cdn + 'js/lib.min.js?v=f0ffe0818c1edfc10e232bf26b7af399', '/static/js/lib.min.js?v=f0ffe0818c1edfc10e232bf26b7af399', 'Sanitize'],
-          [cdn + 'js/jsgen.min.js?v=2c7c38b7d0aa9fa87ba995af709a01d4', '/static/js/jsgen.min.js?v=2c7c38b7d0aa9fa87ba995af709a01d4', 'jsGen'],
+          [cdn + 'js/angular-all.min.js?v=d0bb2d278b63148d3d78adaf9aa7d070', '/static/js/angular-all.min.js?v=d0bb2d278b63148d3d78adaf9aa7d070', 'angular'],
+          [cdn + 'js/lib.min.js?v=fbd67ce553a693a10ba66b8d30c5f47a', '/static/js/lib.min.js?v=fbd67ce553a693a10ba66b8d30c5f47a', 'Sanitize'],
+          [cdn + 'js/jsgen.min.js?v=91bcfc8bf2347ceb6ccfd955db713c34', '/static/js/jsgen.min.js?v=91bcfc8bf2347ceb6ccfd955db713c34', 'jsGen'],
           function (errorUrl) {
             if (errorUrl) {
               alert('Error loading: ' + errorUrl);

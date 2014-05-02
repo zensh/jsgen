@@ -1,6 +1,6 @@
 {
   "name": "jsGen",
-  "version": "0.7.7",
+  "version": "0.7.9",
   "main": "index.html",
   "dependencies": {
     "angular": ">=1.2.0",
@@ -8,7 +8,7 @@
     "angular-cookies": ">=1.2.0",
     "angular-resource": ">=1.2.0",
     "angular-route": ">=1.2.0",
-    "pure": ">=0.3.0",
+    "pure": "~0.4.x",
     "font-awesome": ">=3.2.1",
     "jquery": ">=2.0.3",
     "jquery.old": "jquery#1.7.2",

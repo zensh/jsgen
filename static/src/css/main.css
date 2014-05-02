@@ -87,7 +87,12 @@ body > div {
     background: url(../img/loading.gif) no-repeat center center;
 }
 
-.pure-u-1-4 {
+.pure-g-r img {
+    height: auto;
+    max-width: 100%;
+}
+
+/*.pure-u-1-4 {
     width: 24.8%;
 }
 .pure-u-1-3 {
@@ -95,7 +100,7 @@ body > div {
 }
 .pure-u-1-2 {
     width: 49.9%;
-}
+}*/
 .pure-table {
     border: none;
     width: 100%;
@@ -1052,11 +1057,6 @@ ol.inner {
 .wrap {
     margin-right: auto;
     margin-left: auto;
-}
-.wrap:before,
-.wrap:after {
-    display: table;
-    content: " ";
 }
 .wrap {
     max-width: 1080px;
