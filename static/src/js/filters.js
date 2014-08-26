@@ -1,44 +1,49 @@
 'use strict';
-/*global angular*/
+/*global angular, jsGen*/
 
-angular.module('jsGen.filters', []).
-filter('placeholder', ['tools',
-    function (tools) {
+jsGen
+.filter('placeholder', ['JSONKit',
+    function (JSONKit) {
         return function (str) {
-            return tools.toStr(str) || '-';
+            return JSONKit.toStr(str) || '-';
         };
     }
-]).filter('match', ['$locale',
+])
+.filter('match', ['$locale',
     function ($locale) {
         return function (value, type) {
             return $locale.FILTER[type] && $locale.FILTER[type][value] || '';
         };
     }
-]).filter('switch', ['$locale',
+])
+.filter('switch', ['$locale',
     function ($locale) {
         return function (value, type) {
             return $locale.FILTER[type] && $locale.FILTER[type][+ !! value] || '';
         };
     }
-]).filter('checkName', ['tools',
-    function (tools) {
+])
+.filter('checkName', ['JSONKit',
+    function (JSONKit) {
         return function (text) {
             var reg = /^[(\u4e00-\u9fa5)a-z][(\u4e00-\u9fa5)a-zA-Z0-9_]{1,}$/;
-            text = tools.toStr(text);
+            text = JSONKit.toStr(text);
             return reg.test(text);
         };
     }
-]).filter('length', ['utf8', 'tools',
-    function (utf8, tools) {
+])
+.filter('length', ['utf8', 'JSONKit',
+    function (utf8, JSONKit) {
         return function (text) {
-            text = tools.toStr(text);
+            text = JSONKit.toStr(text);
             return utf8.stringToBytes(text).length;
         };
     }
-]).filter('cutText', ['utf8', 'tools',
-    function (utf8, tools) {
+])
+.filter('cutText', ['utf8', 'JSONKit',
+    function (utf8, JSONKit) {
         return function (text, len) {
-            text = tools.trim(text);
+            text = JSONKit.toStr(text).trim();
             var bytes = utf8.stringToBytes(text);
             len = len > 0 ? len : 0;
             if (bytes.length > len) {
@@ -49,7 +54,8 @@ filter('placeholder', ['tools',
             return text;
         };
     }
-]).filter('formatDate', ['$filter', '$locale',
+])
+.filter('formatDate', ['$filter', '$locale',
     function ($filter, $locale) {
         return function (date, full) {
             var o = Date.now() - date,
@@ -69,7 +75,8 @@ filter('placeholder', ['tools',
             }
         };
     }
-]).filter('formatTime', ['$locale',
+])
+.filter('formatTime', ['$locale',
     function ($locale) {
         return function (seconds) {
             var re = '',
@@ -91,7 +98,8 @@ filter('placeholder', ['tools',
             return o > 0 ? (o + TIME.day + re) : re;
         };
     }
-]).filter('formatBytes', ['$locale',
+])
+.filter('formatBytes', ['$locale',
     function ($locale) {
         return function (bytes) {
             bytes = bytes > 0 ? bytes : 0;

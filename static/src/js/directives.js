@@ -1,8 +1,8 @@
 'use strict';
-/*global angular, $*/
+/*global angular, $, jsGen*/
 
-angular.module('jsGen.directives', ['angularFileUpload']).
-directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout',
+jsGen
+.directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout',
     function (mdParse, sanitize, pretty, isVisible, $timeout) {
         // <div gen-parse-md="document"></div>
         // document是Markdown格式或一般文档字符串，解析成DOM后插入<div>
@@ -39,7 +39,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genTabClick', function () {
+])
+.directive('genTabClick', function () {
     //<ul>
     //<li gen-tab-click="className"></li>
     //<li gen-tab-click="className"></li>
@@ -54,7 +55,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             });
         }
     };
-}).directive('genPagination', ['getFile',
+})
+.directive('genPagination', ['getFile',
     function (getFile) {
         // <div gen-pagination="options"></div>
         // HTML/CSS修改于Bootstrap框架
@@ -123,7 +125,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genModal', ['getFile', '$timeout',
+])
+.directive('genModal', ['getFile', '$timeout',
     function (getFile, $timeout) {
         //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
@@ -207,7 +210,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genTooltip', ['$timeout', 'isVisible',
+])
+.directive('genTooltip', ['$timeout', 'isVisible',
     function ($timeout, isVisible) {
         //<div data-original-title="tootip title" gen-tooltip="tootipOption"></div>
         // tootipOption = {
@@ -302,7 +306,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genMoving', ['anchorScroll',
+])
+.directive('genMoving', ['anchorScroll',
     function (anchorScroll) {
         return {
             link: function (scope, element, attr) {
@@ -338,7 +343,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genSrc', ['isVisible',
+])
+.directive('genSrc', ['isVisible',
     function (isVisible) {
         return {
             priority: 99,
@@ -355,7 +361,8 @@ directive('genParseMd', ['mdParse', 'sanitize', 'pretty', 'isVisible', '$timeout
             }
         };
     }
-]).directive('genUploader', ['getFile', '$fileUploader', 'app',
+])
+.directive('genUploader', ['getFile', '$fileUploader', 'app',
     function (getFile, $fileUploader, app) {
         // <div gen-pagination="options"></div>
         // HTML/CSS修改于Bootstrap框架

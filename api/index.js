@@ -26,25 +26,25 @@ var tagAPI = jsGen.api.tag,
 function getIndex(req, res) {
     var Uid;
 
-    then(function (defer) {
+    then(function (cont) {
         if (req.session.Uid) {
-            userCache.getP(req.session.Uid).all(defer);
+            userCache.getP(req.session.Uid).fin(cont);
         } else if (req.cookie.autologin) {
-            userAPI.cookieLogin(req).then(function (defer2, _id) {
+            userAPI.cookieLogin(req).then(function (cont2, _id) {
                 Uid = _id;
-                userAPI.cookieLoginUpdate(Uid).all(defer2);
-            }).then(function (defer2, cookie) {
+                userAPI.cookieLoginUpdate(Uid).fin(cont2);
+            }).then(function (cont2, cookie) {
                 res.cookie('autologin', cookie, {
                     maxAge: 259200000,
                     path: '/',
                     httpOnly: true
                 });
-                userCache.getP(Uid).all(defer);
-            }).fail(defer);
+                userCache.getP(Uid).fin(cont);
+            }).fail(cont);
         } else {
-            defer();
+            cont();
         }
-    }).all(function (defer, err, user) {
+    }).fin(function (cont, err, user) {
         var config = union(configPublicTpl);
 
         // 自动登录更新session
@@ -66,9 +66,9 @@ function getIndex(req, res) {
         }
 
         // 更新在线用户
-        then(function (defer2) {
-            redis.onlineCache(req, defer2);
-        }).then(function (defer2, onlineUser, onlineNum) {
+        then(function (cont2) {
+            redis.onlineCache(req, cont2);
+        }).then(function (cont2, onlineUser, onlineNum) {
             jsGenConfig.onlineUsers = onlineUser > 1 ? onlineUser : 2;
             jsGenConfig.onlineNum = onlineNum > 1 ? onlineNum : 2;
             if (jsGenConfig.onlineNum > jsGenConfig.maxOnlineNum) {
@@ -77,12 +77,12 @@ function getIndex(req, res) {
             }
         });
 
-        then(function (defer2) {
+        then(function (cont2) {
             intersect(config, jsGenConfig);
-            redis.tagCache.index(0, 20, defer2);
-        }).all(function (defer2, err, tags) {
-            tagAPI.convertTags(tags).all(defer2);
-        }).all(function (defer2, err, tags) {
+            redis.tagCache.index(0, 20, cont2);
+        }).fin(function (cont2, err, tags) {
+            tagAPI.convertTags(tags).fin(cont2);
+        }).fin(function (cont2, err, tags) {
             config.tagsList = tags || [];
             config.user = user || null;
             return res.sendjson(resJson(null, config));
@@ -92,7 +92,7 @@ function getIndex(req, res) {
 
 function getGlobal(req, res) {
     var config = union(jsGenConfig);
-    then(function (defer) {
+    then(function (cont) {
         if (req.session.role >= 4) {
             config.sys = {
                 uptime: Math.round(process.uptime()),
@@ -108,14 +108,14 @@ function getGlobal(req, res) {
                 collection: jsGenCache.collection.info(),
                 message: jsGenCache.message.info()
             };
-            jsGenCache.pagination.info(defer);
+            jsGenCache.pagination.info(cont);
         } else {
-            defer(null, jsGen.Err(msg.USER.userRoleErr));
+            cont(null, jsGen.Err(msg.USER.userRoleErr));
         }
-    }).then(function (defer, info) {
+    }).then(function (cont, info) {
         config.sys.pagination = info;
-        jsGenCache.timeInterval.info(defer);
-    }).then(function (defer, info) {
+        jsGenCache.timeInterval.info(cont);
+    }).then(function (cont, info) {
         config.sys.timeInterval = info;
         delete config.smtp.auth.pass;
         return res.sendjson(resJson(null, config, null, {
@@ -134,22 +134,22 @@ function setGlobal(req, res) {
         list[i] = x;
     }
 
-    then(function (defer) {
+    then(function (cont) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.USER.userRoleErr));
+            cont(jsGen.Err(msg.USER.userRoleErr));
         }
         if (setObj.domain && !checkUrl(setObj.domain)) {
-            defer(jsGen.Err(msg.MAIN.globalDomainErr));
+            cont(jsGen.Err(msg.MAIN.globalDomainErr));
         }
         if (setObj.url) {
             if (!checkUrl(setObj.url)) {
-                defer(jsGen.Err(msg.MAIN.globalUrlErr));
+                cont(jsGen.Err(msg.MAIN.globalUrlErr));
             } else {
                 setObj.url = setObj.url.replace(/(\/)+$/, '');
             }
         }
         if (setObj.email && !checkEmail(setObj.email)) {
-            defer(jsGen.Err(msg.MAIN.globalEmailErr));
+            cont(jsGen.Err(msg.MAIN.globalEmailErr));
         }
         if (setObj.TimeInterval && setObj.TimeInterval < 5) {
             setObj.TimeInterval = 5;

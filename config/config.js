@@ -14,7 +14,7 @@ module.exports = {
     //baseDir: path.join(__dirname, '/..'), //绝对目录地址，下面的目录配置都是根据这个目录的相对地址，这里是根据config文件进行配置地址
     baseDir: processPath,//这里是根据启动nodejs的命令目录来设置baseDir
     autoCreateFolders: false,//如果想要以node_modules加载rrestjs,则此项最好选择true,rrestjs会根据config自动创建静态文件目录和缓存目录等目录
-    favicon: '/favicon.ico',  //favicon存放地址
+    favicon: '/static/dist/favicon.ico',  //favicon存放地址
     charset: 'utf-8',
     autoStatic: '/static',  //自动响应静态文件的uri，比如 http://rrestjs.com/static/rrest.jpg 将会自动响应给客户端，为了加速这里只能设置一级目录
     staticFolder: '/static/dist',  //自动响应静态文件的根目录，比如  http://rrestjs.com/static/rrest.jpg 将返回 baseDir+'/static/rrest.jpg'
@@ -64,7 +64,7 @@ module.exports = {
     logFileNum: 10, //当单个日志文件大小达标时，自动切分，这里设置最多切分多少个日志文件
 //Template
     tempSet: 'ejs', //使用哪种页面模版：jade或者ejs
-    tempFolder: '/static/dist/tpl', //默认读取模版的根目录
+    tempFolder: '/views', //默认读取模版的根目录
     tempHtmlCache: false, //是否开启模版的html缓存，当输出模版需要大量数据库或缓存I/O操作，且实时性要求不高时可以使用
     tempCacheTime: 0,//模版缓存时间
     tempCacheFolder: '/tmp/tpl', //模版缓存 存放目录

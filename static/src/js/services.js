@@ -1,8 +1,8 @@
 'use strict';
-/*global angular, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8, store*/
+/*global angular, jsGen, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8, store, JSONKit*/
 
-angular.module('jsGen.services', ['ngResource', 'ngCookies']).
-factory('restAPI', ['$resource',
+jsGen
+.factory('restAPI', ['$resource',
     function ($resource) {
         return {
             index: $resource('/api/index/:OP'),
@@ -11,7 +11,8 @@ factory('restAPI', ['$resource',
             tag: $resource('/api/tag/:ID/:OP')
         };
     }
-]).factory('cache', ['$cacheFactory',
+])
+.factory('cache', ['$cacheFactory',
     function ($cacheFactory) {
         return {
             user: $cacheFactory('user', {
@@ -28,18 +29,19 @@ factory('restAPI', ['$resource',
             })
         };
     }
-]).factory('myConf', ['$cookieStore', 'tools',
-    function ($cookieStore, tools) {
+])
+.factory('myConf', ['$cookieStore', 'JSONKit',
+    function ($cookieStore, JSONKit) {
         function checkValue(value, defaultValue) {
-            return tools.isNull(value) ? defaultValue : value;
+            return value == null ? defaultValue : value;
         }
 
         function myCookies(name, initial) {
             return function (value, pre, defaultValue) {
-                pre = tools.toStr(pre) + name;
+                pre = JSONKit.toStr(pre) + name;
                 defaultValue = checkValue(defaultValue, initial);
                 var result = checkValue($cookieStore.get(pre), defaultValue);
-                if (!tools.isNull(value) && result !== checkValue(value, defaultValue)) {
+                if ((value != null) && result !== checkValue(value, defaultValue)) {
                     $cookieStore.put(pre, value);
                     result = value;
                 }
@@ -51,7 +53,8 @@ factory('restAPI', ['$resource',
             sumModel: myCookies('sumModel', false)
         };
     }
-]).factory('anchorScroll', function () {
+])
+.factory('anchorScroll', function () {
     function toView(element, top, height) {
         var winHeight = $(window).height();
 
@@ -97,12 +100,14 @@ factory('restAPI', ['$resource',
         toView: toView,
         inView: inView
     };
-}).factory('isVisible', function () {
+})
+.factory('isVisible', function () {
     return function (element) {
         var rect = element[0].getBoundingClientRect();
         return Boolean(rect.bottom - rect.top);
     };
-}).factory('applyFn', ['$rootScope',
+})
+.factory('applyFn', ['$rootScope',
     function ($rootScope) {
         return function (fn, scope) {
             fn = angular.isFunction(fn) ? fn : angular.noop;
@@ -113,7 +118,8 @@ factory('restAPI', ['$resource',
             }
         };
     }
-]).factory('timing', ['$rootScope', '$q', '$exceptionHandler',
+])
+.factory('timing', ['$rootScope', '$q', '$exceptionHandler',
     function ($rootScope, $q, $exceptionHandler) {
         function timing(fn, delay, times) {
             var timingId, count = 0,
@@ -155,7 +161,8 @@ factory('restAPI', ['$resource',
         };
         return timing;
     }
-]).factory('promiseGet', ['$q',
+])
+.factory('promiseGet', ['$q',
     function ($q) {
         return function (param, restAPI, cacheId, cache) {
             var result, defer = $q.defer();
@@ -176,7 +183,8 @@ factory('restAPI', ['$resource',
             return defer.promise;
         };
     }
-]).factory('getList', ['restAPI', 'cache', 'promiseGet',
+])
+.factory('getList', ['restAPI', 'cache', 'promiseGet',
     function (restAPI, cache, promiseGet) {
         return function (listType) {
             return promiseGet({
@@ -185,7 +193,8 @@ factory('restAPI', ['$resource',
             }, restAPI.article, listType, cache.list);
         };
     }
-]).factory('getArticle', ['restAPI', 'cache', 'promiseGet',
+])
+.factory('getArticle', ['restAPI', 'cache', 'promiseGet',
     function (restAPI, cache, promiseGet) {
         return function (ID) {
             return promiseGet({
@@ -193,7 +202,8 @@ factory('restAPI', ['$resource',
             }, restAPI.article, ID, cache.article);
         };
     }
-]).factory('getUser', ['restAPI', 'cache', 'promiseGet',
+])
+.factory('getUser', ['restAPI', 'cache', 'promiseGet',
     function (restAPI, cache, promiseGet) {
         return function (ID) {
             return promiseGet({
@@ -201,23 +211,25 @@ factory('restAPI', ['$resource',
             }, restAPI.user, ID, cache.user);
         };
     }
-]).factory('getMarkdown', ['$http',
+])
+.factory('getMarkdown', ['$http',
     function ($http) {
         return $http.get('/static/md/markdown.md', {
             cache: true
         });
     }
-]).factory('toast', ['$log', 'tools',
-    function ($log, tools) {
+])
+.factory('toast', ['$log', 'JSONKit',
+    function ($log, JSONKit) {
         var toast = {},
             methods = ['info', 'error', 'success', 'warning'];
 
         angular.forEach(methods, function (x) {
             toast[x] = function (message, title) {
                 var log = $log[x] || $log.log;
-                title = tools.toStr(title);
+                title = JSONKit.toStr(title);
                 log(message, title);
-                message = angular.isObject(message) ? angular.toJson(message) : tools.toStr(message);
+                message = angular.isObject(message) ? angular.toJson(message) : JSONKit.toStr(message);
                 toastr[x](message, title);
             };
         });
@@ -227,24 +239,34 @@ factory('restAPI', ['$resource',
         toast.clear = toastr.clear;
         return toast;
     }
-]).factory('pretty', function () {
-    return prettyPrint;
-}).factory('param', function () {
+])
+.factory('pretty', function () {
+    return window.prettyPrint;
+})
+.factory('param', function () {
     return $.param;
-}).factory('CryptoJS', function () {
-    return CryptoJS;
-}).factory('utf8', function () {
-    return utf8;
-}).factory('store', function () {
-    return store;
-}).factory('mdParse', ['tools',
-    function (tools) {
+})
+.factory('CryptoJS', function () {
+    return window.CryptoJS;
+})
+.factory('utf8', function () {
+    return window.utf8;
+})
+.factory('store', function () {
+    return window.store;
+})
+.factory('JSONKit', function () {
+    return window.JSONKit;
+})
+.factory('mdParse', ['JSONKit',
+    function (JSONKit) {
         return function (html) {
-            return marked(tools.toStr(html));
+            return window.marked(JSONKit.toStr(html));
         };
     }
-]).factory('sanitize', ['tools',
-    function (tools) {
+])
+.factory('sanitize', ['JSONKit',
+    function (JSONKit) {
         var San = Sanitize,
             config = San.Config,
             sanitize = [
@@ -258,15 +280,16 @@ factory('restAPI', ['$resource',
             var innerDOM = document.createElement('div'),
                 outerDOM = document.createElement('div');
             level = level >= 0 ? level : 3;
-            innerDOM.innerHTML = tools.toStr(html);
+            innerDOM.innerHTML = JSONKit.toStr(html);
             outerDOM.appendChild(sanitize[level].clean_node(innerDOM));
             return outerDOM.innerHTML;
         };
     }
-]).factory('mdEditor', ['mdParse', 'sanitize', 'pretty', 'tools',
-    function (mdParse, sanitize, pretty, tools) {
+])
+.factory('mdEditor', ['mdParse', 'sanitize', 'pretty', 'JSONKit',
+    function (mdParse, sanitize, pretty, JSONKit) {
         return function (idPostfix, level) {
-            idPostfix = tools.toStr(idPostfix);
+            idPostfix = JSONKit.toStr(idPostfix);
             var editor = new Markdown.Editor({
                 makeHtml: function (text) {
                     return sanitize(mdParse(text), level);

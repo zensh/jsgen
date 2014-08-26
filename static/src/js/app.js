@@ -1,8 +1,15 @@
 'use strict';
 /*global angular*/
-window.jsGen = true;
-angular.module('jsGen', ['ngAnimate', 'jsGen.tools', 'jsGen.router', 'jsGen.filters', 'jsGen.services', 'jsGen.locale', 'jsGen.directives', 'jsGen.controllers']).
-config(['$httpProvider', 'app',
+var jsGen = angular.module('jsGen', [
+    'ngLocale',
+    'ngRoute',
+    'ngAnimate',
+    'ngResource',
+    'ngCookies',
+    'ui.validate',
+    'angularFileUpload']);
+
+jsGen.config(['$httpProvider', 'app',
     function ($httpProvider, app) {
         // global loading status
         var count = 0,
@@ -71,10 +78,11 @@ config(['$httpProvider', 'app',
             };
         });
     }
-]).run(['app', '$q', '$rootScope', '$location', '$timeout', '$filter', '$locale', 'getFile', 'tools', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
-    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'isVisible', 'applyFn', 'param', 'store',
-    function (app, $q, $rootScope, $location, $timeout, $filter, $locale,
-        getFile, tools, toast, timing, cache, restAPI, sanitize, mdParse, mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, isVisible, applyFn, param, store) {
+])
+.run(['app', '$q', '$rootScope', '$location', '$timeout', '$filter', 'getFile', 'JSONKit', 'toast', 'timing', 'cache', 'restAPI', 'sanitize',
+    'mdParse', 'mdEditor', 'CryptoJS', 'promiseGet', 'myConf', 'anchorScroll', 'isVisible', 'applyFn', 'param', 'store', 'i18n-zh',
+    function (app, $q, $rootScope, $location, $timeout, $filter, getFile, JSONKit, toast, timing, cache, restAPI, sanitize, mdParse,
+        mdEditor, CryptoJS, promiseGet, myConf, anchorScroll, isVisible, applyFn, param, store, $locale) {
         var unSave = {
                 stopUnload: false,
                 nextUrl: ''
@@ -109,7 +117,6 @@ config(['$httpProvider', 'app',
             });
         }
 
-        window.jsGen = app;
         app.q = $q;
         app.store = store;
         app.toast = toast;
@@ -118,7 +125,7 @@ config(['$httpProvider', 'app',
         app.location = $location;
         app.timeout = $timeout;
         app.timeOffset = 0;
-        app.timestamp = Date.now() + 0;
+        app.timestamp = Date.now();
         app.filter = $filter;
         app.locale = $locale;
         app.anchorScroll = anchorScroll;
@@ -133,7 +140,7 @@ config(['$httpProvider', 'app',
         app.promiseGet = promiseGet;
         app.myConf = myConf;
         app.rootScope = $rootScope;
-        angular.extend(app, tools); //添加jsGen系列工具函数
+        angular.extend(app, JSONKit); //添加 JSONKit 系列工具函数
 
         app.loading = function (value, status) {
             // $rootScope.loading = status;
@@ -166,20 +173,12 @@ config(['$httpProvider', 'app',
                         delete list[key];
                     }
                 });
-                app.remove(data, undefined);
+                app.removeItem(data, undefined);
                 unSave.stopUnload = !app.isEmpty(data);
             } else {
                 unSave.stopUnload = false;
             }
             return unSave.stopUnload ? data : null;
-        };
-        app.removeItem = function (item, key, list) {
-            return app.some(list, function (x, i) {
-                if (x[key] === item[key]) {
-                    list.splice(i, 1);
-                    return true;
-                }
-            });
         };
         app.checkUser = function () {
             global.isLogin = !! global.user;
@@ -193,7 +192,7 @@ config(['$httpProvider', 'app',
         app.checkFollow = function (user) {
             var me = global.user || {};
             user.isMe = user._id === me._id;
-            user.isFollow = !user.isMe && app.some(me.followList, function (x) {
+            user.isFollow = !user.isMe && !!app.findItem(me.followList, function (x) {
                 return x === user._id;
             });
         };
@@ -251,7 +250,7 @@ config(['$httpProvider', 'app',
                     global.user.followList.push(user._id);
                     app.toast.success($locale.USER.followed + user.name, $locale.RESPONSE.success);
                 } else {
-                    app.some(global.user.followList, function (x, i, list) {
+                    app.findItem(global.user.followList, function (x, i, list) {
                         if (x === user._id) {
                             list.splice(i, 1);
                             app.toast.success($locale.USER.unfollowed + user.name, $locale.RESPONSE.success);
@@ -272,5 +271,6 @@ config(['$httpProvider', 'app',
         }, 120000);
         resize();
         init();
+
     }
 ]);

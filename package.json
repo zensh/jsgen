@@ -1,33 +1,53 @@
 {
-    "author": {
-        "name": "zensh",
-        "email": "admin@zensh.com",
-        "url": "http://weibo.com/zensh"
-    },
-    "name": "jsgen",
-    "version": "0.7.9",
-    "description": "",
-    "keywords": ["Node.js", "AngularJS", "mongoDB", "jsGen"],
-    "homepage": "https://github.com/zensh/jsgen",
-    "main": "app.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/zensh/jsgen.git"
-    },
-    "engines": {
-        "node": ">=0.10.x"
-    },
-    "dependencies": {
-        "rrestjs": ">=1.3.x",
-        "mongoskin": ">=1.3.x",
-        "redis": ">=0.10.x",
-        "marked": ">=0.3.x",
-        "nodemailer": ">=0.6.x",
-        "thenjs": ">=0.10.x",
-        "xss": ">=0.1.x"
-    },
-    "scripts": {
-        "start": "node app.js",
-        "test": "node app.js --dev"
-    }
+  "author": {
+    "name": "zensh",
+    "email": "admin@zensh.com",
+    "url": "http://weibo.com/zensh"
+  },
+  "name": "jsgen",
+  "version": "0.8.0",
+  "description": "",
+  "keywords": [
+    "Node.js",
+    "AngularJS",
+    "mongoDB",
+    "jsGen"
+  ],
+  "homepage": "https://github.com/zensh/jsgen",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zensh/jsgen.git"
+  },
+  "engines": {
+    "node": ">=0.10.x"
+  },
+  "dependencies": {
+    "rrestjs": ">=1.3.x",
+    "mongoskin": ">=1.3.x",
+    "redis": ">=0.10.x",
+    "marked": ">=0.3.x",
+    "nodemailer": ">=0.6.x",
+    "thenjs": ">=1.4.x",
+    "xss": ">=0.1.x"
+  },
+  "devDependencies": {
+    "gulp": ">=3.5.6",
+    "gulp-clean": ">=0.3.1",
+    "gulp-concat": ">=2.2.0",
+    "gulp-imagemin": ">=1.0.1",
+    "gulp-jshint": ">=1.5.1",
+    "gulp-minify-css": ">=0.3.0",
+    "gulp-minify-html": "^0.1.4",
+    "gulp-rename": ">=1.2.0",
+    "gulp-replace": "^0.4.0",
+    "gulp-rev": ">=0.4.2",
+    "gulp-uglify": ">=0.3.1",
+    "gulp-usemin": ">=0.3.6",
+    "gulp-util": ">=2.2.14",
+    "run-sequence": "^0.3.6"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
 }

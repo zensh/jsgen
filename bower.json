@@ -1,6 +1,6 @@
 {
   "name": "jsGen",
-  "version": "0.7.9",
+  "version": "0.8.0",
   "main": "index.html",
   "dependencies": {
     "angular": ">=1.2.0",
@@ -8,17 +8,18 @@
     "angular-cookies": ">=1.2.0",
     "angular-resource": ">=1.2.0",
     "angular-route": ">=1.2.0",
-    "pure": "~0.4.x",
+    "crypto-js": "https://github.com/evanvosberg/crypto-js.git",
+    "pure": "~0.5.x",
     "font-awesome": ">=3.2.1",
     "jquery": ">=2.0.3",
-    "jquery.old": "jquery#1.7.2",
-    "es5-shim": ">=2.1.0",
-    "html5shiv": ">=3.7.0",
-    "json2": "",
     "marked": ">=0.2.9",
     "toastr": ">=2.0.1",
     "google-code-prettify": ">=1.0.0",
-    "angular-file-upload": "v0.2.8.7",
-    "reserveLoadjs": ">=0.4.1"
+    "angular-file-upload": ">=1.1.1",
+    "utf8": "https://github.com/arahaya/utf8.js.git",
+    "angular-i18n": "~1.2.23",
+    "store2": "~2.1.6",
+    "angular-ui-utils": "bower-validate",
+    "jsonkit": "~0.3.0"
   }
 }
