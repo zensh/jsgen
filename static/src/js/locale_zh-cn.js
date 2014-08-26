@@ -1,8 +1,8 @@
 'use strict';
-/*global angular*/
+/*global angular, jsGen*/
 
-angular.module('jsGen.locale', ['ngLocale']).
-run(['$locale',
+jsGen
+.factory('i18n-zh', ['$locale',
     function ($locale) {
         angular.extend($locale, {
             RESET: {
@@ -129,5 +129,6 @@ run(['$locale',
                 fileType: '文件类型无效，仅允许png、gif、jpg文件！'
             }
         });
+        return $locale;
     }
 ]);

@@ -12,7 +12,6 @@ var fs = require('fs'),
 
 global.jsGen = {}; // 注册全局变量jsGen
 module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
-module.exports.conf_dev = require('./config/config_dev'); // 注册开发模式配置文件
 
 serverDm.on('error', function (error) {
     delete error.domain;
@@ -48,7 +47,7 @@ serverDm.run(function () {
     jsGen.dao.message = require('./dao/messageDao.js');
     jsGen.dao.collection = require('./dao/collectionDao.js');
 
-    jsGen.thenErrLog = function (defer, err) {
+    jsGen.thenErrLog = function (cont, err) {
         console.error(err);
         jsGen.serverlog.error(err);
     };
@@ -85,40 +84,40 @@ serverDm.run(function () {
     }
 
     then.parallel([
-        function (defer) {
+        function (cont) {
             // 连接 mongoDB，读取config
-            jsGen.dao.index.getGlobalConfig(defer);
+            jsGen.dao.index.getGlobalConfig(cont);
         },
-        function (defer) {
+        function (cont) {
             // 连接 redis
-            redis.connect(defer);
+            redis.connect(cont);
         }
-    ]).then(function (defer, result) {
+    ]).then(function (cont, result) {
         // 初始化config缓存
-        redis.initConfig(result[0], defer);
-    }).then(function (defer, config) {
+        redis.initConfig(result[0], cont);
+    }).then(function (cont, config) {
         jsGen.config = config;
-        redis.userCache.index.total(defer); // 读取user缓存
-    }).then(function (defer, users) {
+        redis.userCache.index.total(cont); // 读取user缓存
+    }).then(function (cont, users) {
         if (!users || process.argv.indexOf('recache') > 0) {
             // user缓存为空，则判断redis缓存为空，需要初始化
             // 或启动时指定了recache，手动初始化
             var recache = require('./lib/recache.js');
-            recache(defer);
+            recache(cont);
         } else {
-            defer();
+            cont();
         }
     }).parallel([
-        function (defer) {
-            fs.readFile(processPath + '/package.json', 'utf8', defer); // 读取软件版本信息
+        function (cont) {
+            fs.readFile(processPath + '/package.json', 'utf8', cont); // 读取软件版本信息
         },
-        function (defer) {
-            fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', defer); // 读取首页模板
+        function (cont) {
+            fs.readFile(processPath + jsGen.conf.staticFolder + '/index.html', 'utf8', cont); // 读取首页模板
         },
-        function (defer) {
-            fs.readFile(processPath + jsGen.conf.staticFolder + '/robots.txt', 'utf8', defer); // 读取robots.txt
+        function (cont) {
+            fs.readFile(processPath + '/views/robots.txt', 'utf8', cont); // 读取robots.txt
         }
-    ]).then(function (defer, result) {
+    ]).then(function (cont, result) {
         var api = ['index', 'user', 'article', 'tag', 'collection', 'message'],
             config = jsGen.config;
 
@@ -198,7 +197,7 @@ serverDm.run(function () {
         function handler(req, res) {
             var dm = domain.create();
 
-            res.throwError = function (defer, error) { // 处理then.js捕捉的错误
+            res.throwError = function (cont, error) { // 处理then.js捕捉的错误
                 if (!util.isError(error)) {
                     error = jsGen.Err(error);
                 }
@@ -214,7 +213,7 @@ serverDm.run(function () {
 
         http.createServer(handler).listen(jsGen.conf.listenPort);
         console.log('jsGen start at ' + jsGen.conf.listenPort);
-    }).fail(function (defer, error) {
+    }).fail(function (cont, error) {
         console.error(error);
         jsGen.serverlog.error(error);
         return exit();

@@ -37,60 +37,60 @@ userCache.getP = function (Uid, convert) {
     var that = this,
         inCache = false;
 
-    return then(function (defer) {
+    return then(function (cont) {
         if (Uid >= 0) {
             var user = that.get(Uid);
             if (user) {
                 inCache = true;
-                defer(null, user);
+                cont(null, user);
             } else {
-                userDao.getUserInfo(Uid, defer);
+                userDao.getUserInfo(Uid, cont);
             }
         } else {
-            defer(jsGen.Err(msg.USER.UidNone));
+            cont(jsGen.Err(msg.USER.UidNone));
         }
-    }).then(function (defer, user) {
+    }).then(function (cont, user) {
         if (!inCache) {
             user = intersect(union(UserPrivateTpl), user);
             that.put(Uid, user);
         }
         if (convert !== false) {
-            calcuScore(user).all(function (defer2) {
+            calcuScore(user).fin(function (cont2) {
                 userDao.setUserInfo({
                     _id: Uid,
                     score: user.score
                 });
-                defer2();
-            }).then(function (defer2) {
-                tagAPI.convertTags(user.tagsList).all(defer2);
-            }).then(function (defer2, tagsList) {
+                cont2();
+            }).then(function (cont2) {
+                tagAPI.convertTags(user.tagsList).fin(cont2);
+            }).then(function (cont2, tagsList) {
                 user.tagsList = tagsList;
-                convertUsers(user.followList, 'Uid').all(defer2);
-            }).then(function (defer2, followList) {
+                convertUsers(user.followList, 'Uid').fin(cont2);
+            }).then(function (cont2, followList) {
                 user.followList = followList;
                 delete user.fansList;
                 delete user.articlesList;
                 delete user.collectionsList;
                 user._id = convertUserID(Uid);
-                defer(null, user);
-            }).fail(defer);
+                cont(null, user);
+            }).fail(cont);
         } else {
-            defer(null, user);
+            cont(null, user);
         }
     }).fail(errorHandler);
 };
 
 function convertUsers(UidArray, mode) {
-    return then(function (defer) {
+    return then(function (cont) {
         var result = [];
         UidArray = toArray(UidArray);
         if (mode === 'Uid') {
             each(UidArray, function (x) {
                 result.push(convertUserID(x));
             });
-            defer(null, result);
+            cont(null, result);
         } else {
-            then.each(UidArray, function (defer2, x) {
+            then.each(UidArray, function (cont2, x) {
                 cache(x, function (err, user) {
                     user = user && {
                         _id: convertUserID(user._id),
@@ -98,11 +98,11 @@ function convertUsers(UidArray, mode) {
                         avatar: user.avatar,
                         score: user.score
                     };
-                    defer2(err, user || null);
+                    cont2(err, user || null);
                 });
-            }).all(function (defer2, err, users) {
+            }).fin(function (cont2, err, users) {
                 removeItem(users, null);
-                defer(err, users);
+                cont(err, users);
             });
         }
     }).fail(errorHandler);
@@ -117,19 +117,19 @@ function calcuScore(user) {
     user.score += UsersScore[3] * (+user.fans);
     user.score += UsersScore[5] * Math.floor((Date.now() - user.date) / 86400000);
 
-    return then.each(user.articlesList, function (defer, x) {
-        then(function (defer2) {
-            redis.articleCache(x, defer2);
-        }).all(function (defer2, err, article) {
+    return then.each(user.articlesList, function (cont, x) {
+        then(function (cont2) {
+            redis.articleCache(x, cont2);
+        }).fin(function (cont2, err, article) {
             if (article) {
                 user.score += UsersScore[+(article.status !== -1)];
                 user.score += UsersScore[4] * (+article.hots);
             }
-            defer();
+            cont();
         });
-    }).then(function (defer) {
+    }).then(function (cont) {
         user.score = Math.round(user.score);
-        cache.update(user, defer);
+        cache.update(user, cont);
     }).fail(errorHandler);
 }
 
@@ -141,33 +141,33 @@ function setCache(user) {
 }
 
 function adduser(userObj) {
-    return then(function (defer) {
+    return then(function (cont) {
         if (typeof userObj !== 'object') {
-            defer(jsGen.Err(msg.USER.userNone));
+            cont(jsGen.Err(msg.USER.userNone));
         } else if (!checkEmail(userObj.email)) {
-            defer(jsGen.Err(msg.USER.userEmailErr));
+            cont(jsGen.Err(msg.USER.userEmailErr));
         } else if (!checkUserName(userObj.name)) {
-            defer(jsGen.Err(msg.USER.userNameErr));
+            cont(jsGen.Err(msg.USER.userNameErr));
         } else {
-            defer();
+            cont();
         }
-    }).then(function (defer) {
+    }).then(function (cont) {
         cache.get(userObj.email, function (err, Uid) {
             if (Uid) {
-                defer(jsGen.Err(msg.USER.userEmailExist));
+                cont(jsGen.Err(msg.USER.userEmailExist));
             } else {
-                defer();
+                cont();
             }
         });
-    }).then(function (defer) {
+    }).then(function (cont) {
         cache.get(userObj.name, function (err, Uid) {
             if (Uid) {
-                defer(jsGen.Err(msg.USER.userNameExist));
+                cont(jsGen.Err(msg.USER.userNameExist));
             } else {
-                defer();
+                cont();
             }
         });
-    }).then(function (defer) {
+    }).then(function (cont) {
         delete userObj._id;
         userObj.email = userObj.email.toLowerCase();
         userObj.avatar = gravatar(userObj.email);
@@ -178,7 +178,7 @@ function adduser(userObj) {
                 user = setCache(user);
                 jsGen.config.users = 1;
             }
-            defer(err, user);
+            cont(err, user);
         });
     }).fail(errorHandler);
 }
@@ -195,57 +195,57 @@ function setReset(resetObj) {
     userObj._id = resetObj.u;
     userObj.resetDate = Date.now();
     userObj.resetKey = SHA256(userObj.resetDate + '');
-    return then(function (defer) {
-        userDao.setUserInfo(userObj, defer);
-    }).then(function (defer, doc) {
+    return then(function (cont) {
+        userDao.setUserInfo(userObj, cont);
+    }).then(function (cont, doc) {
         resetObj.k = HmacMD5(HmacMD5(userObj.resetKey, resetObj.r), resetObj.u, 'base64');
         var resetUrl = new Buffer(JSON.stringify(resetObj)).toString('base64');
         resetUrl = jsGen.config.url + '/reset?req=' + resetUrl;
         var email = resetObj.e || doc.email;
-        return jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(defer);
+        return jsGen.lib.email.tpl(jsGen.config.title, doc.name, email, resetUrl, resetObj.r).send(cont);
     }).fail(errorHandler);
 }
 
 function userLogin(loginObj) {
     var date = Date.now();
 
-    return then(function (defer) {
+    return then(function (cont) {
         if (typeof loginObj !== 'object') {
-            defer(jsGen.Err(msg.MAIN.requestDataErr));
+            cont(jsGen.Err(msg.MAIN.requestDataErr));
         } else if (date - loginObj.logtime > 259200000) {
-            defer(jsGen.Err(msg.MAIN.requestOutdate));
+            cont(jsGen.Err(msg.MAIN.requestOutdate));
         } else if (checkUserID(loginObj.logname)) {
             var Uid = convertUserID(loginObj.logname);
             cache(Uid, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.USER.UidNone));
+                    cont(jsGen.Err(msg.USER.UidNone));
                 } else {
-                    defer(null, Uid);
+                    cont(null, Uid);
                 }
             });
         } else if (loginObj.logname >= 0) {
-            defer(null, loginObj.logname);
+            cont(null, loginObj.logname);
         } else {
             cache.get(loginObj.logname, function (err, Uid) {
                 if (Uid >= 0) {
-                    defer(null, Uid);
+                    cont(null, Uid);
                 } else {
                     if (checkEmail(loginObj.logname)) {
-                        defer(jsGen.Err(msg.USER.userEmailNone));
+                        cont(jsGen.Err(msg.USER.userEmailNone));
                     } else if (checkUserName(loginObj.logname)) {
-                        defer(jsGen.Err(msg.USER.userNameNone));
+                        cont(jsGen.Err(msg.USER.userNameNone));
                     } else {
-                        defer(jsGen.Err(msg.USER.logNameErr));
+                        cont(jsGen.Err(msg.USER.logNameErr));
                     }
                 }
             });
         }
-    }).then(function (defer, Uid) {
+    }).then(function (cont, Uid) {
         userDao.getAuth(Uid, function (err, user) {
             if (!user) {
-                defer(jsGen.Err(msg.MAIN.dbErr));
+                cont(jsGen.Err(msg.MAIN.dbErr));
             } else if (user.locked) {
-                defer(jsGen.Err(msg.USER.userLocked, 'locked'));
+                cont(jsGen.Err(msg.USER.userLocked, 'locked'));
             } else if (user.loginAttempts >= 5) {
                 userDao.setUserInfo({
                     _id: Uid,
@@ -256,7 +256,7 @@ function userLogin(loginObj) {
                         loginAttempts: 0
                     });
                 });
-                defer(jsGen.Err(msg.USER.loginAttempts));
+                cont(jsGen.Err(msg.USER.loginAttempts));
             } else if (loginObj.logpwd === HmacSHA256(user.passwd, loginObj.logname + ':' + loginObj.logtime)) {
                 if (user.loginAttempts > 0) {
                     userDao.setLoginAttempt({
@@ -272,47 +272,46 @@ function userLogin(loginObj) {
                         ip: loginObj.ip
                     }
                 });
-                defer(null, Uid);
+                cont(null, Uid);
             } else {
                 userDao.setLoginAttempt({
                     _id: Uid,
                     loginAttempts: 1
                 });
-                return defer(jsGen.Err(msg.USER.userPasswd, 'passwd'));
+                return cont(jsGen.Err(msg.USER.userPasswd, 'passwd'));
             }
         });
     }).fail(errorHandler);
 }
 
 function cookieLoginUpdate(Uid) {
-    return then(function (defer) {
-        userDao.getAuth(Uid, defer);
-    }).then(function (defer, user) {
+    return then(function (cont) {
+        userDao.getAuth(Uid, cont);
+    }).then(function (cont, user) {
         var data = {};
         data.n = Uid;
         data.t = Date.now();
         data.p = HmacSHA256(user.passwd, data.n + ':' + data.t);
-        defer(null, new Buffer(JSON.stringify(data)).toString('base64'));
+        cont(null, new Buffer(JSON.stringify(data)).toString('base64'));
     }).fail(errorHandler);
 }
 
 function cookieLogin(req) {
-    return then(function (defer) {
+    return then(function (cont) {
         var data = new Buffer(req.cookie.autologin, 'base64').toString();
         data = parseJSON(data);
         if (data) {
-            data = JSON.parse(data);
             data.logname = data.n;
             data.logtime = data.t;
             data.logpwd = data.p;
             data.ip = req.ip;
-            userLogin(data).then(function (defer2, Uid) {
-                defer(null, Uid);
+            userLogin(data).then(function (cont2, Uid) {
+                cont(null, Uid);
             }).fail(function () {
-                defer(true);
+                cont(true);
             });
         } else {
-            defer(true);
+            cont(true);
         }
     });
 }
@@ -320,15 +319,15 @@ function cookieLogin(req) {
 function getUserID(req) {
     var userID = decodeURI(req.path[2]);
 
-    return then(function (defer) {
+    return then(function (cont) {
         var Uid;
         if (checkUserID(userID)) {
             Uid = convertUserID(userID);
             cache(Uid, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.USER.UidNone));
+                    cont(jsGen.Err(msg.USER.UidNone));
                 } else {
-                    defer(null, Uid);
+                    cont(null, Uid);
                 }
             });
         } else if (checkUserName(userID)) {
@@ -336,13 +335,13 @@ function getUserID(req) {
                 if (_id) {
                     Uid = _id;
                     userID = convertUserID(Uid);
-                    defer(null, Uid);
+                    cont(null, Uid);
                 } else {
-                    defer(jsGen.Err(msg.USER.userNameNone));
+                    cont(jsGen.Err(msg.USER.userNameNone));
                 }
             });
         } else {
-            defer(jsGen.Err(msg.USER.UidNone));
+            cont(jsGen.Err(msg.USER.UidNone));
         }
     });
 }
@@ -357,15 +356,15 @@ function login(req, res) {
     var Uid;
 
     req.apibody.ip = req.ip;
-    userLogin(req.apibody).then(function (defer, _id) {
+    userLogin(req.apibody).then(function (cont, _id) {
         Uid = _id;
-        userCache.getP(Uid).all(defer);
-    }).then(function (defer, doc) {
+        userCache.getP(Uid).fin(cont);
+    }).then(function (cont, doc) {
         req.session.Uid = Uid;
         req.session.role = doc.role;
         req.session.logauto = req.apibody.logauto;
         if (req.session.logauto) {
-            cookieLoginUpdate(Uid).then(function (defer2, cookie) {
+            cookieLoginUpdate(Uid).then(function (cont2, cookie) {
                 res.cookie('autologin', cookie, {
                     maxAge: 259200000,
                     path: '/',
@@ -373,7 +372,7 @@ function login(req, res) {
                 });
                 return res.sendjson(resJson(null, doc));
             }).fail(function (err) {
-                defer(err);
+                cont(err);
             });
         } else {
             return res.sendjson(resJson(null, doc));
@@ -391,21 +390,21 @@ function register(req, res) {
         }
     }
 
-    then(function (defer) {
+    then(function (cont) {
         if (!jsGen.config.register) {
-            defer(jsGen.Err(msg.MAIN.registerClose));
+            cont(jsGen.Err(msg.MAIN.registerClose));
         } else {
-            checkTimeInterval(req, 'Register').all(function (defer2, err, value) {
+            checkTimeInterval(req, 'Register').fin(function (cont2, err, value) {
                 if (value) {
-                    defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
+                    cont(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
                 } else {
-                    defer();
+                    cont();
                 }
             });
         }
-    }).then(function (defer) {
-        adduser(data).all(defer);
-    }).then(function (defer, doc) {
+    }).then(function (cont) {
+        adduser(data).fin(cont);
+    }).then(function (cont, doc) {
         checkTimeInterval(req, 'Register', true);
         req.session.Uid = doc._id;
         req.session.role = doc.role;
@@ -425,83 +424,83 @@ function register(req, res) {
 }
 
 function getUser(req, res) {
-    getUserID(req).then(function (defer, Uid) {
+    getUserID(req).then(function (cont, Uid) {
         var user, publicUser,
             userID = convertUserID(Uid),
             key = 'Public' + userID + req.path[3],
             p = +req.getparam.p || +req.getparam.pageIndex || 1;
 
-        userCache.getP(Uid, false).then(function (defer2, doc) {
+        userCache.getP(Uid, false).then(function (cont2, doc) {
             user = doc;
             publicUser = intersect(union(UserPublicTpl), user);
             publicUser._id = userID;
             if (!req.path[3] || req.path[3] === 'index') {
                 return res.sendjson(resJson(null, publicUser));
             } else {
-                paginationCache.get(key, defer2);
+                paginationCache.get(key, cont2);
             }
-        }).then(function (defer2, list) {
+        }).then(function (cont2, list) {
             if (!list || p === 1) {
                 if (req.path[3] === 'fans') {
                     list = user.fansList;
                     paginationCache.put(key, list);
-                    defer2(null, list, userCache);
+                    cont2(null, list, userCache);
                 } else {
                     list = [];
-                    then.each(user.articlesList.reverse(), function (defer3, ID) {
-                        then(function (defer4) {
-                            redis.articleCache(ID, defer4);
-                        }).all(function (defer4, err, article) {
-                            defer3(null, article && article.status > -1 && article.display === 0 ? ID : null);
+                    then.each(user.articlesList.reverse(), function (cont3, ID) {
+                        then(function (cont4) {
+                            redis.articleCache(ID, cont4);
+                        }).fin(function (cont4, err, article) {
+                            cont3(null, article && article.status > -1 && article.display === 0 ? ID : null);
                         });
-                    }).all(function (defer3, err, list) {
+                    }).fin(function (cont3, err, list) {
                         removeItem(list, null);
                         paginationCache.put(key, list);
-                        defer2(null, list, jsGen.cache.list);
+                        cont2(null, list, jsGen.cache.list);
                     });
                 }
             } else {
-                defer2(null, list, req.path[3] === 'fans' ? userCache : jsGen.cache.list);
+                cont2(null, list, req.path[3] === 'fans' ? userCache : jsGen.cache.list);
             }
-        }).then(function (defer2, list, listCache) {
-            paginationList(req, list, listCache, defer2);
-        }).then(function (defer2, data, pagination) {
+        }).then(function (cont2, list, listCache) {
+            paginationList(req, list, listCache, cont2);
+        }).then(function (cont2, data, pagination) {
             return res.sendjson(resJson(null, data, pagination, {
                 user: publicUser
             }));
-        }).fail(defer);
+        }).fail(cont);
     }).fail(res.throwError);
 }
 
 function setUser(req, res) {
-    getUserID(req).then(function (defer, Uid) {
+    getUserID(req).then(function (cont, Uid) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.USER.userNeedLogin));
+            cont(jsGen.Err(msg.USER.userNeedLogin));
         } else if (req.session.Uid === Uid || !req.apibody) {
-            defer(jsGen.Err(msg.MAIN.requestDataErr));
+            cont(jsGen.Err(msg.MAIN.requestDataErr));
         } else {
-            checkTimeInterval(req, 'Follow').all(function (defer2, err, value) {
+            checkTimeInterval(req, 'Follow').fin(function (cont2, err, value) {
                 if (value) {
-                    defer(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
+                    cont(jsGen.Err(msg.MAIN.timeIntervalErr + '[' + jsGen.config.TimeInterval + 's]'));
                 } else {
-                    defer(null, Uid);
+                    cont(null, Uid);
                 }
             });
         }
-    }).then(function (defer, Uid) {
+    }).then(function (cont, Uid) {
         var follow = !! req.apibody.follow;
-        userCache.getP(req.session.Uid, false).then(function (defer2, user) {
+        userCache.getP(req.session.Uid, false).then(function (cont2, user) {
             if (follow && user.followList.indexOf(Uid) >= 0) {
-                return defer(jsGen.Err(msg.USER.userFollowed));
+                return cont(jsGen.Err(msg.USER.userFollowed));
             } else if (!follow && user.followList.indexOf(Uid) < 0) {
-                return defer(jsGen.Err(msg.USER.userUnfollowed));
+                return cont(jsGen.Err(msg.USER.userUnfollowed));
             } else {
                 userDao.setFollow({
                     _id: req.session.Uid,
                     followList: follow ? Uid : -Uid
-                }, defer2);
+                }, cont2);
             }
-        }).then(function (defer2) {
+        }).then(function (cont2) {
             userDao.setFans({
                 _id: Uid,
                 fansList: follow ? req.session.Uid : -req.session.Uid
@@ -526,20 +525,20 @@ function setUser(req, res) {
             return res.sendjson(resJson(null, null, null, {
                 follow: follow
             }));
-        }).fail(defer);
+        }).fail(cont);
     }).fail(res.throwError);
 }
 
 function getUsers(req, res) {
-    then(function (defer) {
+    then(function (cont) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.USER.userRoleErr));
+            cont(jsGen.Err(msg.USER.userRoleErr));
         } else {
-            cache.index(0, -1, defer);
+            cache.index(0, -1, cont);
         }
-    }).then(function (defer, list) {
-        paginationList(req, list, userCache, defer);
-    }).then(function (defer, data, pagination) {
+    }).then(function (cont, list) {
+        paginationList(req, list, userCache, cont);
+    }).then(function (cont, data, pagination) {
         each(data, function (x, i, list) {
             var user = intersect(union(UserPublicTpl), x);
             user._id = x._id;
@@ -554,42 +553,42 @@ function getUserInfo(req, res) {
     var key, user, userID,
         p = +req.getparam.p || +req.getparam.pageIndex || 1;
 
-    then(function (defer) {
+    then(function (cont) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.USER.userNeedLogin));
+            cont(jsGen.Err(msg.USER.userNeedLogin));
         } else {
             userID = convertUserID(req.session.Uid);
             req.session.paginationKey = req.session.paginationKey || {};
-            userCache.getP(req.session.Uid, false).all(defer);
+            userCache.getP(req.session.Uid, false).fin(cont);
         }
-    }).then(function (defer, doc) {
+    }).then(function (cont, doc) {
         user = doc;
-        paginationCache.get(req.session.paginationKey.home, defer);
-    }).then(function (defer, list) {
+        paginationCache.get(req.session.paginationKey.home, cont);
+    }).then(function (cont, list) {
         if (!list || p === 1) {
-            then(function (defer2) {
-                redis.articleCache.updateList(0, -1, defer2);
-            }).each(null, function (defer2, x) {
-                jsGen.cache.list.getP(x, false).all(function (defer3, err, article) {
+            then(function (cont2) {
+                redis.articleCache.updateList(0, -1, cont2);
+            }).each(null, function (cont2, x) {
+                jsGen.cache.list.getP(x, false).fin(function (cont3, err, article) {
                     var ok = article && req.session.Uid === article.author || user.followList.indexOf(article.author) >= 0;
                     ok = ok && user.tagsList.some(function (x) {
                         if (article.tagsList.indexOf(x) >= 0) {
                             return true;
                         }
                     });
-                    defer2(err, ok ? x : null);
+                    cont2(err, ok ? x : null);
                 });
-            }).then(function (defer2, list) {
+            }).then(function (cont2, list) {
                 removeItem(list, null);
                 paginationCache.put(req.session.paginationKey.home, list);
-                defer(null, list);
-            }).fail(defer);
+                cont(null, list);
+            }).fail(cont);
         } else {
-            defer(null, list);
+            cont(null, list);
         }
-    }).then(function (defer, list) {
-        paginationList(req, list, jsGen.cache.list, defer);
-    }).then(function (defer, data, pagination) {
+    }).then(function (cont, list) {
+        paginationList(req, list, jsGen.cache.list, cont);
+    }).then(function (cont, data, pagination) {
         var now = Date.now(),
             readtimestamp = user.readtimestamp;
 
@@ -621,25 +620,25 @@ function editUser(req, res) {
         userObj = intersect(union(defaultObj), req.apibody);
 
     userObj._id = req.session.Uid;
-    then(function (defer) {
+    then(function (cont) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.USER.userNeedLogin));
+            cont(jsGen.Err(msg.USER.userNeedLogin));
         } else if (userObj.name) {
             if (!checkUserName(userObj.name)) {
-                defer(jsGen.Err(msg.USER.userNameErr));
+                cont(jsGen.Err(msg.USER.userNameErr));
             } else {
                 cache.get(userObj.name, function (err, user) {
                     if (user && user._id !== req.session.Uid) {
-                        defer(jsGen.Err(msg.USER.userNameExist));
+                        cont(jsGen.Err(msg.USER.userNameExist));
                     } else {
-                        defer();
+                        cont();
                     }
                 });
             }
         } else {
-            defer();
+            cont();
         }
-    }).then(function (defer) {
+    }).then(function (cont) {
         if (userObj.sex && ['male', 'female'].indexOf(userObj.sex) < 0) {
             delete userObj.sex;
         }
@@ -650,12 +649,12 @@ function editUser(req, res) {
             userObj.desc = filterSummary(userObj.desc);
         }
         if (userObj.tagsList) {
-            then(function (defer2) {
-                tagAPI.filterTags(userObj.tagsList.slice(0, jsGen.config.UserTagsMax)).all(defer2);
-            }).then(function (defer2, tagsList) {
+            then(function (cont2) {
+                tagAPI.filterTags(userObj.tagsList.slice(0, jsGen.config.UserTagsMax)).fin(cont2);
+            }).then(function (cont2, tagsList) {
                 userObj.tagsList = tagsList || [];
-                userCache.getP(req.session.Uid, false).all(defer2);
-            }).then(function (defer2, user) {
+                userCache.getP(req.session.Uid, false).fin(cont2);
+            }).then(function (cont2, user) {
                 var tagList = {},
                     setTagList = [];
                 each(user.tagsList, function (x) {
@@ -677,17 +676,17 @@ function editUser(req, res) {
                 each(setTagList, function (x) {
                     tagAPI.setTag(x);
                 });
-                defer();
-            }).fail(defer);
+                cont();
+            }).fail(cont);
         } else {
-            defer();
+            cont();
         }
-    }).then(function (defer) {
-        userDao.setUserInfo(userObj, defer);
-    }).then(function (defer, user) {
+    }).then(function (cont) {
+        userDao.setUserInfo(userObj, cont);
+    }).then(function (cont, user) {
         setCache(user);
-        userCache.getP(req.session.Uid).all(defer);
-    }).then(function (defer, user) {
+        userCache.getP(req.session.Uid).fin(cont);
+    }).then(function (cont, user) {
         return res.sendjson(resJson(null, user));
     }).fail(res.throwError);
 }
@@ -700,41 +699,41 @@ function editUsers(req, res) {
     },
         userArray = req.apibody.data;
 
-    then(function (defer) {
+    then(function (cont) {
         if (req.session.role !== 5) {
-            defer(jsGen.Err(msg.USER.userRoleErr));
+            cont(jsGen.Err(msg.USER.userRoleErr));
         } else if (!userArray) {
-            defer(jsGen.Err(msg.MAIN.requestDataErr));
+            cont(jsGen.Err(msg.MAIN.requestDataErr));
         } else {
-            defer(null, toArray(userArray));
+            cont(null, toArray(userArray));
         }
-    }).each(null, function (defer, user) {
+    }).each(null, function (cont, user) {
         var userID;
-        then(function (defer2) {
+        then(function (cont2) {
             user = intersect(union(defaultObj), user);
             if (!user._id) {
-                defer2(true);
+                cont2(true);
             } else {
                 userID = user._id;
                 user._id = convertUserID(userID);
-                cache(user._id, defer2);
+                cache(user._id, cont2);
             }
-        }).then(function (defer2) {
+        }).then(function (cont2) {
             user.role = Math.floor(user.role || -1);
             if (user.role < 0 || user.role > 5) {
                 delete user.role;
             }
-            userDao.setUserInfo(user, defer2);
-        }).then(function (defer2, user) {
+            userDao.setUserInfo(user, cont2);
+        }).then(function (cont2, user) {
             setCache(user);
             var data = intersect(union(UserPublicTpl), user);
             data.email = user.email;
             data._id = userID;
-            defer(null, data);
+            cont(null, data);
         }).fail(function () {
-            defer(null, null);
+            cont(null, null);
         });
-    }).then(function (defer, users) {
+    }).then(function (cont, users) {
         removeItem(users, null);
         res.sendjson(resJson(null, users));
     }).fail(res.throwError);
@@ -743,59 +742,59 @@ function editUsers(req, res) {
 function getReset(req, res) {
     var resetObj = {};
     resetObj.r = req.apibody.request;
-    then(function (defer) {
+    then(function (cont) {
         if (!resetObj.r || ['locked', 'email', 'passwd', 'role'].indexOf(resetObj.r) === -1) {
-            defer(jsGen.Err(msg.MAIN.resetInvalid));
+            cont(jsGen.Err(msg.MAIN.resetInvalid));
         } else if (resetObj.r === 'email') {
             if (!req.session.Uid) {
-                defer(jsGen.Err(msg.USER.userNeedLogin));
+                cont(jsGen.Err(msg.USER.userNeedLogin));
             } else if (!checkEmail(req.apibody.email)) {
-                defer(jsGen.Err(msg.USER.userEmailErr));
+                cont(jsGen.Err(msg.USER.userEmailErr));
             } else {
                 resetObj.e = req.apibody.email;
                 cache.get(resetObj.e, function (err, _id) {
                     if (_id) {
-                        defer(jsGen.Err(msg.USER.userEmailExist));
+                        cont(jsGen.Err(msg.USER.userEmailExist));
                     } else {
                         resetObj.u = req.session.Uid;
-                        defer();
+                        cont();
                     }
                 });
             }
         } else if (resetObj.r === 'role') {
             if (!req.session.Uid) {
-                defer(jsGen.Err(msg.USER.userNeedLogin));
+                cont(jsGen.Err(msg.USER.userNeedLogin));
             } else {
                 resetObj.u = req.session.Uid;
-                defer();
+                cont();
             }
         } else {
-            then(function (defer2) {
+            then(function (cont2) {
                 if (checkUserID(req.apibody.name)) {
-                    defer2(null, convertUserID(req.apibody.name));
+                    cont2(null, convertUserID(req.apibody.name));
                 } else if (checkUserName(req.apibody.name)) {
                     cache.get(req.apibody.name, function (err, Uid) {
-                        defer2(Uid ? null : jsGen.Err(msg.USER.userEmailExist), Uid);
+                        cont2(Uid ? null : jsGen.Err(msg.USER.userEmailExist), Uid);
                     });
                 } else {
-                    defer2(jsGen.Err(msg.USER.userNameNone));
+                    cont2(jsGen.Err(msg.USER.userNameNone));
                 }
-            }).then(function (defer2, Uid) {
+            }).then(function (cont2, Uid) {
                 cache(Uid, function (err, user) {
-                    defer2(user ? null : jsGen.Err(msg.USER.UidNone), user);
+                    cont2(user ? null : jsGen.Err(msg.USER.UidNone), user);
                 });
-            }).then(function (defer2, user) {
+            }).then(function (cont2, user) {
                 resetObj.u = user._id;
                 resetObj.e = user.email;
                 if (req.apibody.email.toLowerCase() !== resetObj.e.toLowerCase()) {
-                    defer2(jsGen.Err(msg.USER.userEmailNotMatch));
+                    cont2(jsGen.Err(msg.USER.userEmailNotMatch));
                 } else {
-                    defer();
+                    cont();
                 }
-            }).fail(defer);
+            }).fail(cont);
         }
-    }).then(function (defer) {
-        setReset(resetObj).all(defer);
+    }).then(function (cont) {
+        setReset(resetObj).fin(cont);
     }).then(function () {
         return res.sendjson(resJson());
     }).fail(res.throwError);
@@ -804,23 +803,23 @@ function getReset(req, res) {
 function resetUser(req, res) {
     var reset;
 
-    then(function (defer) {
+    then(function (cont) {
         reset = new Buffer(req.path[3], 'base64').toString();
         reset = parseJSON(reset);
         if (!reset || !reset.u || !reset.r || !reset.k) {
-            defer(jsGen.Err(msg.MAIN.resetInvalid));
+            cont(jsGen.Err(msg.MAIN.resetInvalid));
         } else {
             cache(reset.u, function (err, user) {
                 if (!user) {
-                    defer(jsGen.Err(msg.MAIN.resetInvalid));
+                    cont(jsGen.Err(msg.MAIN.resetInvalid));
                 } else {
-                    defer(null, user._id);
+                    cont(null, user._id);
                 }
             });
         }
-    }).then(function (defer, Uid) {
-        userDao.getAuth(Uid, defer);
-    }).then(function (defer, user) {
+    }).then(function (cont, Uid) {
+        userDao.getAuth(Uid, cont);
+    }).then(function (cont, user) {
         var now = Date.now(),
             userObj = {
                 _id: user._id
@@ -842,18 +841,18 @@ function resetUser(req, res) {
                     userObj.passwd = SHA256(reset.e);
                     break;
                 default:
-                    defer(jsGen.Err(msg.MAIN.resetInvalid));
+                    cont(jsGen.Err(msg.MAIN.resetInvalid));
                 }
                 userObj.resetDate = now;
                 userObj.resetKey = '';
-                userDao.setUserInfo(userObj, defer);
+                userDao.setUserInfo(userObj, cont);
             } else {
-                defer(jsGen.Err(msg.MAIN.resetInvalid));
+                cont(jsGen.Err(msg.MAIN.resetInvalid));
             }
         } else {
-            defer(jsGen.Err(msg.MAIN.resetOutdate));
+            cont(jsGen.Err(msg.MAIN.resetOutdate));
         }
-    }).then(function (defer, user) {
+    }).then(function (cont, user) {
         setCache(user);
         req.session.Uid = user._id;
         req.session.role = user.role;
@@ -865,28 +864,28 @@ function getArticles(req, res) {
     var key,
         p = +req.getparam.p || +req.getparam.pageIndex || 1;
 
-    then(function (defer) {
+    then(function (cont) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.USER.userNeedLogin));
+            cont(jsGen.Err(msg.USER.userNeedLogin));
         } else {
             key = req.session.Uid + req.path[2];
-            paginationCache.get(key, defer);
+            paginationCache.get(key, cont);
         }
-    }).then(function (defer, list) {
+    }).then(function (cont, list) {
         if (!list || p === 1) {
-            userCache.getP(req.session.Uid, false).then(function (defer2, user) {
+            userCache.getP(req.session.Uid, false).then(function (cont2, user) {
                 if (req.path[2] === 'mark') {
                     list = user.markList.reverse();
                     paginationCache.put(key, list);
-                    defer(null, list);
+                    cont(null, list);
                 } else {
-                    defer2(null, user);
+                    cont2(null, user);
                 }
-            }).then(function (defer2, user) {
+            }).then(function (cont2, user) {
                 var articlesList = [],
                     commentsList = [];
-                then.each(user.articlesList, function (defer3, x) {
-                    jsGen.cache.list.getP(x, false).then(function (defer4, article) {
+                then.each(user.articlesList, function (cont3, x) {
+                    jsGen.cache.list.getP(x, false).then(function (cont4, article) {
                         if (article) {
                             if (article.status > -1) {
                                 articlesList.push(x);
@@ -894,22 +893,22 @@ function getArticles(req, res) {
                                 commentsList.push(x);
                             }
                         }
-                        defer3();
+                        cont3();
                     }, function () {
-                        defer3();
+                        cont3();
                     });
-                }).all(function (defer3) {
+                }).fin(function (cont3) {
                     paginationCache.put(req.session.Uid + 'article', articlesList);
                     paginationCache.put(req.session.Uid + 'comment', commentsList);
-                    defer(null, req.path[2] === 'article' ? articlesList : commentsList);
+                    cont(null, req.path[2] === 'article' ? articlesList : commentsList);
                 });
-            }).fail(defer);
+            }).fail(cont);
         } else {
-            defer(null, list);
+            cont(null, list);
         }
-    }).then(function (defer, list) {
-        paginationList(req, list, jsGen.cache.list, defer);
-    }).then(function (defer, data, pagination) {
+    }).then(function (cont, list) {
+        paginationList(req, list, jsGen.cache.list, cont);
+    }).then(function (cont, data, pagination) {
         return res.sendjson(resJson(null, data, pagination));
     }).fail(res.throwError);
 }
@@ -918,22 +917,22 @@ function getUsersList(req, res) {
     var list,
         p = +req.getparam.p || +req.getparam.pageIndex || 1;
 
-    then(function (defer) {
+    then(function (cont) {
         if (!req.session.Uid) {
-            defer(jsGen.Err(msg.USER.userNeedLogin));
+            cont(jsGen.Err(msg.USER.userNeedLogin));
         } else {
-            userCache.getP(req.session.Uid, false).all(defer);
+            userCache.getP(req.session.Uid, false).fin(cont);
         }
-    }).then(function (defer, user) {
+    }).then(function (cont, user) {
         if (req.path[2] === 'fans') {
             list = user.fansList;
         } else if (req.path[2] === 'follow') {
             list = user.followList;
         } else {
-            defer(jsGen.Err(msg.MAIN.requestDataErr));
+            cont(jsGen.Err(msg.MAIN.requestDataErr));
         }
-        paginationList(req, list, userCache, defer);
-    }).then(function (defer, data, pagination) {
+        paginationList(req, list, userCache, cont);
+    }).then(function (cont, data, pagination) {
         each(data, function (x, i) {
             var userID = x._id;
             data[i] = intersect(union(UserPublicTpl), x);

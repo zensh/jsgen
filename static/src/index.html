@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" ng-app="jsGen">
   <head>
     <meta charset="utf-8">
     <meta name="fragment" content="!">
@@ -9,20 +9,15 @@
     <meta name="description" content="{{global.metadesc}}">
     <meta name="keywords" content="{{global.keywords}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="/static/bower_components/pure/pure.css">
-    <link rel="stylesheet" href="/static/bower_components/toastr/toastr.css">
-    <link rel="stylesheet" href="/static/bower_components/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="/static/css/prettify.css">
-    <link rel="stylesheet" href="/static/css/main.css">
-    <script src="/static/bower_components/reserveLoadjs/reserveLoad.js"></script>
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <link rel="stylesheet" href="/static/css/app.css">
   </head>
-  <!--[if lt IE 8]> <body class="ie pure-g-r"> <![endif]-->
-  <!--[if gt IE 7]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
+  <!--[if lt IE 9]> <body class="ie pure-g-r"> <![endif]-->
+  <!--[if gt IE 8]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
     <div class="pure-u-1 menu">
       <div class="pure-menu pure-menu-open pure-menu-horizontal wrap">
         <ul class="pure-menu-logo">
-          <li><a class="pure-menu-img" href="/"><img height="50" ng-src="{{global.logo}}"/></a></li>
+          <li><a class="pure-menu-img" href="/"><img height="50" src="http://cdn.angularjs.cn/img/logo.png"/></a></li>
           <li><a href="/">{{global.title}}</a></li>
         </ul>
         <ul ng-if="!global.isPhone">
@@ -36,7 +31,7 @@
           <li><a href="/login"><i class="fa fa-signin"></i>登录</a></li>
         </ul>
         <ul class="right user" ng-if="global.isLogin">
-          <li><a class="pure-menu-img" href="/home"><img class="img-mini" src="/static/img/avatar.png" gen-src="{{global.user.avatar}}"/></a></li>
+          <li><a class="pure-menu-img" href="/home"><img class="img-mini" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{global.user.avatar}}"/></a></li>
           <li ng-if="global.isDesktop"><a href="/home"><i class="fa fa-home"></i>{{global.user.name}}</a></li>
           <li ng-if="global.isEditor"><a href="/admin"><i class="fa fa-gear"></i>管理</a></li>
           <li ng-if="global.isDesktop"><a ng-click="logout()"><i class="fa fa-signout"></i>退出</a></li>
@@ -44,11 +39,8 @@
       </div>
     </div>
     <!--[if lt IE 9]>
-      <div class="pure-u ie-msg warning text-center">您的浏览器太老土啦，请升级<a href="http://browsehappy.com/" target="_blank">新版浏览器</a>，或者安装<a href="http://www.google.com/chromeframe/?redirect=true"  target="_blank">Google Chrome浏览器内嵌框架</a>！</div>
-    <![endif]-->
-    <!--[if lt IE 8]>
       <div class="pure-u ie-logo text-center">
-        <img src="/static/img/angularjs.png" />
+        <img src="http://cdn.angularjs.cn/img/angularjs.png" />
         <h1>AngularJS中文社区</h1>
       </div>
     <![endif]-->
@@ -68,42 +60,7 @@
       </div>
     </div>
     <div class="loading" ng-show="loading.show"></div>
-    <script>
-      reserveLoad(
-        '/static/bower_components/jquery/jquery.js',
-        '/static/bower_components/angular/angular.js',
-        '/static/bower_components/angular-animate/angular-animate.js',
-  
-        '/static/bower_components/angular-cookies/angular-cookies.js',
-        '/static/bower_components/angular-resource/angular-resource.js',
-        '/static/bower_components/angular-route/angular-route.js',
-        '/static/bower_components/angular-file-upload/angular-file-upload.js',
-        '/static/bower_components/google-code-prettify/src/prettify.js',
-        '/static/bower_components/marked/lib/marked.js',
-        '/static/bower_components/toastr/toastr.js',
-        '/static/js/lib/angular-locale_zh-cn.js',
-        '/static/js/lib/angular-ui.js',
-        '/static/js/lib/bootstrap.js',
-        '/static/js/lib/hmac-sha256.js',
-        '/static/js/lib/Markdown.Editor.js',
-        '/static/js/lib/sanitize.js',
-        '/static/js/lib/store.js',
-        '/static/js/lib/utf8.js',
-        '/static/js/locale_zh-cn.js',
-        '/static/js/tools.js',
-        '/static/js/router.js',
-        '/static/js/services.js',
-        '/static/js/filters.js',
-        '/static/js/directives.js',
-        '/static/js/controllers.js',
-        '/static/js/app.js',
-        function (errorUrl) {
-          if (errorUrl) {
-            alert('Error loading: ' + errorUrl);
-          } else {
-            angular.bootstrap(document, ['jsGen']);
-          }
-        });
-    </script>
+    <script src="/static/js/lib.js"></script>
+    <script src="/static/js/app.js"></script>
   </body>
 </html>

@@ -1,10 +1,11 @@
 'use strict';
-/*global angular, jsGenVersion*/
+/*global angular, jsGen*/
 
-angular.module('jsGen.router', ['ngRoute']).
-constant('app', {
+jsGen
+.constant('app', {
     version: Date.now()
-}).provider('getFile', ['app',
+})
+.provider('getFile', ['app',
     function (app) {
         this.html = function (fileName) {
             return '/static/tpl/' + fileName + '?v=' + app.version;
@@ -19,7 +20,8 @@ constant('app', {
             };
         };
     }
-]).config(['$routeProvider', '$locationProvider', 'getFileProvider',
+])
+.config(['$routeProvider', '$locationProvider', 'getFileProvider',
 
     function ($routeProvider, $locationProvider, getFileProvider) {
         var index = {
