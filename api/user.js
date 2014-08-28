@@ -50,6 +50,7 @@ userCache.getP = function (Uid, convert) {
             cont(jsGen.Err(msg.USER.UidNone));
         }
     }).then(function (cont, user) {
+        user.nickname = user.nickname || user.name;
         if (!inCache) {
             user = intersect(union(UserPrivateTpl), user);
             that.put(Uid, user);
@@ -170,6 +171,7 @@ function adduser(userObj) {
     }).then(function (cont) {
         delete userObj._id;
         userObj.email = userObj.email.toLowerCase();
+        userObj.nickname = userObj.nickname || userObj.name;
         userObj.avatar = gravatar(userObj.email);
         userObj.resetDate = Date.now();
         userObj.role = jsGen.config.emailVerification ? 1 : 2;

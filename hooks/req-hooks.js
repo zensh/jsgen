@@ -1,6 +1,7 @@
 'use strict';
 /*global require, module, Buffer, jsGen*/
 
-module.exports = function (req, res) {
+module.exports = function (req, res, next) {
   //
+  next();
 };

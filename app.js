@@ -181,21 +181,23 @@ serverDm.run(function () {
 
             var path = req.path[0].toLowerCase();
 
-            if (jsGen.hooks.reqHooks(req, res) === false) return;
-            if (path === 'api' && jsGen.api[req.path[1]]) {
-                jsGen.api[req.path[1]][req.method](req, res); // 处理api请求
-            } else if (jsGen.robotReg.test(req.useragent)) {
-                jsGen.api.article.robot(req, res); // 处理搜索引擎请求
-            } else if (path === 'sitemap.xml') {
-                jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
-            } else if (path === 'robots.txt') {
-                res.setHeader('Content-Type', 'text/plain');
-                res.send(jsGen.cache.robotsTxt);
-            } else {
-                jsGen.config.visitors = 1; // 访问次数+1
-                res.setHeader('Content-Type', 'text/html');
-                res.send(jsGen.cache.indexTpl); // 响应首页index.html
-            }
+            jsGen.hooks.reqHooks(req, res, function () {
+
+                if (path === 'api' && jsGen.api[req.path[1]]) {
+                    jsGen.api[req.path[1]][req.method](req, res); // 处理api请求
+                } else if (jsGen.robotReg.test(req.useragent)) {
+                    jsGen.api.article.robot(req, res); // 处理搜索引擎请求
+                } else if (path === 'sitemap.xml') {
+                    jsGen.api.article.sitemap(req, res); // 响应搜索引擎sitemap，动态生成
+                } else if (path === 'robots.txt') {
+                    res.setHeader('Content-Type', 'text/plain');
+                    res.send(jsGen.cache.robotsTxt);
+                } else {
+                    jsGen.config.visitors = 1; // 访问次数+1
+                    res.setHeader('Content-Type', 'text/html');
+                    res.send(jsGen.cache.indexTpl); // 响应首页index.html
+                }
+            });
         }
 
         function handler(req, res) {
