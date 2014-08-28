@@ -46,6 +46,8 @@ serverDm.run(function () {
     jsGen.dao.article = require('./dao/articleDao.js');
     jsGen.dao.message = require('./dao/messageDao.js');
     jsGen.dao.collection = require('./dao/collectionDao.js');
+    jsGen.hooks = {};
+    jsGen.hooks.reqHooks = require('./hooks/req-hooks.js');
 
     jsGen.thenErrLog = function (cont, err) {
         console.error(err);
@@ -176,8 +178,10 @@ serverDm.run(function () {
         }
 
         function router(req, res) {
+
             var path = req.path[0].toLowerCase();
 
+            if (jsGen.hooks.reqHooks(req, res) === false) return;
             if (path === 'api' && jsGen.api[req.path[1]]) {
                 jsGen.api[req.path[1]][req.method](req, res); // 处理api请求
             } else if (jsGen.robotReg.test(req.useragent)) {
