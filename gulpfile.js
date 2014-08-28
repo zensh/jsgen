@@ -13,7 +13,8 @@ var gulp = require('gulp'),
   rev = require('gulp-rev'),
   replace = require('gulp-replace'),
   usemin = require('gulp-usemin'),
-  version = require('./package.json').version;
+  version = 'v' + require('./package.json').version,
+  cdnHost = require('./package.json').cdnHost;
 
 gulp.task('clean', function () {
   return gulp.src(['static/dist/*', 'static/cdn/*'])
@@ -35,6 +36,7 @@ gulp.task('css', function () {
       'static/src/css/main.css'
     ])
     .pipe(concat('app.css'))
+    .pipe(replace('VERSION', version))
     .pipe(gulp.dest('static/dist/css/'));
 });
 
@@ -82,6 +84,7 @@ gulp.task('js-app', function () {
 
 gulp.task('html', function () {
   return gulp.src('static/src/**/*.html')
+    .pipe(replace('VERSION', version))
     .pipe(gulp.dest('static/dist/'));
 });
 
@@ -106,22 +109,27 @@ gulp.task('font', function () {
     .pipe(gulp.dest('static/dist/fonts/'));
 });
 
-// gulp.task('usemin', function () {
-//   return gulp.src('./www/index.html')
-//     .pipe(usemin({
-//       css: [minifyCss({keepSpecialComments: 0}), rev()],
-//       html: [minifyHtml({empty: true})],
-//       js: [uglify(), rev()]
-//     }))
-//     .pipe(replace('manifest=""', 'manifest="teambition-mobile.manifest"'))
-//     .pipe(replace('apihost="http://project.ci/api"', 'apihost="https://www.teambition.com/api"'))
-//     .pipe(gulp.dest('./dist/'));
-// });
+gulp.task('cdn', function () {
+  return gulp.src(['static/dist/**/*', '!static/dist/js/*', '!static/dist/css/*'])
+    .pipe(gulp.dest('static/cdn/'));
+});
+
+gulp.task('usemin', function () {
+  return gulp.src('static/dist/index.html')
+    .pipe(replace(/\/static\/(js|css)/g, '$1'))
+    .pipe(usemin({
+      css: [minifyCss({keepSpecialComments: 0}), rev()],
+      // html: [minifyHtml({empty: true})],
+      js: [uglify(), rev()]
+    }))
+    .pipe(replace('../cdn', cdnHost))
+    .pipe(gulp.dest('static/cdn/'));
+});
 
 gulp.task('default', function (cb) {
   runSequence('jshint', 'clean', ['css', 'font', 'js-lib', 'js-app', 'html', 'md', 'image', 'ico'], cb);
 });
 
-// gulp.task('build', function (cb) {
-//   runSequence('default', 'clean-dist', ['build-images', 'build-fonts'], 'usemin', 'manifest', cb);
-// });
+gulp.task('build', function (cb) {
+  runSequence('default', 'cdn', 'usemin', cb);
+});

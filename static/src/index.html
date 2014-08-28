@@ -9,8 +9,10 @@
     <meta name="description" content="{{global.metadesc}}">
     <meta name="keywords" content="{{global.keywords}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/static/favicon.ico"/>
+    <link rel="shortcut icon" href="/static/favicon.ico?VERSION"/>
+    <!-- build:css ../cdn/css/app.css -->
     <link rel="stylesheet" href="/static/css/app.css">
+    <!-- endbuild -->
   </head>
   <!--[if lt IE 9]> <body class="ie pure-g-r"> <![endif]-->
   <!--[if gt IE 8]><!--> <body class="pure-g-r ng-cloak" ng-cloak> <!--<![endif]-->
@@ -60,7 +62,11 @@
       </div>
     </div>
     <div class="loading" ng-show="loading.show"></div>
+    <!-- build:js ../cdn/js/lib.js -->
     <script src="/static/js/lib.js"></script>
+    <!-- endbuild -->
+    <!-- build:js ../cdn/js/app.js -->
     <script src="/static/js/app.js"></script>
+    <!-- endbuild -->
   </body>
 </html>
