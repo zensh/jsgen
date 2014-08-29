@@ -85,6 +85,7 @@ function convertUsers(UidArray, mode) {
     return then(function (cont) {
         var result = [];
         UidArray = toArray(UidArray);
+        removeItem(UidArray, null);
         if (mode === 'Uid') {
             each(UidArray, function (x) {
                 result.push(convertUserID(x));

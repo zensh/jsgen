@@ -8,10 +8,13 @@ var fs = require('fs'),
     http = require('http'),
     domain = require('domain'),
     serverDm = domain.create(),
-    processPath = path.dirname(process.argv[1]);
+    processPath = path.dirname(process.argv[1]),
+    conf = require('./config/config'); // 注册rrestjs配置文件
 
 global.jsGen = {}; // 注册全局变量jsGen
-module.exports.conf = require('./config/config'); // 注册rrestjs配置文件
+
+if (process.env.NODE_ENV) conf.staticFolder = '/static/' + process.env.NODE_ENV;
+module.exports.conf = conf;
 
 serverDm.on('error', function (error) {
     delete error.domain;

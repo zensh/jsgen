@@ -5,7 +5,7 @@
     "url": "http://weibo.com/zensh"
   },
   "name": "jsgen",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "cdnHost": "http://cdn.angularjs.cn",
   "description": "",
   "keywords": [
