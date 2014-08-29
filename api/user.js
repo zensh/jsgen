@@ -173,7 +173,7 @@ function adduser(userObj) {
         delete userObj._id;
         userObj.email = userObj.email.toLowerCase();
         userObj.nickname = userObj.nickname || userObj.name;
-        userObj.avatar = gravatar(userObj.email);
+        userObj.avatar = userObj.avatar || gravatar(userObj.email);
         userObj.resetDate = Date.now();
         userObj.role = jsGen.config.emailVerification ? 1 : 2;
         userDao.setNewUser(userObj, function (err, user) {
