@@ -1527,7 +1527,7 @@ jsGen
         $scope.reset = {
             name: '',
             email: '',
-            request: $routeParams.req
+            request: $routeParams.type
         };
         $scope.parent = {
             title: locale.RESET[$routeParams.type],
