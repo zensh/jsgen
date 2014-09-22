@@ -1530,7 +1530,7 @@ jsGen
             request: $routeParams.req
         };
         $scope.parent = {
-            title: locale.RESET[$routeParams.req],
+            title: locale.RESET[$routeParams.type],
             timing: 5
         };
         $scope.timingModal = {
@@ -1557,7 +1557,7 @@ jsGen
                 });
             }
         };
-        if (['locked', 'passwd'].indexOf($routeParams.req) < 0) {
+        if (['locked', 'passwd'].indexOf($routeParams.type) < 0) {
             app.restAPI.user.get({
                 ID: 'reset',
                 OP: $routeParams.req
