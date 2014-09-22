@@ -1,4 +1,4 @@
-{jsGen} <small>0.7.x</small>
+{jsGen} <small>0.8.x</small>
 =======
 **——JavaScript Generated**
 
@@ -10,12 +10,11 @@
 
 ### 0.7.x更新说明（开发中）
 
- 1. 调整前端代码框架，使用bower和gruntjs管理代码;
+ 1. 调整前端代码框架，使用 bower 和 gulp 管理代码;
  2. **第一次启动需带`install`参数，用于初始化MongoDB数据库;**
  3. 文章编辑页面增加localStorage本地存储;
- 4. 线上模式和开发模式的端口统一为3000，进入开发模式的命令为:
-
-    node app.js --dev
+ 4. 线上模式和开发模式的端口统一为3000；
+ 5. `gulp` 命令编译本地运行文件，`gulp build` 编译 CDN 运行文件，其中 CDN 可在 `pachage.json` 中定义。
 
 **v0.7.7版 升级了账号密码系统，v0.7.6及之前的版本升级后需更新数据库，请运行 `node app.js update-passwd` **
 
