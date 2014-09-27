@@ -1189,6 +1189,14 @@ input.upload-input {
     background-position: center;
 }
 
+.site-link ul {
+  list-style: none;
+}
+
+.site-link li {
+  margin: 10px 0;
+}
+
 @media (min-width: 980px) {
     .pure-visible-phone {
         display: none !important;
