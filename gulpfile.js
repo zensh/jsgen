@@ -3,7 +3,7 @@
 var gulp = require('gulp'),
   gutil = require('gulp-util'),
   clean = require('gulp-clean'),
-  runSequence = require('run-sequence'),
+  gulpSequence = require('gulp-sequence'),
   jshint = require('gulp-jshint'),
   concat = require('gulp-concat'),
   imagemin = require('gulp-imagemin'),
@@ -126,10 +126,6 @@ gulp.task('usemin', function () {
     .pipe(gulp.dest('static/cdn/'));
 });
 
-gulp.task('default', function (cb) {
-  runSequence('jshint', 'clean', ['css', 'font', 'js-lib', 'js-app', 'html', 'md', 'image', 'ico'], cb);
-});
+gulp.task('default', gulpSequence('jshint', 'clean', ['css', 'font', 'js-lib', 'js-app', 'html', 'md', 'image', 'ico']));
 
-gulp.task('build', function (cb) {
-  runSequence('default', 'cdn', 'usemin', cb);
-});
+gulp.task('build', gulpSequence('default', 'cdn', 'usemin'));

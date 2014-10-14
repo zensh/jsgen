@@ -5,7 +5,7 @@
     "url": "http://weibo.com/zensh"
   },
   "name": "jsgen",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "cdnHost": "http://cdn.angularjs.cn",
   "description": "",
   "keywords": [
@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "rrestjs": ">=1.3.x",
-    "mongoskin": ">=1.3.x",
-    "redis": ">=0.10.x",
+    "mongoskin": "~1.3.x",
+    "redis": "~0.10.x",
     "marked": ">=0.3.x",
     "nodemailer": ">=0.6.x",
     "thenjs": ">=1.4.x",
@@ -46,7 +46,7 @@
     "gulp-uglify": ">=0.3.1",
     "gulp-usemin": ">=0.3.6",
     "gulp-util": ">=2.2.14",
-    "run-sequence": "^0.3.6"
+    "gulp-sequence": "^0.1.0"
   },
   "scripts": {
     "start": "node app.js"
