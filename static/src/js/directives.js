@@ -56,78 +56,76 @@ jsGen
         }
     };
 })
-.directive('genPagination', ['getFile',
-    function (getFile) {
-        // <div gen-pagination="options"></div>
-        // HTML/CSS修改于Bootstrap框架
-        // options = {
-        //     path: 'pathUrl',
-        //     sizePerPage: [25, 50, 100],
-        //     pageSize: 25,
-        //     pageIndex: 1,
-        //     total: 10
-        // };
-        return {
-            scope: true,
-            templateUrl: getFile.html('gen-pagination.html'),
-            link: function (scope, element, attr) {
-                scope.$watchCollection(attr.genPagination, function (value) {
-                    if (!angular.isObject(value)) {
-                        return;
-                    }
-                    var pageIndex = 1,
-                        showPages = [],
-                        lastPage = Math.ceil(value.total / value.pageSize) || 1;
+.directive('genPagination', function () {
+    // <div gen-pagination="options"></div>
+    // HTML/CSS修改于Bootstrap框架
+    // options = {
+    //     path: 'pathUrl',
+    //     sizePerPage: [25, 50, 100],
+    //     pageSize: 25,
+    //     pageIndex: 1,
+    //     total: 10
+    // };
+    return {
+        scope: true,
+        templateUrl: 'gen-pagination.html',
+        link: function (scope, element, attr) {
+            scope.$watchCollection(attr.genPagination, function (value) {
+                if (!angular.isObject(value)) {
+                    return;
+                }
+                var pageIndex = 1,
+                    showPages = [],
+                    lastPage = Math.ceil(value.total / value.pageSize) || 1;
 
-                    pageIndex = value.pageIndex >= 1 ? value.pageIndex : 1;
-                    pageIndex = pageIndex <= lastPage ? pageIndex : lastPage;
+                pageIndex = value.pageIndex >= 1 ? value.pageIndex : 1;
+                pageIndex = pageIndex <= lastPage ? pageIndex : lastPage;
 
-                    showPages[0] = pageIndex;
-                    if (pageIndex <= 6) {
-                        while (showPages[0] > 1) {
-                            showPages.unshift(showPages[0] - 1);
-                        }
-                    } else {
+                showPages[0] = pageIndex;
+                if (pageIndex <= 6) {
+                    while (showPages[0] > 1) {
                         showPages.unshift(showPages[0] - 1);
-                        showPages.unshift(showPages[0] - 1);
-                        showPages.unshift('…');
-                        showPages.unshift(2);
-                        showPages.unshift(1);
                     }
+                } else {
+                    showPages.unshift(showPages[0] - 1);
+                    showPages.unshift(showPages[0] - 1);
+                    showPages.unshift('…');
+                    showPages.unshift(2);
+                    showPages.unshift(1);
+                }
 
-                    if (lastPage - pageIndex <= 5) {
-                        while (showPages[showPages.length - 1] < lastPage) {
-                            showPages.push(showPages[showPages.length - 1] + 1);
-                        }
-                    } else {
+                if (lastPage - pageIndex <= 5) {
+                    while (showPages[showPages.length - 1] < lastPage) {
                         showPages.push(showPages[showPages.length - 1] + 1);
-                        showPages.push(showPages[showPages.length - 1] + 1);
-                        showPages.push('…');
-                        showPages.push(lastPage - 1);
-                        showPages.push(lastPage);
                     }
+                } else {
+                    showPages.push(showPages[showPages.length - 1] + 1);
+                    showPages.push(showPages[showPages.length - 1] + 1);
+                    showPages.push('…');
+                    showPages.push(lastPage - 1);
+                    showPages.push(lastPage);
+                }
 
-                    scope.prev = pageIndex > 1 ? pageIndex - 1 : 0;
-                    scope.next = pageIndex < lastPage ? pageIndex + 1 : 0;
-                    scope.total = value.total;
-                    scope.pageIndex = pageIndex;
-                    scope.showPages = showPages;
-                    scope.pageSize = value.pageSize;
-                    scope.perPages = value.sizePerPage || [10, 20, 50];
-                    scope.path = value.path && value.path + '?p=';
-                });
-                scope.paginationTo = function (p, s) {
-                    if (!scope.path && p > 0) {
-                        s = s || scope.pageSize;
-                        scope.$emit('genPagination', p, s);
-                    }
-                };
-            }
-        };
-    }
-])
-.directive('genModal', ['getFile', '$timeout',
-    function (getFile, $timeout) {
+                scope.prev = pageIndex > 1 ? pageIndex - 1 : 0;
+                scope.next = pageIndex < lastPage ? pageIndex + 1 : 0;
+                scope.total = value.total;
+                scope.pageIndex = pageIndex;
+                scope.showPages = showPages;
+                scope.pageSize = value.pageSize;
+                scope.perPages = value.sizePerPage || [10, 20, 50];
+                scope.path = value.path && value.path + '?p=';
+            });
+            scope.paginationTo = function (p, s) {
+                if (!scope.path && p > 0) {
+                    s = s || scope.pageSize;
+                    scope.$emit('genPagination', p, s);
+                }
+            };
+        }
+    };
+})
+.directive('genModal', ['$timeout',
+    function ($timeout) {
         //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
@@ -144,7 +142,7 @@ jsGen
         return {
             scope: true,
             transclude: true,
-            templateUrl: getFile.html('gen-modal.html'),
+            templateUrl: 'gen-modal.html',
             link: function (scope, element, attr) {
                 var modalStatus,
                     modalElement = element.children(),
@@ -362,8 +360,8 @@ jsGen
         };
     }
 ])
-.directive('genUploader', ['getFile', '$fileUploader', 'app',
-    function (getFile, $fileUploader, app) {
+.directive('genUploader', ['$fileUploader', 'app',
+    function ($fileUploader, app) {
         // <div gen-pagination="options"></div>
         // HTML/CSS修改于Bootstrap框架
         // options = {
@@ -375,7 +373,7 @@ jsGen
         // };
         return {
             scope: true,
-            templateUrl: getFile.html('gen-uploader.html'),
+            templateUrl: 'gen-uploader.html',
             link: function (scope, element, attr) {
                 var options = scope.$eval(attr.genUploader);
                 var fileType = options.fileType;

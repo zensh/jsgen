@@ -274,6 +274,7 @@ jsGen.config(['$httpProvider', 'app',
 
     }
 ]);
+
 'use strict';
 /*global angular, jsGen*/
 
@@ -431,51 +432,51 @@ jsGen
         };
     }
 ])
-.config(['$routeProvider', '$locationProvider', 'getFileProvider',
+.config(['$routeProvider', '$locationProvider',
 
-    function ($routeProvider, $locationProvider, getFileProvider) {
+    function ($routeProvider, $locationProvider) {
         var index = {
-            templateUrl: getFileProvider.html('index.html'),
+            templateUrl: 'index.html',
             controller: 'indexCtrl'
         },
             login = {
-                templateUrl: getFileProvider.html('login.html'),
+                templateUrl: 'login.html',
                 controller: 'userLoginCtrl'
             },
             register = {
-                templateUrl: getFileProvider.html('register.html'),
+                templateUrl: 'register.html',
                 controller: 'userRegisterCtrl'
             },
             home = {
-                templateUrl: getFileProvider.html('user.html'),
+                templateUrl: 'user.html',
                 controller: 'homeCtrl'
             },
             admin = {
-                templateUrl: getFileProvider.html('admin.html'),
+                templateUrl: 'admin.html',
                 controller: 'adminCtrl'
             },
             edit = {
-                templateUrl: getFileProvider.html('article-editor.html'),
+                templateUrl: 'article-editor.html',
                 controller: 'articleEditorCtrl'
             },
             tag = {
-                templateUrl: getFileProvider.html('index.html'),
+                templateUrl: 'index.html',
                 controller: 'tagCtrl'
             },
             reset = {
-                templateUrl: getFileProvider.html('reset.html'),
+                templateUrl: 'reset.html',
                 controller: 'userResetCtrl'
             },
             user = {
-                templateUrl: getFileProvider.html('user.html'),
+                templateUrl: 'user.html',
                 controller: 'userCtrl'
             },
             article = {
-                templateUrl: getFileProvider.html('article.html'),
+                templateUrl: 'article.html',
                 controller: 'articleCtrl'
             },
             collection = {
-                templateUrl: getFileProvider.html('collection.html'),
+                templateUrl: 'collection.html',
                 controller: 'collectionCtrl'
             };
         $routeProvider.
@@ -507,6 +508,7 @@ jsGen
         $locationProvider.html5Mode(true).hashPrefix('!');
     }
 ]);
+
 'use strict';
 /*global angular, jsGen, marked, Sanitize, Markdown, prettyPrint, toastr, CryptoJS, utf8, store, JSONKit*/
 
@@ -996,78 +998,76 @@ jsGen
         }
     };
 })
-.directive('genPagination', ['getFile',
-    function (getFile) {
-        // <div gen-pagination="options"></div>
-        // HTML/CSS修改于Bootstrap框架
-        // options = {
-        //     path: 'pathUrl',
-        //     sizePerPage: [25, 50, 100],
-        //     pageSize: 25,
-        //     pageIndex: 1,
-        //     total: 10
-        // };
-        return {
-            scope: true,
-            templateUrl: getFile.html('gen-pagination.html'),
-            link: function (scope, element, attr) {
-                scope.$watchCollection(attr.genPagination, function (value) {
-                    if (!angular.isObject(value)) {
-                        return;
-                    }
-                    var pageIndex = 1,
-                        showPages = [],
-                        lastPage = Math.ceil(value.total / value.pageSize) || 1;
+.directive('genPagination', function () {
+    // <div gen-pagination="options"></div>
+    // HTML/CSS修改于Bootstrap框架
+    // options = {
+    //     path: 'pathUrl',
+    //     sizePerPage: [25, 50, 100],
+    //     pageSize: 25,
+    //     pageIndex: 1,
+    //     total: 10
+    // };
+    return {
+        scope: true,
+        templateUrl: 'gen-pagination.html',
+        link: function (scope, element, attr) {
+            scope.$watchCollection(attr.genPagination, function (value) {
+                if (!angular.isObject(value)) {
+                    return;
+                }
+                var pageIndex = 1,
+                    showPages = [],
+                    lastPage = Math.ceil(value.total / value.pageSize) || 1;
 
-                    pageIndex = value.pageIndex >= 1 ? value.pageIndex : 1;
-                    pageIndex = pageIndex <= lastPage ? pageIndex : lastPage;
+                pageIndex = value.pageIndex >= 1 ? value.pageIndex : 1;
+                pageIndex = pageIndex <= lastPage ? pageIndex : lastPage;
 
-                    showPages[0] = pageIndex;
-                    if (pageIndex <= 6) {
-                        while (showPages[0] > 1) {
-                            showPages.unshift(showPages[0] - 1);
-                        }
-                    } else {
+                showPages[0] = pageIndex;
+                if (pageIndex <= 6) {
+                    while (showPages[0] > 1) {
                         showPages.unshift(showPages[0] - 1);
-                        showPages.unshift(showPages[0] - 1);
-                        showPages.unshift('…');
-                        showPages.unshift(2);
-                        showPages.unshift(1);
                     }
+                } else {
+                    showPages.unshift(showPages[0] - 1);
+                    showPages.unshift(showPages[0] - 1);
+                    showPages.unshift('…');
+                    showPages.unshift(2);
+                    showPages.unshift(1);
+                }
 
-                    if (lastPage - pageIndex <= 5) {
-                        while (showPages[showPages.length - 1] < lastPage) {
-                            showPages.push(showPages[showPages.length - 1] + 1);
-                        }
-                    } else {
+                if (lastPage - pageIndex <= 5) {
+                    while (showPages[showPages.length - 1] < lastPage) {
                         showPages.push(showPages[showPages.length - 1] + 1);
-                        showPages.push(showPages[showPages.length - 1] + 1);
-                        showPages.push('…');
-                        showPages.push(lastPage - 1);
-                        showPages.push(lastPage);
                     }
+                } else {
+                    showPages.push(showPages[showPages.length - 1] + 1);
+                    showPages.push(showPages[showPages.length - 1] + 1);
+                    showPages.push('…');
+                    showPages.push(lastPage - 1);
+                    showPages.push(lastPage);
+                }
 
-                    scope.prev = pageIndex > 1 ? pageIndex - 1 : 0;
-                    scope.next = pageIndex < lastPage ? pageIndex + 1 : 0;
-                    scope.total = value.total;
-                    scope.pageIndex = pageIndex;
-                    scope.showPages = showPages;
-                    scope.pageSize = value.pageSize;
-                    scope.perPages = value.sizePerPage || [10, 20, 50];
-                    scope.path = value.path && value.path + '?p=';
-                });
-                scope.paginationTo = function (p, s) {
-                    if (!scope.path && p > 0) {
-                        s = s || scope.pageSize;
-                        scope.$emit('genPagination', p, s);
-                    }
-                };
-            }
-        };
-    }
-])
-.directive('genModal', ['getFile', '$timeout',
-    function (getFile, $timeout) {
+                scope.prev = pageIndex > 1 ? pageIndex - 1 : 0;
+                scope.next = pageIndex < lastPage ? pageIndex + 1 : 0;
+                scope.total = value.total;
+                scope.pageIndex = pageIndex;
+                scope.showPages = showPages;
+                scope.pageSize = value.pageSize;
+                scope.perPages = value.sizePerPage || [10, 20, 50];
+                scope.path = value.path && value.path + '?p=';
+            });
+            scope.paginationTo = function (p, s) {
+                if (!scope.path && p > 0) {
+                    s = s || scope.pageSize;
+                    scope.$emit('genPagination', p, s);
+                }
+            };
+        }
+    };
+})
+.directive('genModal', ['$timeout',
+    function ($timeout) {
         //<div gen-modal="msgModal">[body]</div>
         // scope.msgModal = {
         //     id: 'msg-modal',    [option]
@@ -1084,7 +1084,7 @@ jsGen
         return {
             scope: true,
             transclude: true,
-            templateUrl: getFile.html('gen-modal.html'),
+            templateUrl: 'gen-modal.html',
             link: function (scope, element, attr) {
                 var modalStatus,
                     modalElement = element.children(),
@@ -1302,8 +1302,8 @@ jsGen
         };
     }
 ])
-.directive('genUploader', ['getFile', '$fileUploader', 'app',
-    function (getFile, $fileUploader, app) {
+.directive('genUploader', ['$fileUploader', 'app',
+    function ($fileUploader, app) {
         // <div gen-pagination="options"></div>
         // HTML/CSS修改于Bootstrap框架
         // options = {
@@ -1315,7 +1315,7 @@ jsGen
         // };
         return {
             scope: true,
-            templateUrl: getFile.html('gen-uploader.html'),
+            templateUrl: 'gen-uploader.html',
             link: function (scope, element, attr) {
                 var options = scope.$eval(attr.genUploader);
                 var fileType = options.fileType;
@@ -1365,6 +1365,7 @@ jsGen
         };
     }
 ]);
+
 'use strict';
 /*global angular, jsGen*/
 
@@ -1412,7 +1413,7 @@ jsGen
 
         global.title2 = global.description;
         $scope.parent = {
-            getTpl: app.getFile.html('index-article.html'),
+            getTpl: 'index-article.html',
             viewPath: 'latest',
             sumModel: myConf.sumModel(null, 'index', false)
         };
@@ -1448,7 +1449,7 @@ jsGen
 
         app.rootScope.global.title2 = app.locale.TAG.title;
         $scope.parent = {
-            getTpl: app.getFile.html('index-tag.html')
+            getTpl: 'index-tag.html'
         };
         $scope.pagination = {};
 
@@ -1643,7 +1644,7 @@ jsGen
         global.title2 = app.locale.HOME.title;
         $scope.user = global.user;
         $scope.parent = {
-            getTpl: app.getFile.html(tplName($routeParams.OP)),
+            getTpl: tplName($routeParams.OP),
             isMe: true,
             viewPath: $routeParams.OP || 'index'
         };
@@ -1665,7 +1666,7 @@ jsGen
 
         app.rootScope.global.title2 = app.locale.USER.title;
         $scope.parent = {
-            getTpl: app.getFile.html(tplName()),
+            getTpl: tplName(),
             isMe: false,
             viewPath: $routeParams.OP || 'index'
         };
@@ -2424,7 +2425,7 @@ jsGen
         }
 
         $scope.parent = {
-            getTpl: app.getFile.html(tplName(path)),
+            getTpl: tplName(path),
             viewPath: path
         };
         global.title2 = app.locale.ADMIN[path];
@@ -2708,3 +2709,167 @@ jsGen
         });
     }
 ]);
+
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-article.html', '<div ng-controller="adminArticleCtrl"><div class="panel"><div class="inner page-header"><strong>文章评论批量管理</strong></div><div class="inner well text-right" ng-show="parent.editSave"><button class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></div><div gen-pagination="pagination"></div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-global.html', '<div class="panel" ng-controller="adminGlobalCtrl"><div class="inner page-header"><strong>网站设置</strong></div><ul class="nav nav-tabs inner"><li class="active" gen-tab-click="active"><a ng-click="parent.switchTab=\'tab1\'">基本设置</a></li><li gen-tab-click="active"><a ng-click="parent.switchTab=\'tab2\'">参数设置</a></li><li gen-tab-click="active"><a ng-click="parent.switchTab=\'tab3\'">缓存设置</a></li><li gen-tab-click="active"><a ng-click="parent.switchTab=\'tab4\'">SMTP设置</a></li><li gen-tab-click="active"><a ng-click="parent.switchTab=\'tab5\'">云存储设置</a></li></ul><div class="inner well" ng-switch on="parent.switchTab"><div ng-switch-default><form class="pure-form pure-form-aligned" novalidate><div class="pure-control-group"><label>网站域名：</label> <input type="text" class="pure-input-1-2" name="网站域名" ng-model="editGlobal.domain" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>ICP备案：</label> <input type="text" class="pure-input-1-2" name="ICP备案" ng-model="editGlobal.beian"></div><div class="pure-control-group"><label>网站网址[含http://]：</label> <input type="url" class="pure-input-1-2" name="网站网址" ng-model="editGlobal.url" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>网站Logo：</label> <input type="text" class="pure-input-1-2" name="logo" ng-model="editGlobal.logo" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>管理员Email[不公开]：</label> <input type="email" name="管理员Email" ng-model="editGlobal.email" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>网站名称：</label> <input type="text" class="pure-input-1-2" name="网站名称" ng-model="editGlobal.title" ng-maxlength="20" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>网站副标题：</label> <input type="text" class="pure-input-1-2" ng-model="editGlobal.description"></div><div class="pure-control-group"><label>网站Meta标题[SEO]：</label> <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.metatitle">\n' +
+  '                    </textarea></div><div class="pure-control-group"><label>网站Meta描述[SEO]：</label> <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.metadesc">\n' +
+  '                    </textarea></div><div class="pure-control-group"><label>网站Meta关键词[SEO]：</label> <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.keywords">\n' +
+  '                    </textarea></div><div class="pure-control-group"><label>搜索引擎机器人：</label> <textarea class="pure-input-1-2" rows="4" ng-model="editGlobal.robots">\n' +
+  '                    </textarea></div><div class="pure-control-group"><label>用户注册：</label> <input type="button" class="pure-button pure-button-small" ng-class="{\'primary-bg\':editGlobal.register}" ng-click="editGlobal.register=!editGlobal.register" value="{{!editGlobal.register | switch:\'turn\'}}"></div><div class="pure-control-group"><label>邮箱验证：</label> <input type="button" class="pure-button pure-button-small" ng-class="{\'primary-bg\':editGlobal.emailVerification}" ng-click="editGlobal.emailVerification=!editGlobal.emailVerification" value="{{!editGlobal.emailVerification | switch:\'turn\'}}"></div><div class="pure-controls"><button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div><div ng-switch-when="tab2"><form class="pure-form pure-form-aligned" novalidate><div class="pure-control-group"><label>文章最多标签数量：</label> <input type="number" ng-model="editGlobal.ArticleTagsMax"></div><div class="pure-control-group"><label>用户最多标签数量：</label> <input type="number" ng-model="editGlobal.UserTagsMax"></div><div class="pure-control-group"><label>标题最短字节数：</label> <input type="number" ng-model="editGlobal.TitleMinLen"></div><div class="pure-control-group"><label>标题最长字节数：</label> <input type="number" ng-model="editGlobal.TitleMaxLen"></div><div class="pure-control-group"><label>摘要最长字节数：</label> <input type="number" ng-model="editGlobal.SummaryMaxLen"></div><div class="pure-control-group"><label>文章最短字节数：</label> <input type="number" ng-model="editGlobal.ContentMinLen"></div><div class="pure-control-group"><label>文章最长字节数：</label> <input type="number" ng-model="editGlobal.ContentMaxLen"></div><div class="pure-control-group"><label>用户名最短字节数：</label> <input type="number" ng-model="editGlobal.UserNameMinLen"></div><div class="pure-control-group"><label>用户名最长字节数：</label> <input type="number" ng-model="editGlobal.UserNameMaxLen"></div><div class="pure-control-group"><label>用户积分系数：</label> <input type="text" ng-model="editGlobal.UsersScore" ng-list="/[,，、]/"></div><div class="pure-controls-group"><small>评论×<strong>{{editGlobal.UsersScore[0]}}</strong> ，文章×<strong>{{editGlobal.UsersScore[1]}}</strong>，关注×<strong>{{editGlobal.UsersScore[2]}}</strong> ，粉丝×<strong>{{editGlobal.UsersScore[3]}}</strong>，文章热度×<strong>{{editGlobal.UsersScore[4]}}</strong>， 注册时长天数×<strong>{{editGlobal.UsersScore[5]}}</strong></small></div><div class="pure-control-group"><label>评论提升系数：</label> <input type="text" ng-model="editGlobal.ArticleStatus" ng-list="/[,，、]/"></div><div class="pure-controls-group"><small>评论的评论数达到<strong>{{editGlobal.ArticleStatus[0]}}</strong>时，自动提升正常文章， 达到<strong>{{editGlobal.ArticleStatus[1]}}</strong>时，自动提升为推荐文章</small></div><div class="pure-control-group"><label>文章热度系数：</label> <input type="text" ng-model="editGlobal.ArticleHots" ng-list="/[,，、]/"></div><div class="pure-controls-group"><small>访问+<strong>{{editGlobal.ArticleHots[0]}}</strong>，支持/反对±<strong>{{editGlobal.ArticleHots[1]}}</strong>，评论+<strong>{{editGlobal.ArticleHots[2]}}</strong>，收藏+ <strong>{{editGlobal.ArticleHots[3]}}</strong>，推荐+<strong>{{editGlobal.ArticleHots[4]}}</strong></small></div><div class="pure-controls"><button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div><div ng-switch-when="tab3"><form class="pure-form pure-form-aligned" novalidate><div class="pure-control-group"><label>用户缓存容量：</label> <input type="number" ng-model="editGlobal.userCache"></div><div class="pure-control-group"><label>文章缓存容量：</label> <input type="number" ng-model="editGlobal.articleCache"></div><div class="pure-control-group"><label>评论缓存容量：</label> <input type="number" ng-model="editGlobal.commentCache"></div><div class="pure-control-group"><label>列表缓存容量：</label> <input type="number" ng-model="editGlobal.listCache"></div><div class="pure-control-group"><label>标签缓存容量：</label> <input type="number" ng-model="editGlobal.tagCache"></div><div class="pure-control-group"><label>合集缓存容量：</label> <input type="number" ng-model="editGlobal.collectionCache"></div><div class="pure-control-group"><label>消息缓存容量：</label> <input type="number" ng-model="editGlobal.messageCache"></div><div class="pure-control-group"><label>分页导航缓存：</label> <input type="number" ng-model="editGlobal.paginationCache"></div><div class="pure-controls-group"><small>分页导航缓存有效期<strong>{{editGlobal.paginationCache}}</strong>秒</small></div><div class="pure-control-group"><label>操作限时缓存：</label> <input type="number" ng-model="editGlobal.TimeInterval"></div><div class="pure-controls-group"><small>搜索、用户添加文章或评论等限制操作的最小时间间隔，最小值为3秒</small></div><div class="pure-controls"><button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div><div ng-switch-when="tab4"><form class="pure-form pure-form-aligned" novalidate><div class="pure-control-group"><label>服务器地址：</label> <input type="text" ng-model="editGlobal.smtp.host"></div><div class="pure-control-group"><label>服务器端口：</label> <input type="number" ng-model="editGlobal.smtp.port"></div><div class="pure-control-group"><label>SMTP用户名：</label> <input type="text" ng-model="editGlobal.smtp.auth.user"></div><div class="pure-control-group"><label>SMTP用户密码：</label> <input type="password" ng-model="editGlobal.smtp.auth.pass"></div><div class="pure-control-group"><label>发送人名称：</label> <input type="text" ng-model="editGlobal.smtp.senderName"></div><div class="pure-control-group"><label>发送人Email：</label> <input type="text" ng-model="editGlobal.smtp.senderEmail"> <small>部分SMTP服务器要求其与用户名一致</small></div><div class="pure-control-group"><label>是否开启SSL：</label> <input type="button" class="pure-button pure-button-small" ng-class="{\'primary-bg\':editGlobal.smtp.secureConnection}" ng-click="editGlobal.smtp.secureConnection=!editGlobal.smtp.secureConnection" value="{{!editGlobal.smtp.secureConnection | switch:\'turn\'}}"></div><div class="pure-controls"><button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div><div ng-switch-when="tab5"><form class="pure-form pure-form-aligned" novalidate><div class="pure-control-group"><label>云存储空间绑定域名：</label> <input type="text" ng-model="editGlobal.cloudDomian"></div><div class="pure-control-group"><label>又拍云bucket：</label> <input type="text" ng-model="editGlobal.upyun.bucket"></div><div class="pure-control-group"><label>又拍云表单密匙：</label> <input type="password" ng-model="editGlobal.upyun.form_api_secret"></div><div class="pure-control-group"><label>是否开启图片上传：</label> <input type="button" class="pure-button pure-button-small" ng-class="{\'primary-bg\':editGlobal.upload}" ng-click="editGlobal.upload=!editGlobal.upload" value="{{!editGlobal.upload | switch:\'turn\'}}"></div><div class="pure-controls"><button type="submit" class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div></div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-index.html', '<div class="panel" ng-controller="adminGlobalCtrl"><div class="page-header inner"><strong>网站信息</strong></div><ul class="nav nav-tabs inner"><li class="active" gen-tab-click="active"><a ng-click="parent.switchTab=\'tab1\'">站点信息</a></li><li gen-tab-click="active"><a ng-click="parent.switchTab=\'tab2\'">服务器信息</a></li></ul><div class="inner" ng-switch on="parent.switchTab"><div ng-switch-default><dl class="dl-horizontal"><dt>网站名称：</dt><dd>{{global.title | placeholder}}</dd><dt>网站网址：</dt><dd>{{global.url | placeholder}}</dd><dt>网站副标题：</dt><dd>{{global.description | placeholder}}</dd><dt>网站Meta标题：</dt><dd>{{global.metatitle | placeholder}}</dd><dt>网站Meta描述：</dt><dd>{{global.metadesc | placeholder}}</dd><dt>网站Meta关键词：</dt><dd>{{global.keywords | placeholder}}</dd><dt>上线时间：</dt><dd>{{global.date | date:\'yy-MM-dd HH:mm\'}}</dd><dt>访问总数：</dt><dd>{{global.visitors | placeholder}}</dd><dt>会员总数：</dt><dd>{{global.users | placeholder}}</dd><dt>文章总数：</dt><dd>{{global.articles | placeholder}}</dd><dt>评论总数：</dt><dd>{{global.comments | placeholder}}</dd><dt>在线访客：</dt><dd>{{global.onlineNum | placeholder}}</dd><dt>在线会员：</dt><dd>{{global.onlineUsers | placeholder}}</dd><dt>在线记录：</dt><dd>{{global.maxOnlineNum | placeholder}}</dd><dt>记录时间：</dt><dd>{{global.maxOnlineTime | date:\'yy-MM-dd HH:mm\'}}</dd></dl></div><div ng-switch-when="tab2"><dl class="dl-horizontal"><dt>服务器已运行时间：</dt><dd>{{global.sys.uptime | formatTime}}</dd><dt>服务器操作系统：</dt><dd>{{global.sys.platform | placeholder}}</dd><dt>软件信息：</dt><dd><span>软件：<a ng-href="{{global.info.homepage}}"><strong>{{global.info.name}}</strong></a></span><br><span>版本：{{global.info.version}}</span><br><span>作者：<a ng-href="{{global.info.author.url}}">{{global.info.author.name}}</a></span><br><span>邮箱：<a href="mailto:#">{{global.info.author.email}}</a></span></dd><dt>Node.js环境：</dt><dd><span ng-repeat="(key, value) in global.sys.node"><strong>{{key}}：</strong>{{value}}<br></span></dd><dt>CPUs[{{global.sys.cpus.length}}]：</dt><dd ng-repeat="data in global.sys.cpus"><span ng-repeat="(key, value) in data"><strong>{{key}}：</strong>{{value}}<br></span></dd><dt>系统内存：</dt><dd><span ng-repeat="(key, value) in global.sys.memory track by $index"><strong>{{key}}：</strong>{{value | formatBytes}}<br></span></dd><dt>用户缓存：</dt><dd><span>容量：{{global.sys.user.capacity}}</span> <span>当前数量：{{global.sys.user.length}}</span></dd><dt>文章缓存：</dt><dd><span>容量：{{global.sys.article.capacity}}</span> <span>当前数量：{{global.sys.article.length}}</span></dd><dt>评论缓存：</dt><dd><span>容量：{{global.sys.comment.capacity}}</span> <span>当前数量：{{global.sys.comment.length}}</span></dd><dt>列表缓存：</dt><dd><span>容量：{{global.sys.list.capacity}}</span> <span>当前数量：{{global.sys.list.length}}</span></dd><dt>标签缓存：</dt><dd><span>容量：{{global.sys.tag.capacity}}</span> <span>当前数量：{{global.sys.tag.length}}</span></dd><dt>合集缓存：</dt><dd><span>容量：{{global.sys.collection.capacity}}</span> <span>当前数量：{{global.sys.collection.length}}</span></dd><dt>消息缓存：</dt><dd><span>容量：{{global.sys.message.capacity}}</span> <span>当前数量：{{global.sys.message.length}}</span></dd><dt>分页导航缓存：</dt><dd><span>限时(s)：{{global.sys.pagination.timeLimit}}</span> <span>当前数量：{{global.sys.pagination.length}}</span></dd><dt>操作限时缓存：</dt><dd><span>限时(s)：{{global.sys.timeInterval.timeLimit}}</span> <span>当前数量：{{global.sys.timeInterval.length}}</span></dd></dl></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-message.html', '<div><div class="panel"><div class="inner page-header"><strong>消息批量管理</strong></div><div class="inner well text-right" ng-show="parent.editSave"><button class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></div><div gen-pagination="pagination"></div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-tag.html', '<div ng-controller="adminTagCtrl"><div class="panel"><div class="inner page-header"><strong>标签管理</strong> <small class="right"><button class="pure-button pure-button-link" ng-click="predicate=\'tag\';reverse=!reverse"><i class="fa fa-sort-alpha-asc"></i>名称</button> <button class="pure-button pure-button-link" ng-click="predicate=\'articles\';reverse=!reverse"><i class="fa fa-sort-amount-asc"></i>文章</button> <button class="pure-button pure-button-link" ng-click="predicate=\'users\';reverse=!reverse"><i class="fa fa-sort-amount-asc"></i>用户</button></small></div><form class="pure-form pure-g-r inner"><div class="pure-u-1-2 edit-tag" ng-repeat="tag in tagList | orderBy:predicate:reverse" id="{{tag._id}}"><a title="删除标签" ng-click="remove(tag)" gen-tooltip><i class="fa fa-trash-o"></i></a> <input class="pure-input-1-2 input-flat" type="text" name="标签" ng-model="tag.tag" ui-validate="{tag:checkTag,minlength:checkTagMin}" gen-tooltip="validateTooltip" required> <small class="muted"><a ng-href="/{{tag._id}}">文章 {{tag.articles}}/会员 {{tag.users}}</a></small></div></form><div class="inner well text-right" ng-show="parent.editSave"><button class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></div><div gen-pagination="pagination"></div><div gen-modal="removeTagModal">确定要删除标签 {{removeTag.tag}}？</div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin-user.html', '<div ng-controller="adminUserCtrl"><div class="panel"><div class="inner page-header"><strong>用户批量查询/设置</strong></div><div class="inner"><table class="pure-table pure-table-horizontal"><thead><tr><th class="text-left"><input type="checkbox" ng-model="parent.isSelectAll" ng-click="selectAll()"></th><th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate=\'name\';reverse=!reverse">用户名</a></th><th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate=\'email\';reverse=!reverse">Email</a></th><th><i class="fa fa-sort-alpha-asc"></i><a ng-click="predicate=\'role\';reverse=!reverse">权限</a></th><th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate=\'score\';reverse=!reverse">积分</a></th><th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate=\'date\';reverse=!reverse">注册</a></th><th><i class="fa fa-sort-amount-asc"></i><a ng-click="predicate=\'lastLoginDate\';reverse=!reverse">登录</a></th></tr></thead><tbody><tr ng-repeat="user in userList | orderBy:predicate:reverse"><td><input type="checkbox" ng-model="user.isSelect"></td><td><a ng-href="/{{user._id}}">{{user.name}}</a><a ng-show="user.locked" title="该用户已被锁定，点击保存后解锁" ng-click="user.locked=false" gen-tooltip><i class="fa fa-minus-circle"></i></a></td><td>{{user.email}}</td><td><select class ng-model="user.role" ng-options="role | match:\'role\' for role in roleArray"></select></td><td class="text-center">{{user.score}}</td><td class="text-center">{{user.date | date:\'yy-MM-dd\'}}</td><td class="text-center">{{user.lastLoginDate | date:\'yy-MM-dd\'}}</td></tr></tbody></table></div><div class="inner well text-right" ng-show="parent.editSave"><button class="pure-button success-bg" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></div><div gen-pagination="pagination"></div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('admin.html', '<div class="pure-g-r wrap"><div class="pure-u-2-3"><div ng-include src="parent.getTpl"></div></div><div class="pure-u-1-3 aside"><div class="panel pure-menu pure-menu-open"><ul class="text-center"><li ng-class="{active: parent.viewPath==\'index\'}"><a href="/admin/index"><i class="fa fa-chevron-left left"></i>网站信息</a></li><li ng-class="{active: parent.viewPath==\'user\'}"><a href="/admin/user"><i class="fa fa-chevron-left left"></i>用户管理</a></li><li ng-class="{active: parent.viewPath==\'tag\'}"><a href="/admin/tag"><i class="fa fa-chevron-left left"></i>标签管理</a></li><li ng-class="{active: parent.viewPath==\'article\'}"><a href="/admin/article"><i class="fa fa-chevron-left left"></i>文章管理</a></li><li ng-class="{active: parent.viewPath==\'comment\'}"><a href="/admin/comment"><i class="fa fa-chevron-left left"></i>评论管理</a></li><li ng-class="{active: parent.viewPath==\'message\'}"><a href="/admin/message"><i class="fa fa-chevron-left left"></i>消息管理</a></li><li ng-class="{active: parent.viewPath==\'global\'}" ng-show="global.isAdmin"><a href="/admin/global"><i class="fa fa-chevron-left left"></i>网站设置</a></li></ul></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('article-editor.html', '<div class="pure-g-r"><div class="pure-u-1-2 pure-visible-desktop"><div class="panel"><div class="page-header inner"><strong>{{parent.title}}</strong></div><div class="article-content" gen-parse-md="parent.content"></div></div></div><div ng-class="{\'pure-u-1-2\':global.isDesktop,\'pure-u-1\':!global.isDesktop}"><div class="panel file-drop" ng-file-drop ng-file-over="file-drop-over"><div class="page-header inner"><strong>{{parent.edit | switch:\'edit\'}}文章</strong></div><form class="inner pure-form pure-form-stacked" novalidate><label>文章标题 <span class="info">[必填，{{global.TitleMinLen}} 到 {{global.TitleMaxLen}} 字节，当前<strong class="hot">{{parent.titleBytes}}</strong>字节]</span></label> <input class="pure-input-1" type="text" placeholder="文章标题" name="文章标题" ng-model="article.title" ng-change="store(\'title\')" ui-validate="{maxlength:checkTitleMax,minlength:checkTitleMin}" gen-tooltip="validateTooltip" required> <label>文章来源 <span class="info">[如转载文章，请填完整的原文URL地址]</span></label> <input class="pure-input-1" type="text" placeholder="文章来源URL" name="文章来源" ng-model="article.refer" ng-change="store(\'refer\')"> <label>文章内容 <span class="info">[使用<a class="hot" ng-click="wmdPreview()">MarkDown语法</a>，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong class="hot">{{parent.contentBytes}}</strong>字节]</span></label><div id="wmd-button-bar"></div><textarea class="wmd-input pure-input-1" id="wmd-input" name="文章内容" placeholder="{{global.isLogin?\'请使用MarkDown语法编辑内容\':\'您还没有登录，不能发表文章哦\'}}" ng-model="article.content" rows="10" ng-change="store(\'content\')" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>\n' +
+  '                </textarea> <label>文章标签 <span class="info">(最多设置 {{global.ArticleTagsMax}} 个标签){{article.tagsList}}</span></label> <textarea class="pure-input-1" name="文章标签" ng-model="article.tagsList" ng-list="/[,，、]/" ng-change="store(\'tagsList\')" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">\n' +
+  '                </textarea><mark>热门标签：</mark><a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a><div class="well" gen-uploader="uploaderOptions" ng-if="global.upload"></div><div class="well"><button class="pure-button pure-button-small info-bg" ng-click="wmdPreview()">MarkDown语法 / 文章预览</button> <button type="submit" class="pure-button pure-button-small success-bg" ng-class="{\'pure-button-disabled\':!global.isLogin}" ng-click="submit()">提交</button> <button class="pure-button pure-button-small primary-bg" ng-click="goBack()">返回</button></div></form></div></div></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('article.html', '<div class="pure-g-r wrap"><div class="pure-u-2-3"><div class="panel" id="{{article._id}}"><div class="article-header"><h3>{{article.title}} <small><a ng-show="global.isEditor" ng-click="highlight(article)" ng-class="{info:article.status<2,warning:article.status==2}"><i class="fa fa-hand-o-up"></i>{{article.status==2 | switch:\'highlight\'}}</a></small></h3><div class="article-info"><a ng-href="{{article.refer.url}}" title="原文"><i class="fa fa-external-link--square success"></i>{{article.refer.url | cutText:25}}</a> <i class="fa fa-clock-o" data-original-title="{{article.date | formatDate:true}}发布" gen-tooltip>{{article.date | formatDate}}</i> <i class="fa fa-refresh" data-original-title="{{article.updateTime | formatDate:true}}更新" gen-tooltip>{{article.updateTime | formatDate}}</i> <i class="fa fa-eye" data-original-title="访问{{article.visitors}}次" gen-tooltip>{{article.visitors}}</i> <i class="fa fa-star-o" data-original-title="热度{{article.hots}}" gen-tooltip><span>{{article.hots}}</span></i> <i class="fa fa-comments-o" data-original-title="评论{{article.comments}}条" ng-show="article.comments" gen-tooltip>{{article.comments}}</i> <a ng-repeat="tag in article.tagsList" ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a> <a class="success" ng-show="article.isAuthor||global.isEditor" ng-href="{{\'/\'+article._id+\'/edit\'}}"><i class="fa fa-pencil"></i> 编辑</a></div></div><div class="article-content" gen-parse-md="article.content"></div><div class="pure-g-r article-footer"><div class="pure-u-1-2 pure-hidden-phone"><div class="article-info" ng-show="article.favorsList"><i class="fa fa-thumbs-up">支持</i> <span ng-repeat="user in article.favorsList"><a ng-href="{{\'/\'+user._id}}">{{user.name}}</a></span></div><div class="article-info" ng-show="article.opposesList"><i class="fa fa-thumbs-down">反对</i> <span ng-repeat="user in article.opposesList"><a ng-href="{{\'/\'+user._id}}">{{user.name}}</a></span></div><div class="article-info" ng-show="article.markList"><i class="fa fa-bookmark">收藏</i> <span ng-repeat="user in article.markList"><a ng-href="{{\'/\'+user._id}}">{{user.name}}</a></span></div></div><div class="pure-u-1-2 text-right"><div class="pure-button-group"><button class="pure-button pure-button-small info-bg" title="支持" ng-click="setFavor(article)"><i ng-class="{\'fa fa-thumbs-up\':article.isFavor,\'fa fa-thumbs-o-up\':!article.isFavor}"></i> {{article.favorsList.length}}</button> <button class="pure-button pure-button-small info-bg" title="收藏" ng-click="setMark(article)"><i ng-class="{\'fa fa-bookmark\':article.isMark,\'fa fa-bookmark-o\':!article.isMark}"></i> {{article.markList.length}}</button> <button class="pure-button pure-button-small info-bg" title="反对" ng-click="setOppose(article)"><i ng-class="{\'fa fa-thumbs-down\':article.isOppose,\'fa fa-thumbs-o-down\':!article.isOppose}"></i> {{article.opposesList.length}}</button></div><div class="pure-button-group"><button ng-click="reply(article)" class="pure-button pure-button-small success-bg">发表评论<i class="fa fa-reply"></i></button></div></div></div></div><div class="panel" id="comments"><div class="inner" id="replyForm" gen-moving="replyMoving"><h4>{{comment.title}}</h4><div class="wmd-preview article-content" ng-show="parent.wmdPreview" gen-parse-md="comment.content"></div><form class="pure-form" ng-hide="parent.wmdPreview"><div id="wmd-button-bar"></div><textarea class="wmd-input pure-input-1" id="wmd-input" name="评论内容" placeholder="{{global.isLogin?\'请使用MarkDown语法编辑内容\':\'您还没有登录，不能发表评论哦\'}}" ng-model="comment.content" rows="6" ui-validate="{maxlength:checkContentMax,minlength:checkContentMin}" gen-tooltip="validateTooltip" required>\n' +
+  '                    </textarea></form><div class="article-info">[使用<a ng-click="wmdHelp()">MarkDown语法</a>，{{global.ContentMinLen}} 到 {{global.ContentMaxLen}} 字节，当前<strong class="hot">{{parent.contentBytes}}</strong>字节]</div><div class="text-right"><div class="pure-button-group"><button class="pure-button pure-button-small info-bg" ng-click="wmdPreview()">编辑 / 预览</button></div><div class="pure-button-group"><button class="pure-button pure-button-small info-bg" ng-if="comment.replyToComment" ng-click="reply(article)">返回</button> <button class="pure-button pure-button-small success-bg" ng-click="submit()">提交</button></div></div></div><ul class="media-list comments"><li class="media" ng-repeat="comment in article.commentsList"><a class="media-object left" ng-href="{{\'/\'+comment.author._id}}" ng-show="!global.isPocket"><img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{comment.author.avatar}}"></a><div class="media-body" id="{{comment._id}}"><div class="media-heading"><a ng-click="getComments(comment.refer._id, comment)">{{comment.title}}</a> <a class="right" title="删除评论" ng-show="comment.isAuthor||global.isEditor" ng-click="remove(comment)"><i class="fa fa-trash-o"></i></a></div><div class="media-content list-content" gen-parse-md="comment.content"></div><div class="pure-g-r media-footer"><div class="pure-u-1-2"><a ng-href="{{\'/\'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div><div class="pure-u-1-2 text-right"><div class="pure-button-group"><button class="pure-button pure-button-link" title="支持" ng-click="setFavor(comment)"><i ng-class="{\'fa fa-thumbs-up\':comment.isFavor,\'fa fa-thumbs-o-up\':!comment.isFavor}">{{comment.favorsList.length}}</i></button> <button class="pure-button pure-button-link" title="评论" ng-click="getComments(comment.commentsList, comment)"><i class="fa fa-comments-o"></i> {{comment.commentsList.length}}</button> <button class="pure-button pure-button-link" title="反对" ng-click="setOppose(comment)"><i ng-class="{\'fa fa-thumbs-down\':comment.isOppose,\'fa fa-thumbs-o-down\':!comment.isOppose}"></i> {{comment.opposesList.length}}</button></div><div class="pure-button-group"><button class="pure-button pure-button-link" ng-click="reply(comment)">回复<i class="fa fa-reply"></i></button></div></div></div></div></li></ul><ul class="media-list comments" id="commentForm" gen-moving="commentMoving"><li class="media" ng-repeat="comment in referComments"><a class="media-object left" ng-href="{{\'/\'+comment.author._id}}" ng-show="!global.isPocket"><img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{comment.author.avatar}}"></a><div class="media-body"><div class="media-heading">{{comment.title}}</div><div class="media-content list-content" gen-parse-md="comment.content"></div><div class="pure-g-r media-footer"><div class="pure-u-1-2"><a ng-href="{{\'/\'+comment.author._id}}">{{comment.author.name}}</a> <span data-original-title="{{comment.date | formatDate:true}}发布" gen-tooltip>{{comment.date | formatDate}}发表</span></div><div class="pure-u-1-2 text-right"><div class="pure-button-group"><button class="pure-button pure-button-link" title="支持" ng-click="setFavor(comment)"><i ng-class="{\'fa fa-thumbs-up\':comment.isFavor,\'fa fa-thumbs-o-up\':!comment.isFavor}">{{comment.favorsList.length}}</i></button> <button class="pure-button pure-button-link" title="反对" ng-click="setOppose(comment)"><i ng-class="{\'fa fa-thumbs-down\':comment.isOppose,\'fa fa-thumbs-o-down\':!comment.isOppose}"></i> {{comment.opposesList.length}}</button></div></div></div></div></li></ul></div><div gen-pagination="pagination"></div></div><div class="pure-u-1-3 aside"><div class="panel"><div class="panel-heading">作者信息</div><div class="media inner"><a class="media-object left" ng-href="{{\'/\'+article.author._id}}"><img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{article.author.avatar}}"></a><div class="media-body"><div class="media-header"><a ng-href="{{\'/\'+article.author._id}}">{{article.author.name}}</a></div><button class="pure-button success-bg" ng-show="!article.author.isMe" ng-click="followMe(article.author)">{{article.author.isFollow | switch:\'follow\'}}</button></div></div><ul class="inner list-inline article-info"><li><strong class="info">{{article.author.role | match:\'role\'}}</strong></li><li ng-show="article.author.score">积分：<strong>{{article.author.score}}</strong></li><li ng-show="article.author.fans">粉丝：<strong>{{article.author.fans}}</strong></li><li ng-show="article.author.follow">关注：<strong>{{article.author.follow}}</strong></li><li ng-show="article.author.articles">文章/评论：<strong>{{article.author.articles}}</strong></li><li ng-show="article.author.collections">合集：<strong>{{article.author.collections}}</strong></li></ul></div><div class="panel" ng-show="article.author.articlesList.length>0"><div class="panel-heading">作者文章</div><ul class="media-list comments"><li ng-repeat="item in article.author.articlesList"><span class="label">{{item.date | formatDate}}</span>&nbsp;<a ng-href="{{\'/\'+item._id}}" title="{{item.author.name+\'发表\'}}">{{item.title}}</a></li></ul></div><div class="panel pure-hidden-phone" ng-show="hotArticles.length>0"><div class="panel-heading">热门文章</div><ul class="media-list comments"><li class="media" ng-repeat="item in hotArticles"><div class="media-body" id="{{item._id}}"><small class="hot" title="热度">{{item.hots}}</small>&nbsp; <span class="media-content"><a ng-href="{{\'/\'+item._id}}" title="{{item.author.name+\'发表\'}}">{{item.title}}</a></span></div></li></ul></div></div></div><div gen-modal="markdownModal"><div gen-parse-md="parent.markdownHelp"></div></div><div gen-modal="removeCommentModal">确定要删除评论《{{removeComment.title}}》？</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('gen-modal.html', '<div class="pure-u modal fade" id="{{id}}" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header" ng-show="title"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title">{{title}}</h4></div><div class="modal-body" ng-transclude></div><div class="modal-footer" ng-show="confirmBtn || cancelBtn || deleteBtn"><button type="button" class="pure-button warning-bg pull-left" ng-show="deleteBtn" ng-click="deleteCb()">{{deleteBtn}}</button> <button type="button" class="pure-button primary-bg" ng-show="confirmBtn" ng-click="confirmCb()">{{confirmBtn}}</button> <button type="button" class="pure-button" ng-show="cancelBtn" ng-click="cancelCb()">{{cancelBtn}}</button></div></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('gen-pagination.html', '<ul class="pagination" ng-show="total>perPages[0]"><li ng-class="{disabled: !prev}"><a ng-href="{{path&&prev?path+prev:\'\'}}" title="上一页" ng-click="paginationTo(prev)">&#171;</a></li><li ng-class="{active: n==pageIndex, disabled: n==\'…\'}" ng-repeat="n in showPages track by $index"><a ng-href="{{path&&n!=\'…\'&&n!=pageIndex?path+n:\'\'}}" title="{{n!=\'…\'?\'第\'+n+\'页\':\'\'}}" ng-click="paginationTo(n)">{{n}}</a></li><li ng-class="{disabled: !next}"><a ng-href="{{path&&next?path+next:\'\'}}" title="下一页" ng-click="paginationTo(next)">&#187;</a></li><li class="pure-hidden-phone" ng-class="{active: s==pageSize}" ng-repeat="s in perPages"><a ng-href="{{path&&s!=pageSize?path+\'1&s=\'+s:\'\'}}" title="每页{{s}}" ng-click="paginationTo(1, s)">{{s}}</a></li></ul>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('gen-uploader.html', '<table class="pure-table pure-table-horizontal file-upload-info" ng-show="uploader.queue.length"><thead><tr><th width="35%">名称</th><th width="15%">大小</th><th width="30%">进度</th><th width="20%">总数：{{ uploader.queue.length }}</th></tr></thead><tbody><tr ng-repeat="item in uploader.queue"><td class="file-upload-filename"><strong>{{ item.file.name }}</strong></td><td nowrap>{{ item.file.size/1024|number:1 }} KB</td><td><div class="progress" style="margin-bottom: 0;"><div class="progress-bar" role="progressbar" ng-style="{ \'width\': item.progress + \'%\' }"></div></div></td><td nowrap><button type="button" class="pure-button pure-button-xsmall success-bg" ng-click="item.upload()" ng-disabled="item.isUploading"><span class="fa fa-upload"></span>上传</button> <button type="button" class="pure-button pure-button-xsmall warning-bg" ng-click="item.remove()"><span class="fa fa-trash-o"></span>删除</button></td></tr></tbody></table><div class="progress" ng-show="uploader.queue.length"><div class="progress-bar" role="progressbar" ng-style="{ \'width\': uploader.progress + \'%\' }"></div></div><div><button type="button" class="pure-button pure-button-small info-bg" ng-click="triggerUpload()"><span class="fa fa-plus-square-o"></span> 上传图片</button><input class="upload-input" ng-file-select type="file" multiple> <button type="button" class="pure-button pure-button-small success-bg" ng-click="uploader.uploadAll()" ng-show="uploader.queue.length" ng-disabled="!uploader.getNotUploadedItems().length"><span class="fa fa-upload"></span> 上传所有</button> <button type="button" class="pure-button pure-button-small warning-bg" ng-click="uploader.clearQueue()" ng-show="uploader.queue.length"><span class="fa fa-trash-o"></span> 删除所有</button></div><ul class="nav file-uploaded" ng-show="uploaded.length"><li ng-repeat="file in uploaded"><a class="file-thumbnail" style="background-image: url({{file.url}});" ng-click="clickImage(file)" title="{{file.name}}"></a></li></ul>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('index-article.html', '<ul class="nav nav-tabs inner"><li ng-class="{active: parent.viewPath==\'latest\'}"><a href="/latest" title="最新文章">最新</a></li><li ng-class="{active: parent.viewPath==\'hots\'}"><a href="/hots" title="热门文章">热门</a></li><li ng-class="{active: parent.viewPath==\'update\'}"><a href="/update" title="最近更新文章">更新</a></li><li ng-class="{active: !parent.viewPath}" ng-show="other._id"><a ng-href="/{{other._id}}">{{other.title}}</a></li><div class="pure-button-group right"><a href="/add" class="pure-button success-bg" ng-if="global.isLogin">发表文章</a> <a class="pure-button list-model" title="{{parent.sumModel?\'摘要模式\':\'简洁模式\'}}" ng-if="!global.isPocket" ng-class="{\'info-bg\':parent.sumModel}" ng-click="setListModel()"><i class="fa fa-th-large"></i></a></div></ul><ul class="list-inline inner"><li ng-repeat="tag in global.tagsList"><a ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-xsmall info-bg">{{tag.tag}}</a></li><li><a href="/tag" class="pure-button pure-button-xsmall"><i class="fa fa-search"></i>更多</a></li></ul><ul class="media-list"><li class="media" ng-repeat="article in articleList"><div class="media-body" id="{{article._id}}"><div class="media-header"><a ng-href="{{\'/\'+article._id}}"><i class="primary" ng-class="{\'fa fa-hand-o-up\':article.status==2, \'fa fa-external-link\':article.status!=2}"></i>{{article.title}}</a> <i ng-show="article.status==1" class="fa fa-thumbs-up hot" title="推荐"></i> <i class="fa fa-star-o right hot hover-icon" title="热度" ng-show="!global.isPhone">{{article.hots}}</i></div><div class="media-content list-content" ng-show="parent.sumModel" gen-parse-md="article.content"></div><div class="media-footer"><a ng-href="{{\'/\'+article.author._id}}"><i class="fa fa-pencil success"></i>{{article.author.name}}</a> <i class="fa fa-clock-o" title="{{article.date | formatDate:true}}发布">{{article.date | formatDate}}</i> <i class="fa fa-refresh" title="{{article.updateTime | formatDate:true}}更新">{{article.updateTime | formatDate}}</i> <i class="fa fa-comments-o" title="评论" ng-show="article.comments">{{article.comments}}</i> <a ng-repeat="tag in article.tagsList" ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a></div></div></li></ul>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('index-tag.html', '<div class="inner page-header"><span>热门标签</span></div><ul class="inner list-inline"><li ng-repeat="tag in tagList" id="{{tag._id}}" class="text-center"><a class="pure-button pure-button-small" ng-href="{{\'/\'+tag._id}}"><strong>{{tag.tag}}</strong> <small class="muted">文章 {{tag.articles}}/会员 {{tag.users}}</small></a></li></ul>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('index.html', '<div class="pure-g-r wrap"><div class="pure-u-2-3"><div class="panel" ng-include src="parent.getTpl"></div><div gen-pagination="pagination"></div></div><div class="pure-u-1-3"><div class="panel pure-hidden-phone"><div class="inner text-center"><img src="http://cdn.angularjs.cn/img/angularjs.png" alt="AngularJS"><div class="text-show text-left">使用超动感HTML &amp; JS开发WEB应用！</div><div class="text-show text-hot text-left">QQ交流群1 <strong class="hot">278252889(满)</strong></div><div class="text-show text-hot text-left">QQ交流群2 <strong class="hot">305739270(满)</strong></div><div class="text-show text-hot text-left">QQ交流群3 <strong class="hot">207542263</strong></div><div class="text-show text-hot text-left">QQ交流群4 <strong class="hot">240328422</strong></div><div class="text-show"><a href="https://github.com/angular/angular.js" class="pure-button pure-button-link" target="_blank"><i class="fa fa-github fa-2x"></i>Git Hub</a> <a href="http://weibo.com/angularjs/" class="pure-button pure-button-link" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a></div></div></div><div class="panel pure-hidden-phone"><div class="inner text-center"><div class="text-show-large"><strong>{jsGen}</strong></div><div class="text-show text-left">纯JavaScript构建的新一代开源社区网站系统，基于Node.js &amp; AngularJS！</div><div class="text-show"><a href="https://github.com/zensh/jsgen" class="pure-button pure-button-link" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a> <a href="http://weibo.com/zensh" class="pure-button pure-button-link" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a></div></div></div><div class="panel pure-hidden-phone"><div class="inner text-center"><a href="http://www.lagou.com/?utm_source=CPA__angularjs_banner&utm_medium=front&utm_campaign=toufang" target="_blank"><img src="http://cdn.angularjs.cn/img/lagou.jpg" alt="拉勾网"></a></div></div><div class="panel pure-hidden-phone"><div class="inner text-center"><a href="https://www.upyun.com/" target="_blank"><img src="http://cdn.angularjs.cn/img/upyun.png" alt="又拍云存储"></a><div class="text-show text-left">帮助企业提供静态文件云存储、云处理、云分发的云服务平台。<a href="http://weibo.com/upaiyun" target="_blank"><i class="fa fa-weibo fa-lg"></i></a></div><div class="text-show"><a href="http://segmentfault.com/t/%E5%8F%88%E6%8B%8D%E4%BA%91%E5%AD%98%E5%82%A8" target="_blank"><strong>segmentfault 又拍云存储问答专区</strong></a></div></div></div><div class="panel site-link"><div class="panel-heading muted"><i class="fa fa-link"></i>友情链接</div><ul class="inner"><li><a href="https://coding.net" target="_blank">Coding.net</a></li><li class="muted"><i class="fa fa-thumb-tack"></i>仅链接AngularJS框架网站</li></ul></div><div class="panel"><div class="panel-heading muted"><i class="fa fa-dashboard"></i>网站状态</div><ul class="inner list-inline"><li>访问总数：{{global.visitors}}</li><li>文章总数：{{global.articles}}</li><li>评论总数：{{global.comments}}</li><li>会员总数：{{global.users}}</li><li>在线访客：{{global.onlineNum}}</li><li>在线会员：{{global.onlineUsers}}</li><li>在线记录：{{global.maxOnlineNum}}</li><li>时间：{{global.maxOnlineTime | date:\'yy-MM-dd HH:mm\'}}</li></ul></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('login.html', '<div class="pure-g-r wrap"><div class="pure-u-1-2"><div class="panel pure-hidden-phone"><div class="page-header text-center"><span class="hot">欢迎回到AngularJS中文社区</span></div><div class="inner text-center"><img src="http://cdn.angularjs.cn/img/angularjs.png" alt="angularjs"><div class="text-show">使用超动感HTML &amp; JS开发WEB应用！</div><div class="text-show text-hot">QQ交流群 <strong>278252889</strong></div><div class="text-show"><a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a> <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a></div></div></div></div><div class="pure-u-1-2"><div class="panel transparent"><div class="page-header inner"><strong class="primary">用户登录</strong></div><form class="pure-form pure-form-aligned inner" novalidate><div class="pure-control-group"><label>登录名：</label> <input type="text" placeholder="name or Email or Uid" name="登录名" ng-model="login.logname" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>密码：</label> <input type="password" placeholder="password" name="密码" ng-model="login.logpwd" ng-minlength="6" ng-maxlength="20" gen-tooltip="validateTooltip" required></div><div class="pure-controls"><label for="auto-login" class="pure-checkbox"><input id="auto-login" type="checkbox" ng-model="login.logauto">3天内自动登录</label> <button class="pure-button primary-bg" ng-click="submit()">登录</button> <a class="pure-button warning-bg" ng-show="reset.title" ng-href="{{\'/reset?type=\'+reset.type}}">{{reset.title}}</a></div></form></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('register.html', '<div class="pure-g-r wrap"><div class="pure-u-1-2"><div class="panel pure-hidden-phone"><div class="page-header text-center"><span class="hot">欢迎来到AngularJS中文社区</span></div><div class="inner text-center"><img src="http://cdn.angularjs.cn/img/angularjs.png" alt="angularjs"><div class="text-show">使用超动感HTML &amp; JS开发WEB应用！</div><div class="text-show text-hot">QQ交流群 <strong>278252889</strong></div><div class="text-show"><a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a> <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a></div></div></div></div><div class="pure-u-1-2"><div class="panel transparent"><div class="page-header inner"><strong class="success">用户注册</strong></div><form class="pure-form pure-form-aligned inner" novalidate><div class="pure-control-group"><label>用户名：</label> <input type="text" placeholder="name" name="用户名" ng-model="user.name" ui-validate="{username:checkName,minname:checkMin,maxname:checkMax}" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>邮箱：</label> <input type="email" placeholder="email" name="邮箱" ng-model="user.email" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>密码：</label> <input type="password" placeholder="password" name="密码" ng-model="user.passwd" ng-minlength="6" ng-maxlength="20" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>重复密码：</label> <input type="password" placeholder="password" name="重复密码" ng-model="user.passwd2" ui-validate="{repasswd:\'$value==user.passwd\'}" ui-validate-watch="\'user.passwd\'" gen-tooltip="validateTooltip" required></div><div class="pure-controls"><button class="pure-button success-bg" ng-click="submit()">注册</button></div></form></div></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('reset.html', '<div class="pure-g-r wrap"><div class="pure-u-1-2"><div class="panel pure-hidden-phone"><div class="page-header text-center"><span class="hot">欢迎来到AngularJS中文社区</span></div><div class="inner text-center"><img src="http://cdn.angularjs.cn/img/angularjs.png" alt="angularjs"><div class="text-show">使用超动感HTML &amp; JS开发WEB应用！</div><div class="text-show text-hot">QQ交流群 <strong>278252889</strong></div><div class="text-show"><a href="https://github.com/angular/angular.js" class="pure-button pure-button-small" target="_blank"><i class="fa fa-github fa-2x"></i>GitHub</a> <a href="http://weibo.com/angularjs/" class="pure-button pure-button-small" target="_blank"><i class="fa fa-weibo fa-2x"></i>WeiBo</a></div></div></div></div><div class="pure-u-1-2" ng-show="parent.title"><div class="panel transparent"><div class="page-header inner"><strong class="warning">{{parent.title}}</strong></div><form class="pure-form pure-form-aligned inner" novalidate><div class="pure-control-group"><label>用户名/Uid：</label> <input type="text" placeholder="name or Uid" name="用户名/Uid" ng-model="reset.name" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>邮箱：</label> <input type="email" placeholder="email" name="邮箱" ng-model="reset.email" gen-tooltip="validateTooltip" required></div><div class="pure-controls"><button class="pure-button warning-bg" ng-click="submit()">提交</button></div></form></div></div><div gen-modal="timingModal">{{parent.timing}}秒钟后自动返回首页</div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('user-article.html', '<div ng-controller="userArticleCtrl"><div class="page-header inner"><a class="pure-button list-model right" title="{{parent.sumModel?\'摘要模式\':\'简洁模式\'}}" ng-if="!global.isPocket" ng-class="{\'info-bg\':parent.sumModel}" ng-click="setListModel()"><i class="fa fa-th-large"></i></a> <strong>{{parent.title}}</strong></div><ul class="media-list"><li class="media" ng-repeat="article in articleList"><a class="media-object left" title="删除文章" ng-show="article.isAuthor||global.isEditor" ng-click="remove(article)"><i class="fa fa-trash-o"></i></a><div class="media-body" id="{{article._id}}" ng-class="{muted: article.read}"><div class="media-header"><a ng-href="{{\'/\'+article._id}}"><i class="primary" ng-class="{\'fa fa-hand-o-up\':article.status==2, \'fa fa-external-link\':article.status!=2}" ng-hide="article.isAuthor"></i>{{article.title}}</a> <i ng-show="article.status==1" class="fa fa-thumbs-up hot" title="推荐"></i> <a class="pure-button pure-button-link" ng-href="{{\'/\'+article._id+\'/edit\'}}" ng-show="isMe"><i class="fa fa-edit"></i></a> <i class="fa fa-star-o right hot hover-icon" title="热度" ng-show="!global.isPhone">{{article.hots}}</i></div><div class="media-content list-content" ng-show="parent.sumModel" gen-parse-md="article.content"></div><div class="media-footer"><a ng-href="{{\'/\'+article.author._id}}"><i class="fa fa-pencil success"></i>{{article.author.name}}</a> <i class="fa fa-clock-o" title="{{article.date | formatDate:true}}发布">{{article.date | formatDate}}</i> <i class="fa fa-refresh" title="{{article.updateTime | formatDate:true}}更新">{{article.updateTime | formatDate}}</i> <i class="fa fa-comments-o" title="评论" ng-show="article.comments">{{article.comments}}</i> <a ng-repeat="tag in article.tagsList" ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a></div></div></li></ul><p class="inner" ng-show="articleList.length==0">暂无</p><div gen-pagination="pagination"></div><div gen-modal="removeArticleModal">确定要删除文章《{{removeArticle.title}}》？</div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('user-edit.html', '<div ng-controller="userEditCtrl"><div class="page-header inner"><strong>用户设置</strong></div><form class="pure-form pure-form-aligned inner" novalidate><div class="pure-control-group"><label>&nbsp;</label> <img class="img-small pure-help-inline" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{user.avatar}}"></div><div class="pure-control-group"><label>头像URL：</label> <input class="pure-input-1-2" type="url" name="头像" ng-model="user.avatar" gen-tooltip="validateTooltip"></div><div class="pure-control-group"><label>用户名：</label> <input type="text" placeholder="name" name="用户名" ng-model="user.name" ui-validate="{username:checkName,minname:checkMin,maxname:checkMax}" gen-tooltip="validateTooltip" required></div><div class="pure-control-group"><label>邮箱：</label> <input type="email" placeholder="email" name="邮箱" ng-model="user.email" gen-tooltip="validateTooltip" required> <input type="button" class="pure-button pure-button-small success-bg" title="修改邮箱后会自动发送一封验证邮件，通过验证后才保存修改" ng-click="verifyEmail()" value="验证邮箱" gen-tooltip></div><div class="pure-control-group"><label>用户性别：</label><select ng-model="user.sex" ng-options="sex | match:\'gender\' for sex in sexArray"></select></div><div class="pure-control-group"><label>用户标签：</label> <textarea class="pure-input-1-2" name="用户标签" ng-model="user.tagsList" ng-list="/[,，、]/" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">\n' +
+  '            </textarea></div><div class="pure-controls-group"><a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a></div><div class="pure-control-group"><label>个人简介：</label> <textarea class="pure-input-1-2" name="个人简介" ng-model="user.desc" ui-validate="{maxlength:checkDesc}" gen-tooltip="validateTooltip">\n' +
+  '            </textarea></div><div class="pure-control-group"><label>修改密码（不改留空）：</label> <input type="password" placeholder="password" name="密码" ng-model="user.passwd" ng-minlength="6" ng-maxlength="20" gen-tooltip="validateTooltip"></div><div class="pure-control-group"><label>再次输入密码：</label> <input type="password" placeholder="password" name="重复密码" ng-model="user.passwd2" ui-validate="{repasswd:checkPwd}" ui-validate-watch="\'user.passwd\'" gen-tooltip="validateTooltip"></div><div class="pure-controls"><button class="pure-button success-bg" type="submit" ng-click="submit()">保存</button> <button class="pure-button info-bg" ng-click="reset()">重置</button></div></form></div><div gen-modal="unSaveModal">确定要离开？未保存的数据将会丢失！</div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('user-list.html', '<div ng-controller="userListCtrl"><div class="page-header inner"><strong>{{parent.title}}</strong></div><ul class="media-list"><li class="media" ng-repeat="user in userList"><a class="media-object left" ng-href="{{\'/\'+user._id}}"><img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{user.avatar}}"></a><div class="media-body" id="{{user._id}}"><div class="media-heading"><div class="media-heading"><a ng-click="followMe(user)" class="pure-button pure-button-small success-bg right" ng-class="{\'success-bg\':!user.isFollow,\'primary-bg\':user.isFollow}" ng-hide="user.isMe">{{user.isFollow | switch:\'follow\'}}</a> <a ng-href="{{\'/\'+user._id}}">{{user.name}}</a> <small class="muted">{{user.date | formatDate:true}}注册 / {{user.lastLoginDate | formatDate:true}}最后登录</small><ul class="inner list-inline article-info"><li><strong class="hot">{{user.role | match:\'role\'}}</strong></li><li ng-show="user.email">UID：<strong>{{user._id}}</strong></li><li ng-show="user.sex">性别：<strong>{{user.sex | match:\'gender\'}}</strong></li><li ng-show="user.score">积分：<strong>{{user.score}}</strong></li><li ng-show="user.fans">粉丝：<strong>{{user.fans}}</strong></li><li ng-show="user.follow">关注：<strong>{{user.follow}}</strong></li><li ng-show="user.articles">文章/评论：<strong>{{user.articles}}</strong></li><li ng-show="user.collections">合集：<strong>{{user.collections}}</strong></li></ul></div></div><div class="media-content" gen-parse-md="user.desc"></div><div><ul class="list-inline"><li ng-repeat="tag in user.tagsList"><a ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-xsmall">{{tag.tag}}</a></li></ul></div></div></li></ul><p class="inner" ng-show="userList.length==0">暂无</p><div gen-pagination="pagination"></div></div>');
+
+}]);
+'use strict';
+
+angular.module('jsGen').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('user.html', '<div class="pure-g-r wrap"><div class="pure-u-2-3"><div class="panel" ng-include src="parent.getTpl"></div></div><div class="pure-u-1-3 aside"><div class="panel"><div class="media inner"><a class="media-object left"><img class="img-small" src="http://cdn.angularjs.cn/img/avatar.png" gen-src="{{user.avatar}}"></a><div class="media-body"><div class="media-header"><a ng-href="{{\'/\'+user._id}}">{{user.name}}</a></div><button ng-show="!parent.isMe" ng-click="followMe(user)" class="pure-button success-bg">{{user.isFollow | switch:\'follow\'}}</button></div></div><ul class="inner list-inline article-info"><li><strong class="hot">{{user.role | match:\'role\'}}</strong></li><li ng-show="user.email">Email：<strong>{{user.email}}</strong></li><li ng-show="user.sex">性别：<strong>{{user.sex | match:\'gender\'}}</strong></li><li ng-show="user.score">积分：<strong>{{user.score}}</strong></li><li ng-show="user.fans">粉丝：<strong>{{user.fans}}</strong></li><li ng-show="user.follow">关注：<strong>{{user.follow}}</strong></li><li ng-show="user.collect">收藏：<strong>{{user.collect}}</strong></li><li ng-show="user.articles">文章/评论：<strong>{{user.articles}}</strong></li><li ng-show="user.collections">合集：<strong>{{user.collections}}</strong></li><li ng-show="user.date"><strong>{{user.date | formatDate:true}}</strong>注册<br><strong>{{user.lastLoginDate | formatDate:true}}</strong>最后登录</li></ul><div class="inner article-info"><strong>用户简介：</strong><div gen-parse-md="user.desc"></div><strong>用户标签：</strong><div><a ng-repeat="tag in user.tagsList" ng-href="{{\'/\'+tag._id}}" class="pure-button pure-button-link">{{tag.tag}}</a></div></div></div><div class="panel pure-menu pure-menu-open"><ul class="text-center" ng-show="parent.isMe"><li ng-class="{active: parent.viewPath==\'index\'}"><a href="/home"><i class="fa fa-chevron-left left"></i>我的主页</a></li><li ng-class="{active: parent.viewPath==\'follow\'}"><a href="/home/follow"><i class="fa fa-chevron-left left"></i>我的关注</a></li><li ng-class="{active: parent.viewPath==\'fans\'}"><a href="/home/fans"><i class="fa fa-chevron-left left"></i>我的粉丝</a></li><li ng-class="{active: parent.viewPath==\'mark\'}"><a href="/home/mark"><i class="fa fa-chevron-left left"></i>我的收藏</a></li><li ng-class="{active: parent.viewPath==\'article\'}"><a href="/home/article"><i class="fa fa-chevron-left left"></i>我的文章</a></li><li ng-class="{active: parent.viewPath==\'comment\'}"><a href="/home/comment"><i class="fa fa-chevron-left left"></i>我的评论</a></li><li ng-class="{active: parent.viewPath==\'detail\'}"><a href="/home/detail"><i class="fa fa-chevron-left left"></i>用户设置</a></li></ul><ul class="text-center" ng-hide="parent.isMe"><li ng-class="{active: parent.viewPath==\'article\'}"><a ng-href="/{{user._id}}/article"><i class="fa fa-chevron-left left"></i>{{user.name}}的文章</a></li><li ng-class="{active: parent.viewPath==\'fans\'}"><a ng-href="/{{user._id}}/fans"><i class="fa fa-chevron-left left"></i>{{user.name}}的粉丝</a></li></ul></div></div></div>');
+
+}]);

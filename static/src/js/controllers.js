@@ -45,7 +45,7 @@ jsGen
 
         global.title2 = global.description;
         $scope.parent = {
-            getTpl: app.getFile.html('index-article.html'),
+            getTpl: 'index-article.html',
             viewPath: 'latest',
             sumModel: myConf.sumModel(null, 'index', false)
         };
@@ -81,7 +81,7 @@ jsGen
 
         app.rootScope.global.title2 = app.locale.TAG.title;
         $scope.parent = {
-            getTpl: app.getFile.html('index-tag.html')
+            getTpl: 'index-tag.html'
         };
         $scope.pagination = {};
 
@@ -276,7 +276,7 @@ jsGen
         global.title2 = app.locale.HOME.title;
         $scope.user = global.user;
         $scope.parent = {
-            getTpl: app.getFile.html(tplName($routeParams.OP)),
+            getTpl: tplName($routeParams.OP),
             isMe: true,
             viewPath: $routeParams.OP || 'index'
         };
@@ -298,7 +298,7 @@ jsGen
 
         app.rootScope.global.title2 = app.locale.USER.title;
         $scope.parent = {
-            getTpl: app.getFile.html(tplName()),
+            getTpl: tplName(),
             isMe: false,
             viewPath: $routeParams.OP || 'index'
         };
@@ -1057,7 +1057,7 @@ jsGen
         }
 
         $scope.parent = {
-            getTpl: app.getFile.html(tplName(path)),
+            getTpl: tplName(path),
             viewPath: path
         };
         global.title2 = app.locale.ADMIN[path];
