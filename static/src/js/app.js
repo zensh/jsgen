@@ -7,6 +7,7 @@ var jsGen = angular.module('jsGen', [
     'ngResource',
     'ngCookies',
     'ui.validate',
+    'genTemplates',
     'angularFileUpload']);
 
 jsGen.config(['$httpProvider', 'app',

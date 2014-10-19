@@ -4,7 +4,6 @@ var gulp = require('gulp'),
   gutil = require('gulp-util'),
   clean = require('gulp-clean'),
   gulpSequence = require('gulp-sequence'),
-  gulpMerge = require('gulp-merge'),
   jshint = require('gulp-jshint'),
   concat = require('gulp-concat'),
   imagemin = require('gulp-imagemin'),
@@ -15,6 +14,7 @@ var gulp = require('gulp'),
   rev = require('gulp-rev'),
   replace = require('gulp-replace'),
   usemin = require('gulp-usemin'),
+  merge2 = require('merge2'),
   version = 'v' + require('./package.json').version,
   cdnHost = require('./package.json').cdnHost;
 
@@ -69,7 +69,7 @@ gulp.task('js-lib', function () {
 });
 
 gulp.task('js-app', function () {
-  return gulpMerge(
+  return merge2(
       gulp.src([
         'static/src/js/app.js',
         'static/src/js/locale_zh-cn.js',
@@ -83,8 +83,9 @@ gulp.task('js-app', function () {
       gulp.src('static/src/tpl/*.html')
         .pipe(minifyHtml({empty: true, quotes: true}))
         .pipe(ngtemplate({
-          module: 'jsGen',
-          standalone: false
+          module: 'genTemplates',
+          standalone: true,
+          filePath: 'templates.js'
         })
       )
     )
