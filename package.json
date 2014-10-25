@@ -40,7 +40,7 @@
     "gulp-jshint": ">=1.5.1",
     "gulp-minify-css": ">=0.3.0",
     "gulp-minify-html": "^0.1.4",
-    "gulp-ngtemplate": "https://github.com/teambition/gulp-ngtemplate.git",
+    "gulp-ngtemplate": "^0.2.3",
     "gulp-rename": ">=1.2.0",
     "gulp-replace": "^0.4.0",
     "gulp-rev": ">=0.4.2",
