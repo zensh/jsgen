@@ -9,7 +9,7 @@ var gulp = require('gulp'),
   imagemin = require('gulp-imagemin'),
   minifyCss = require('gulp-minify-css'),
   minifyHtml = require('gulp-minify-html'),
-  ngtemplate = require('gulp-ngtemplate'),
+  ngTemplate = require('gulp-ng-template'),
   uglify = require('gulp-uglify'),
   rev = require('gulp-rev'),
   replace = require('gulp-replace'),
@@ -82,8 +82,8 @@ gulp.task('js-app', function () {
       ]),
       gulp.src('static/src/tpl/*.html')
         .pipe(minifyHtml({empty: true, quotes: true}))
-        .pipe(ngtemplate({
-          module: 'genTemplates',
+        .pipe(ngTemplate({
+          moduleName: 'genTemplates',
           standalone: true,
           filePath: 'templates.js'
         })
