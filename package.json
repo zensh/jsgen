@@ -5,7 +5,7 @@
     "url": "http://weibo.com/zensh"
   },
   "name": "jsgen",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "cdnHost": "http://cdn.angularjs.cn",
   "description": "",
   "keywords": [
@@ -44,7 +44,7 @@
     "gulp-rename": ">=1.2.0",
     "gulp-replace": "^0.4.0",
     "gulp-rev": ">=0.4.2",
-    "gulp-sequence": "^0.1.0",
+    "gulp-sequence": ">=0.3.0",
     "gulp-uglify": ">=0.3.1",
     "gulp-usemin": ">=0.3.6",
     "gulp-util": ">=2.2.14",

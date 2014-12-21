@@ -35,7 +35,7 @@
                 <label>文章标签
                     <span class="info">(最多设置 {{global.ArticleTagsMax}} 个标签){{article.tagsList}}</span>
                 </label>
-                <textarea class="pure-input-1" name="文章标签" ng-model="article.tagsList" ng-list="/[,，、]/" ng-change="store('tagsList')" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">
+                <textarea class="pure-input-1" name="文章标签" ng-model="article.tagsList" ng-list=" " ng-trim="false" ng-change="store('tagsList')" ui-validate="{more:checkTag}" gen-tooltip="validateTooltip">
                 </textarea>
                 <mark>热门标签：</mark>
                 <a class="pure-button pure-button-link" ng-repeat="tag in global.tagsList" ng-click="getTag(tag)"><small>{{tag.tag}}</small></a>

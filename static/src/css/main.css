@@ -1197,6 +1197,10 @@ input.upload-input {
   margin: 10px 0;
 }
 
+.site-link img {
+  height: 44px;
+}
+
 @media (min-width: 980px) {
     .pure-visible-phone {
         display: none !important;
