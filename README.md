@@ -1,4 +1,4 @@
-{jsGen} <small>0.8.x</small>
+{jsGen} <small>0.8.x</small>【停止更新】
 =======
 **——JavaScript Generated**
 
